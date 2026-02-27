@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "264737328165",
+    "project_id": "offibox-prod",
+    "storage_bucket": "offibox-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264737328165:android:9156ce010d5fd07cddc3cc",
+        "android_client_info": {
+          "package_name": "com.example.offibox"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "264737328165-cskk83jevrjrc94veihvcfo3jola2p63.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCi1AhMabx9PZYeNnZxZqfyogtrmEWp8pA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "264737328165-cskk83jevrjrc94veihvcfo3jola2p63.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

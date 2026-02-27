@@ -3,14 +3,21 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  bitsdojo_window_windows
+  cloud_firestore
+  firebase_auth
+  firebase_core
+  printing
+  protocol_handler_windows
   screen_retriever_windows
-  syncfusion_pdfviewer_windows
-  system_tray
+  tray_manager
   url_launcher_windows
+  webview_windows
   window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  pdfium_flutter
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

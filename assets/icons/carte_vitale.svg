@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:ns1="http://sozi.baierouge.fr"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    id="svg2"
+    sodipodi:docname="Carte vitale.svg"
+    inkscape:export-filename="/home/olivier/Bureau/Carte vitale.png"
+    viewBox="0 0 659.23 434.58"
+    inkscape:export-xdpi="90"
+    version="1.1"
+    inkscape:export-ydpi="90"
+    inkscape:version="0.48.1 r9760"
+  >
+  <title
+      id="title4034"
+    >Carte vitale</title
+  >
+  <defs
+      id="defs4"
+    >
+    <linearGradient
+        id="linearGradient4032"
+        y2="321.2"
+        gradientUnits="userSpaceOnUse"
+        x2="685.55"
+        y1="321.2"
+        x1="61.721"
+        inkscape:collect="always"
+      >
+      <stop
+          id="stop3930"
+          style="stop-color:#218221"
+          offset="0"
+      />
+      <stop
+          id="stop3936"
+          style="stop-color:#45a945"
+          offset=".5"
+      />
+      <stop
+          id="stop3932"
+          style="stop-color:#1f731f"
+          offset="1"
+      />
+    </linearGradient
+    >
+  </defs
+  >
+  <g
+      id="layer1"
+      inkscape:label="Calque 1"
+      inkscape:groupmode="layer"
+      transform="translate(-44.023 -103.91)"
+    >
+    <text
+        id="text3838"
+        style="font-size:24px;font-family:Sans;letter-spacing:0px;line-height:125%;word-spacing:0px;fill:#000000"
+        xml:space="preserve"
+        y="395.21933"
+        x="238.57143"
+        sodipodi:linespacing="125%"
+      >
+      <tspan
+          id="tspan3840"
+          sodipodi:role="line"
+          x="238.57143"
+          y="395.21933"
+      />
+    </text
+    >
+    <g
+        id="g4001"
+      >
+      <rect
+          id="rect3050"
+          style="opacity:0.99;stroke:#000000;stroke-width:3.8;fill:url(#linearGradient4032)"
+          rx="15.152"
+          ry="15.152"
+          height="395.35"
+          width="619.99"
+          y="123.53"
+          x="63.64"
+      />
+      <path
+          id="path3822"
+          d="m64.665 132.37 173.74 386.41-163.03-0.95c-3.4-1.34-10.192-4.55-10.287-12.01z"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#ffbc00"
+          inkscape:connector-curvature="0"
+      />
+      <rect
+          id="rect3820"
+          style="stroke:#000000;stroke-width:3.837;fill:#d4aa00"
+          rx="15.152"
+          ry="15.152"
+          height="92.934"
+          width="101.02"
+          y="243.23"
+          x="123.24"
+      />
+      <path
+          id="path3824"
+          d="m154.96 243.23v92.346"
+          sodipodi:nodetypes="cc"
+          style="stroke:#000000;stroke-width:1px;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <path
+          id="path3826"
+          d="m189.29 242.36v94.286"
+          sodipodi:nodetypes="cc"
+          style="stroke:#000000;stroke-width:1px;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <path
+          id="path3828"
+          d="m122.86 260.58h32.143"
+          sodipodi:nodetypes="cc"
+          style="stroke:#000000;stroke-width:1px;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <path
+          id="path3830"
+          d="m154.64 285.76h-32.143"
+          sodipodi:nodetypes="cc"
+          style="stroke:#000000;stroke-width:1px;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <path
+          id="path3832"
+          d="m190 260.4c11.548 0.0595 23.095 0 34.643 0"
+          sodipodi:nodetypes="cc"
+          style="stroke:#000000;stroke-width:1px;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <path
+          id="path3834"
+          d="m122.14 317.18h102.14"
+          sodipodi:nodetypes="cc"
+          style="stroke:#000000;stroke-width:1px;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <path
+          id="path3836"
+          d="m189.29 285.04h35.357"
+          sodipodi:nodetypes="cc"
+          style="stroke:#000000;stroke-width:1px;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <text
+          id="text3842"
+          style="font-size:40px;font-family:Sans;letter-spacing:0px;line-height:125%;word-spacing:0px;fill:#000000"
+          sodipodi:linespacing="125%"
+          y="402.36218"
+          x="240"
+          xml:space="preserve"
+        >
+        <tspan
+            id="tspan3846"
+            y="402.36218"
+            x="240"
+            style="font-size:22px;font-family:Arial;font-weight:bold"
+            sodipodi:role="line"
+          >ROBERT</tspan
+        >
+        <tspan
+            id="tspan3850"
+            y="429.86218"
+            x="240"
+            style="font-size:22px;font-family:Arial;font-weight:bold"
+            sodipodi:role="line"
+          >DUPONT</tspan
+        >
+      </text
+      >
+      <text
+          id="text3852"
+          style="font-size:40px;font-family:Sans;letter-spacing:0px;line-height:125%;word-spacing:0px;fill:#000000"
+          sodipodi:linespacing="125%"
+          y="313.07648"
+          x="257.14285"
+          xml:space="preserve"
+        >
+        <tspan
+            id="tspan3854"
+            y="313.07648"
+            x="257.14285"
+            style="font-size:20px;font-family:Arial"
+            sodipodi:role="line"
+          >émise le  01/01/2011</tspan
+        >
+      </text
+      >
+      <text
+          id="text3856"
+          style="font-size:40px;font-family:Sans;letter-spacing:0px;line-height:125%;word-spacing:0px;fill:#000000"
+          sodipodi:linespacing="125%"
+          y="469.50507"
+          x="239.28571"
+          xml:space="preserve"
+        >
+        <tspan
+            id="tspan3858"
+            y="469.50507"
+            x="239.28571"
+            style="font-size:20px;font-family:Arial"
+            sodipodi:role="line"
+          >0 00 00 00 000 000 00</tspan
+        >
+      </text
+      >
+      <text
+          id="text3860"
+          style="font-size:40px;font-family:Sans;letter-spacing:0px;line-height:125%;word-spacing:0px;fill:#000000"
+          sodipodi:linespacing="125%"
+          transform="rotate(269.74)"
+          xml:space="preserve"
+          y="661.98193"
+          x="-387.3674"
+        >
+        <tspan
+            id="tspan3862"
+            y="661.98193"
+            x="-387.3674"
+            style="font-size:20px;font-family:Arial"
+            sodipodi:role="line"
+          >0000000000 0000000000 0</tspan
+        >
+      </text
+      >
+      <text
+          id="text3864"
+          style="font-size:40px;font-family:Sans;letter-spacing:0px;line-height:125%;word-spacing:0px;fill:#000000"
+          sodipodi:linespacing="125%"
+          y="246.64789"
+          x="240"
+          xml:space="preserve"
+        >
+        <tspan
+            id="tspan3866"
+            y="246.64789"
+            x="240"
+            style="font-size:18px;font-family:Arial;font-weight:bold;fill:#ffffff"
+            sodipodi:role="line"
+          >carte d'assurance maladie</tspan
+        >
+      </text
+      >
+      <text
+          id="text3868"
+          style="font-size:66.045px;font-family:Sans;letter-spacing:0px;line-height:125%;word-spacing:0px;fill:#ffcc00"
+          sodipodi:linespacing="125%"
+          transform="scale(1.0758 .92954)"
+          xml:space="preserve"
+          y="243.62137"
+          x="105.98605"
+        >
+        <tspan
+            id="tspan3870"
+            y="243.62137"
+            x="105.98605"
+            style="font-size:116.68px;font-family:Arial;font-weight:bold;fill:#ffcc00"
+            sodipodi:role="line"
+          >Vitale</tspan
+        >
+      </text
+      >
+      <path
+          id="path3918"
+          d="m110.11 477.59-23.234 10.102 23.234 10.102"
+          sodipodi:nodetypes="ccc"
+          style="stroke:#ffffff;stroke-width:5.3;fill:none"
+          inkscape:connector-curvature="0"
+      />
+      <path
+          id="path3959"
+          sodipodi:rx="2.7779195"
+          sodipodi:ry="2.7779195"
+          style="opacity:0.99;fill:#ffdd55"
+          sodipodi:type="arc"
+          d="m87.883-148.96c0 1.5342-1.2437 2.7779-2.7779 2.7779s-2.7779-1.2437-2.7779-2.7779 1.2437-2.7779 2.7779-2.7779 2.7779 1.2437 2.7779 2.7779z"
+          transform="matrix(1.5455 0 0 1.5455 4.0865 663.6)"
+          sodipodi:cy="-148.96173"
+          sodipodi:cx="85.105354"
+      />
+      <path
+          id="path3959-1"
+          sodipodi:rx="2.7779195"
+          sodipodi:ry="2.7779195"
+          style="opacity:0.99;fill:#ffdd55"
+          sodipodi:type="arc"
+          d="m87.883-148.96c0 1.5342-1.2437 2.7779-2.7779 2.7779s-2.7779-1.2437-2.7779-2.7779 1.2437-2.7779 2.7779-2.7779 2.7779 1.2437 2.7779 2.7779z"
+          transform="matrix(1.5455 0 0 1.5455 4.1878 678.09)"
+          sodipodi:cy="-148.96173"
+          sodipodi:cx="85.105354"
+      />
+      <path
+          id="path3959-0"
+          sodipodi:rx="2.7779195"
+          sodipodi:ry="2.7779195"
+          style="opacity:0.99;fill:#ffdd55"
+          sodipodi:type="arc"
+          d="m87.883-148.96c0 1.5342-1.2437 2.7779-2.7779 2.7779s-2.7779-1.2437-2.7779-2.7779 1.2437-2.7779 2.7779-2.7779 2.7779 1.2437 2.7779 2.7779z"
+          transform="matrix(1.5455 0 0 1.5455 4.1878 692.58)"
+          sodipodi:cy="-148.96173"
+          sodipodi:cx="85.105354"
+      />
+      <path
+          id="path3959-9"
+          sodipodi:rx="2.7779195"
+          sodipodi:ry="2.7779195"
+          style="opacity:0.99;fill:#ffdd55"
+          sodipodi:type="arc"
+          d="m87.883-148.96c0 1.5342-1.2437 2.7779-2.7779 2.7779s-2.7779-1.2437-2.7779-2.7779 1.2437-2.7779 2.7779-2.7779 2.7779 1.2437 2.7779 2.7779z"
+          transform="matrix(1.5455 0 0 1.5455 18.986 693.66)"
+          sodipodi:cy="-148.96173"
+          sodipodi:cx="85.105354"
+      />
+      <rect
+          id="rect3999"
+          style="opacity:0.99;stroke:#000000;stroke-width:3.8;fill:none"
+          rx="15.152"
+          ry="15.152"
+          height="395.35"
+          width="619.99"
+          y="123.53"
+          x="63.64"
+      />
+    </g
+    >
+  </g
+  >
+</svg
+>

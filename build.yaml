@@ -1,0 +1,33 @@
+targets:
+  $default:
+    sources:
+      include:
+        - lib/**
+      exclude:
+        - lib/**/.plugin_symlinks/**
+        - lib/**/flutter/ephemeral/**
+        - linux/**
+        - windows/**
+        - macos/**
+        - ios/**
+        - android/**
+        - .dart_tool/**
+
+    builders:
+      json_serializable:
+        generate_for:
+          include:
+            - lib/**.dart
+          exclude:
+            - lib/**.freezed.dart
+            - lib/**.g.dart
+            - lib/**/.plugin_symlinks/**
+            - lib/**/flutter/ephemeral/**
+
+      hive_generator:
+        generate_for:
+          include:
+            - lib/**.dart
+          exclude:
+            - lib/**/.plugin_symlinks/**
+            - lib/**/flutter/ephemeral/**

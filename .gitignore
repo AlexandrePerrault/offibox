@@ -39,7 +39,13 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# OAuth credentials (ne pas commiter)
+config/oauth_credentials.json
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ne jamais commiter les codes/tokens GitHub locaux
+lib/data/GITHUB CODES.txt

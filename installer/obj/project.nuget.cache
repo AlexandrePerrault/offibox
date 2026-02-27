@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "tXQ8OKaAc1Y=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\perra\\Documents\\projets_flutter\\offibox\\installer\\Offibox.wixproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\perra\\.nuget\\packages\\wixtoolset.heat\\6.0.0\\wixtoolset.heat.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

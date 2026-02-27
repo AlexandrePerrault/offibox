@@ -1,0 +1,2 @@
+# Pour pdf_pharmacovigilance_to_csv.py
+pdfplumber>=0.10.0

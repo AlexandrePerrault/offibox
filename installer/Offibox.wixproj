@@ -1,0 +1,34 @@
+<Project Sdk="WixToolset.Sdk/6.0.0">
+
+  <!-- Ne pas compiler l'ancien WiX v3 (installer/wix/Product.wxs) -->
+  <ItemGroup>
+    <Compile Remove="wix\**\*.wxs" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputPath>..\website\download</OutputPath>
+    <PackageFileName>Offibox-Setup.1.0.11.msi</PackageFileName>
+    <ReleaseFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../build/windows/x64/runner/Release'))</ReleaseFullPath>
+    <!-- Installation sous LocalAppData : ICE64, ICE38, ICE91 (per-user), ICE60 (font/language) -->
+    <SuppressIces>ICE38;ICE60;ICE64;ICE91</SuppressIces>
+    <!-- Heat : .exe/.dll Flutter ne sont pas des assemblies .NET -->
+    <HarvestDirectorySuppressSpecificWarnings>5151</HarvestDirectorySuppressSpecificWarnings>
+    <!-- Résolution des chemins récoltés : SourceDir = chemin absolu Release (évite MSI vide ~111 Ko) -->
+    <DefineConstants>$(DefineConstants);ReleaseDir=$(ReleaseFullPath)</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Inclure tous les fichiers du dossier Release (après flutter build windows) -->
+  <ItemGroup>
+    <HarvestDirectory Include="../build/windows/x64/runner/Release">
+      <ComponentGroupName>ReleaseFiles</ComponentGroupName>
+      <DirectoryRefId>INSTALLDIR</DirectoryRefId>
+      <SuppressRootDirectory>true</SuppressRootDirectory>
+      <PreprocessorVariable>var.ReleaseDir</PreprocessorVariable>
+    </HarvestDirectory>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Heat" Version="[6.0.0,)" />
+  </ItemGroup>
+
+</Project>

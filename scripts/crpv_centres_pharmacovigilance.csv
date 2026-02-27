@@ -1,0 +1,31 @@
+nom;adresse_complete;tel;fax;mail
+Centre d'Amiens;CHU Amiens Sud 80054 AMIENS CEDEX 1;03.22.08.70.96;03.22.08.70.95;pharmacovigilance@chu-amiens.fr
+Centre d'Angers;CHRU d'Angers 4 rue Larrey 49933 ANGERS CEDEX 09;02.41.35.45.54;02.41.35.55.02;pharmacovigilance@chu-angers.fr
+Centre de Besançon;CHRU de Besançon 3 Boulevard Alexandre Fleming Bâtiment gris 25030 BESANCON CEDEX;03.81.66.84.74;03.81.66.85.58;pharmacovigilance@chu-besancon.fr
+Centre de Bordeaux;CHU de Bordeaux - Hôpital Pellegrin Place Amélie Raba-Léon 33000 BORDEAUX;05.56.79.55.08;05.57.57.46.60;pharmacovigilance@u-bordeaux.fr
+Centre de Brest;CHU de Brest - Hôpital du Morvan 2 avenue Foch 29609 BREST CEDEX;02.98.34.79.75;02.98.34.79.77;crpv.brest@chu-brest.fr
+Centre de Caen;CHU de Caen / Niveau 3 Avenue de la Côte de Nacre CS30001 14033 CAEN CEDEX 9;02.31.06.46.72;02.31.06.46.73;pharmacovigilance@chu-caen.fr
+Centre de Clermont-Ferrand;CHU - Centre de Biologie 58 rue Montalembert - BP 69 63003 CLERMONT-FERRAND CEDEX 1;04.73.75.48.31;04.73.75.48.32;pharmacovigilance@chu-clermontferrand.fr
+Centre de Dijon;CHU de Dijon - Pôle des Vigilances 14 rue Paul Gassarel BP n° 77908 21079 DIJON CEDEX;03.80.29.37.42;03.80.29.37.23;pharmacovigilance@chu-dijon.fr
+Centre de Grenoble;CHU de Grenoble - Pavillon E 38043 GRENOBLE CEDEX 09;04.76.76.51.45;04.76.76.56.55;pharmacovigilance@chu-grenoble.fr
+Centre de Lille;CHRU de Lille 1 Place de Verdun 59045 LILLE CEDEX;03.20.96.18.18;03.20.44.56.87;pharmacovigilance@chru-lille.fr
+Centre de Limoges;CHU - Bâtiment CBRS 2 avenue Martin Luther King 87042 LIMOGES CEDEX;05.55.05.67.43;05.55.05.62.98;pharmacovigilance@chu-limoges.fr
+Centre de Lyon;CHU de Lyon - Bâtiment A 162 avenue Lacassagne 69424 LYON CEDEX 03;04.72.11.69.97;04.72.11.69.85;centre.pharmacovigilance@chu-lyon.fr
+Centre de Marseille;CHU de Marseille - Hôpital Sainte-Marguerite 270 boulevard de Saint-Marguerite 13009 MARSEILLE;04.91.74.75.60;04.91.74.07.80;pharmacovigilance@ap-hm.fr
+Centre de Montpellier;CHU de Montpellier - Hôpital Lapeyronie Département de Pharmacologie Médicale et Toxicologie 371 Avenue du Doyen Gaston Giraud 34295 MONTPELLIER CEDEX 5;04.67.33.67.57;04.67.33.67.51;pharmacovigilance@chu-montpellier.fr
+Centre de Nancy;CHRU de Nancy - Laboratoire de Pharmacologie clinique et de toxicologie Bâtiment de Biologie Médicale et de Biopathologie Avenue du Morvan 54511 VANDOEUVRE LES NANCY CEDEX;03.83.65.60.85;03.83.65.61.33;crpv@chru-nancy.fr
+Centre de Nantes;CHR Hôtel-Dieu Institut de biologie 9 quai Moncousu 44093 NANTES CEDEX 01;02.40.08.40.96;02.40.08.40.97;pharmacovigilance@chu-nantes.fr
+Centre de Nice;CHU de Nice - Hôpital de Cimiez - Pavillon Victoria 4 avenue Reine Victoria CS 91179 06003 NICE Cedex 1;04.92.03.47.08;04.92.03.47.09;pharmacovigilance@chu-nice.fr
+Centre de Paris Cochin - Port Royal;Hôpital Cochin-Port Royal 27 rue du Faubourg Saint-Jacques 75014 PARIS CEDEX 14;01.58.41.34.79;01.58.41.33.70;pharmacovigilance.hupc@aphp.fr
+Centre de Paris Saint Louis (ex-Fernand Widal);Hôpital Fernand Widal 200 rue du faubourg Saint Denis 75475 PARIS CEDEX 10;01.40.05.43.34;01.40.35.76.28;pharmacovigilance.fwd.lrb@aphp.fr
+Centre de Paris HEGP;Hôpital Européen Georges Pompidou 20-40 rue Leblanc 75015 PARIS;01.56.09.39.88;01.56.09.56.67;crpv.hegp.egp@aphp.fr
+Centre de Paris Henri Mondor;Hôpital Henri Mondor 51 avenue du Maréchal de Lattre de Tassigny 94010 CRETEIL CEDEX;01.49.81.47.00;01.49.81.47.63;hmn-pharmacovigilance@aphp.fr
+Centre de Paris Pitié Salpêtrière - Saint Antoine;CHU Pitié Salpêtrière - Service de Pharmacologie 47-83 boulevard de l'Hôpital 75013 PARIS;01.42.16.16.79;01.42.16.16.88;pharmaco.vigilance.psl@aphp.fr
+Centre de Poitiers;CHU de Poitiers La Vie la santé – 1er étage - Entrée n° 5 CS 90577 86021 POITIERS CEDEX;05.49.44.38.36;05.49.44.38.45;pharmaco.clin@chu-poitiers.fr
+Centre de Reims;CHU de Reims - Hôpital Robert Debré Avenue du Général Koenig 51092 REIMS CEDEX;03.26.78.77.80;03.26.83.23.79;pharmacovigilance@chu-reims.fr
+Centre de Rennes;CHU de Rennes - Hôpital de Pontchaillou 2 rue Henri Le Guilloux 35033 RENNES CEDEX 9;02.99.28.43.63;02.99.28.24.26;pharmacovigilance@chu-rennes.fr
+Centre de Rouen;CHU de Rouen - Hôpital Charles Nicolle 76031 ROUEN CEDEX;02.32.88.90.79;02.32.88.90.49;pharmacovigilance@chu-rouen.fr
+Centre de Saint-Etienne;CHU de Saint-Etienne - Hôpital Nord Avenue Albert Raimond 42055 SAINT-ETIENNE CEDEX 02;04.77.12.77.37;04.77.12.77.74;pharmacovigilance@chu-st-etienne.fr
+Centre de Strasbourg;CHU de Strasbourg - Hôpital Civil 1 place de l'Hôpital B.P. n°426 67091 STRASBOURG CEDEX;03.88.11.64.80;03.88.11.67.26;pharmacovigilance@chru-strasbourg.fr
+Centre de Toulouse;CHU de Toulouse - Faculté de Médecine 37 allées Jules Guesde 31000 TOULOUSE;05.61.25.51.12;05.61.25.51.16;pharmacovigilance@chu-toulouse.fr
+Centre de Tours;CHRU de Tours 2 boulevard Tonnellé 37044 TOURS CEDEX 09;02.47.47.37.37;02.47.47.38.26;crpv@chu-tours.fr

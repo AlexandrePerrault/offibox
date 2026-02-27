@@ -1,0 +1,33 @@
+nom,adresse,latitude,longitude,telephone,email,site_web,url
+Centre hospitalier régional (CHR) - Metz-Thionville,,49.08412,6.243648,0387553131,dg-secretariat@chr-metz-thionville.fr,,https://lannuaire.service-public.gouv.fr/grand-est/moselle/6966f8f9-71bc-4984-9ad4-72cbf2be5b57
+Centre hospitalier régional (CHR) - Orléans,,47.836864,1.923709,0238514444,,,https://lannuaire.service-public.gouv.fr/centre-val-de-loire/loiret/07c952b1-30ad-4ebd-9103-9dda1b8b5b91
+Centre hospitalier régional universitaire (CHRU) - Besançon,,47.23479,6.020665,0381668166,,,https://lannuaire.service-public.gouv.fr/bourgogne-franche-comte/doubs/bf8c11aa-f224-466a-9f31-faa4d9fa136f
+Centre hospitalier régional universitaire (CHRU) - Brest,,48.392807,-4.486178,0298223333,,,https://lannuaire.service-public.gouv.fr/bretagne/finistere/7f2e0d6a-2029-4536-8aeb-3b185a2776f5
+Centre hospitalier régional universitaire (CHRU) - Lille,,50.610027,3.037679,0320445962,,,https://lannuaire.service-public.gouv.fr/hauts-de-france/nord/52bafb88-4be1-45ed-88dc-ea96cef41bdd
+Centre hospitalier régional universitaire (CHRU) - Nancy,,48.685184,6.192023,0383858585,communication@chru-nancy.fr,,https://lannuaire.service-public.gouv.fr/grand-est/meurthe-et-moselle/970d7614-1f3d-4013-a49c-eef3304b6afe
+Centre hospitalier universitaire (CHU) - Amiens-Picardie,,49.907295,2.290168,0322088000,chu@chu-amiens.fr,,https://lannuaire.service-public.gouv.fr/hauts-de-france/somme/b48a9186-65ac-480c-af75-b31d623aebfb
+Centre hospitalier universitaire (CHU) - Angers,,47.481407,-0.556171,0241353637,,,https://lannuaire.service-public.gouv.fr/pays-de-la-loire/maine-et-loire/2ff15efd-f654-4804-b790-1bb4c3ce002f
+Centre hospitalier universitaire (CHU) - Assistance publique - Hôpitaux de Marseille,,43.290997,5.393862,0491380000,,,https://lannuaire.service-public.gouv.fr/provence-alpes-cote-d-azur/bouches-du-rhone/9286af69-2107-49e1-ac55-226fdc153470
+Centre hospitalier universitaire (CHU) - Assistance publique - Hôpitaux de Paris (AP-HP),,48.850533,2.382187,0140273000,06communication.institutionnelle@sap.aphp.fr,,https://lannuaire.service-public.gouv.fr/ile-de-france/paris/bec0760f-c0b9-4c72-979f-fecf50de9320
+Centre hospitalier universitaire (CHU) - Bordeaux,,44.81412,-0.601116,0556795679,,,https://lannuaire.service-public.gouv.fr/nouvelle-aquitaine/gironde/cd8117cd-f106-4878-a4fd-bda18d845b67
+Centre hospitalier universitaire (CHU) - Caen,,49.205322,-0.357651,0231063106,,,https://lannuaire.service-public.gouv.fr/normandie/calvados/9fb6e846-8226-4cfa-a78d-4d20f1b61d18
+Centre hospitalier universitaire (CHU) - Clermont-Ferrand,,45.756912,3.094373,0473750750,,,https://lannuaire.service-public.gouv.fr/auvergne-rhone-alpes/puy-de-dome/7014cc85-bceb-4572-9c38-086b712cd5cb
+Centre hospitalier universitaire (CHU) - Dijon,,47.321762,5.065452,0380293031,,,https://lannuaire.service-public.gouv.fr/bourgogne-franche-comte/cote-d-or/ec2a2b39-60e5-4933-a895-4ad83251c53a
+Centre hospitalier universitaire (CHU) - Grenoble-Alpes,,45.191525,5.76072,0476767575,directioncommunication@chu-grenoble.fr,,https://lannuaire.service-public.gouv.fr/auvergne-rhone-alpes/isere/4fb4464a-51e7-4c7d-bd50-7708a7579114
+Centre hospitalier universitaire (CHU) - Guadeloupe,,44.07507,1.986779,0590891010,,,https://lannuaire.service-public.gouv.fr/guadeloupe/guadeloupe/9ac4c826-c901-4810-8673-304065d5f3a5
+Centre hospitalier universitaire (CHU) - Hospices civils de Lyon,,45.7609,4.831477,0825082569,,,https://lannuaire.service-public.gouv.fr/auvergne-rhone-alpes/rhone/be8e4750-7ccc-4fdd-80f3-6099c22b4ad6
+Centre hospitalier universitaire (CHU) - Limoges,,45.811745,1.23515,0555055555,,,https://lannuaire.service-public.gouv.fr/nouvelle-aquitaine/haute-vienne/28ba92e4-2b96-4ee1-9ede-ac1d0652994a
+Centre hospitalier universitaire (CHU) - Martinique,,14.61217,-61.068417,0596552000,secretariat.communication@chu-martinique.fr,,https://lannuaire.service-public.gouv.fr/martinique/martinique/afc60ba3-90d7-4705-9267-941c00c0d46b
+Centre hospitalier universitaire (CHU) - Montpellier,,43.633347,3.850395,0467336733,,,https://lannuaire.service-public.gouv.fr/occitanie/herault/b70cfeec-3371-4dc4-bfac-7fbbd9c47c4e
+Centre hospitalier universitaire (CHU) - Nantes,,47.21114,-1.557241,0240083333,,,https://lannuaire.service-public.gouv.fr/pays-de-la-loire/loire-atlantique/77b8a692-5017-4155-a1f9-d69bad47bf64
+Centre hospitalier universitaire (CHU) - Nice,,43.721012,7.273394,0492037777,,,https://lannuaire.service-public.gouv.fr/provence-alpes-cote-d-azur/alpes-maritimes/b0645ea7-6361-4500-8893-2d551091e862
+Centre hospitalier universitaire (CHU) - Nîmes,,43.822556,4.318858,0466686868,,,https://lannuaire.service-public.gouv.fr/occitanie/gard/d2432ab8-868e-43f8-89b0-ef89b9063611
+Centre hospitalier universitaire (CHU) - Poitiers,,46.559086,0.385147,0549444444,,,https://lannuaire.service-public.gouv.fr/nouvelle-aquitaine/vienne/e21b55b5-672b-43ee-a60f-60355c438827
+Centre hospitalier universitaire (CHU) - Reims,,49.230213,4.018592,0326787878,secretariatdg@chu-reims.fr,,https://lannuaire.service-public.gouv.fr/grand-est/marne/d0995fa1-7854-4fe6-b98d-47a8faeb41ed
+Centre hospitalier universitaire (CHU) - Rennes,,48.11878,-1.693679,0299284321,,,https://lannuaire.service-public.gouv.fr/bretagne/ille-et-vilaine/e0cd8bdb-4e10-4a53-a13e-36b8d74e8750
+Centre hospitalier universitaire (CHU) - Rouen,,49.440872,1.107371,0232888990,,,https://lannuaire.service-public.gouv.fr/normandie/seine-maritime/aeadce75-0c2e-40d5-a09e-91c2988add37
+Centre hospitalier universitaire (CHU) - La Réunion,,-21.379936,55.61884,0262359540,communication@chu-reunion.fr,,https://lannuaire.service-public.gouv.fr/la-reunion/la-reunion/15916bac-c3ef-4994-a485-b2ef50590153
+Centre hospitalier universitaire (CHU) - Saint-Etienne,,45.41264,4.391715,0477828000,,,https://lannuaire.service-public.gouv.fr/auvergne-rhone-alpes/loire/2ed1a8a7-babd-4733-8139-d7faf99766fb
+Centre hospitalier universitaire (CHU) - Strasbourg,,48.577354,7.748287,0388116768,courrierdg@chru-strasbourg.fr,,https://lannuaire.service-public.gouv.fr/grand-est/bas-rhin/ce93ac1f-736a-45db-98bc-6dc7a643f796
+Centre hospitalier universitaire (CHU) - Toulouse,,43.599903,1.436489,0561772223,,,https://lannuaire.service-public.gouv.fr/occitanie/haute-garonne/c51ecd91-8197-4533-853e-f4b1ecb2a3c5
+Centre hospitalier universitaire (CHU) - Tours,,47.389282,0.680718,0247474747,,,https://lannuaire.service-public.gouv.fr/centre-val-de-loire/indre-et-loire/c5e0671e-2360-4ab3-81aa-7307c4348ca3

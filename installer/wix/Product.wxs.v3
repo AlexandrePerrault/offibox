@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           Name="Offibox"
+           Language="1033"
+           Version="1.0.11"
+           Manufacturer="Offibox"
+           UpgradeCode="B7B3E8A2-9F4C-4D1E-8A5B-2C6D9E1F3A4B">
+
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
+
+    <MajorUpgrade DowngradeErrorMessage="Une version plus récente d'Offibox est déjà installée." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Répertoire d'installation : AppData\Local\Offibox (sans admin) -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder" Name="AppData">
+        <Directory Id="INSTALLDIR" Name="Offibox" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Offibox" />
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <Feature Id="MainApplication" Title="Offibox" Level="1" ConfigurableDirectory="INSTALLDIR">
+      <ComponentGroupRef Id="ReleaseFiles" />
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <!-- Raccourci Menu Démarrer -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890">
+        <Shortcut Id="StartMenuShortcut"
+                  Name="Offibox"
+                  Description="La Boîte à Outils de l'Officine"
+                  Target="[INSTALLDIR]offibox.exe"
+                  WorkingDirectory="INSTALLDIR" />
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\Offibox" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Raccourci Bureau -->
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901">
+        <Shortcut Id="DesktopShortcut"
+                  Name="Offibox"
+                  Description="La Boîte à Outils de l'Officine"
+                  Target="[INSTALLDIR]offibox.exe"
+                  WorkingDirectory="INSTALLDIR" />
+        <RegistryValue Root="HKCU" Key="Software\Offibox" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <UIRef Id="WixUI_Minimal" />
+  </Product>
+</Wix>

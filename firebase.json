@@ -1,0 +1,43 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "offibox-prod",
+          "appId": "1:264737328165:android:9156ce010d5fd07cddc3cc",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "offibox-prod",
+          "configurations": {
+            "android": "1:264737328165:android:9156ce010d5fd07cddc3cc",
+            "ios": "1:264737328165:ios:6b20effe963daa3cddc3cc",
+            "macos": "1:264737328165:ios:6b20effe963daa3cddc3cc",
+            "web": "1:264737328165:web:d8744f8fc1c188d9ddc3cc",
+            "windows": "1:264737328165:web:e3cc7f1f356f45beddc3cc"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ]
+}

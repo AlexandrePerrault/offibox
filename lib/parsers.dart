@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
 
@@ -52,7 +54,7 @@ Future<List<List<String>>> loadCsvFromUrl(String url) async {
     shouldParseNumbers: false,
   ).convert(text);
 
-  print('→ lignes parsées: ${rows.length}');
+  debugPrint('→ lignes parsées: ${rows.length}');
   return rows.map((r) => r.map((c) => c.toString()).toList()).toList();
 }
 
@@ -80,7 +82,7 @@ Future<List<BdmItem>> parseBDM(String url) async {
       cip: cip,
       url: link,
       alert: isAlert,
-    ));
+    ),);
   }
 
   return result;

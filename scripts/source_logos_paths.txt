@@ -1,0 +1,34 @@
+# Nom -> chemin dans le projet (assets/icons)
+# Utiliser dans le code: assets/icons/nom_fichier.png ou .svg
+
+base de données publiques sur le médicament	assets/icons/base-donnees-publique_medicaments_gouv_fr.png  # NON TROUVE
+DGS urgent	assets/icons/solidarites-sante_gouv_fr.png  # NON TROUVE
+pharmaradio	assets/icons/pharmaradio_fr.png  # NON TROUVE
+le moniteur des pharmacies	assets/icons/lemoniteurdespharmacies_fr.png  # NON TROUVE
+le quotidien du pharmacien	assets/icons/lequotidiendopharmacien_fr.png  # NON TROUVE
+ordre national des pharmaciens	assets/icons/ordre_pharmaciens_fr.png  # NON TROUVE
+vidal	assets/icons/vidal_fr.png  # NON TROUVE
+thériaque	assets/icons/theriaque_org.png  # NON TROUVE
+vigirupture	assets/icons/vigirupture_fr.png  # NON TROUVE
+posos	assets/icons/posos_fr.png  # NON TROUVE
+Pharmalia (PHOENIX OCP)	assets/icons/phoenixgroup_eu.png  # NON TROUVE
+Lohmann et Rauscher	assets/icons/lohmann-rauscher_com.png  # NON TROUVE
+Coloplast (pansements)	assets/icons/coloplast_com.png
+Coloplast (uro et colostomie)	assets/icons/coloplast_com.png
+convatec	assets/icons/convatec_com.png  # NON TROUVE
+Hartmann	assets/icons/hartmann_info.png  # NON TROUVE
+Urgo Médical	assets/icons/urgomedical_com.png  # NON TROUVE
+Smith & Nephew	assets/icons/smith-nephew_com.png  # NON TROUVE
+Meddispar	assets/icons/meddispar_fr.png  # NON TROUVE
+Mailiz	assets/icons/mailiz_fr.png  # NON TROUVE
+doctolib Pro	assets/icons/doctolib_fr.png  # NON TROUVE
+annuaire santé	assets/icons/sante_fr.png  # NON TROUVE
+recommandations sanitaires aux voyageurs	assets/icons/diplomatie_gouv_fr.png  # NON TROUVE
+Thuasne (compression)	assets/icons/thuasne_com.png  # NON TROUVE
+Sigvaris	assets/icons/sigvaris_com.png  # NON TROUVE
+Innothera-Gibaud	assets/icons/innothera_fr.png  # NON TROUVE
+Thuasne (orthopédie)	assets/icons/thuasne_com.png  # NON TROUVE
+Orliman	assets/icons/orliman_com.png  # NON TROUVE
+Radiante	assets/icons/radiante_fr.png  # NON TROUVE
+Madouest	assets/icons/madouest_fr.png  # NON TROUVE
+Cerp équipement	assets/icons/cerp_fr.png  # NON TROUVE

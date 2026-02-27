@@ -1,210 +1,145 @@
-// lib/models/search_result.dart
+// ignore_for_file: invalid_annotation_target
 
-enum SourceType {
-  bdm,
-  dm,
-  veto,
-  lpp,
-  amc,
-  keyword,
-  catalogue,
-  cerp,
-}
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:offibox/models/source_type.dart';
+import 'package:offibox/utils/normalize.dart';
 
-class SearchResult {
-  // ─────────────────────────
-  // 🔧 CHAMPS NORMALISÉS (PERF)
-  // ─────────────────────────
-  late final String labelNorm;
-  late final String cipNorm;
-  late final String labNorm;
+part 'search_result.freezed.dart';
+part 'search_result.g.dart';
 
-  final String label;
-  final String labelRaw;
-  final String? cip13;
-  final String? cis;
-  final SourceType source;
+@Freezed(fromJson: true, toJson: true)
+class SearchResult with _$SearchResult {
+  const SearchResult._();
 
-  final bool isPdf;
+  const factory SearchResult({
+    // 🔤 IDENTITÉ
+    required String label,
+    required String labelRaw,
+    required SourceType source,
+    required String laboratory,
 
-  // ─────────────────────────
-  // 🟢 NSFP
-  // ─────────────────────────
-  final bool nsfp;
-  final String? nsfpDate;
+    String? cip13,
+    String? cis,
 
-  // ─────────────────────────
-  // 🔗 LIENS
-  // ─────────────────────────
-  final String? url;
-  final String? rcpVetoUrl;
-  final String? meddisparUrl;
-  final String? lppCode;
+    // 🔥 AJOUTS
+    String? cip7,
+    String? groupLabel,
 
-  // ─────────────────────────
-  // 📦 STATUTS MÉTIER
-  // ─────────────────────────
-  final bool liste1;
-  final bool liste2;
-  final bool isStupefiant;
- final bool isException;
+    // 📄 CONTENU
+    @Default(false) bool isPdf,
 
-/// ✅ Vérité métier injectée UNIQUEMENT par le mapper
-final bool hospitalOnly;
+    // 🟢 NSFP
+    @Default(false) bool nsfp,
+    String? nsfpDate,
 
-  // ─────────────────────────
-  // 🧬 BIOSIMILAIRE / BIO-RÉFÉRENT
-  // ─────────────────────────
-  final String? biosimilaireOf;
-  final bool isBioreferent;
+    // 🔗 LIENS
+    String? url,
+    String? rcpVetoUrl,
+    String? meddisparUrl,
+    String? lppCode,
 
-  // ─────────────────────────
-  // 💊 GÉNÉRIQUES
-  // ─────────────────────────
-  final bool? isGeneric;
-  final String? princepsName;
-  final String? genericName;
+    // 📘 LPP — libellé, tarif (dernier par date validité), prix unitaire, montant max
+    String? lppLibelle,
+    double? lppTarif,
+    double? lppPrixUnitaireReglemente,
+    String? lppMontantMaxRemboursement,
 
-  // ─────────────────────────
-  // 🏭 LABO / FOURNISSEUR
-  // ─────────────────────────
-  final String laboratory;
-  final String? iconUrl;
-  final String? phone;
-  final String? fax;
-  final String? email;
-  final String? catalogueUrl;
+    // ⚠️ STATUTS
+    @Default(false) bool liste1,
+    @Default(false) bool liste2,
+    @Default(false) bool isStupefiant,
+    @Default(false) bool isException,
+    @Default(false) bool isOtc,
+    @Default(false) bool hospitalOnly,
 
-  // ─────────────────────────
-  // 🏷️ BADGES
-  // ─────────────────────────
-  final String? badge1Name;
-  final String? badge1Url;
-  final String? badge2Name;
-  final String? badge2Url;
-  final String? badge3Name;
-  final String? badge3Url;
+    @Default(false) bool isPih,
+    @Default(false) bool isSurveillanceParticuliere,
 
-  // ─────────────────────────
-  // 🟢🟠🔴 ANSM
-  // ─────────────────────────
-  final String? ansmStatut;
-  final String? ansmDate;
-  final String? ansmUrl;
+    // 🩸 MDS
+    @Default(false) bool isMds,
 
-  SearchResult({
-    required this.label,
-    required this.labelRaw,
-    required this.source,
-    required this.laboratory,
+    // 🧬 BIOSIMILAIRE
+    String? biosimilaireOf,
+    @Default(false) bool isBioreferent,
 
-    this.cip13,
-    this.cis,
+    // 💊 GÉNÉRIQUE
+    bool? isGeneric,
+    String? princepsName,
+    String? genericName,
 
-    this.nsfp = false,
-    this.nsfpDate,
+    // 🏭 FOURNISSEUR
+    String? iconUrl,
+    String? phone,
+    String? fax,
+    String? email,
+    String? catalogueUrl,
+    String? commentaire,
 
-    this.url,
-    this.rcpVetoUrl,
-    this.meddisparUrl,
-    this.lppCode,
+    // 🆕 AMC
+    String? address,
+    String? website,
 
-    this.liste1 = false,
-    this.liste2 = false,
-    this.isStupefiant = false,
-    this.isException = false,
-    this.hospitalOnly = false,
+    // 🏷️ BADGES
+    String? badge1Name,
+    String? badge1Url,
+    String? badge2Name,
+    String? badge2Url,
+    String? badge3Name,
+    String? badge3Url,
+    String? badge4Name,
+    String? badge4Url,
 
-    this.biosimilaireOf,
-    this.isBioreferent = false,
+    // 🟢🟠🔴 ANSM
+    String? ansmStatut,
+    String? ansmDate,
+    String? ansmUrl,
+  }) = _SearchResult;
 
-    this.isGeneric,
-    this.princepsName,
-    this.genericName,
+  // 🔁 JSON avec normalisation
+  factory SearchResult.fromJson(Map<String, dynamic> json) {
+    final normalized = json.map((key, value) {
+      if (value is String) {
+        return MapEntry(key, normalizeText(value));
+      }
+      return MapEntry(key, value);
+    });
 
-    this.isPdf = false,
-    this.iconUrl,
-    this.phone,
-    this.fax,
-    this.email,
-    this.catalogueUrl,
-
-    this.badge1Name,
-    this.badge1Url,
-    this.badge2Name,
-    this.badge2Url,
-    this.badge3Name,
-    this.badge3Url,
-
-    this.ansmStatut,
-    this.ansmDate,
-    this.ansmUrl,
-  })  : labelNorm = _normalize(labelRaw),
-        cipNorm   = _normalize(cip13 ?? ''),
-        labNorm   = _normalize(laboratory);
-
-  // ─────────────────────────
-  // 🔧 NORMALISATION INTERNE
-  // ─────────────────────────
-  static String _normalize(String s) =>
-      s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-
-  // ─────────────────────────
-  // 🧠 RÈGLES MÉTIER
-  // ─────────────────────────
-
-  bool get isNsfpEffective =>
-      nsfp && nsfpDate != null && nsfpDate!.trim().isNotEmpty;
-
-  bool get isInactive =>
-      source == SourceType.bdm && (isNsfpEffective || hospitalOnly);
-
-  bool get hasMedispar =>
-      source == SourceType.bdm &&
-      meddisparUrl != null &&
-      meddisparUrl!.isNotEmpty;
-
-  bool get isGelule {
-    final l = label.toLowerCase();
-    return l.contains('gélule') || l.contains('gelule');
+    return _$SearchResultFromJson(normalized);
   }
 
-  bool get isLaboratoire =>
-      source == SourceType.keyword && iconUrl != null;
+  // ─────────────────────────────
+  // 🔥 GETTERS MANQUANTS (STABILITÉ PROJET)
+  // ─────────────────────────────
 
-  // ─────────────────────────
-  // 🏥 HELPERS CIP (INFORMATIFS)
-  // ─────────────────────────
+  /// NSFP actif
+  bool get isNsfpEffective => nsfp == true;
 
-  /// CIP7 = 7 chiffres centraux du CIP13
-  String? get cip7 =>
-      cip13 != null && cip13!.length == 13
-          ? cip13!.substring(5, 12)
-          : null;
+  /// Organisme AMC
+  bool get isOrganisme => source == SourceType.amc;
 
-  /// ⚠️ Informatif uniquement (le mapper décide)
-  bool get isHospitalierCip7 =>
-      cip7 != null && cip7!.startsWith('5');
+  /// Produit inactif
+  bool get isInactive => false; // à adapter si besoin réel
 
-  // ─────────────────────────
-  // 🔢 PRIORITÉ SOURCE
-  // ─────────────────────────
-  int get sourcePriority {
-    switch (source) {
-      case SourceType.bdm:
-        return 0;
-      case SourceType.keyword:
-        return 1;
-      case SourceType.dm:
-        return 2;
-      case SourceType.veto:
-        return 3;
-      case SourceType.lpp:
-        return 4;
-      case SourceType.amc:
-        return 5;
-      default:
-        return 99;
-    }
+  /// Label normalisé recherche
+  String get labelNorm => _normalize(label);
+
+  /// CIP normalisé recherche
+  String get cipNorm => cip13 != null ? _normalize(cip13!) : '';
+
+  // ⚡ NORMALISATION
+  String get normalizedLabel => _normalize(label);
+
+  static String _normalize(String input) {
+    return input
+        .toLowerCase()
+        .replaceAll(RegExp('[éèêë]'), 'e')
+        .replaceAll(RegExp('[àâ]'), 'a')
+        .replaceAll(RegExp('[îï]'), 'i')
+        .replaceAll(RegExp('[ô]'), 'o')
+        .replaceAll(RegExp('[ùû]'), 'u')
+        .replaceAll('ç', 'c')
+        .replaceAll(RegExp(r'[^a-z0-9 ]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
   }
 }

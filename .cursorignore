@@ -1,0 +1,20 @@
+﻿# Build Flutter / Dart
+/build/
+.dart_tool/
+# Git
+.git/
+# Android
+android/build/
+android/app/build/
+android/.gradle/
+# iOS
+ios/Pods/
+ios/Flutter/
+macos/Flutter/
+# Coverage
+/coverage/
+# Fichiers lourds
+*.xlsx
+*.pdf
+*.symbols
+*.map.json

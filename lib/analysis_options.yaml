@@ -1,0 +1,39 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  language:
+    strict-inference: true
+    strict-raw-types: true
+
+  errors:
+    unused_import: warning
+    unused_local_variable: warning
+    dead_code: warning
+    missing_required_param: error
+    missing_return: error
+    invalid_use_of_visible_for_testing_member: error
+
+linter:
+  rules:
+    # 🧠 Lisibilité
+    always_declare_return_types: true
+    annotate_overrides: true
+    avoid_print: true
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    require_trailing_commas: true
+
+    # 🧹 Nettoyage
+    avoid_dynamic_calls: true
+    no_logic_in_create_state: true
+
+    # 🎯 Architecture
+    avoid_classes_with_only_static_members: false
+    avoid_function_literals_in_foreach_calls: true
+    use_key_in_widget_constructors: true
+
+    # URLs et constantes de config en SCREAMING_CAPS par convention
+    constant_identifier_names: false

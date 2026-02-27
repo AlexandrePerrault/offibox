@@ -40,11 +40,13 @@ Future<List<PansementItem>> parsePansements(String url) async {
     final row = line.split(';');
     if (row.length < 2) continue;
 
+    final cip13 = row[1].replaceAll('"', '').trim();
+    final url = row.length > 2 ? row[2].replaceAll('"', '').trim() : '';
     result.add(
       PansementItem(
         label: cleanPansementLabel(row[0]),
-        cip13: row[1].trim(),
-        url: row.length > 2 ? row[2].trim() : '',
+        cip13: cip13,
+        url: url,
       ),
     );
   }

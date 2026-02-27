@@ -1,0 +1,45 @@
+# Release automatique : au push d’un tag v* (ex. v1.0.12), build Windows + MSI puis création de la release GitHub avec le MSI en pièce jointe.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build MSI
+        run: dotnet build installer/Offibox.wixproj -c Release
+        env:
+          Configuration: Release
+
+      - name: Upload MSI to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: website/download/*.msi
+          generate_release_notes: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

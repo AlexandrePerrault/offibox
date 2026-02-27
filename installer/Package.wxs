@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Id="Offibox.Msi"
+           Name="Offibox"
+           Manufacturer="Offibox"
+           Version="1.0.11"
+           UpgradeCode="B7B3E8A2-9F4C-4D1E-8A5B-2C6D9E1F3A4B">
+    <MajorUpgrade DowngradeErrorMessage="Une version plus récente d'Offibox est déjà installée." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Répertoire d'installation : AppData\Local\Offibox (sans admin) -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="INSTALLDIR" Name="Offibox" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Offibox" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Feature Id="MainFeature" Title="Offibox" Level="1">
+      <ComponentGroupRef Id="ReleaseFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <Component Id="StartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890">
+      <Shortcut Id="StartMenuShortcut"
+                Name="Offibox"
+                Description="La Boîte à Outils de l'Officine"
+                Target="[INSTALLDIR]offibox.exe"
+                WorkingDirectory="INSTALLDIR" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\Offibox" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901">
+      <Shortcut Id="DesktopShortcut"
+                Name="Offibox"
+                Description="La Boîte à Outils de l'Officine"
+                Target="[INSTALLDIR]offibox.exe"
+                WorkingDirectory="INSTALLDIR" />
+      <RegistryValue Root="HKCU" Key="Software\Offibox" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Fragment>
+</Wix>

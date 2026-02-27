@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
 
 import 'models/search_result.dart';
+import 'models/source_type.dart';
 
 class CsvRepository {
   final List<String> csvUrls;
@@ -17,7 +19,7 @@ class CsvRepository {
 
     for (final url in csvUrls) {
       final res = await http.get(Uri.parse(url));
-      print('URL: $url → ${res.bodyBytes.length} bytes');
+      debugPrint('URL: $url → ${res.bodyBytes.length} bytes');
 
       if (res.statusCode != 200) continue;
 
@@ -32,13 +34,13 @@ class CsvRepository {
       text = text.replaceAll('\r\n', '\n');
       text = text.replaceAll('\r', '\n');
 
-      final parsed = CsvToListConverter(
+      final parsed = const CsvToListConverter(
         fieldDelimiter: ';',
         textDelimiter: '"',
         shouldParseNumbers: false,
       ).convert(text);
 
-      print('→ lignes parsées: ${parsed.length}');
+      debugPrint('→ lignes parsées: ${parsed.length}');
 
       for (final row in parsed) {
         if (row.isEmpty) continue;
@@ -48,7 +50,7 @@ class CsvRepository {
       }
     }
 
-    print('📦 Lignes chargées : ${_rows.length}');
+    debugPrint('📦 Lignes chargées : ${_rows.length}');
   }
 
   List<SearchResult> searchMedicaments(String query, {int limit = 20}) {
@@ -65,15 +67,25 @@ class CsvRepository {
 
       if (!label.contains(q) && !cip.contains(q)) continue;
 
-      results.add(
-        SearchResult(
-          label: row[0],
-          cip13: row.length > 1 ? row[1] : '',
-          url: row.length > 4 ? row[4] : '',
-          isBDMAlert:
-              row.length > 18 && row[18].toString().toLowerCase() == 'oui',
-        ),
-      );
+     results.add(
+  SearchResult(
+    label: row[0],
+    labelRaw: row[0],
+
+    source: SourceType.bdm, // logique ici
+    laboratory: row.length > 2 ? row[2] : '—',
+
+    cip13: row.length > 1 ? row[1] : null,
+    url: row.length > 4 ? row[4] : null,
+
+    // optionnel : si tu veux garder l’info BDM
+    ansmStatut: row.length > 18 &&
+            row[18].toString().toLowerCase() == 'oui'
+        ? 'BDM'
+        : null,
+  ),
+);
+
 
       if (results.length >= limit) break;
     }
