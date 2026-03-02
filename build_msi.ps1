@@ -27,7 +27,7 @@ $OutDir   = Join-Path $ProjectRoot "website\download"
 # Lire la version depuis pubspec.yaml (format X.Y.Z ou X.Y.Z+build)
 $PubspecPath = Join-Path $ProjectRoot "pubspec.yaml"
 $versionLine = Get-Content $PubspecPath -Raw | Select-String -Pattern "version:\s*([\d.]+)(?:\+\d+)?" | ForEach-Object { $_.Matches.Groups[1].Value }
-$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.16" }
+$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.17" }
 $OutMsi = Join-Path $OutDir "Offibox-Setup-$VersionName.msi"
 
 # WiX : variable d'environnement WIX ou chemin par défaut (doit pointer vers le dossier contenant heat.exe, souvent ...\bin)
@@ -124,7 +124,10 @@ if ($doPush) {
             & git push origin $branch
             if ($LASTEXITCODE -eq 0) {
               & git tag -f "v$VersionName" 2>$null | Out-Null
-              $tagPush = Start-Process -FilePath "git" -ArgumentList "push","origin","-f","v$VersionName" -WorkingDirectory $ProjectRoot -Wait -NoNewWindow -PassThru -RedirectStandardError "NUL" -RedirectStandardOutput "NUL"
+              $out = Join-Path $env:TEMP "git_push_out.txt"
+              $err = Join-Path $env:TEMP "git_push_err.txt"
+              $tagPush = Start-Process -FilePath "git" -ArgumentList "push","origin","-f","v$VersionName" -WorkingDirectory $ProjectRoot -Wait -NoNewWindow -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
+              Remove-Item $out, $err -ErrorAction SilentlyContinue
               if ($tagPush.ExitCode -eq 0) {
                 # Creer la Release GitHub (sinon "Historique des versions" ne voit que les Releases, pas les tags seuls)
                 $gh = Get-Command gh -ErrorAction SilentlyContinue

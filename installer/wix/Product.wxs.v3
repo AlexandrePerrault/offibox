@@ -3,7 +3,7 @@
   <Product Id="*"
            Name="Offibox"
            Language="1033"
-           Version="1.1.16"
+           Version="1.1.17"
            Manufacturer="Offibox"
            UpgradeCode="B7B3E8A2-9F4C-4D1E-8A5B-2C6D9E1F3A4B">
 
