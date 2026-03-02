@@ -177,11 +177,85 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
     .hero-glow img {
       width: 120px;
       height: auto;
       opacity: 0.95;
+    }
+
+    /* Mini animation : icônes façon "Star Wars" qui viennent de loin puis rentrent dans la boîte */
+    .hero-orbit {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .hero-icon {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      background-color: #ffffff;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.4);
+      background-size: 70%;
+      background-repeat: no-repeat;
+      background-position: center;
+      animation: icon-spiral 7s ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+      transform-origin: center center;
+      opacity: 0;
+    }
+
+    /* Animation : les widgets arrivent de l’extérieur vers la boîte puis entrent (scale 0) */
+    @keyframes icon-spiral {
+      0% {
+        transform: translateY(calc(-1 * var(--orbit-radius, 140px))) scale(1);
+        opacity: 1;
+      }
+      70% {
+        transform: translateY(8px) scale(0.85);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* Icônes : chemins vers le dossier assets/icons du projet (../ = parent de website/) */
+    .icon-ameli {
+      --orbit-radius: 135px;
+      --delay: 0s;
+      background-image: url('../assets/icons/assurance%20maladie.svg');
+    }
+    .icon-ansm {
+      --orbit-radius: 145px;
+      --delay: 0.8s;
+      background-image: url('../assets/icons/logo-ansm%20(1).jpg');
+    }
+    .icon-has {
+      --orbit-radius: 130px;
+      --delay: 1.4s;
+      background-image: url('../assets/icons/logo-has.png');
+    }
+    .icon-meddispar {
+      --orbit-radius: 140px;
+      --delay: 2.0s;
+      background-image: url('../assets/icons/meddispar.png');
+    }
+    .icon-omedit {
+      --orbit-radius: 125px;
+      --delay: 2.6s;
+      background-image: url('../assets/icons/omedit.png');
+    }
+    .icon-epansement {
+      --orbit-radius: 135px;
+      --delay: 3.2s;
+      background-image: url('../assets/icons/e_pansement.png');
     }
 
     /* ----- Sections (fond clair) ----- */
@@ -291,7 +365,7 @@
         <a href="#fonctionnalites">Fonctionnalités</a>
         <a href="login.html" class="btn-outline">Se connecter</a>
         <a href="login.html" class="btn-primary">S'inscrire</a>
-        <a href="download/Offibox-Setup-1.0.11.msi" class="btn-primary" download>Télécharger</a>
+        <a href="download/Offibox-Setup-1.1.13.msi" class="btn-primary" download>Télécharger</a>
       </div>
     </div>
   </nav>
@@ -315,7 +389,16 @@
         </div>
         <div class="hero-visual">
           <div class="hero-glow">
-            <img src="assets/icons/logo_offibox.png" alt="">
+            <!-- Logo \"boîte seule\" pris directement depuis assets/icons/logo sans texte.png -->
+            <img src="../assets/icons/logo%20sans%20texte.png" alt="Offibox">
+            <div class="hero-orbit">
+              <div class="hero-icon icon-ameli"></div>
+              <div class="hero-icon icon-ansm"></div>
+              <div class="hero-icon icon-has"></div>
+              <div class="hero-icon icon-meddispar"></div>
+              <div class="hero-icon icon-omedit"></div>
+              <div class="hero-icon icon-epansement"></div>
+            </div>
           </div>
         </div>
       </div>

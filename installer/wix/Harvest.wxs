@@ -1,0 +1,1236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="INSTALLDIR">
+            <Directory Id="dir38903B42FECED7D073B27F29CA029A00" Name="data" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ReleaseFiles">
+            <Component Id="cmp4DFF922833A574E2CA8EC5E98FB4083D" Directory="INSTALLDIR" Guid="{35B7A0FB-0630-4BAE-94AA-D79BEAD5D19F}">
+                <File Id="filC7A0D82E9B11C25192BA1CD066010975" KeyPath="yes" Source="SourceDir\bitsdojo_window_windows_plugin.lib" />
+            </Component>
+            <Component Id="cmp5168FFE4A9738F63854CB73B7C5834D7" Directory="INSTALLDIR" Guid="{3CD9ECC5-9327-4778-8245-6BF05DF24D17}">
+                <File Id="fil7614B04320BE6CBC449318070A9884DC" KeyPath="yes" Source="SourceDir\cloud_firestore_plugin.lib" />
+            </Component>
+            <Component Id="cmp032A9CADD5B5516D976BF2D54B34F1BA" Directory="INSTALLDIR" Guid="{CE842A91-65C4-4E06-963D-9DDDE0CA1F7F}">
+                <File Id="filB4474A3C52634A6A6E9200825483E55A" KeyPath="yes" Source="SourceDir\firebase_auth_plugin.lib" />
+            </Component>
+            <Component Id="cmp3A8374266CCEFC879DB9E615B0176146" Directory="INSTALLDIR" Guid="{76A6C306-CB1A-408B-AE56-2D487E4AB5C8}">
+                <File Id="fil915C7FCE55C42CE887B4DC3D17DCD570" KeyPath="yes" Source="SourceDir\firebase_core_plugin.lib" />
+            </Component>
+            <Component Id="cmp440828710CC00C4AD322B33A59BC16C0" Directory="INSTALLDIR" Guid="{C76A1F56-D55E-4D84-8753-A523DC2B7BDB}">
+                <File Id="fil474A93684804F9D80DA569D61F0217F4" KeyPath="yes" Source="SourceDir\flutter_windows.dll" />
+            </Component>
+            <Component Id="cmpA5D01D229376A4564822FC36CB652AAF" Directory="INSTALLDIR" Guid="{83EDD796-633A-4BFF-B48F-1BDAD6B326D9}">
+                <File Id="fil80EC908F3492A78E17D6FE123F3065C3" KeyPath="yes" Source="SourceDir\offibox.exe" />
+            </Component>
+            <Component Id="cmpC44BFD4670C5A45ECA26F80340CD7EFE" Directory="INSTALLDIR" Guid="{090FB5A8-AC39-4BF7-8898-C17338D40120}">
+                <File Id="fil13B818DBAD7AA47BD116D76938C72341" KeyPath="yes" Source="SourceDir\offibox.exp" />
+            </Component>
+            <Component Id="cmpCE805EF45BAE795AFDD24002B2EB2155" Directory="INSTALLDIR" Guid="{CB4D1FBE-0946-466B-9D89-BC2D134932C4}">
+                <File Id="fil826349CEBBC16117AA3C409E7EC959DE" KeyPath="yes" Source="SourceDir\offibox.lib" />
+            </Component>
+            <Component Id="cmpFDB2E9638346FB363DBB2B6B44A33E03" Directory="INSTALLDIR" Guid="{032C6935-44C3-4FC1-A064-F23C6F5E03F8}">
+                <File Id="fil7178E230EF0B6610B6E623F29DC4E601" KeyPath="yes" Source="SourceDir\pdfium.dll" />
+            </Component>
+            <Component Id="cmp14A473B4FF4C9E4A248E276232978DA9" Directory="INSTALLDIR" Guid="{D3F76337-CFD1-4E7C-AE14-652FEEC9EC45}">
+                <File Id="fil48272BAB44C0DB8CE529B9F3222685A3" KeyPath="yes" Source="SourceDir\printing_plugin.dll" />
+            </Component>
+            <Component Id="cmp1B5791847035CAD8364881766863892C" Directory="INSTALLDIR" Guid="{FFBE4E67-FC26-431E-A39E-018FC0E5F0CD}">
+                <File Id="filD2E41B90782032839AAA1D4BDA4E2FFF" KeyPath="yes" Source="SourceDir\protocol_handler_windows_plugin.dll" />
+            </Component>
+            <Component Id="cmp4D617D8778653E3CC855C089FF78B8A8" Directory="INSTALLDIR" Guid="{5312BE65-1995-48FC-9A09-A98F5424CA5D}">
+                <File Id="fil3A22E6CA78EC903BBA2E45D0FFFD7AAD" KeyPath="yes" Source="SourceDir\screen_retriever_windows_plugin.dll" />
+            </Component>
+            <Component Id="cmp61F5CFB6029AF203BACDCC11A5E270C1" Directory="INSTALLDIR" Guid="{062C90E7-97AB-4D05-9D2D-6364FD0E0DD7}">
+                <File Id="fil24F8CF9577EB8C1C1D48CE8BE2F097A5" KeyPath="yes" Source="SourceDir\tray_manager_plugin.dll" />
+            </Component>
+            <Component Id="cmp6B21BF5D48997813B6861BC07A7B82BF" Directory="INSTALLDIR" Guid="{6C4FAC87-C822-4137-9142-073E4E032B74}">
+                <File Id="fil8891B9474AE3BE9B97E3851C8DBD6EA1" KeyPath="yes" Source="SourceDir\url_launcher_windows_plugin.dll" />
+            </Component>
+            <Component Id="cmp74C002F3E7887C8150BBB5707FA71B13" Directory="INSTALLDIR" Guid="{0989B12F-225B-415B-9913-64F0CE8FC00D}">
+                <File Id="fil2493994E030480CF99B3EF99E2E518C4" KeyPath="yes" Source="SourceDir\WebView2Loader.dll" />
+            </Component>
+            <Component Id="cmpA63464825DA6978A196189AFA87DC2F0" Directory="INSTALLDIR" Guid="{7440CA79-ABBB-4035-9CF0-EB58C7EE2863}">
+                <File Id="filCAC6E563A677FCAF81C9BA0D95A72590" KeyPath="yes" Source="SourceDir\webview_windows_plugin.dll" />
+            </Component>
+            <Component Id="cmp82D0EAD8D9C7A4CE5317B107B7DF222E" Directory="INSTALLDIR" Guid="{042627D1-7C84-4083-9A52-ECD208E0941D}">
+                <File Id="filD158B3474979789211DDD4E921B84CAF" KeyPath="yes" Source="SourceDir\window_manager_plugin.dll" />
+            </Component>
+            <Component Id="cmp2DE44E602EE8106FBE8DDEC53BC6E37C" Directory="dir38903B42FECED7D073B27F29CA029A00" Guid="{E14C28BB-71FD-4F05-B3DE-8574B929B3C5}">
+                <File Id="fil9CD962AA84D3EBC8E1A4CF324A0B7994" KeyPath="yes" Source="SourceDir\data\app.so" />
+            </Component>
+            <Component Id="cmp3480E2356E981E907352E9C1CBBCEC0A" Directory="dir38903B42FECED7D073B27F29CA029A00" Guid="{2BDE18F5-D4F9-498F-894E-6F55A808BBF8}">
+                <File Id="filA1C38815D0278EF23F5E98AFC5839D30" KeyPath="yes" Source="SourceDir\data\icudtl.dat" />
+            </Component>
+            <Component Id="cmp508515BD66A08E45B07D9B381920B4FC" Directory="dir73D0AC48AF3E626A9A8B4B8894B22518" Guid="{6810FF97-64AB-4BE9-8618-BA81B9121412}">
+                <File Id="fil79734EFD5D8A75BB5E37B7C13799B6BF" KeyPath="yes" Source="SourceDir\data\flutter_assets\AssetManifest.bin" />
+            </Component>
+            <Component Id="cmp6CDD022EFC6019780B9CE155C3A59E25" Directory="dir73D0AC48AF3E626A9A8B4B8894B22518" Guid="{25840A86-2534-446D-B8AF-4D3CC846A8A2}">
+                <File Id="filA2B281900215E165B4A40F26706D7215" KeyPath="yes" Source="SourceDir\data\flutter_assets\FontManifest.json" />
+            </Component>
+            <Component Id="cmpBE4078BC789BAA1C01C957217D603DC6" Directory="dir73D0AC48AF3E626A9A8B4B8894B22518" Guid="{D3E3C31D-72C6-4968-876E-E84E3292E50D}">
+                <File Id="fil3568E93B6FCA53D80C24A1E8272B64F9" KeyPath="yes" Source="SourceDir\data\flutter_assets\NativeAssetsManifest.json" />
+            </Component>
+            <Component Id="cmpA5D612DDCFA4EA2F1FDAF1D724C8D3F5" Directory="dir73D0AC48AF3E626A9A8B4B8894B22518" Guid="{FE78BE7B-B658-47F5-893C-4C35A4E9F9F3}">
+                <File Id="fil7231C6DD2B310AA3711C2C8E70C2163B" KeyPath="yes" Source="SourceDir\data\flutter_assets\NOTICES.Z" />
+            </Component>
+            <Component Id="cmp9A918E9E4A7751DEDF9392FE7A068C57" Directory="dirF5ECDF198C1CB9D3EFEE2272A67B0F95" Guid="{FEFBB452-CB72-46B9-B29D-E57F89DB2C44}">
+                <File Id="filBE479CD21F9FB535AECEFC4421EDC17F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\debug\BDM_SAMPLE.csv" />
+            </Component>
+            <Component Id="cmp3D7B2312193FF601447AE383D58B1483" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5AAC5F58-F196-4548-A7B3-18BFFCCCE17F}">
+                <File Id="fil0F4BC659FB69A8CDD373DE49636D9EC2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\.png" />
+            </Component>
+            <Component Id="cmp78FD5F76EEC87AD63230210034155FF4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{DE40A176-275B-4FD6-947A-2BE14D2E3A76}">
+                <File Id="fil93D1BA30FB80BB04F2A3AA56FEECD69D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\3m_com.png" />
+            </Component>
+            <Component Id="cmp33390E23625FCFC51266077506BB37C1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{12D3B9CD-EEC4-431D-97B9-6233CEC547E6}">
+                <File Id="fil007FBDEA7B0C9945AA38BD1CF581EFCC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\3m_science.png" />
+            </Component>
+            <Component Id="cmp4C5514ABE4C60BCCD234E6B7ED8C85E2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{431674D7-4439-460C-B7AD-1C65DD030698}">
+                <File Id="fil6065832EA39CB613E44FCF31671D2569" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\abbvie.png" />
+            </Component>
+            <Component Id="cmpF6493ADDBEFBAF88C4A60E609D3C426A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EBC85FFD-89F7-4FC6-A8B4-91666E1120B1}">
+                <File Id="fil0453D5169B149B1E5FAF793357CF79F2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\abbvie.svg" />
+            </Component>
+            <Component Id="cmp21E7862E96E105A52ED263FBBD19A335" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6CB597F9-133D-4D79-9234-8765907EB8C6}">
+                <File Id="filE27DC78DCA3FDCA4AE66D3BC4042E6AA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\abbvie_fr.png" />
+            </Component>
+            <Component Id="cmp92CDFC2962383B1C02987CCF23E99F8E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{3971E113-3833-42DC-AAD0-B950CBED13F6}">
+                <File Id="filE6E811465B9507AB029A80BEBBA3C2A1" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\abm_pharma.png" />
+            </Component>
+            <Component Id="cmp04897387E4FE138FD187D57038FA94F0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2CA8A6D8-C28E-4542-A9DE-8B9AD1F7BFD1}">
+                <File Id="fil7F3B299B9341F662C10534B79DD757A2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\aboca.png" />
+            </Component>
+            <Component Id="cmp6EF752032D9FE5E6ED099E1EFCE18523" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{AB38D35E-F9BF-42A0-989A-849E662EFBBA}">
+                <File Id="fil70CA770568668359634C9B079DEBD76D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\adobe-pdf-icon-logo-svgrepo-com.png" />
+            </Component>
+            <Component Id="cmpAA1EE6EDD0D78456A9F132AFF29F9F7F" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8853B364-C7BC-485C-8908-7923EA0C6D9B}">
+                <File Id="fil94272B7ACBBE30D282446A23AD386789" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\afone.png" />
+            </Component>
+            <Component Id="cmp3F515BDBA9A2E6B0BA4AC47FC0B81488" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{101D881E-E208-44D1-8E54-0F87978A13A1}">
+                <File Id="filF89D214A6C78B141E8C680AC1E03B25C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\agence%20numerique%20en%20sant%C3%A9.png" />
+            </Component>
+            <Component Id="cmp396DCD97E0AAE278496B751727E93427" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{31C2EAFD-2AB1-4103-83C9-155DDEC2AE3F}">
+                <File Id="fil90F374D0750E55C3B853C02E080841BC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\agrandir-la-fenetre.png" />
+            </Component>
+            <Component Id="cmp90F75D4C50C9EB6AA273E43CDC23E352" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EFAF1642-9EA2-4C2D-A9B1-AA6578CDF822}">
+                <File Id="fil4BA6D21E43492CDF7FBB82A83FA0DAD6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\allergan.png" />
+            </Component>
+            <Component Id="cmpD14F302B934B6FBB6D3C61DED351D577" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F6697A03-11FA-4873-B289-B0EA6736CC8F}">
+                <File Id="fil07F05A5B7591004DD4E4D4E8BF254FCB" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\alliance.png" />
+            </Component>
+            <Component Id="cmp1E636441FD612469F8C52D16A5DCF961" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{982B25BF-4FA1-47C1-AD6A-2008EBE196FD}">
+                <File Id="fil497B74F93B00D2136BD5EF726ED01EFB" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\alloga.png" />
+            </Component>
+            <Component Id="cmpF8C5E41C46402E55FA42BE2ACD6CCA58" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{101B925A-CB51-4BF1-87FD-0B86A4E3DAA3}">
+                <File Id="filA86883033D5714D3B9C9912360272092" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\almadia.png" />
+            </Component>
+            <Component Id="cmp3A515070905D5209215C86AA0B40B2AD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{60E8E41D-75AB-4D83-8461-6E0AF5B07245}">
+                <File Id="fil0015E43BC3F5EFC3E51D6C27A639FC31" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\altapharm.png" />
+            </Component>
+            <Component Id="cmpC2C57CF03FD309D7F0993B7CE23F6C51" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B7FACB03-CF23-4FCB-92B8-272A0ACE66CE}">
+                <File Id="fil7FB2FD1FC59B2E8857652547C3215FFD" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\amazon.png" />
+            </Component>
+            <Component Id="cmpB8CAD3E25A49D9306974C01205F4302D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{ED1FB138-A6CF-45B6-9554-0977B5960AED}">
+                <File Id="filDAF4D04C94A5E1E4F0A6A8EF4C5FD06B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\amazon_business.png" />
+            </Component>
+            <Component Id="cmpAC6FC3BBDFFE1D483CB48E1A75730EC6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4C78B0AF-FB93-4D43-AACC-AFFA417FB42B}">
+                <File Id="filCA91432C1657D747F444AB821941EC98" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ambapharm.png" />
+            </Component>
+            <Component Id="cmpA8047B1F837B474B1E4EF27F3EE4E448" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0229F0AA-4A7F-4F18-9CD3-267E5A34F545}">
+                <File Id="fil10273C4A6674CC848556A3DF21FDF6DC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\amiem.png" />
+            </Component>
+            <Component Id="cmp50ACCDAF05EBFE835EDA8414B175DBEA" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4F863708-DEBF-4910-AD47-39870E104D51}">
+                <File Id="filC6777130428ABF151A5C2F1352A979A0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\amoena.png" />
+            </Component>
+            <Component Id="cmpB5A092DD568F54AE4190CB4D7E400E01" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0070B84B-E96A-48AE-B04B-E8F086AEAF19}">
+                <File Id="fil4D63A3D71929F2010D99285387D991C2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\amoena_via_esker.png" />
+            </Component>
+            <Component Id="cmp7C632805137435DB75F78785E1026177" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BB8DABCF-1DF4-43B7-BC5A-2F053D5433C5}">
+                <File Id="filF6D5BB2EA756CF9E3EAECB1A98F83C0D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ampoule_idees.jpg" />
+            </Component>
+            <Component Id="cmpDA79FDA4A3D04B47061297BC1F46C796" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{73EBBD09-DDEE-4105-AC47-6D6150DE73D8}">
+                <File Id="fil87CA198EE39E5AA0C6F3685D976E9E94" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ANDPC.png" />
+            </Component>
+            <Component Id="cmp9588E2012581431729A6ECB15874483D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{01B7CD4D-FEF0-426A-971B-210F8254848D}">
+                <File Id="filE6A509E8C66A82979A0E9A2F7E98EB2C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\annuaire.png" />
+            </Component>
+            <Component Id="cmp7C880684E7139CE0EA5A7C2E185FB671" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A6E38713-D3FF-41BE-A4DB-027A9A9078C1}">
+                <File Id="filFDAED586E28DDBF655EE0B1C79ED88A4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\anses-small.svg" />
+            </Component>
+            <Component Id="cmpC38D99421FDFCEE190DCDDEE116B1C68" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7CB60DE4-4AB3-4587-83F9-A8EF47D677A9}">
+                <File Id="fil5620E49695CA0DD98C80E0C693DC3A20" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\apave.png" />
+            </Component>
+            <Component Id="cmp059FE870E7D33A3BC29BCE3FBA1E88D8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5B430A9D-C425-443B-8859-EF289D92D9B8}">
+                <File Id="fil532620A8536144DB4EFE4323DC64210F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\appel_medical.png" />
+            </Component>
+            <Component Id="cmp27CB18D8F1C59A98AE185CB35E3FBCD9" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EFB70FDD-BF1C-4302-B0E6-9D86090F1622}">
+                <File Id="fil200B221FF64C24FAA39297887FAB119D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\app_icon.ico" />
+            </Component>
+            <Component Id="cmpD27D885684E340642B6AC8ED705D90CD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5DB49B23-BE82-48D7-97DB-F2DF7F628E6C}">
+                <File Id="fil1B1B31EAECCA506C9D4A1BCD96504232" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\aprium.png" />
+            </Component>
+            <Component Id="cmpF1A23FCA28EF879964BA98F856832430" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4ABCD003-8C7A-4E76-AEE8-8602F150FD56}">
+                <File Id="filCFABBFB4C1E6A8F7FAC59F804D25979C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\aquarelle_pro.png" />
+            </Component>
+            <Component Id="cmp223470BB302DFBEC74515F8013E51533" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CC5C92C9-17CA-4285-BF7B-87A8FBD67EC3}">
+                <File Id="filF79DE14ACF246A2F9EFFA3B19279CE19" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\aquitem.png" />
+            </Component>
+            <Component Id="cmpCB9F7D1D66D21AFB2775785AB887D329" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{292BFE29-19CF-4C78-BFF9-2C1B3EB67735}">
+                <File Id="filC4043F69A5EE4EBD30FD4AA4FF39D8F6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\arkopharma.png" />
+            </Component>
+            <Component Id="cmpD1B565332979DAFEC829A34EE6D2D164" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BA16DA19-C9C7-4336-80FF-6BE409BF7DAB}">
+                <File Id="fil7E6D355608E772A74AC656162C416E65" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\arkopharma_com.png" />
+            </Component>
+            <Component Id="cmp5BE66A4A75444A89ABD4E6823092620A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{56F7B642-041D-402D-A757-2CEFECBBBC40}">
+                <File Id="fil89D5FC340125254DFCF22D323C4C4881" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\arkopharma_fr.png" />
+            </Component>
+            <Component Id="cmpB53D82C2EE0C44CE1D2014EE34F1DA90" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7F9FD180-B11B-409D-A11C-535A828B4BF2}">
+                <File Id="fil08BD600231AAC46260E1AF7F36D74FE4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\arrow.png" />
+            </Component>
+            <Component Id="cmpB71002DFD40B0CDA548A0985E9AC14E6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{829E1FFE-BB05-4386-B19C-C980891D7E00}">
+                <File Id="filE76C2F9F4AA4F38570F17DEBB7D131E0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\arrow_cooperations_commerciales.png" />
+            </Component>
+            <Component Id="cmp05AA34B690E2115B6024B52CDD539ACD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4B1F7012-9F8D-4D6B-89EC-3BAC3CD21ECC}">
+                <File Id="fil5E555474BBE88F0904CFCC5B388625F4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\arval.png" />
+            </Component>
+            <Component Id="cmpCEA745B0F1DA47DDAEAD95DD2B6AD83D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{982606E4-4486-4298-BB4F-933A04F27F46}">
+                <File Id="fil0B9FF09D0762295D17B657E8271ADBD2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\assistance_pharma.png" />
+            </Component>
+            <Component Id="cmp4901F42F74B749BF910763739696F38F" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8E66DD04-2653-4BB1-86C1-8B1ADF4981D6}">
+                <File Id="fil2B7523E1FEF5210F45B377743A1A8C09" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\assurance%20maladie.svg" />
+            </Component>
+            <Component Id="cmp29E8BB8BC3AA5F241EDC8D7996683FB8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1FF1B514-5930-4E6D-A7EB-230EC652203F}">
+                <File Id="fil3173D3CBD83A2D891F6582B1CD66AC65" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\astellas.svg" />
+            </Component>
+            <Component Id="cmpD4BAD8F23E8FAF49B118F1F66AEBDDE3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{594D5F60-4651-4F04-941F-1A3F6C2CAD4F}">
+                <File Id="fil5CD995744B7F1311987F93CB82EC68E5" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\astrazeneca.svg" />
+            </Component>
+            <Component Id="cmp4696C69A496356E862D2CA950A4E1AA9" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4ABB9475-476B-4A2D-BD32-04398917804F}">
+                <File Id="fil9AFF5B0693F54C26276493E9FB66A94D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\avene_com.png" />
+            </Component>
+            <Component Id="cmp179EF682B815BD06FF194ED688850E26" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{43E94FC2-490B-4BDD-A1C9-14814183EAAB}">
+                <File Id="filBEA5277C23A2F8C16C4C5AB19FFEE764" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\avril.png" />
+            </Component>
+            <Component Id="cmp72C22B63676CACC6D4DA50315BA5C40B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{76F1DB49-EA1C-4C31-B61B-8D4916DBB674}">
+                <File Id="filF151771B14F2A19101572BBFA57B5234" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\axeo.png" />
+            </Component>
+            <Component Id="cmp387B5D087B8080D2CCE1159C67F0C04D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8F35F608-FDD2-4428-AECD-5D61C8035A21}">
+                <File Id="fil95F3E48CD5DC79A08441E57412A41EE9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\axonaut.png" />
+            </Component>
+            <Component Id="cmp6D496EAAB62FA806738B5E2E9C3146F7" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F547C2A0-1B0E-4615-98BD-CA5F48680F37}">
+                <File Id="fil96C4FBCC4F6317A78049DF6C713580D2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bailleul_com.png" />
+            </Component>
+            <Component Id="cmp1EB8860929767862E490718573BC1E2D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{023E7ABA-0480-48A7-BA68-85834A091041}">
+                <File Id="filE12453DC4F50F19504C7B3509FD9A63C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bausch_lomb.png" />
+            </Component>
+            <Component Id="cmpEE02AFFE645EF84C303675AD29DA4B1C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FE4CBB5C-156F-4A8B-9FE8-411FE732504C}">
+                <File Id="filE1E41638C3262B6C7615AA037A3B5C82" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\baxter.svg" />
+            </Component>
+            <Component Id="cmpFFE6D00CC3A2FBB8E4A44463E57C414B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D6833896-DE66-41B0-96EF-12A120601F0A}">
+                <File Id="fil5C9CE71765EC0EB377A999664092B410" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bayer.png" />
+            </Component>
+            <Component Id="cmpE70BD2C0863696BECC610D87CEEC5DDF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BDA1196D-D7A1-43D1-9599-7A08BA500E6D}">
+                <File Id="fil154E46F3243B8338C89E27E583786C0F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bayer_com.png" />
+            </Component>
+            <Component Id="cmpA44B266C62633E8F380162E6EDA13B72" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{AE771F30-3A4D-4132-B0EB-32C0CA0775C7}">
+                <File Id="fil2BC64241B2258C0B91531E33DFD7A0C2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bd.svg" />
+            </Component>
+            <Component Id="cmp06B3A32C614532BC4DB849C8A0F8C5CD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{AF7CFD95-E054-411F-B16E-8C8C3B07B1B3}">
+                <File Id="fil27DFF8F2D3056BDB0F77199DEF59B471" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\BDPM.jpeg" />
+            </Component>
+            <Component Id="cmp4E74760F4D6B939513932E3BCA34E95A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{54BCF619-D0A2-406F-9DF0-D0ED641E2B7C}">
+                <File Id="fil7D3CDF8B25F60D7FE7FC0857B8F196FC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\biocodex_com.png" />
+            </Component>
+            <Component Id="cmpCD350CA04AFFCD29C8B130E225D50E4D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2891028C-442D-47F0-AE0D-D62F2803B00A}">
+                <File Id="fil0B5F7742007D0EA314E16B8EFAF3CD5E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\biocyte.png" />
+            </Component>
+            <Component Id="cmpD113F181DA99E5CF26FFD628CA801D2C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7D5399C3-861E-4B46-A08E-F525D8710064}">
+                <File Id="filB68DB51F329C8183810FEA122261ECB1" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bioderma_com.png" />
+            </Component>
+            <Component Id="cmpBDB595B555093C2DA23CAB73BED772DC" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{904CCC9A-A3DE-4C5B-957E-86269CCCB7A4}">
+                <File Id="fil9596687B15805F1B97B4BCF8940E3EFE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\biogaran.jpg" />
+            </Component>
+            <Component Id="cmp851BDD4900FA20061AF0A54CC30E1B19" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{AAC5BD1C-B908-43F5-A447-3025F2741064}">
+                <File Id="filC6194BDCFC3763B866BF91CDF608F2E8" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\biogaran_fr.png" />
+            </Component>
+            <Component Id="cmp532A32349A1037850983951C3F0539F6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{3716765C-76E6-4D38-8403-A62BC2E49D08}">
+                <File Id="fil66DDAF7F69A2AD51E495854C5E696E89" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\biogaran_pro.png" />
+            </Component>
+            <Component Id="cmpF7832002BFF8839A6D729CE5035FE9F2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{95979DAF-2A29-4C5E-A3F5-CCBD0AA59CB4}">
+                <File Id="fil904B1D0C48EDCA33E44E7DDF97123ED6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bnp_paribas_leasing_solution.png" />
+            </Component>
+            <Component Id="cmp8C062029877C865C00FE05391F1E60F1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5FBD545E-9A58-4306-BB76-072FCAB0E59A}">
+                <File Id="fil6C253E58F9762486DFB45E7D0789DA41" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\boite-de-livraison.png" />
+            </Component>
+            <Component Id="cmp5521E504FA743145C6742A7AB3BFC078" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5BF8C3EC-5908-455C-86F8-1625E606BCF4}">
+                <File Id="fil4923CDD1D9C45643236472EFC81A9037" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\boost.png" />
+            </Component>
+            <Component Id="cmp1000E531083A1E5C8795C4C4A659EBFB" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7EFC87F1-99A2-453B-8F2A-39ADE950CA86}">
+                <File Id="filAE875DA0BC7CC8E8D95E818E1EBAB3D7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\boticinal.png" />
+            </Component>
+            <Component Id="cmp7E3E52054B21BB5CE24EBC0332D88470" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{DAA5FA9F-E9F1-4A6B-B8AC-2A6710C91F54}">
+                <File Id="fil1559520E1A7BC9876A3DA4F3FCA0F2ED" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\boxtal.png" />
+            </Component>
+            <Component Id="cmp18AA8372DC1C53FA792C77CEFA08A226" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FB1ED936-CC07-4467-A5D2-0BB0B6CF4947}">
+                <File Id="fil997BCD713C2A2975E405113A1FDA8D2C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bruneau.png" />
+            </Component>
+            <Component Id="cmpD6FDEA00797AC149DA55F6A66FE4B3D6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{40B07A5D-9A35-4475-8928-B3075EA2023A}">
+                <File Id="filBACF21C0AAA98CD8E60D00C9D1C6933B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bureau_vallee.png" />
+            </Component>
+            <Component Id="cmp39A9780BD126B313A040EDDF7D76DBF5" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6E77F8B1-7A0E-485D-A2F0-12F466D967EB}">
+                <File Id="fil5D3E7774A6B3EB70EA77A6E7061B44B3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\bureau_vallee_guyane.png" />
+            </Component>
+            <Component Id="cmp9DBEF88B9A8AE22D3ECD55EADCF28FA5" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CA48BCD5-5609-4640-9E0B-25A8FA158B5D}">
+                <File Id="fil9B8F20B4EDAD9E581876715AA65CF8F7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\caduciel.png" />
+            </Component>
+            <Component Id="cmp1E60DB699CC91B63CF88BCFA4459D259" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{99898A31-B36D-4D9B-A9A8-7427A80374BE}">
+                <File Id="fil206FD26CAE239AA0D54C61AB714EFF8F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cailleau.png" />
+            </Component>
+            <Component Id="cmp174583B7078961217FA063240FDF8F42" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CB66E5DA-A6E3-4151-9264-070CDC545687}">
+                <File Id="fil67E79BBA7459EAE452238E2DA39AA5D5" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\calk.png" />
+            </Component>
+            <Component Id="cmp34D38F46B7C1726BD0A39544969A9037" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{936506D4-0A92-4ADB-B138-C57E7209D095}">
+                <File Id="filE05256D33387216BE0C3ABD4661CE4D4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\capitol_pharma_via_zeendoc.png" />
+            </Component>
+            <Component Id="cmpD174DB67C0E7EB6F2BB9F1B9EB628836" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{088217FF-34E7-4D05-85DC-E9729DDC7B34}">
+                <File Id="fil1E62BEBE2E2B30E1ADBDE5E6C96619FD" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\carte_vitale.svg" />
+            </Component>
+            <Component Id="cmp66DB17306C0F0FC048DB89E25BC22EE6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D6D70A59-3E76-4A20-AB0B-EDE68F561E72}">
+                <File Id="fil7B3DA95434C07993F8F6A12FFB1B0193" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\caudalie.png" />
+            </Component>
+            <Component Id="cmpC7CD33581B6874C50FBFEED70425ED7D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A9B80B48-1FEA-4E52-9C9A-8A3E9D3699BB}">
+                <File Id="fil1A960AA7590BECFDACFDB05935411493" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\caudalie_com.png" />
+            </Component>
+            <Component Id="cmp18C56786B255E9CC4C639C70AC8B6446" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5E19367D-B563-4C53-9606-9D142348A6C4}">
+                <File Id="fil4365C0CBE5F97ED3CB2A8CF35FCC2215" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\centres%20antipoison.jpg" />
+            </Component>
+            <Component Id="cmp4842A04FD18392693C2E6F667B18B8EF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1FBFA897-F60D-46D2-8619-1361C75B38E8}">
+                <File Id="fil3066B3010A2C9372DC43954A4EC247AC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cerp_astera.png" />
+            </Component>
+            <Component Id="cmp03B4B273D388EE7567027000C0C602CC" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7F5CD3E7-6E3F-4535-8F6F-3C081F113AE0}">
+                <File Id="fil74FFD79F4AE1ACC720DEB6CA59A9A0C6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cerp_bretagne_atlantique.png" />
+            </Component>
+            <Component Id="cmp893B823429D745CAD818655191C50311" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{17B96C39-B59F-4F58-9B23-92BAD18E9E45}">
+                <File Id="fil703E4596FC86FD2C298E3F605A97FCC2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cerp_gpg.png" />
+            </Component>
+            <Component Id="cmpE0FD6248D5B058CD9412CD3BF3165A7F" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A34CF168-EF27-4823-A518-D3C6CEF0554F}">
+                <File Id="fil6C9ABA4BC8C5B990F6A43E34F6406B35" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cerp_rrm.png" />
+            </Component>
+            <Component Id="cmp6BD4E0B293A78BABF7225BFBF9A607BF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{DFB28368-CAD6-490E-BBD4-A4786DF0138C}">
+                <File Id="fil676E86AF1695819533FFBD4F03DEB03E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cerp_sipr.png" />
+            </Component>
+            <Component Id="cmp6660DB8595DA088F540F1DB110B1B211" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1EE595F5-D1F4-4A53-BC3D-2C428B6B1687}">
+                <File Id="fil21ABBEE8B366ABB452144BDB5C30A91E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\chiesi.png" />
+            </Component>
+            <Component Id="cmp55387EC9FFC59853903BC76B8283F2BC" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8ABEC485-2032-4159-BE94-712E87670432}">
+                <File Id="fil2553537B16E69672A2BF4C702F7D6611" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\chiesi_com.png" />
+            </Component>
+            <Component Id="cmp15E8D616E5F16C62E421554465DDF47B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{66474490-B7D8-444B-8D12-9A7152E03CE8}">
+                <File Id="filBBF66690109F0853BE3CCDD5331B2F5D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cizeta.png" />
+            </Component>
+            <Component Id="cmpB6590C1D2DCB145F1FA702348DC05F99" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D419562E-08C4-4174-B3CC-0AC96334A741}">
+                <File Id="filADD14F0715424BD2FD9B60CA57969E69" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cloud_eco.png" />
+            </Component>
+            <Component Id="cmpAC8600C2C5F22E56B687FD08CF3E0928" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{25619DDB-0498-4885-B518-1A1CEEB17906}">
+                <File Id="filC52DD8B174F172C8BE95DB8EC9BE67DA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\club_officine.png" />
+            </Component>
+            <Component Id="cmpDBB0424280A125A9487B99D4BD76F577" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8408E02A-92EC-4D4B-BBA1-7A3650A28542}">
+                <File Id="filC0C07C6C5FA1FEB49906E0ABB8BF2D8C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\coffre_integral_pharma.png" />
+            </Component>
+            <Component Id="cmp7D5961CF49AB2A8E532BD2DD74E5C682" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{3989FC22-F669-42C6-A9AA-08035B158A82}">
+                <File Id="fil502004D975DA70FECB51D7883E2C58A4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\colgatepalmolive.svg" />
+            </Component>
+            <Component Id="cmpB68309199D660C81AA264E9BBC62C34B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{27186143-B919-453D-97FA-A3415FDBD6AE}">
+                <File Id="filC104858A2F86CAEE93D6D584FE5767A7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\coloplast_com.png" />
+            </Component>
+            <Component Id="cmp5B54FE1EEDF5714F40FE066A3A4E9894" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2C921C37-89BB-4732-A3EC-BAFA679DB3A1}">
+                <File Id="filCE34BE8D7904D069AAE99C818E587F4F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\colpropur.png" />
+            </Component>
+            <Component Id="cmpCF64063F58C9FE9B0A157DB26D1431AF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B2D9476E-E82A-467C-B115-17BC6F23D96B}">
+                <File Id="filC9282ACF8B8735D1E6C7E318CFA5BB8C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\conciergerie_pharmavie.png" />
+            </Component>
+            <Component Id="cmp1FB95BE611228385776D334CBEDAB819" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7CF4C52C-9D55-4B32-80CD-09F5EDBA3BB3}">
+                <File Id="fil167CE14D29F5DCE4C2B7335E49B91D58" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cooper.png" />
+            </Component>
+            <Component Id="cmp8F6DCF463AD77F1F60E2BE69890F0528" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{DD32254C-0D3D-4C62-A616-BBBFA75013E6}">
+                <File Id="filEC813552AEAFF77FF9D95F1B1C20A5E7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\copharmay.png" />
+            </Component>
+            <Component Id="cmp2AC38D6C9BF9E16ADEB0C67E55437FAB" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{3FDE2D39-322B-452A-9BC3-4B4B4EBD1AEA}">
+                <File Id="filC01A2A12707B6CED9D3F00893F2BD0D2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cosmediet_biotechnie.png" />
+            </Component>
+            <Component Id="cmp1BC7E845B78EF3EC1DF817EA0DB3E7F7" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F1E58983-CB27-48F2-9CA0-025327462309}">
+                <File Id="filD576E6271A963E88F20F2EAC2A791A1E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cpo_plus.png" />
+            </Component>
+            <Component Id="cmpE1C8E4418E5CA560532DA8B7464CADD5" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7E154904-87D2-453B-9E32-DEC7C5FA195D}">
+                <File Id="filF69184094C6D7D5968F8854D1DED0213" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\CRAT.png" />
+            </Component>
+            <Component Id="cmpCAAC1E7EDD92DBB60429B772CB29E7CA" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{795100D2-C6A6-4383-A567-D8B40D0D8B5C}">
+                <File Id="filA2B1C295EC52FEC58694B83CF7CF3F4A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cropped-vigirupture-logo.jpg" />
+            </Component>
+            <Component Id="cmp8C55A8036A61F3337F63E4298D29CB9A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{89BD578B-1C9A-431F-BBFF-DAA225EC614D}">
+                <File Id="fil7263A59C22F00F7A51BB7BA9889E5493" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\csp.png" />
+            </Component>
+            <Component Id="cmp61CFA6BF4726A682C86C592AA3FB070B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8E6ADA4E-07A7-488C-B2A2-76BEDB8C0300}">
+                <File Id="filA8FD16EDE0422EC093E1A0E4A24FDFF5" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\cs_pharma_via_esker.png" />
+            </Component>
+            <Component Id="cmp41A77AD67E389D6901ECA5E0824B0695" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4A1B1C7C-3C0E-43C8-B1A7-A17C87C69567}">
+                <File Id="fil9F73A0725360665BE18F34EC9FBC54A3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\d%C3%A9marche%20qualit%C3%A9%20officine.png" />
+            </Component>
+            <Component Id="cmpA6561A97E98433FCE80946917476D7E7" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{599D50B7-527E-4736-AA32-20370BE24A8E}">
+                <File Id="fil8F2E97A51EB470826A139909D9D48014" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\DASTRI_logo_RVB-HD4.png" />
+            </Component>
+            <Component Id="cmp902C8FF2FBFDB0F522519447FED41870" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D4A8A82F-A4A4-4CE2-B4DB-33F87D426DC1}">
+                <File Id="filC3C06B574C0E80A4F900435AA907073A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\defimedoc.png" />
+            </Component>
+            <Component Id="cmpD12CD553B62C3B0051D89CBFE919C884" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2856D1F5-A3E8-4050-BED5-8D258B853857}">
+                <File Id="filC3067D6F3A2CA86429A3694DAFEB31D7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\delpech.png" />
+            </Component>
+            <Component Id="cmp9C79E806094A3F87D5E73D462F65C111" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FE02230E-996F-4DF4-A606-A3508798558D}">
+                <File Id="filE5CBD9F17EFD1CC431FAC3AE7E355E93" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\delpech_nancy.png" />
+            </Component>
+            <Component Id="cmpCBB435821450B0D62217EC2FB1CD73FD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{36F671F5-2EF6-49FB-A767-AB0DFC01BEAA}">
+                <File Id="fil531B5517BD5F10397B31F0966ACF15D3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\demat_box_extencia.png" />
+            </Component>
+            <Component Id="cmpBD019C1CD0F27F8EF4F60050439B8369" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{ED6F3696-05D1-4AB0-B7A9-78A67CDF33FB}">
+                <File Id="fil0158BE09566E63B1A8C07735ABFCA3FE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\despharm.png" />
+            </Component>
+            <Component Id="cmp9C8819A5408C2E1D8F5C63967F52C137" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EB587D7F-8BE7-476C-9099-B854EAF2D13C}">
+                <File Id="fil018BBEF06AD702BF8C4F143E311425E9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\DGS%20urgent.png" />
+            </Component>
+            <Component Id="cmp145E02D221CDAD00548AC4742B74812D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{685D823C-336B-45A3-B897-EDF7F85176A0}">
+                <File Id="fil21CADA9E3FC7BEBA6B554EDFD20BE710" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\difarmed.png" />
+            </Component>
+            <Component Id="cmp7F2B193D0373C5474BC3473CE549E43D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4FF15E4F-A189-43E1-970B-FDAA62C5A7E1}">
+                <File Id="fil7A14C4C0BCB2708707895E906A8B1854" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\digipharmacie.png" />
+            </Component>
+            <Component Id="cmp0D1C072CEC74AEB9F95F65C11E632B2E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C35D198C-C798-4D5A-A57D-C8FD953D0C29}">
+                <File Id="fil2DDC099012AC8F3D9154EDCEED0C1A28" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\directlog.png" />
+            </Component>
+            <Component Id="cmpF4B727AA864EE1E866771D563B4E7173" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6FA9EA45-0118-42C5-95C2-9DA63DF55169}">
+                <File Id="fil2D727737E795AE35ED719D640E016571" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\distripharm.png" />
+            </Component>
+            <Component Id="cmpCD9752CF58837D90ED385D4752CDBD62" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B095D3BA-72AE-4A00-B763-93BD49F23B4C}">
+                <File Id="filF9F931148A72BFAEB553D0359A7169F9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\dll.png" />
+            </Component>
+            <Component Id="cmpB1B26B07AB9D3517825682A6808817DC" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7CF38DBC-E85E-49AE-B84C-CDEFFE55986D}">
+                <File Id="filC93F59EACA2581FA8C0C8DB72A1E8C55" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\DMP%20(2).png" />
+            </Component>
+            <Component Id="cmp6BC38FBF4BBA55BAE8C4EB80282EC2DB" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{3F034C6F-E2B9-46C8-A0EC-BA46937954E9}">
+                <File Id="fil881E6DFE017AA46B9417962DED2582B7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\DMP.jpg" />
+            </Component>
+            <Component Id="cmp7ACC99CD95F54478BD42340299391B7F" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{77C1FD14-55F5-486D-8728-EA9F15F199A9}">
+                <File Id="fil2E7FE927E8AEA1FFFD673F8DEB2072C6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\DMP.png" />
+            </Component>
+            <Component Id="cmpEB925AA54964C51FEEFB87DDC290AA91" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{65EFD3E3-3FE6-444E-BA51-77FCB878428B}">
+                <File Id="fil6CFFCC9E448821742A3452E01C226832" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\doctolib.JPG" />
+            </Component>
+            <Component Id="cmp4863145D8357AF05C4D49C3B0810AA72" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6A4C04D6-ABFF-413C-844F-BED14CB0CBB0}">
+                <File Id="fil90C7D3A7DF9DF08A4E48EB70FBCE9A73" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\doctolib_pro.png" />
+            </Component>
+            <Component Id="cmp73D1C119F9C82FF7D5EBC0F48A704C2C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D4E9376F-7609-42E9-B810-8A140B4010FE}">
+                <File Id="fil1EA064CB2CEF4A36A8737561CF101DF8" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\domespharma.png" />
+            </Component>
+            <Component Id="cmp4AA1BB1B26B2619F0DF01DDA523CC509" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5C18BAF1-AA41-4D45-9971-1D48FDFBA6EC}">
+                <File Id="fil9351C686138EE056F1E3BC0DBD132A7B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\donjoy.png" />
+            </Component>
+            <Component Id="cmp03368974B68C89FCDCB8EB003D68BFA5" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EA7D03E7-0BE3-4FE5-82BA-5D040D1E344B}">
+                <File Id="filB5D245684FC8FDF6E0407A810B186127" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\dr._hauschka.png" />
+            </Component>
+            <Component Id="cmp544F565FC7236B4A8709CA7C0FB3E420" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{626D3776-7120-4AFC-8B00-DF9FD639A047}">
+                <File Id="fil48089BACAAB90D03AFE24083E0A93517" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ducray_com.png" />
+            </Component>
+            <Component Id="cmp1FE7D6B92B09C92861C999503705CEC1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{07C3E967-343E-4154-94A5-2C3A82B5BA2B}">
+                <File Id="filE30A831737377C6CE472DF8C0AD728CE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\dynamiz_pharma.png" />
+            </Component>
+            <Component Id="cmpBB326DE908BFF9768CDE0662DF7D6910" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{457CBBDB-FDCC-4E3D-B02B-E84F1154F583}">
+                <File Id="filF52C452603C15FEABEF7AAE55448292C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\E%20pop.png" />
+            </Component>
+            <Component Id="cmp2D31ADB942C6960681F99CE489576A91" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{377099DA-BE2E-4F4A-9161-6386484A1FE7}">
+                <File Id="fil3C20E97BD92721E1A79D64D266DE0F25" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\eau-thermale-avene_fr.png" />
+            </Component>
+            <Component Id="cmp485D98D25693D54F3487B8B9E3792E1C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{84AEA43D-F922-4E6F-82B0-0D0C7CCCDA86}">
+                <File Id="filEEF8B72D0B9F3508AA05828F87B3D6EC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ea_pharma.png" />
+            </Component>
+            <Component Id="cmp4033BC1F97A28A78A41A7B86315C7A9C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E56DF566-B254-4E9D-A68E-6B1C0D7B00BD}">
+                <File Id="fil2D37584A5AA4F5C64EC4811C9F894A9A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ededoc.png" />
+            </Component>
+            <Component Id="cmp8F549AECB57065AD4F787FCD9B0E9634" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8D28402E-9102-4332-8B6C-4CB8B18E823F}">
+                <File Id="fil43518A08B66E7F348BD4DCDD82ADA4D3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ededoc_bis.png" />
+            </Component>
+            <Component Id="cmpEF55F50125D04EA5B02C0BC64C253CE1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{15021444-9F9D-4C58-894C-B993F7D678D6}">
+                <File Id="fil1FE22E74E5BCB4252653E0821F7EF933" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\edenred.png" />
+            </Component>
+            <Component Id="cmp914F4F5E7E5B54F19A086053AB418E40" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{81090C3D-86C1-41EC-835F-2EAB3A52389A}">
+                <File Id="fil41B9FF1DB89E3B8F34E6EBF904FDEC56" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\edf_entreprises.png" />
+            </Component>
+            <Component Id="cmpD1748798DF03C28258C6549809CE1CD0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F925C948-E1A8-44FD-80C7-9E30A60036ED}">
+                <File Id="fil75303A2B95BFED9A2A9C95CCFE624C4F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\edf_guyane.png" />
+            </Component>
+            <Component Id="cmp9968B149B0BC7ABDCE6C3ECDF25A5715" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0D1DF8AC-F71E-4BDB-A810-C61F95149B12}">
+                <File Id="filB031176D02D28AA7D9CFD291813B73A9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\edf_reunion.png" />
+            </Component>
+            <Component Id="cmpAE5A594DE68EEF6622F36D6CFA8DBD57" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{AB7711FA-788C-431E-95D8-92184B3EEFD3}">
+                <File Id="fil7BACA61FFA252644D8A8AA5088B09489" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\effinov.png" />
+            </Component>
+            <Component Id="cmpD38BAA6C7672564BE062C91627AC3329" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1A8FFDC4-78F4-4A77-9DE0-BB90F8A873F5}">
+                <File Id="filC070310866D18B33D1CF0BD3BCB17D30" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ekwateur.png" />
+            </Component>
+            <Component Id="cmpA80BC72BE084398E1C5ECF1C3CC052B6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{35271913-378A-4BF7-81E4-16BA2D5B091E}">
+                <File Id="fil8D7E0E808661A8BD4B2FEA09447C0372" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ekwateur_pro.png" />
+            </Component>
+            <Component Id="cmp85C888CCB1B7073D42B4C8483B13F197" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5A2FC083-544E-486B-9840-1278A2AE11D3}">
+                <File Id="filC70F562B60BD3467B8555BEED8620A57" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\elis.png" />
+            </Component>
+            <Component Id="cmp1F6CD717EE897CE21BC0F33EABA22587" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BB2D28D3-AA4B-4ED7-8378-C2A728885DE8}">
+                <File Id="fil7FBD36C98E5DEE7A9E5CBEDB249A7B32" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\elixir_pharma.png" />
+            </Component>
+            <Component Id="cmpA7467037A450D424794B96239B9CDF44" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CD5E82F8-A197-42E4-8325-E173A442314B}">
+                <File Id="fil16A2B57FB3CC3900D8E56E0A0FC2FFE4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\emapo.png" />
+            </Component>
+            <Component Id="cmp532CE619C7BFFA4138466A141B056DF9" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0AA65972-B272-4C58-B679-33F742785ADD}">
+                <File Id="fil88FF1351F3CC88250BEABBD2DB9C6BA0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\Enovis.svg" />
+            </Component>
+            <Component Id="cmp1B3A5B9103480236AA549AF8E24F12F8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{61B0559E-2FEA-45D1-9A16-8874ABD603E7}">
+                <File Id="fil17044B05F655240197B56CCB53B35696" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\entete_ameli_gdr.gif" />
+            </Component>
+            <Component Id="cmp3B18E600BF2863A053737ED774B295B2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BAB0FCA8-C65A-4C9F-AE44-E75DFEDB2E0D}">
+                <File Id="fil9B6EEF34109F00FF5FF97053ABFC7661" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\eolys_beaute.png" />
+            </Component>
+            <Component Id="cmp8CB9ADFCF42A8C640DCD119E8B6CBFE2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{09D40A6B-60D3-4443-A0CA-9A3738FAB76B}">
+                <File Id="fil47900DFC3BF8FDBB93518E2405774C97" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\epsilon.png" />
+            </Component>
+            <Component Id="cmp82EE7A426706EE1034AD82A7996CF7B1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F6F3FBE9-52A0-4D36-8586-684042687F50}">
+                <File Id="fil3A67061F37FE985C345553DC3C4F91BB" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\esc_laboratoire.png" />
+            </Component>
+            <Component Id="cmp29179376FA5595F91ED3E210B2CDA165" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FC47B68F-5D34-4437-965F-EAC237B5F1E4}">
+                <File Id="fil596A6BC5A47451DE400B33958D4D9FA1" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\espace_monge.png" />
+            </Component>
+            <Component Id="cmp0825275FBD91C396E6E3CC236F2A7EEF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{56315D63-5E09-4C87-B4B2-F4A21B2A5675}">
+                <File Id="fil1786667B6AE2C67516133544D3850E25" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\estipharm.png" />
+            </Component>
+            <Component Id="cmpD251CFF3557821ABBBE281269DA2AF01" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{64387BF7-EC6D-4E17-8C5E-4A8EDAA088C8}">
+                <File Id="fil5538779C09BB522A623A73A75F318142" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\eucerin.png" />
+            </Component>
+            <Component Id="cmp310B9C8D651D083AECFACAC219CD7459" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{294F8708-E069-4528-9F3D-83B3AF4208FD}">
+                <File Id="fil2E035C5C5105376EB064AB993300E249" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\eucerin.svg" />
+            </Component>
+            <Component Id="cmp94B2EF9F38CBE807482D66B4BE41BC34" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{94994C59-0C7A-421C-969E-44064CCD9E31}">
+                <File Id="fil4BAD1E0FAAF7C71E33286842F73186B0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\eurodep.png" />
+            </Component>
+            <Component Id="cmpB3DF60D0AA60394F5F49055435EACCFB" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8C9ED37F-FB00-453D-947A-C59FFBDF4DCA}">
+                <File Id="filFA63AEFAD54D6D39B2CA3D02ECD3F2F2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\evolupharm.png" />
+            </Component>
+            <Component Id="cmp6787DECC6496B0374D1E8E803018D251" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{42A659DA-A2A9-429A-B2A1-F8D104DE693F}">
+                <File Id="fil82137A6E5FA79D13A16754946A8E312A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\expanscience_com.png" />
+            </Component>
+            <Component Id="cmp35B074385F181CE4263CAFCF1F49D043" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4CBA7084-0299-4105-B2D6-7911D7C5478F}">
+                <File Id="fil3EBF8ADFFE6E85D008FC5A0CF157B45D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\extencia.png" />
+            </Component>
+            <Component Id="cmpE04CC247AF4CA416F2CF0C02F0C28C35" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0FFBF4FE-9F14-45CC-8115-20E03BDAB4A9}">
+                <File Id="fil4AB92A8A4A87A5082EBCB22370374E75" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\external_link.png" />
+            </Component>
+            <Component Id="cmp6C640FE714D9BD0619C4E7236D9F9675" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0C135137-6DC3-46D2-90C2-DF82981FE5ED}">
+                <File Id="fil21B1B77640695AA334F5322056FB088F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\e_pansement.jpg" />
+            </Component>
+            <Component Id="cmp3692BEB9D93C5D6E927B6C54A5BD84C2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BDEFB487-C26A-452A-A87A-473C3EA441A4}">
+                <File Id="fil27DF12B6A4E9AD311D2EE519E79537BB" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\e_pansement.png" />
+            </Component>
+            <Component Id="cmp3D83BF83825719604E5B32EE4CA141C4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A6F30FF8-F1AA-4166-9858-A76146E8D22A}">
+                <File Id="fil386BA6DB251BAE4680AAA04772DCE1CA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\fidel_fillaud.png" />
+            </Component>
+            <Component Id="cmp720051EBFA3AF1EBB24AD76C059B1AA0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{668BF95F-6CC8-42B6-8AA4-21E3F178DD3F}">
+                <File Id="filA8643DA94160980FAE553628B90C64A9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\filter.png" />
+            </Component>
+            <Component Id="cmp6B8951EF09EDDD510CEF2232F9B4130C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D2C4E75D-1B79-4765-B7AE-E13404196858}">
+                <File Id="filEAB2D3CAD983401BBE86DB66AACE9EE7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\filtre.png" />
+            </Component>
+            <Component Id="cmp50304C9013336B6420B6DFE9C0DDD816" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B998D307-17F4-4699-BEF3-3CDED076EE64}">
+                <File Id="fil381E9E0D7AE78BEDCB2C95845E964A66" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\fld_via_esker.png" />
+            </Component>
+            <Component Id="cmp4884F7CF09695E2F47C122BF5067A572" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{463C5E6C-A82E-4163-BEF3-8942977EDD23}">
+                <File Id="fil903900B416986A2EABF7E124805A64D2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\fld_via_zeendoc.png" />
+            </Component>
+            <Component Id="cmp6657422A6C84F2EBB0A67B1E76A0A318" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{54FDB222-683F-48B0-AFED-40721BAA208D}">
+                <File Id="filF2CA0DA3B514D33A002E2FDF15C1B298" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\fortepharma_com.png" />
+            </Component>
+            <Component Id="cmpFC82D428296D0692E00110459821D3A1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7AAE2251-D974-41A1-A98A-EE4A5968F502}">
+                <File Id="fil9A5B0183664906821FC01F014F12DDDC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\france_prep.png" />
+            </Component>
+            <Component Id="cmpF450E7F9F21E3A795D09FA835F0E353D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EEF7D0D7-F0C9-4675-972D-01F6E38AC1D5}">
+                <File Id="fil512F6065FBF19AB2F43D26DE7F3CD36C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\free.png" />
+            </Component>
+            <Component Id="cmp6AFDD034505C473D29D412E6453A8AC8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{59DBD4BF-00C4-4BFD-9BB9-A9609AF0CD05}">
+                <File Id="filA2A63E6AAC627618E5C7210E977D1787" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\freestyle_libre.png" />
+            </Component>
+            <Component Id="cmpEDD1F286795EC42828A41786F99FA978" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{9223FD1F-FC52-4378-BB1B-A6350370B0A5}">
+                <File Id="fil0825AB02D01F0CB43D9B8B4A37DB7015" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\free_pro.png" />
+            </Component>
+            <Component Id="cmp59402CE3D23FD40B746C0F46A1D503F9" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{31C765D4-E584-4FE6-A91F-DEA1601E0A49}">
+                <File Id="fil3D55B2DBA577FE63B01C1137C02232AE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\fresenius-kabi_com.png" />
+            </Component>
+            <Component Id="cmp73BA0A6A3493C43FDAE8154BC7D21D9C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4A891F62-98D4-4289-9B7D-BD088A7E9E12}">
+                <File Id="filC8394BAAD57998E3EBDDD326C4796FFA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\galderma.svg" />
+            </Component>
+            <Component Id="cmp0B159148330ABEF0DEBA7A2574FEFEA4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{45C78E44-76ED-4F32-944E-C09FA8267219}">
+                <File Id="fil1EE2F86878A516B589B516D4CDB8752A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\gener.png" />
+            </Component>
+            <Component Id="cmp6C83CDCB8A2646D8B47FDA7EAE034B4B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EC1E407A-200B-4C5D-B256-ED81088A359B}">
+                <File Id="filED0F51C364AA81FA92916BA5A3E6F4EE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\getinge_com.png" />
+            </Component>
+            <Component Id="cmp6617A0BB2F88AF75FFD4FDA95F194258" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4BF07F5F-BC3D-4508-A0C3-E52BAC5CF759}">
+                <File Id="filD88B059ABC7B551848EEF6C9E3E2E073" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\gifrer.png" />
+            </Component>
+            <Component Id="cmp2AC57079003528C6CD31DC8A936E73B0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B4033EF4-12B2-42A4-8B9C-1FF2D61C12B6}">
+                <File Id="fil8C4FA52CB2852FB5845CBEF2B2746198" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\gilead_com.png" />
+            </Component>
+            <Component Id="cmpF9787C5955B8BCD073D962CA95EEE07A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0F3A8D27-B6A9-4E14-B5A2-43E73FC513E4}">
+                <File Id="fil32E91F6AF0B3D5A4B5D1ADFB2E10C47F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\gis.png" />
+            </Component>
+            <Component Id="cmp422A01B850CB28621E310E65B615D43C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{446F32A3-F8B1-464E-AB14-32B1813E3E04}">
+                <File Id="filCD63B3F1ED3C193B8A89C1F4D7826586" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\gmail-icon.svg" />
+            </Component>
+            <Component Id="cmp45C739281BBFB8C87749B87CCCEB62F9" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{71A575EA-AD23-4409-B3B5-6D60FAE76872}">
+                <File Id="filBAADCD7923F62C78E391F7B604F7AE51" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\good_web.png" />
+            </Component>
+            <Component Id="cmpE9A4FA287D1AC7408562C7D7F0ABCEFE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{DE1CB056-9903-432C-AB91-5645D658488B}">
+                <File Id="fil3C878BEB52F02E80C2A7025BA5041FCA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\google_logo.svg" />
+            </Component>
+            <Component Id="cmp5B72434F3753AF219A8DB35E6A7EFCDB" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{51C74B7E-8563-4BEB-A655-024DAAEC6BFF}">
+                <File Id="fil9624387D5D92661F7CF32FC8D42F41D0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\grenke.png" />
+            </Component>
+            <Component Id="cmp688C61CD354A4D0B2848CE5A6BCB406C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{35B5248F-9FDC-435B-8D32-78AF9610277B}">
+                <File Id="fil2C1B267DC4D1A2AB2621C346C4653627" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\grunenthal_com.png" />
+            </Component>
+            <Component Id="cmp711FE73DE0DC2E93FA257878D2287316" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E1BA6DAD-36E9-415A-8A7B-739DC3FCD355}">
+                <File Id="fil57C6D8E943FCA2A6E9A0308E191D2206" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\gsa_connect.png" />
+            </Component>
+            <Component Id="cmpDB1F0C135A8BEDA543E7181529BEAA9E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{642351A7-48C7-41DB-A83D-39F811620C1F}">
+                <File Id="filC181AD23FC99167DB90D085EB629685C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\gsk.svg" />
+            </Component>
+            <Component Id="cmpDFB6CC525F5F5ACA60927A8386356DE8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E0528EFB-A184-4AA0-80B3-EDFABF757FFF}">
+                <File Id="filB3915D43D2D1545B18B20806908BA18E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\guerbet_com.png" />
+            </Component>
+            <Component Id="cmp423E5DB2FA030506417FF2431D320427" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6DCD720E-8211-4C85-AB78-FACDCDD1B935}">
+                <File Id="filF37BD54414F5A9998AF5ED09653E7C01" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\Guideoutils.jpg" />
+            </Component>
+            <Component Id="cmpFD262A20444E87B5504B63355314EDE6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{43635A6D-8F6E-456E-A965-1BD2DDA84FA7}">
+                <File Id="fil15F3E3ED21238A01729091D0E87ED0AF" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\handipharm.png" />
+            </Component>
+            <Component Id="cmp8F30B28F5831F269D6982843E3F22C8D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{995DA13B-29CA-435A-A608-3559887C5DD7}">
+                <File Id="fil93C3E683BE013031CD44F60B0635DD6C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\handipharm_via_esker.png" />
+            </Component>
+            <Component Id="cmpCFBEDC181544491C288E3E51E6844EAF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F264B68B-BF2E-4891-8AD4-4D2338C9E62B}">
+                <File Id="fil67A293030B4376CCCCBD45D41786534A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\hartmann.png" />
+            </Component>
+            <Component Id="cmpFA0D840A6E0D5EF01FD937C50640FE4A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A64E9522-C8AB-4682-ADB6-B39B77773C1E}">
+                <File Id="fil4B61165BF03EA0EE202313A9AA151FED" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\hartmann.svg" />
+            </Component>
+            <Component Id="cmp235C8C73113851BCC39D8CD3287CEE17" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B1A0B01F-F5F8-4457-91FD-57A7F7E6B234}">
+                <File Id="fil10008C7E8F8236E0E26D5CAD51AA9AE2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\havea.png" />
+            </Component>
+            <Component Id="cmp239679628A515A140600F44D5F98C821" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{44F9A3B4-9840-43DD-AA20-F3B989D84F75}">
+                <File Id="fil130DC7DD7F959BA1765712BF6BFAFCE4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\herbaethic.png" />
+            </Component>
+            <Component Id="cmpB6D1336E32BCE5DC97711D410E17B87D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A7AAF448-2BE1-4D41-8CAB-9792216F038C}">
+                <File Id="filAE6DE59DBDCAD86217B52AF1564120CF" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\homiris.png" />
+            </Component>
+            <Component Id="cmp559D195B6950C5777B68FF09AB81DE66" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{96A60267-FA8C-475C-831F-5F4E4440AEA7}">
+                <File Id="filF1DE3C8DCA0E23FB309D486032FE4949" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\hopitaux%20universitaires%20gen%C3%A8ve.png" />
+            </Component>
+            <Component Id="cmp8EB25DD3A33684E6AAF445976E0A0924" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5D98487D-52B2-4264-8B27-EB703CAEC3E7}">
+                <File Id="fil09E6275BF6A926E431E3C5F268BC5645" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\hra-pharma_com.png" />
+            </Component>
+            <Component Id="cmp8B66C1136506159854C699EDC956EC7D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{62E1B3DA-B283-4C9C-907F-1B458EB2F20E}">
+                <File Id="fil7DDC613A96A0C01BF7BF806634D29058" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\hydratis.png" />
+            </Component>
+            <Component Id="cmp8A5B4157DD43CBED90BA7276AE7B8616" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C13E0787-8ABE-482E-9C62-498B3F54A891}">
+                <File Id="filDB107DBC4FC1C3C0334C9C9872155145" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\hygiestore.png" />
+            </Component>
+            <Component Id="cmp0675EA37C2C309C67E722A1D6E6DB9A0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E31D5C59-585F-43B6-B609-B70A8B79D495}">
+                <File Id="fil37EE170A592862C98D5F8ADB6D89BBCF" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\icone_BDNM.png" />
+            </Component>
+            <Component Id="cmp1BB48B4354EDBB35DF99C5B8CF185481" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1E4D4867-0F8B-46FC-8532-1C69C4CDE8CA}">
+                <File Id="filD818542BE0039EB1DA8EDFB560094B5A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\idc_pharma.png" />
+            </Component>
+            <Component Id="cmpBEF3E4AAD5A00FF05C75D4A10CE7F2B4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4EF764D2-3733-4F52-8D5F-10CF8250A532}">
+                <File Id="fil5B4F498A7F6BE8A37A7A60F7614BC2F3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\image5-e1718800798315-480x300.webp" />
+            </Component>
+            <Component Id="cmp7FD920A4D0AB71F55EB3B754B1BB313F" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{29F3BD97-3AFC-4FEA-A279-83CDAB5EF7F0}">
+                <File Id="fil75311819B0EDBB88D27CDE7FE180710B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ineldea.png" />
+            </Component>
+            <Component Id="cmp412DA1C46744CA9D57C100A587CA6545" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{9B3E2E48-6938-4B64-8FFE-3E43ABEFACB3}">
+                <File Id="filFFCB3712D46E46DFDB8DBDFD5A5B09A3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ingenico.png" />
+            </Component>
+            <Component Id="cmp5575DC66B43F252A1EC5238AA0D8F051" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1D5937E7-E6F5-43A1-B9C1-6E33AEA90AD6}">
+                <File Id="fil5B5351D2FDE47F61E323DA284C3C6647" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\invacare.png" />
+            </Component>
+            <Component Id="cmp7093B665EBBD45A146C398AC0C5F3E8E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{107E2685-2B32-434B-ABB9-8ACBED6A97C5}">
+                <File Id="fil0BADBD70DC58D61FCDC6A15099A07517" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ipsen_com.png" />
+            </Component>
+            <Component Id="cmp2B86B6B477334B779BE18070E2EB4513" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6BDE7B45-47AF-4890-B2EE-8C683A524C77}">
+                <File Id="filFFAA07091F039E536790028848F51F13" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ipsen_fr.png" />
+            </Component>
+            <Component Id="cmp95081B431085AE08F4F382FA98638E00" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FCC88D97-A58D-4775-A7D8-5C6B93832D35}">
+                <File Id="fil8E6CB97E1F007D5CE5BC300968AF2732" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\iqvia-logo-original.svg" />
+            </Component>
+            <Component Id="cmpDA2C5DFB67EA187A0125B68193019093" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{568C2E6C-E449-4728-8E4D-BCFBA5ECCD9D}">
+                <File Id="filF35F510334C73D238EF8D8ABCB7BF0D2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\izivia.png" />
+            </Component>
+            <Component Id="cmp7980EC61A0E5C5374B89D57FF48863DE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{18604B68-8ABA-4E12-8379-6F8B97A0A465}">
+                <File Id="fil677D395472F72B4827B7E9A44836FA16" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\izi_pharma.png" />
+            </Component>
+            <Component Id="cmpF459851B86D469E05015C0362F740497" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FF17B8DE-F0ED-4A24-9619-586B471ABE4A}">
+                <File Id="filCC41BB41C80B38C4AB9121FBACA2D876" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\johnsonandjohnson_com.png" />
+            </Component>
+            <Component Id="cmpB6D42F6362018F409685D179CA283A6F" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D459C013-CC06-41F4-BDDC-4C27E8EC9CE2}">
+                <File Id="fil88780F0EA672B09022B4B71797B9D52B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\johnson_johnson.png" />
+            </Component>
+            <Component Id="cmpB388B350641E60D41EADC1C805492963" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{9D06F1D0-B323-47FA-971D-73ED85AC6261}">
+                <File Id="filFC4BB8B84898942EBFFC3F51846D65DE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\kerangal.png" />
+            </Component>
+            <Component Id="cmp8ED90BD3C02DFA7043317B952AFB86A8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B6D4FAF7-FD6A-4996-88CC-C621B4CF44A0}">
+                <File Id="fil7A8A11522777512C065A35F7753D3B43" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\keyyo.png" />
+            </Component>
+            <Component Id="cmpF28BE78E8A340EEE56598B0B8D5D67B0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{630EAB60-D212-413E-A492-B1A957897AB3}">
+                <File Id="fil06BC975EBE1F5BB281699A8C34F020A9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\kiwaki.png" />
+            </Component>
+            <Component Id="cmp99C0A8992E12E1B0B28733D415AE2002" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{56E4C031-CDBC-4AC0-99BF-CF2D6C71D59A}">
+                <File Id="filCE2729D642ABEEF5FF8E0D0B73E85E98" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\kiwaki_dolibarr.png" />
+            </Component>
+            <Component Id="cmp2A28B2F7FFE501DD321E20DE2DA0F223" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CC22CA33-8236-4A71-A084-986DFE43B597}">
+                <File Id="fil8D4895089F3FEA310DD65BFA8D02D6E7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\klorane_com.png" />
+            </Component>
+            <Component Id="cmpD9370D1C45D3D60412FFCBD8C282DD37" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0C42533D-4CD5-405D-8D64-40746AF27487}">
+                <File Id="fil841276CE14A860607DF9DACEE75C550F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\la-mer_com.png" />
+            </Component>
+            <Component Id="cmpFD1B39879F174ACCB537DDA98A48B41C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6A25B9B0-4EF2-4F31-9FF9-6DE808C9CB0B}">
+                <File Id="fil653608E234F6982D3B8C064A0DF331C0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\laroche-posay.svg" />
+            </Component>
+            <Component Id="cmpCB4C9D802E9F5EA196B2BFBEE5B38176" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{37384D91-17D3-4D06-9489-BE8FE7D86C75}">
+                <File Id="fil60908A1332BAB3B1B416195917B3BA28" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\lehning.png" />
+            </Component>
+            <Component Id="cmp9E1368BBA020D2079C2BFD9E9F288F4C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{407A8BE1-356A-4735-9E12-9D0CCA2D86F7}">
+                <File Id="fil58AE7F370C47AF250335B74221CF81EE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\leo-pharma_com.png" />
+            </Component>
+            <Component Id="cmp5AC929CD42DF22D075A4BAAA820E2FB6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2F4E7452-3ABD-48C4-819C-0EFA5211B1CA}">
+                <File Id="fil94C6CFE9F91E2F82CC58611377D65CA2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\le_comptoir_des_pharmacies.png" />
+            </Component>
+            <Component Id="cmp2BEC85176A8B14BF51BC1388BA5C1B4E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B54DF715-C8EA-4C9B-9775-CC32CA222A8B}">
+                <File Id="fil15A3ACA69E6AF6CA51CE567D952B22C3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\lierac_com.png" />
+            </Component>
+            <Component Id="cmpF7491593F16400EEF5F6369D636806D8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{152537BE-D14B-45FC-8E79-1B63F2171827}">
+                <File Id="fil474A59BB4ED1B98651780E5225352F0A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\lifescan.png" />
+            </Component>
+            <Component Id="cmp43D51D9F6F24388AF5F43FE4922187EC" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{059FE342-F9AA-4D94-BEA7-089468544C75}">
+                <File Id="fil0627DBDF2AA8B14C92EC9B156C95CB0A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\lilly.svg" />
+            </Component>
+            <Component Id="cmpE3D0B5838A6425F6BBDD69782A40C336" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{80B1ABCD-6633-4572-8C88-3845FED4DFF2}">
+                <File Id="filCEC5470581335DBC56F3A14FC0B5B7A6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\link-external.svg" />
+            </Component>
+            <Component Id="cmp97715B6C8B226533E3A91E37DFE3DF77" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0E67D551-042B-4A90-8828-66548C02D368}">
+                <File Id="fil03A63B6210A19A0C9AE32CC7627D9860" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20APPEXokkk.jpg" />
+            </Component>
+            <Component Id="cmpA0EC2BDA680BB669E9AF7CAD93E8E216" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BEE57ACC-96CC-4AA3-BECC-9E1BC941FEA1}">
+                <File Id="filB6156BBB975F962D74F52DCD7DABB683" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20dpc.png" />
+            </Component>
+            <Component Id="cmp3D1F014945396880203D9F9ADDCEA07B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{36EFCB0C-A912-46B8-B525-7F520C4952DB}">
+                <File Id="fil754D58FDDAC825F4FF161B175CBBCADC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20mailiz.png" />
+            </Component>
+            <Component Id="cmp8E510B7A70A98EEFFF316D943CE152AB" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{693E923B-5ACC-464E-8890-7DDF2CEC6F10}">
+                <File Id="filA288F153250D3BA3EAD97990AE3BFDC6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20sans%20texte.png" />
+            </Component>
+            <Component Id="cmpD5B6A095E083B4D482773C809E4A682A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7FDA17BE-0B71-46AD-8192-213A058ED74B}">
+                <File Id="filF891574533C28DB4FBD65F215EB9F9C8" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20Sant%C3%A9.svg" />
+            </Component>
+            <Component Id="cmp227AA1CD8548EFEDFFDE794EFC20914E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{176E0BD6-F1DB-4FF8-8A7E-AC4CFA010743}">
+                <File Id="fil7D068BEF96D92433DDD853410A8CE535" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20societe%20francaise%20pneumologie.jpg" />
+            </Component>
+            <Component Id="cmp5E29A547779382ACCB01B46BE9FA4EB1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FA0F0958-7CA4-4F64-AE32-DCB2309B215D}">
+                <File Id="fil1AC1F3FCD8C24778B0C4531C49D00817" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20text.png" />
+            </Component>
+            <Component Id="cmpEF26C4581AE228192CE6CF10CBA05A33" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{938661C6-6577-4A24-AB37-769560AF3B3A}">
+                <File Id="filB431D0F0547849C046B969A7472AEC0A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo%20texte%20seul.png" />
+            </Component>
+            <Component Id="cmp861F331E1BB635ABD6CB3F2B8F565ED2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FF53D4C1-C418-4652-B890-42F330DE86B2}">
+                <File Id="fil71BCA967C3FA25E124B428A84FBED821" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-ann-120-768x262.jpg" />
+            </Component>
+            <Component Id="cmp4C4AB659B709E7A66D3EABDA734F42C6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{12732DC4-7614-4A72-8F4A-927E0B1A3C48}">
+                <File Id="fil89DA802323E4AAF7228DD180DDC815EB" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-anp.svg" />
+            </Component>
+            <Component Id="cmp9A19B405D5E8B6B59EC5F6D772D1A6DE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{EEA939B5-28F4-44E4-B50F-9F4070B5D164}">
+                <File Id="filBE1A05690C4498390E30A1F6FE964F37" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-ansm%20(1).jpg" />
+            </Component>
+            <Component Id="cmpB32259E824E0F9E21610DBECBF43E4E4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{16E14BA2-25EC-43D2-9986-D031BE6778F2}">
+                <File Id="filBDAF9898A75F77C68486A3B6EA0E6FE2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-ars.svg" />
+            </Component>
+            <Component Id="cmp456486F1FCE01106774C134CFE7D6EF0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A8ED93F2-8FF0-4C2F-A254-0E7CFF096D0A}">
+                <File Id="fil5AE836D79A03AF6D56873040795EE646" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-FSPF-color.svg" />
+            </Component>
+            <Component Id="cmp80293FD8A2A5F7A0E3FB4CA0C48B047D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{57D66B76-7CF2-4AF2-901C-0F570FA428D1}">
+                <File Id="filFDCDEF3E38A43D83B30FF5670BD7186D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-has%20(1).png" />
+            </Component>
+            <Component Id="cmpB6E2D81CF749A6E8C239CBA452BE6A1B" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{90E2417A-9F26-4F72-BEEE-98D985DE481B}">
+                <File Id="fil8FFA46CC656F007EE9D5575D3419BBCF" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-has.png" />
+            </Component>
+            <Component Id="cmpFFE5B7BFF16334BD74F5051C1FD0FA77" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{513C010A-F422-41B8-8ADB-704426C38217}">
+                <File Id="filC6847B48F66005D884495CC634D92426" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo-omedit-normandie,3772.png" />
+            </Component>
+            <Component Id="cmp4EEEFAD02229C9BCA2ECF668C51FA57A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F59CE601-043C-4387-AD24-B6A392458B0C}">
+                <File Id="filBF0431E8F2B0A0EFB0DA5405F14482CD" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo.svg" />
+            </Component>
+            <Component Id="cmp596497C079E15A59E541172C9C8619EF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{9B874919-8FA0-4996-9BBA-F559E2B751D4}">
+                <File Id="fil59D6F945429D86C16F793AFA5711B393" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_aboca_group_green.png" />
+            </Component>
+            <Component Id="cmp42847D738B1F78585EA588D4FDAB2402" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C6894D62-CFCE-490A-B262-19D9F48250EF}">
+                <File Id="filC886246651396B2EA89D2D29B884BE82" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_amelipro.svg" />
+            </Component>
+            <Component Id="cmp8EE7DFFF4B080E535BDB717D33711B7E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{62D234F4-DE02-471A-8914-F4A206224310}">
+                <File Id="fil16ECF112598382F6ACFE1C6402E41F38" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_am_amelipro.svg" />
+            </Component>
+            <Component Id="cmp1F5EF9743CA4F2C1D20175E4C36AC1CD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8E25A7E1-F16F-4ABA-B399-1B5D8B3790DE}">
+                <File Id="fil298B1C93BB76986242BCC6B422C8A757" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_cgp.png" />
+            </Component>
+            <Component Id="cmp93D630E70696130F3D8FE0352C261275" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8521413E-56A2-4178-80C2-6A119D8153B8}">
+                <File Id="fil6E74BDD10F316045D0217BB142DEAFC4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg" />
+            </Component>
+            <Component Id="cmpBBF5F651429FED438933D5886A43F586" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4322B550-7CFE-404C-A44C-8EA07DE39DC5}">
+                <File Id="fil44AACDBA9A0227F11DB1F7FA2C00B16E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_dmp.png" />
+            </Component>
+            <Component Id="cmp1DD0F65B249AFDEE8241C52631FE5895" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FA514F79-3E10-498B-BC40-628797DB05BA}">
+                <File Id="filE0B426F7DB4B607968F7036AA6C22A61" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_dmp.webp" />
+            </Component>
+            <Component Id="cmp159A5BFB7D2CD6AF78B7B45666166372" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{85B50206-155D-4886-91BC-B7CE33025D62}">
+                <File Id="fil4FBB7B3AF751F4D3F47AB7EEE49E63D1" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_hcsp_rouge%20(1).jpg" />
+            </Component>
+            <Component Id="cmp0BD7DB2D51058896B9D66109795778FA" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{36400872-E2D0-4A6F-893F-1457791F8162}">
+                <File Id="fil608DF7DA9F5A5DDA652F2B3B8C145A07" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_hcsp_rouge.jpg" />
+            </Component>
+            <Component Id="cmpDBF8E251310E6BB96D27520C961C8584" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C7F8E6F3-8643-4AA7-8B1F-19954CE7E0B2}">
+                <File Id="fil2AA2CA9C704023035C2E6C54E6BF0561" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_moniteur%20des%20pharmacie.svg" />
+            </Component>
+            <Component Id="cmp8B4B139367A6F4ABCCC2C9EE3D840316" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FA3B8EB2-D51E-4668-BB7E-8843774AA3DD}">
+                <File Id="filDC80217535A30076EC4EC028FD3400AC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_offibox.png" />
+            </Component>
+            <Component Id="cmp8892AE79D82D625DE29CFC371771566C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1C13740C-6792-445F-B73B-EB130C46F0AA}">
+                <File Id="filDD7EE7F9CA10DE3CE74CB95D8F927334" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_offibox2.png" />
+            </Component>
+            <Component Id="cmp11BF26088E813DBC231AB9787E7AA1D9" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{04400FB9-6AED-4945-A603-8C12FF694595}">
+                <File Id="filC825C63599B748044030B658ED5A2724" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_offibox_installer.png" />
+            </Component>
+            <Component Id="cmpFF5ED80A3C75E64690DA235FD45D2120" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C61C97BE-6148-4298-BFBC-3B2419E83B8B}">
+                <File Id="fil098D42E1B33E67C046E8F41D9E8B2855" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_offibox_text.png" />
+            </Component>
+            <Component Id="cmp4E6D8AF6EA8AE81CBBDDE3534A3B9F89" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{56AF5E72-3AFB-4334-B5FD-D860A4CCA72F}">
+                <File Id="fil7AFA1F9BB93DB8D75A240183B01637C5" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_opco_ep%20(1).svg" />
+            </Component>
+            <Component Id="cmp9CB5FBF547DA47B22CA5583A634F6A16" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5962A88C-D9B9-42F7-B820-C01131F6FA0E}">
+                <File Id="fil9AD7F4CA9458D61802574FDC341B99AD" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_pharmaradio.png" />
+            </Component>
+            <Component Id="cmp75E2E1592DB889B08939234CCC3AFDEF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FC3B4D08-75C5-49BF-8CB3-AC5094176662}">
+                <File Id="fil9512C750F64DA51896684348495125CD" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_sfpo_oncolien.webp" />
+            </Component>
+            <Component Id="cmp1E9591AC3592B21AEB03622C44B29EA5" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E65792D1-2312-4ABE-BD59-64E9999F740E}">
+                <File Id="filD20469E0AB3AC15BAFF7D70562E618A9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\logo_uspo_2021-2.png" />
+            </Component>
+            <Component Id="cmp6B5148167679BEDE144CEEFDB56422F3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7B4C8924-258A-4781-98D9-B7807D397D0F}">
+                <File Id="filB4BBFA1FFAEDE6F004A1964D742EE3DE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\lundbeck_com.png" />
+            </Component>
+            <Component Id="cmp2F28B8E82DF4B302A31FA320E048ED0C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{253B7F8E-DA35-464F-A086-112027F6DB6D}">
+                <File Id="fil37D2D2937F33F0D3FD1E18747ABB0109" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\l_autre_pharmacie.png" />
+            </Component>
+            <Component Id="cmp8492CEB6240D5494B4CACF34E6E2B48A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FFAA9387-69CE-4CBC-98E7-783C0C0414E9}">
+                <File Id="fil9E72490EE491DD6CC64EFE99AEAF16F4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\l_oreal.png" />
+            </Component>
+            <Component Id="cmpB5BA3D656880EC1429E351377D95EE61" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{AF7F3FB3-0916-47BF-9F40-4554FE3FE9C8}">
+                <File Id="fil4D6DECC125C50B60CDBB1D39CABADD45" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\market_pharm.png" />
+            </Component>
+            <Component Id="cmp3BB52560340981FBF9F8077F8710D571" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B35AD142-E23A-42C7-88CE-6353B140E9B6}">
+                <File Id="filE0245B2E075B69E45161C8C735716EEC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\maynepharma_com.png" />
+            </Component>
+            <Component Id="cmp647044CE5E347F84E6CB92FA766633CF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4C80B4FB-C29C-4401-8C63-C211D27A651E}">
+                <File Id="fil8E7C252C0FD67B95421DC496CEC4B43F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\mayoly-spindler_com.png" />
+            </Component>
+            <Component Id="cmp7B0C2A6E77A7FB2EEB0C22127DEC0FE2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0B6BD83F-C2AE-4921-9A82-46C7982F087A}">
+                <File Id="fil20E3DE99BDE8D8864810616B1FF1882C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\mayoly_spindler.png" />
+            </Component>
+            <Component Id="cmp338D798E99F5E57EEC410580C69A46B3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0B666F6C-5EDF-4C70-BD89-8CDF6598EFE2}">
+                <File Id="filEAD1AD97E0FBF0D514D1CE548A680875" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ma_formation_officinale.png" />
+            </Component>
+            <Component Id="cmpD2D98D0600F59809EF46FECA66EBF2C5" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{ABEA4D69-633D-4BDC-8594-DCF04838FADF}">
+                <File Id="filB9F81141056489554F1978C005A081B8" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\meddispar.png" />
+            </Component>
+            <Component Id="cmpD557D71C32F725813772B957DD1FF68C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{441889F6-187B-4595-8367-E32AACC1E95D}">
+                <File Id="fil8E0C21EFC44C74140235306FF1C1DEF2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\medidestock.png" />
+            </Component>
+            <Component Id="cmp7F1ECE9FF0826F0CB7C797E7A844D83E" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{41EC8693-CBC0-44D5-A1E7-35373C73271F}">
+                <File Id="filB03EC789FCC053A395CDA4EBEDCD036D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\medincell_com.png" />
+            </Component>
+            <Component Id="cmp4FD8DA285B4976B0BEA1A95718CEE782" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{86B4E1C3-28C6-4A48-9ED3-9314C6433F08}">
+                <File Id="filA7A0841E1F324ACEBA5175D116604837" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\meme.png" />
+            </Component>
+            <Component Id="cmpE44F4E0FB494C56CEB0DF3B033B21CD8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{944E89C9-A336-4E8E-9EBD-6B85FEF4868B}">
+                <File Id="fil843E1E38F283619AA5852150F380638D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\menarini_com.png" />
+            </Component>
+            <Component Id="cmp7D2164A5C2178B3ECDFA3924A178C29F" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E76489CD-ADE9-4524-9198-8ED69FB06DA8}">
+                <File Id="fil44EC49AC91CC9DBC0CA94D6A831FEEBE" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\Microsoft_Office_Excel_Logo_128px.png" />
+            </Component>
+            <Component Id="cmp87904F514CBC9D4680FFD075ED05E6CE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CDFC4BDD-672E-4D32-83B4-BEF456E12B8D}">
+                <File Id="filE828F8EDFAD4B8A43358D45932FBF88B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\monitor_www.png" />
+            </Component>
+            <Component Id="cmp527DB75F38114872E282F6F99FFA85DF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{71E9B24C-6260-4AD5-9916-3231F07CF159}">
+                <File Id="fil71AD1C5D22D9DFC4BE812D445CA4B665" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\mon_teva_fr_logo.svg" />
+            </Component>
+            <Component Id="cmpEC7DCC09267A5409F05E673B2EB455B5" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{652B8A33-A489-4A27-9FC8-6A78EEB1FD52}">
+                <File Id="fil914EC143068E7F159FFD92C5A2FD68C0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\msd_com.png" />
+            </Component>
+            <Component Id="cmp903C038093910BD471706AC34BFEFA08" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C13B4168-CFD4-41FA-B8AA-B22A20F5F90A}">
+                <File Id="filBD5CDD4E3A3847B6BDAA1E718EAE4C28" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\mustela_com.png" />
+            </Component>
+            <Component Id="cmp5416B04E0B6A6FF7ADD73D61E2BD3CC2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B650E6D7-1CB3-41A7-B457-E6FA1AC7D671}">
+                <File Id="fil65133BCABF5DD6A64716B7CB02B6B6C9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\naos_com.png" />
+            </Component>
+            <Component Id="cmpBD948A601027754768688BB92721D9C4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{22E2578B-FAE9-40F1-BDC9-30DDDCDF13B7}">
+                <File Id="fil8B184F92E73EE045410ED0302FC29794" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\nestle_health_science.png" />
+            </Component>
+            <Component Id="cmpBCC35B169E6BEB3E30E5C13C0321DFB0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B053F01F-F023-42EF-A75E-C90B4E4DD79E}">
+                <File Id="fil82DAD533B2BA38F79493D494EE400EAC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\noreva_com.png" />
+            </Component>
+            <Component Id="cmp46DF455CE3E45A6457901E491C2830B4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8F1D5F3A-B3D9-46CB-B61F-C78EB5B5942A}">
+                <File Id="filA386A9D5412D98C23BDD98D8CBF4B58A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\novartis.svg" />
+            </Component>
+            <Component Id="cmp7C26ECF68CBEED873A5FB58DE0384DE9" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{039D182B-3A97-4D44-9940-CE5E14A492BB}">
+                <File Id="filA3C85E1CFC1BAA4BFD8A89D271B6E48D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\novartis_fr.png" />
+            </Component>
+            <Component Id="cmpE268F64E8030E2E04E9B7E13CEC0F30D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F0273AC8-4450-4E97-BCAD-9C7F8A38A4C7}">
+                <File Id="fil8D60B77A19F0581CB8C363B1FED28969" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\nutergia.png" />
+            </Component>
+            <Component Id="cmp75EF72FC46CF4B589B25AE90C662CF80" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{52899F29-923A-4ED0-836F-61FD3FCAEE68}">
+                <File Id="fil09F1403BDE970A9BD29A47A82B4F1616" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\nuxe_com.png" />
+            </Component>
+            <Component Id="cmpEB5E132F194B3CE73C0282D17AFCCC31" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B1897171-FD14-4557-8804-BFF398C88A96}">
+                <File Id="filF334845FDB06D238BD20E8658D96F995" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\OCP%20PHOENIX.jpg" />
+            </Component>
+            <Component Id="cmpA91A0A9E1A79190DEFF1627CD6AABB5C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4E695709-5096-454C-942B-E01AB408EB5A}">
+                <File Id="filBAAF075DD9FE5912D323340B1A99FCC2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ocp.png" />
+            </Component>
+            <Component Id="cmp6A6D7855D5CD53DE5FF67E303B3201F3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E5EEBE11-BA56-4CAF-9ACE-6BFAF5EE173C}">
+                <File Id="filB6954D4FD9E11D20763A8F171BB97A1B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\octobre%20rose.jpg" />
+            </Component>
+            <Component Id="cmp3AF08AFB8E0B510AFE2D444A3E259F59" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7AB3FC23-B1F3-4156-B98A-B9DA7DCB7343}">
+                <File Id="fil30367BF25B30553962622FB9F27FB81B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\omedit.png" />
+            </Component>
+            <Component Id="cmpB529F24044D9C2DBDE91DAE9AF99838A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{17AE7F91-ECF5-46F7-9A9B-A05620E0BF7E}">
+                <File Id="fil489DE9556F364354D8CD49B2AD53A3FA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ongie.png" />
+            </Component>
+            <Component Id="cmp0DAA1CAF1F5EFFE6834DB1D8FF95A7BA" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{B7E634FC-171E-424B-910F-13FB72110664}">
+                <File Id="fil1A3003D9091CFE773D09B06657E0E079" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\opella..png" />
+            </Component>
+            <Component Id="cmp7EDCD48B2EBCFB76EAA8538FDA03404C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8455A1E8-8AE1-4EAA-950B-6E245B2545AA}">
+                <File Id="filEF8EB5465D45C03F3C99893A00A0E93E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\OPELLA.png" />
+            </Component>
+            <Component Id="cmpFF80782DAA7906139D5FB0FF55853E40" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C7566DA5-5C51-4A1E-B3FC-6A3F8CF21FFD}">
+                <File Id="fil58E5B08B0E79DCE81CABC9E06D8F905F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\operations_commerciales_bayer.png" />
+            </Component>
+            <Component Id="cmpA657ADC242A190014FAA024D7CBC6DB3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8A3A0D21-1140-446E-A4AD-A42721710895}">
+                <File Id="filED7A2A237C58B0B36E0EA985CD8F0EB7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\orkyn.png" />
+            </Component>
+            <Component Id="cmp268C9213EE0874BFB19A70F434E86D44" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C8281F33-AF0C-498D-9BE5-ACAE461452D1}">
+                <File Id="fil8E18ABF485563837CF47AA31652F779E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\otsuka_com.png" />
+            </Component>
+            <Component Id="cmp767F19E7215DFEA7CC1C23F29B6FED01" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D3B7D240-2269-4AD1-A050-30AB5A9CF16D}">
+                <File Id="fil24E2E7A3715075AAA4CFF85A6376A10E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pdf_red.svg" />
+            </Component>
+            <Component Id="cmpFEB77665551A947DB1EAD7E2457D8DE7" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8F42F25D-2278-40B7-8918-1148D8DA1C50}">
+                <File Id="fil2E3DE6AA4D251C624F9FD566491FAF9B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\perrigo.png" />
+            </Component>
+            <Component Id="cmp5D1932585A017E1F00B8DE20D50ABD57" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{05E87E30-DE61-4859-9E77-DE2ABEF9A9AF}">
+                <File Id="filFBA360A024251480493DA57743219D5A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pfizer.svg" />
+            </Component>
+            <Component Id="cmpF14C7E4152B4D5FBE57F2188DFC0A85C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6EB07C4E-E3BD-4A3E-96FE-949F25B1F98F}">
+                <File Id="filDE9DE20546A5A14BD279C9CF77F7FD37" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pfizer_fr.png" />
+            </Component>
+            <Component Id="cmp67D2E34CC47AEFBE16580D9B483132F3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{23FA4F9B-7AD6-488F-A244-48E75B3087E2}">
+                <File Id="fil9AF8536ABC11E7284CAC8FD959E3BD93" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pharmalia.svg" />
+            </Component>
+            <Component Id="cmp4C5E690BEC8EE13D46E0C7C4FB24A23A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{9BB67B56-FE3E-4CFC-AA40-DBE697B32F61}">
+                <File Id="fil7ED158ECE162F33AC392AC27BA8DEC41" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pharmasmile.png" />
+            </Component>
+            <Component Id="cmp909C1E94A44554F2E9676EE88E615E27" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A620D07F-1A21-4B4D-97B0-DFCE8CAE4598}">
+                <File Id="filAD99DE269C76AF7A6CEDC23B2A382949" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pharmedinsight.png" />
+            </Component>
+            <Component Id="cmpA34BD4FFED240FE082EE7D84F93423DA" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1B89B9E7-EB3A-44F3-9118-ED11D4674A72}">
+                <File Id="fil3E02887336A2E2722FAB66D29CE28B40" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pharmedisound.png" />
+            </Component>
+            <Component Id="cmp034DE91670E5DD5E5AEFD3BD5B7CDA93" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{82AB8A44-E921-4AD6-97D5-81C2C5CDCA51}">
+                <File Id="fil659E58284D064635A2302363BF588712" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pharmedistore.png" />
+            </Component>
+            <Component Id="cmpA81FD84D63368D27E90F0459AA022EDE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{3EC83E63-00CC-4939-9957-0BAA611D21C0}">
+                <File Id="fil8F82A6043A681FD17031C4B61955F168" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\phi.png" />
+            </Component>
+            <Component Id="cmpA811B5241D5C0DEA26C7342C1508489C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5B3EF59D-18F3-4467-8DEC-6676323316B8}">
+                <File Id="fil806F6C1F7D6808F5332A1C0E82A701D0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pierre-fabre_com.png" />
+            </Component>
+            <Component Id="cmp988618FA3C00094C134889555D1072FD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6E9D379D-7E95-458D-A1C9-4C8C6E49E6BC}">
+                <File Id="filC3DA294AF57E4001299F70001EC3C76D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pierre_fabre.png" />
+            </Component>
+            <Component Id="cmpE8E1C1AA2CD643CE758613DA44CDAFE2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CABDA6F3-B434-40BF-958E-844F10630E2D}">
+                <File Id="fil5168F453E14AB38C60EEF7DE32D4FAB8" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\podowell.png" />
+            </Component>
+            <Component Id="cmpFF138F1C32B6D3DEB02B250953DFF131" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4D8E6219-7470-433E-9EE9-4089C2489BEB}">
+                <File Id="fil40625C5BA04C365D4D9C0E7D51533ED5" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\posos.svg" />
+            </Component>
+            <Component Id="cmp710E1D53397C744D8D0B862864A3D282" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F07786CC-8345-4854-811B-D39BBE5AED32}">
+                <File Id="filFF6C01A6D4270D98A9E8B5F71D2F8A64" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pranarom_com.png" />
+            </Component>
+            <Component Id="cmpAC0A25EC8C2B180D87E161998F455972" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BBD95B07-58FF-42DD-BEC5-2A92025E7133}">
+                <File Id="fil3FDADA6B331245B6F5CE0984547B2CEA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\pranarom_inula.png" />
+            </Component>
+            <Component Id="cmp982A3B833DBCC028ECF1EE89583B87EF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{ABB901EA-A39A-404A-B78F-19C3EA9D1294}">
+                <File Id="fil6ECB845B31F43EEB28EBB78C82056DDA" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\procterandgamble_com.png" />
+            </Component>
+            <Component Id="cmp31BE9A39D1576CF8E8E81B34EA6BE3EE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E8580930-1CEE-456B-9D0C-39E328AFF7D7}">
+                <File Id="filCF787D44E2A88BE1582605BD795BD012" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\ProSanteConnect.png" />
+            </Component>
+            <Component Id="cmpCF024BA938B3F21034DA3AC655EE3985" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{8215F719-C95B-43F2-AC9C-95CBD32583D3}">
+                <File Id="fil5F2F8EA2D7BF250EFD16D0A373C5DC7C" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\quotidien%20du%20pharmacien.svg" />
+            </Component>
+            <Component Id="cmp40F574935FA099CD9DDACE9F4CF3F13D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0816CCEC-8D6C-4944-A067-81EA9DAC892E}">
+                <File Id="fil3DDFC9A685F41A02F78BB570554DB7D4" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\README.md" />
+            </Component>
+            <Component Id="cmp1CFB267D5035E6B3FB99DA1475771B44" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D6D56BB2-FE7B-471F-9847-CBCFE0417641}">
+                <File Id="filE72CD2A089573F2CD5A8284056A4CF74" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\recommandations%20voyageurs%202025.jpg" />
+            </Component>
+            <Component Id="cmp4906300759F508902DACC177347248B7" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D7D09195-5331-454C-9229-0B0B10602616}">
+                <File Id="filD05D17919C58BFE7DDFAB42CFAAD5888" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\Referentiel_DQO_2026_Version1.00_page-0001.jpg" />
+            </Component>
+            <Component Id="cmp4A74707FAB9D32818596B308B2BC90EE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{DF364049-5B70-4860-91ED-782C05A7935A}">
+                <File Id="fil35401F95D21D250C0DC0466C163C8041" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\resopharma.png" />
+            </Component>
+            <Component Id="cmp331DDA2E8E58F21D5A31553727E2542C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7A1A45ED-2BFD-40A6-A12D-4832BC4970C0}">
+                <File Id="filB6E40A7E636D7C9EAF2670BC00ACA764" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\revue%20pharma.png" />
+            </Component>
+            <Component Id="cmpB41DBCA5307DDEC4F057440550888299" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{D9B1AC15-4127-4226-A4B6-305E197AF590}">
+                <File Id="fil2C8936C4F4570053BD5436F0D8D5D814" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\roche.svg" />
+            </Component>
+            <Component Id="cmp37AA9AF4517D3B59CFF3036A52544BE1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{31940DAF-E5FA-4E9A-8293-F5E5304ACDB2}">
+                <File Id="fil351BA4B9ECE211457738D2E858A9CCB6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\roche_fr.png" />
+            </Component>
+            <Component Id="cmp792F359052F69D86DE6CD684B35B13D1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{065E6E82-684D-47F5-BE48-A294B775A3A6}">
+                <File Id="filEFE0215ADBB9C91F54AF95F88E06E91B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\sacem.png" />
+            </Component>
+            <Component Id="cmpFEEE998DEE199A106EB0ADD190C9C06C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2993049F-E54C-4640-B1F8-050BF6F29C55}">
+                <File Id="filA0198C04A2A618009CB5962C4CBB76C6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\sagitta_pharma.png" />
+            </Component>
+            <Component Id="cmp8212F8340399FDBD9493D8987C6B90A6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{79C307DA-8B20-4E79-86FC-7D60A385EF4B}">
+                <File Id="fil076901F83F0F0B723F5BE3DA594646C7" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\sanofi%20pro.png" />
+            </Component>
+            <Component Id="cmp763A5FB011EEA7673E4BCD2F7D635380" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{523E86E9-8C9B-4C86-AA6E-5E120123A5A8}">
+                <File Id="fil663AB74AA40C9BED7CC905EDA519AB52" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\sanofi.svg" />
+            </Component>
+            <Component Id="cmpB1CFBA1C348F0190D030B223876CB725" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{71D93E33-D481-4F7B-AB5A-7D26A274B14E}">
+                <File Id="filB8AB90BF11D4D8D7E09AB7CD087DF3F0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\sanofi_fr.png" />
+            </Component>
+            <Component Id="cmpAB35C8AAF20F08A5E9E55D44F9DDD745" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7FCCDCF2-0C51-4C6C-9607-D90D46E211C4}">
+                <File Id="filCCADE6266B9A5AB867CE82B1A87EC61F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\sanofi_pro.png" />
+            </Component>
+            <Component Id="cmp24557A3FFB96B6A190CFD10AC17B81C2" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{9D530889-9E3A-4968-AB7A-5D15A4DCBC82}">
+                <File Id="filB382B8E832B7FA40DF97DFE0745AD097" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\santarome_fr.png" />
+            </Component>
+            <Component Id="cmpE9E420E6D103B0A0F2E87FDAD4F559C3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{16E5BE2C-7D07-431C-B3CD-AE9B0BCBD9A2}">
+                <File Id="fil906B0BC92D3BE305CF9EFA7AFEBBE863" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\santestat.png" />
+            </Component>
+            <Component Id="cmp1D0200CC49F95818A54B6776FAE591B1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0FECEC87-D920-41F4-865D-6D2D6174B356}">
+                <File Id="fil3C4A99BB609AD06D4DB2D039D7D9DBDF" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\send_mail.png" />
+            </Component>
+            <Component Id="cmpD159CB7CA31B1DE8A49BAB3AA4A814E0" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2FD89213-5FC0-4D9F-B1FD-CA9925A2CD4F}">
+                <File Id="fil21CE147FD2FEEB23061F8688CE40B592" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\Service%20public.png" />
+            </Component>
+            <Component Id="cmp343140BD38080C4B57B1E546E77772DF" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{606EB002-3D03-45E7-8A95-F3BD3698471F}">
+                <File Id="fil5032CFEE4C0A50DED3B12B238659A686" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\servier_fr.png" />
+            </Component>
+            <Component Id="cmpDCF3B2004EEB2DB58FA5A17D70BF5043" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FE9989A3-14CD-45EC-A369-DFF4DFF92909}">
+                <File Id="fil612230A42391005B54294C42B764FC23" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\solocal.png" />
+            </Component>
+            <Component Id="cmp04FAA79431AB4662CEB31B92EA7AF2FE" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{45B32449-DD3E-402C-B241-4ED79492EB1C}">
+                <File Id="fil585DADD5E60870019B6F3D39D9250D29" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\SPF.png" />
+            </Component>
+            <Component Id="cmpA6B2343EA44CA406A207199934EFF7E8" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6578465C-A398-4B6D-B7A7-25EF370BA08C}">
+                <File Id="filF2C9618ACD0702672EA082AEE5BFA9FC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\splayce.png" />
+            </Component>
+            <Component Id="cmp1911A954169EB55B0ED7F92CEBA1E949" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{635BEC07-C9C9-4F0B-9740-5A063A6E5422}">
+                <File Id="fil60DAB2854FF00F47AF4A1C994248D64D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\svr_com.png" />
+            </Component>
+            <Component Id="cmpDD9799ED26A13DB87759C57B4C3B3248" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4939E770-A844-4EF7-8BEC-4493FD9E296C}">
+                <File Id="filBB456BB45DA1B635A6784BF09DC0EE10" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\sy_by_cegedim.png" />
+            </Component>
+            <Component Id="cmp04F2CE901B1A7F4F36DC8B5EC87C1566" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{55812ED3-B6A9-4497-82F0-9556A4E93105}">
+                <File Id="filDF0D4F120E31CA27B451A3E037A1EFFC" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\takeda.svg" />
+            </Component>
+            <Component Id="cmpF953E08AFCCEF010769B3AFC59E79442" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{3858BFCE-F923-4F84-B025-EF0D06D391E7}">
+                <File Id="fil8B23FBDE99B0CD0FC57F44538320B002" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\teva.png" />
+            </Component>
+            <Component Id="cmpBFECD72D3DC98EBD971BCBF530F9244C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{919B59ED-6CF7-4271-BD35-E12820F6953E}">
+                <File Id="filE524B916BA75D51DC466C73DF75E1C70" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\theapharma_com.png" />
+            </Component>
+            <Component Id="cmpE5CA3209BC7D5AABC9C5C847225E207A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{E6E9E5B8-AA5F-45E5-89B3-FB7BB291177D}">
+                <File Id="fil6AE9B22E1C6567F4368EC14E00728026" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\therabel_com.png" />
+            </Component>
+            <Component Id="cmp4000047FE4BFA695B1B9889E8EDB3784" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{355E0798-C638-445E-9DC3-BD0BCF7A3B59}">
+                <File Id="filA7E3E78A8D40980071406A4E2B179251" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\theramex_com.png" />
+            </Component>
+            <Component Id="cmpDD3F982578593976BD0D98F273430376" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{915A5AD1-C1FA-47AA-8F4A-E8C78074D185}">
+                <File Id="filD5747C107EDC10F554D4168BFAAD5336" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\theriaque.png" />
+            </Component>
+            <Component Id="cmp97D12025CBCB3FDACBBB14A8190F51F1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{2A967D39-9D22-4D67-8EB0-B969CC7BE15B}">
+                <File Id="fil4184874B666C2B1B7FF70A90E223846F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\thesorimed.png" />
+            </Component>
+            <Component Id="cmp571251C475625BF87B413B4A722ECF95" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{80367831-0A71-452C-99D3-CFB9D76EB157}">
+                <File Id="filD5F656E489CF1729A54D4CBC0B8A2AB2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\thuasne.png" />
+            </Component>
+            <Component Id="cmpC44A2CC8335ECAEB3D5C64B9148B7411" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{A2FF818C-CCF5-4F1E-B255-397BA0581DE5}">
+                <File Id="filF81B50D896DDFFD23F4759809AF07B6F" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\UPSA%20LOGO.svg" />
+            </Component>
+            <Component Id="cmp2F596727D6CB23B54DC4740D889C3575" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{5B815463-E8CE-46CE-872F-8A28D3681C34}">
+                <File Id="fil60A0F630BF5B82EA320EE21A67302BB0" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\upsa.png" />
+            </Component>
+            <Component Id="cmp184F7DC2FA6F0C88E6BA835F1DA076DD" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1218E29E-F89A-4466-B52A-431332955349}">
+                <File Id="fil5D6C9E640DC071B849B1C1C556FD9837" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\upsa_com.png" />
+            </Component>
+            <Component Id="cmp9F6415A2C8E84C35CE6FB1E6B1724AA4" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{BE2D0E41-EC3D-4078-ABE9-F7052C764D89}">
+                <File Id="fil8F4E6CF67C286BFD6EB7D5158A51B9F3" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\urgo.png" />
+            </Component>
+            <Component Id="cmp5DDFFFC2DE09F005FE64F4200110516D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4DBA2DC1-DC32-4E4D-9857-A67EA6A29AAC}">
+                <File Id="fil5EF7BF8A00C3D8E2CABDD236A787EF4E" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\urgo_com.png" />
+            </Component>
+            <Component Id="cmp82F5575C471BC68C70B6042AEF0F557A" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{4A11F2AD-E5AF-432B-92A5-A6B36146ABE5}">
+                <File Id="fil2294E7FAA8C9CAA136108A944D746626" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\uriage_com.png" />
+            </Component>
+            <Component Id="cmp38B6FF59E0BDACA030E48C122B96835C" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{6E29C6EA-8F59-4B91-ABCE-AE027F07EA1F}">
+                <File Id="fil6E84CCB3B6F439C2E6BFDC25CF85FC3A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\Ursaff.svg" />
+            </Component>
+            <Component Id="cmpCCF8E0E3B729217601B6AAEAD137FD6D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{C839A5BA-449F-4230-A071-D4B4BE2D8B69}">
+                <File Id="fil279A7732EBC074DA44B980B0405DBFD8" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\URSSAF.svg" />
+            </Component>
+            <Component Id="cmp3EAC4D27FAA767C3643DDC0FC0855135" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7AF7F4CF-0A7A-429F-882B-EEF6F9EEA404}">
+                <File Id="fil480B8198AF4608FF50CE6EA34795FCC9" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\vaccin%20info%20service.png" />
+            </Component>
+            <Component Id="cmpAD426C05387BEFE89FB2D288C56EBF42" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{ED8378B5-BF55-4CA8-A900-6964FEBC71C5}">
+                <File Id="fil17014AD71C2BA454DC7CA93CB19B1B4D" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\vaccin_info_service.png" />
+            </Component>
+            <Component Id="cmp7674F68E83008175EF19B93C836D5EA1" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{0C92145D-4BDE-4CF9-BB14-C203B59568D1}">
+                <File Id="fil1F8200F433DE31B7291C16A34F8B9367" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\viatris.png" />
+            </Component>
+            <Component Id="cmpC39FDD1FF287F9A09DE903286D20C902" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{FE46554B-F192-4A8E-9A57-ED4DEB9F7F9E}">
+                <File Id="filFD74BF5072A1C0111701EB7E42DF6F12" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\viatris.svg" />
+            </Component>
+            <Component Id="cmpAE43CF905658719276E43B9B960641E6" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{F54936C7-6273-4677-B14F-A2CF93655EE7}">
+                <File Id="fil15ED553409739DA0A01A7AEAE594689B" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\viatris_mylan.png" />
+            </Component>
+            <Component Id="cmp4F8D11AC9E76E8538A303FC55B64ABDA" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7947DD4C-6ECB-4222-A060-08875EA37797}">
+                <File Id="filF0CCFB16B915EE5B7E12A682A244E373" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\vidal.png" />
+            </Component>
+            <Component Id="cmpEC8A43C246BC14C05D1F07C5394D71FC" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{62B5AE28-ADD8-4E53-8BB6-F313B1E0C4FB}">
+                <File Id="fil25A667CA3B9B53DD8A5255A061B85271" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\weleda.png" />
+            </Component>
+            <Component Id="cmpCFA8FD360498E3321609DFAC55BB2808" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{CCE8EDF8-2C69-4D0A-9A4B-16EEFF60F47D}">
+                <File Id="fil4DAD291949AD476B77D4E04D359917C2" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\weleda_com.png" />
+            </Component>
+            <Component Id="cmpB75AEE57EF40A075BF96AEEB1A3FC64D" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{1F6C48D1-9586-4495-B964-88375AFA2E19}">
+                <File Id="fil0360ED387F092F1A217DACBA39206CAF" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\youtube.svg" />
+            </Component>
+            <Component Id="cmp394DAD267C393E238F9DF1DEF57A94F3" Directory="dir6B9E63817156BBD09CADE1BCE92C64FE" Guid="{7E303F0F-C8B8-46D4-B3A4-CB10E259D9B6}">
+                <File Id="fil4AB61DEA092658D21C6FFC767689B00A" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\icons\zentiva_com.png" />
+            </Component>
+            <Component Id="cmp8B2CF350E7C1E2786F911095F22539D2" Directory="dirFC4F61E3BB886827B15A49930ADDEC65" Guid="{D3553B55-E97B-4AEC-84B8-CD5F3FF367C1}">
+                <File Id="filC5CC3A84DA454DF616EF029BF5E26D49" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\pdf\.gitkeep" />
+            </Component>
+            <Component Id="cmpAE3A91D29B9A836C3833B931F7256B28" Directory="dirFC4F61E3BB886827B15A49930ADDEC65" Guid="{54051EDB-B902-41CA-B917-1A7AF4C21E5B}">
+                <File Id="filFC7375B823FAE6CAECACCF9E34B930B6" KeyPath="yes" Source="SourceDir\data\flutter_assets\assets\pdf\Tableau-Gouttes-buvables.pdf" />
+            </Component>
+            <Component Id="cmp9FB12663BF628F6600A3037173B05261" Directory="dir16488F467D71518A1B420FBA9C104230" Guid="{F39B4611-53EC-40B4-A56B-3DE141E49A8B}">
+                <File Id="filE2FCF99BE86F7B6533372F16CAD6B2E9" KeyPath="yes" Source="SourceDir\data\flutter_assets\fonts\MaterialIcons-Regular.otf" />
+            </Component>
+            <Component Id="cmpE2CC1C827A5C923EF15884A23AF46034" Directory="dir734F86ECDE38CA88FC81A3E81BF42134" Guid="{3835F0BF-9EF7-4669-B9A2-B970B5DD9591}">
+                <File Id="fil4D58FB7B5A987159E039D4B5E1A3243C" KeyPath="yes" Source="SourceDir\data\flutter_assets\packages\pdfrx\assets\pdfium.wasm" />
+            </Component>
+            <Component Id="cmpA0670F743F775682452581E36A51035E" Directory="dir734F86ECDE38CA88FC81A3E81BF42134" Guid="{F54B4D6B-54DA-4A9E-A7B6-A128FC6CAFA6}">
+                <File Id="fil8D49059BC1119902FE93D827370945A0" KeyPath="yes" Source="SourceDir\data\flutter_assets\packages\pdfrx\assets\pdfium_client.js" />
+            </Component>
+            <Component Id="cmp8E660D640EC7A8F30C81B0F00DEEB201" Directory="dir734F86ECDE38CA88FC81A3E81BF42134" Guid="{1AC2CB80-D1D4-4351-B4B6-739AE3E319DD}">
+                <File Id="fil59103889A2494D0028F4BE30C1B6E87F" KeyPath="yes" Source="SourceDir\data\flutter_assets\packages\pdfrx\assets\pdfium_worker.js" />
+            </Component>
+            <Component Id="cmpF76778E34A641D2BD200F1C1364D8A20" Directory="dirDB024929A459AABE7ADC2AF87134E591" Guid="{EF7067E6-53EE-4767-A6F8-411784D98BDB}">
+                <File Id="filC29C46FED54CFAC6EBAD24344DB0B140" KeyPath="yes" Source="SourceDir\data\flutter_assets\packages\youtube_player_iframe\assets\player.html" />
+            </Component>
+            <Component Id="cmp1FBA15B5516083B96BF2A5915ABCDBDA" Directory="dir5C4B32E2323C3C68144A7842225822BA" Guid="{9B554889-122B-4D0E-8250-DD3B13D0E31E}">
+                <File Id="fil46F1EC012B2A0CD658125AB12E076035" KeyPath="yes" Source="SourceDir\data\flutter_assets\shaders\ink_sparkle.frag" />
+            </Component>
+            <Component Id="cmp0125D25EDEAE16445851340D7F27DC5D" Directory="dir5C4B32E2323C3C68144A7842225822BA" Guid="{F189A05D-1711-4E68-998B-199130AB328C}">
+                <File Id="filDF1D2772D7A5AD3F2834C972DA4D2DA5" KeyPath="yes" Source="SourceDir\data\flutter_assets\shaders\stretch_effect.frag" />
+            </Component>
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dirFE36E1E748F590EAF7C98F6B1C204955">
+            <Directory Id="dir05B33CD02A65C7D2AAC4358C1357B89F" Name="pdfrx" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir73D0AC48AF3E626A9A8B4B8894B22518">
+            <Directory Id="dir16488F467D71518A1B420FBA9C104230" Name="fonts" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir73D0AC48AF3E626A9A8B4B8894B22518">
+            <Directory Id="dir1D77DCC10F66B6A7B6C3243BBE452F94" Name="assets" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir73D0AC48AF3E626A9A8B4B8894B22518">
+            <Directory Id="dir5C4B32E2323C3C68144A7842225822BA" Name="shaders" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir1D77DCC10F66B6A7B6C3243BBE452F94">
+            <Directory Id="dir6B9E63817156BBD09CADE1BCE92C64FE" Name="icons" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir05B33CD02A65C7D2AAC4358C1357B89F">
+            <Directory Id="dir734F86ECDE38CA88FC81A3E81BF42134" Name="assets" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir38903B42FECED7D073B27F29CA029A00">
+            <Directory Id="dir73D0AC48AF3E626A9A8B4B8894B22518" Name="flutter_assets" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dirFE36E1E748F590EAF7C98F6B1C204955">
+            <Directory Id="dirCD4E7D458F8D612E2AE3D14BCDAC86E6" Name="youtube_player_iframe" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dirCD4E7D458F8D612E2AE3D14BCDAC86E6">
+            <Directory Id="dirDB024929A459AABE7ADC2AF87134E591" Name="assets" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir1D77DCC10F66B6A7B6C3243BBE452F94">
+            <Directory Id="dirF5ECDF198C1CB9D3EFEE2272A67B0F95" Name="debug" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir1D77DCC10F66B6A7B6C3243BBE452F94">
+            <Directory Id="dirFC4F61E3BB886827B15A49930ADDEC65" Name="pdf" />
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir73D0AC48AF3E626A9A8B4B8894B22518">
+            <Directory Id="dirFE36E1E748F590EAF7C98F6B1C204955" Name="packages" />
+        </DirectoryRef>
+    </Fragment>
+</Wix>

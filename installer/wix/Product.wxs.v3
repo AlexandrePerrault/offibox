@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="*"
            Name="Offibox"
            Language="1033"
-           Version="1.0.11"
+           Version="1.1.13"
            Manufacturer="Offibox"
            UpgradeCode="B7B3E8A2-9F4C-4D1E-8A5B-2C6D9E1F3A4B">
 
@@ -11,6 +11,11 @@
 
     <MajorUpgrade DowngradeErrorMessage="Une version plus récente d'Offibox est déjà installée." />
     <MediaTemplate EmbedCab="yes" />
+
+    <!-- Propriétés pour options (cases à cocher). Valeur 1 = coché par défaut. -->
+    <Property Id="CREATEDESKTOPSHORTCUT" Value="1" />
+    <Property Id="LAUNCHATSTARTUP" Value="1" />
+    <Property Id="LAUNCHOFFIBOX" Value="1" />
 
     <!-- Répertoire d'installation : AppData\Local\Offibox (sans admin) -->
     <Directory Id="TARGETDIR" Name="SourceDir">
@@ -23,9 +28,15 @@
       <Directory Id="DesktopFolder" Name="Desktop" />
     </Directory>
 
-    <Feature Id="MainApplication" Title="Offibox" Level="1" ConfigurableDirectory="INSTALLDIR">
+    <!-- Arbre de fonctionnalités : toutes cochables. Main = fichiers + menu Démarrer ; Bureau = icône bureau. -->
+    <Feature Id="MainApplication" Title="Offibox" Level="1" ConfigurableDirectory="INSTALLDIR"
+             Description="Application Offibox et raccourci Menu Démarrer.">
       <ComponentGroupRef Id="ReleaseFiles" />
       <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="RegistryLaunchAtStartup" />
+    </Feature>
+    <Feature Id="FeatureDesktopShortcut" Title="Créer une icône sur le bureau" Level="1"
+             Description="Place un raccourci Offibox sur le bureau.">
       <ComponentRef Id="DesktopShortcut" />
     </Feature>
 
@@ -42,9 +53,10 @@
       </Component>
     </DirectoryRef>
 
-    <!-- Raccourci Bureau -->
+    <!-- Raccourci Bureau (installé seulement si feature bureau sélectionnée) -->
     <DirectoryRef Id="DesktopFolder">
       <Component Id="DesktopShortcut" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901">
+        <Condition>CREATEDESKTOPSHORTCUT</Condition>
         <Shortcut Id="DesktopShortcut"
                   Name="Offibox"
                   Description="La Boîte à Outils de l'Officine"
@@ -54,6 +66,25 @@
       </Component>
     </DirectoryRef>
 
-    <UIRef Id="WixUI_Minimal" />
+    <!-- Écriture LaunchAtStartup pour l'app (lue au premier lancement dans main.dart). -->
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="RegistryLaunchAtStartup" Guid="C3D4E5F6-A7B8-9012-CDEF-123456789012">
+        <Condition>LAUNCHATSTARTUP</Condition>
+        <RegistryValue Root="HKCU" Key="Software\Offibox" Name="LaunchAtStartup" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Lancer Offibox à la fin de l'installation si coché (nécessite -ext WixUtilExtension au light). -->
+    <CustomAction Id="SetLaunchOffiboxCmd" Property="WixQuietExecCmdLine" Value="&quot;[INSTALLDIR]offibox.exe&quot;" />
+    <CustomAction Id="LaunchOffibox" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="SetLaunchOffiboxCmd" Before="LaunchOffibox">LAUNCHOFFIBOX AND NOT Installed</Custom>
+      <Custom Action="LaunchOffibox" After="InstallFinalize">LAUNCHOFFIBOX AND NOT Installed</Custom>
+    </InstallExecuteSequence>
+
+    <!-- UI : arbre de fonctionnalités (icône bureau cochable). Exit dialog : case "Lancer Offibox" (voir WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT). -->
+    <UIRef Id="WixUI_FeatureTree" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Lancer Offibox" />
   </Product>
 </Wix>
