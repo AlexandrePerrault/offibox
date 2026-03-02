@@ -3,7 +3,9 @@
 # Exécuter depuis la racine du projet : .\build_msi.ps1
 # Si -BumpVersion est passé (défaut : true), incrémente la version avant de builder (1.1.02 -> 1.1.03).
 # Depuis CMD : powershell -File ".\build_msi.ps1" -BumpVersion false  (pour ne pas bumper)
-# -PushToGitHub true : après succès, git add + commit "Release X.Y.Z" + push + tag vX.Y.Z et push du tag
+# -PushToGitHub true : après succès, git add + commit + push + tag vX.Y.Z + creation d'une Release GitHub
+#   (titre + notes lues depuis release_notes.md si present, sinon "Release X.Y.Z") + upload du MSI en asset.
+#   C'est cette Release qui alimente la fenetre "Historique des versions" dans l'app (API GitHub Releases).
 
 param([string]$BumpVersion = "true", [string]$PushToGitHub = "false")
 
@@ -25,7 +27,7 @@ $OutDir   = Join-Path $ProjectRoot "website\download"
 # Lire la version depuis pubspec.yaml (format X.Y.Z ou X.Y.Z+build)
 $PubspecPath = Join-Path $ProjectRoot "pubspec.yaml"
 $versionLine = Get-Content $PubspecPath -Raw | Select-String -Pattern "version:\s*([\d.]+)(?:\+\d+)?" | ForEach-Object { $_.Matches.Groups[1].Value }
-$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.13" }
+$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.14" }
 $OutMsi = Join-Path $OutDir "Offibox-Setup-$VersionName.msi"
 
 # WiX : variable d'environnement WIX ou chemin par défaut (doit pointer vers le dossier contenant heat.exe, souvent ...\bin)
@@ -123,7 +125,29 @@ if ($doPush) {
             if ($LASTEXITCODE -eq 0) {
               & git tag -f "v$VersionName" 2>$null
               & git push origin -f "v$VersionName" 2>$null
-              Write-Host "Push GitHub : commit + tag v$VersionName pousses sur $branch" -ForegroundColor Green
+              if ($LASTEXITCODE -eq 0) {
+                # Creer la Release GitHub (sinon "Historique des versions" ne voit que les Releases, pas les tags seuls)
+                $gh = Get-Command gh -ErrorAction SilentlyContinue
+                $notesFile = Join-Path $ProjectRoot "release_notes.md"
+                if ($gh) {
+                  $useNotesFile = $false
+                  if (Test-Path $notesFile) {
+                    $content = Get-Content $notesFile -Raw
+                    if ($content -and ($content.Trim().Length -gt 0)) { $useNotesFile = $true }
+                  }
+                  if ($useNotesFile) {
+                    & gh release create "v$VersionName" --title "v$VersionName" --notes-file $notesFile
+                  } else {
+                    & gh release create "v$VersionName" --title "v$VersionName" --notes "Release $VersionName"
+                  }
+                  if ($LASTEXITCODE -eq 0 -and (Test-Path $OutMsi)) {
+                    & gh release upload "v$VersionName" $OutMsi --clobber
+                  }
+                }
+                Write-Host "Push GitHub : commit + tag v$VersionName + release (notes depuis release_notes.md si present)" -ForegroundColor Green
+              } else {
+                Write-Host "Push GitHub : push du tag echoue" -ForegroundColor Red
+              }
             } else {
               Write-Host "Push GitHub : push commit echoue" -ForegroundColor Red
             }
