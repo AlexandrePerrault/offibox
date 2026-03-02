@@ -116,7 +116,7 @@ if ($doPush) {
       if ($LASTEXITCODE -ne 0) {
         Write-Host "Push GitHub : pas un depot git, ignore." -ForegroundColor Yellow
       } else {
-        & git add pubspec.yaml build_msi.ps1 installer\wix\Product.wxs.v3 installer\wix\Harvest.wxs website\index.html website\download\*.msi 2>$null
+        & git add pubspec.yaml build_msi.ps1 installer\wix\Product.wxs.v3 website\index.html website\download\*.msi 2>$null
         $status = & git status --porcelain 2>$null
         if ($status) {
           & git commit -m "Release $VersionName"
