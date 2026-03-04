@@ -21,8 +21,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          # Dart 3.6+ requis par mobile_scanner
-          flutter-version: "3.29.0"
+                    # Dart 3.9+ requis par pdfrx ^2.2.24
+          flutter-version: "3.35.0"
           channel: "stable"
           cache: true
 
