@@ -9,10 +9,13 @@ set(BINARY_NAME "offibox")
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(VERSION 3.14...3.25)
-# CMP0175 (CMake 3.31+): webview_windows uses add_custom_command(TARGET ... DEPENDS).
-# Set OLD before any subdirectory so the plugin does not warn.
+# Suppress CMP0175 warning from webview_windows (add_custom_command DEPENDS).
 if(POLICY CMP0175)
   cmake_policy(SET CMP0175 OLD)
+endif()
+# Masquer les avertissements « for project developers » (CMake 3.25+).
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
+  set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE BOOL "" FORCE)
 endif()
 
 # Define build configuration option.
@@ -37,6 +40,8 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+# C4005 (macro redefinition) : évite erreur quand un plugin redéfinit _CRT_SECURE_NO_WARNINGS
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4005")
 
 
 # Compilation settings that should be applied to most targets.
@@ -46,7 +51,7 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 # of modifying this function.
 function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_17)
-  target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4100")
+  target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4100" /wd"4005")
   target_compile_options(${TARGET} PRIVATE /EHsc)
   target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")

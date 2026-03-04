@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/constants/ui_constants.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/utils/open_url.dart';
 
 /// Badge on/off type iOS : piste en pill, glissable — droite = ouvrir, gauche = fermer.
@@ -17,10 +18,15 @@ class _InfoBarOnOffBadge extends StatefulWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// Vert type Apple (ON) — plus clair que le teal Offibox.
+  static const Color _trackOnGreen = Color(0xFF34C759);
+
+  /// Même hauteur visuelle que la barre d'infos (tickerBarHeight) pour alignement.
   static const double _trackWidth = 27;
   static const double _trackHeight = 17;
   static const double _knobSize = 12;
-  static const double _padding = 2;
+  /// Marge minimale pour que le rond gris soit bien à gauche en position OFF.
+  static const double _padding = 0;
 
   @override
   State<_InfoBarOnOffBadge> createState() => _InfoBarOnOffBadgeState();
@@ -46,16 +52,17 @@ class _InfoBarOnOffBadgeState extends State<_InfoBarOnOffBadge> {
 
   @override
   Widget build(BuildContext context) {
+    final p = _InfoBarOnOffBadge._padding;
     final range = _InfoBarOnOffBadge._trackWidth -
-        2 * _InfoBarOnOffBadge._padding -
+        2 * p -
         _InfoBarOnOffBadge._knobSize;
     final isOn = _dragOffset == null
         ? widget.value
         : _effectivePosition >= range * 0.5;
-    final padding = _InfoBarOnOffBadge._padding;
+    final padding = p;
     final isDragging = _dragOffset != null;
 
-    return Tooltip(
+    return OffiboxTooltip(
       message: isOn
           ? 'Glisser à gauche pour replier'
           : 'Glisser à droite pour déployer',
@@ -82,8 +89,8 @@ class _InfoBarOnOffBadgeState extends State<_InfoBarOnOffBadge> {
           height: _InfoBarOnOffBadge._trackHeight,
           child: Container(
             decoration: BoxDecoration(
-              // ON (barre déployée) = couleur Offibox, OFF = gris
-              color: isOn ? OffiboxColors.primary : const Color(0xFF979797),
+              // ON (barre déployée) = vert type Apple, OFF = gris
+              color: isOn ? _InfoBarOnOffBadge._trackOnGreen : const Color(0xFF979797),
               borderRadius:
                   BorderRadius.circular(_InfoBarOnOffBadge._trackHeight / 2),
               border: Border.all(
@@ -172,6 +179,7 @@ class OffiboxInfoBar extends StatefulWidget {
     required this.items,
     this.value = true,
     this.onChanged,
+    this.onUrlTap,
   });
 
   final bool visible;
@@ -180,14 +188,21 @@ class OffiboxInfoBar extends StatefulWidget {
   /// true = barre déployée (on), false = repliée (off).
   final bool value;
   final ValueChanged<bool>? onChanged;
+  /// Si fourni, au clic sur un badge on appelle ce callback (ouvrir l’URL dans le panneau sous la barre). Sinon ouverture dans le navigateur.
+  final void Function(String url)? onUrlTap;
 
   @override
   State<OffiboxInfoBar> createState() => _OffiboxInfoBarState();
 }
 
+/// Gris anthracite (date/heure barre d'infos).
+const Color _infoBarAnthracite = Color(0xFF37474F);
+
 class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
   final ScrollController _scrollController = ScrollController();
   Timer? _timer;
+  Timer? _clockTimer;
+  DateTime _dateTime = DateTime.now();
 
   bool _paused = false;
 
@@ -219,14 +234,17 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
     return const Color(0xFF8D6E63);
   }
 
-  /// Un segment = badge (style unifié avec logo INFOS : même pill, typo, padding).
+  /// Un segment = badge (hauteur moitié de la barre, centré sur la barre d'infos).
   Widget _buildBadge(TickerItem e, Color bgColor) {
+    final badgeHeight = OffiboxWindowUI.tickerBadgeHeight;
     final content = Container(
-      padding: OffiboxWindowUI.tickerBadgePadding,
+      height: badgeHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1.5),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(OffiboxWindowUI.tickerBadgeBorderRadius),
       ),
+      alignment: Alignment.center,
       child: Text(
         e.label,
         style: GoogleFonts.spinnaker(
@@ -240,13 +258,18 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
     );
     final gesture = GestureDetector(
       onTap: () {
-        if (e.url.isNotEmpty) openUrl(e.url);
+        if (e.url.isEmpty) return;
+        if (widget.onUrlTap != null) {
+          widget.onUrlTap!(e.url);
+        } else {
+          openUrl(e.url);
+        }
       },
       child: content,
     );
     final msg = e.tooltip;
     if (msg != null && msg.trim().isNotEmpty) {
-      return Tooltip(
+      return OffiboxTooltip(
         message: msg,
         waitDuration: const Duration(milliseconds: 400),
         child: gesture,
@@ -258,13 +281,15 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
   /// Puce grise entre les badges.
   Widget _bullet() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5),
-      child: Text(
-        '•',
-        style: GoogleFonts.spinnaker(
-          fontSize: 10 * 1.15, // +15 % cohérent avec les badges
-          color: _bulletColor,
-          height: 1.1,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Center(
+        child: Text(
+          '•',
+          style: GoogleFonts.spinnaker(
+            fontSize: 9,
+            color: _bulletColor,
+            height: 1.1,
+          ),
         ),
       ),
     );
@@ -291,6 +316,10 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
   @override
   void initState() {
     super.initState();
+    _dateTime = DateTime.now();
+    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _dateTime = DateTime.now());
+    });
     // Démarrer le défilement après le premier layout pour que le ScrollController soit attaché
     WidgetsBinding.instance.addPostFrameCallback((_) => _startScrolling());
   }
@@ -315,9 +344,20 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
   @override
   void dispose() {
     _timer?.cancel();
+    _clockTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
+
+  /// Date + heure pour le badge gris (à droite du toggle, à gauche du badge INFOS).
+  String get _dateTimeFormatted {
+    final d = _dateTime;
+    return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}  '
+        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
+  }
+
+  /// Badge gris (date/heure) et badge INFOS : même hauteur que les infos qui défilent.
+  static double get _badgeHeight => OffiboxWindowUI.tickerBadgeHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -348,56 +388,89 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
           ),
           child: Row(
             mainAxisAlignment: widget.value ? MainAxisAlignment.center : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (widget.onChanged != null) ...[
-                _InfoBarOnOffBadge(
-                  value: widget.value,
-                  onChanged: widget.onChanged!,
+                SizedBox(
+                  height: barHeight,
+                  child: Center(
+                    child: _InfoBarOnOffBadge(
+                      value: widget.value,
+                      onChanged: widget.onChanged!,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 3),
+                const SizedBox(width: 6),
               ],
+              // Badge gris date/heure — même hauteur que les infos qui défilent
+              Container(
+                height: _badgeHeight,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 2.5,
+                ),
+                decoration: BoxDecoration(
+                  color: _infoBarAnthracite,
+                  borderRadius: BorderRadius.circular(
+                    OffiboxWindowUI.tickerBadgeBorderRadius,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  _dateTimeFormatted,
+                  style: GoogleFonts.spinnaker(
+                    fontSize: OffiboxWindowUI.tickerBadgeFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    height: 1,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              // Badge INFOS — même hauteur que les infos qui défilent
               GestureDetector(
                 onTap: widget.onChanged != null && !widget.value
                     ? () => widget.onChanged!(true)
                     : null,
                 behavior: HitTestBehavior.opaque,
-                child: SizedBox(
-                  height: barHeight,
-                  child: Container(
-                    padding: OffiboxWindowUI.tickerBadgePadding,
-                    decoration: BoxDecoration(
-                      color: OffiboxWindowUI.tickerInfosBadgeGreen,
-                      borderRadius: BorderRadius.circular(
-                        OffiboxWindowUI.borderRadius,
-                      ),
+                child: Container(
+                  height: _badgeHeight,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: OffiboxWindowUI.tickerInfosBadgeGreen,
+                    borderRadius: BorderRadius.circular(
+                      OffiboxWindowUI.tickerBadgeBorderRadius,
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      widget.value
-                          ? 'INFOS'
-                          : 'BARRE D\'INFOS DÉSACTIVÉE',
-                      style: GoogleFonts.spinnaker(
-                        fontSize: OffiboxWindowUI.tickerBadgeFontSize,
-                        fontWeight: FontWeight.w700,
-                        fontStyle:
-                            widget.value ? FontStyle.normal : FontStyle.italic,
-                        color: Colors.white,
-                        height: 1,
-                        letterSpacing: 0.25,
-                      ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    widget.value
+                        ? 'INFOS'
+                        : 'BARRE D\'INFOS DÉSACTIVÉE',
+                    style: GoogleFonts.spinnaker(
+                      fontSize: OffiboxWindowUI.tickerBadgeFontSize,
+                      fontWeight: FontWeight.w700,
+                      fontStyle:
+                          widget.value ? FontStyle.normal : FontStyle.italic,
+                      color: Colors.white,
+                      height: 1,
+                      letterSpacing: 0.25,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 3),
+              const SizedBox(width: 4),
               if (widget.value)
                 Expanded(
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Align(
-                      alignment: Alignment.center,
+                  child: Center(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
                       child: _buildScrollableContent(context),
                     ),
                   ),

@@ -11,6 +11,11 @@ import 'package:offibox/config/google_oauth_config.dart';
 const _calendarScope = 'https://www.googleapis.com/auth/calendar.readonly';
 const _prefsKeyCredentials = 'google_calendar_oauth_credentials';
 
+/// Port fixe pour la redirection OAuth (Google Cloud exige une URI exacte).
+/// À ajouter dans la Console Google : Identifiants → OAuth 2.0 → URI de redirection :
+/// http://localhost:8085
+const int _oauthRedirectPort = 8085;
+
 /// OAuth manuel pour Google Calendar sur Windows/Desktop (où google_sign_in n'est pas supporté).
 class GoogleCalendarDesktopAuth {
   GoogleCalendarDesktopAuth._();
@@ -63,8 +68,8 @@ class GoogleCalendarDesktopAuth {
     final clientSecret = await GoogleOAuthConfig.clientSecret;
     if (clientId == null || clientSecret == null) return null;
 
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    final redirectUri = Uri.parse('http://localhost:${server.port}');
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, _oauthRedirectPort);
+    final redirectUri = Uri.parse('http://localhost:$_oauthRedirectPort');
 
     final grant = oauth2.AuthorizationCodeGrant(
       clientId,

@@ -1,0 +1,78 @@
+Code Acte;Libellé;Tarif
+HD1;Honoraire de dispensation à 100%;1,02 € TTC
+HD2;Honoraire de dispensation à 15%;1,02 € TTC
+HD4;Honoraire de dispensation à 30%;1,02 € TTC
+HD7;Honoraire de dispensation à 65%;1,02 € TTC
+HG1;Honoraire de dispensation Grand Conditionnement à 100%;2,76 € TTC
+HG2;Honoraire de dispensation Grand Conditionnement à 15%;2,76 € TTC
+HG4;Honoraire de dispensation Grand Conditionnement à 30%;2,76 € TTC
+HG7;Honoraire de dispensation Grand Conditionnement à 65%;2,76 € TTC
+HC;Honoraire de dispensation Complexe à 100%;0,31 € TTC
+HDR;Honoraire de dispensation médicament remboursable;0,61 € TTC
+HDA;Honoraire de dispensation en lien avec âge;1,58 € TTC
+HDE;Honoraire de dispensation médicaments spécifiques;3,57 € TTC
+CPH;Copie d'ordonnance;
+MPI;Majoration pharmacie îles;Majoration Drom
+PG7;Pharmacie Spécialité Générique à 65%;Selon spécialité
+PH1;Pharmacie 100%;Selon spécialité
+PH2;Pharmacie 15%;Selon spécialité
+PH4;Pharmacie 30%;Selon spécialité
+PH7;Pharmacie 65%;Selon spécialité
+PHN;Pharmacie non remboursable;Selon spécialité
+PHU;Médicament avec une Autorisation Temporaire d'Utilisation (ATU);Selon spécialité
+PMR;Préparation magistrale remboursable;Variable
+PPI;Préparation Pharmaceutique Individualisée (allergènes);Variable
+UPH;Urgence pharmacie;2 à 20 € TTC selon créneau
+IGM;Mifegyne IVG;Variable
+IGP;Prostaglandines IVG;Variable
+TLM;Code traceur : Téléconsultation;Code traceur
+TPH;Télésoin;Code traceur
+TRD;TROD Angine;10 ou 15 € TTC
+PEE;TROD Cystite;10 ou 15 € TTC
+VGP;Vaccination gripe pharmacien;7,50 € TTC
+RVA;Vaccination autres du calendrier vaccinal (Rappel Vaccinaux Adultes);7,50 ou 9,60 € TTC
+PRR;Code traceur : afin de valider la bonne vérification du justificatif pour la délivrance d'AGLP-1;0,01 € TTC
+INJ;Acte d'injection du vaccin Covid19 (en officine);Variable
+KGP;Rémunération Pharmacien Covid19 (approvisionnement vaccins);Variable
+MSQ;Délivrance masques (chirurgicaux et FFP2);4,22 € à 22,16 € selon type et quantité
+PMR;Prélèvement en vue d'un test RT-PCR - Supervision autotests Abrogé depuis le 1er mars 2025;Abrogé
+OTO;Délivrance des autotests Abrogé depuis le 1er mars 2025;4,35 € à 34,60 € (abrogé 01/03/2025)
+DTG;Délivrance des tests antigéniques Abrogé depuis le 1er mars 2025;5 € (abrogé 01/03/2025)
+RTG;Réalisation des tests antigéniques Abrogé depuis le 1er mars 2025;11,50 € (abrogé 01/03/2025)
+RTR;Paiement ponctuel Pharmacie - Crédit amorçage TAG réalisés entre le 01/11 et 31/12/20 = 300€;300 €
+VAC;Acte de vaccination Covid19 (en centre de vaccination);Variable
+VCO;Rémunération saisies Vaccination Covid19 sous Vaccin Covid Plus de rémunération depuis le 28 juin 2024;Plus de rémunération
+NRD;Versement de pénalités de retard AMO (Le non-respect du délai contractuel par l'organisme d'assurance maladie entraîne le versement au professionnel de santé : – d'une pénalité forfaitaire de 1 € calculée pour chaque facture payée le huitième jour ouvré ou le neuvième jour ouvré ; d'une pénalité égale à 10% de la part prise en charge par l'assurance maladie calculée pour chaque facture payée à compter du dixième jour ouvré.);1 € puis 10 % part AM
+CTR;Paiement ponctuel Pharmacie (ex : régularisation contentieux avenant 19 convention);Variable
+RKD;Remise Kit Dépistage cancer colorectal;3 € TTC + 2 € par test réalisé
+RPC;Dépistage cancer colorectal : rémunération;Variable
+PCC;Dépistage cancer colorectal : rémunération suite contestation;Variable
+BUP;ROSP BUPS Développement du Bon Usage des Produits de Santé (anciennement Génériques);ROSP variable
+PQS;ROSP NUM Développement du numérique en santé et Amélioration de l'accès aux soins;ROSP variable
+CQS;ROSP NUM : rémunération suite contestation;Variable
+PWC;ROSP Exceptionnelle 2024;ROSP variable
+RPV;Rémunération supplémentaire 3€/vaccination sur RVA à 9,60€ (2024-2027);3 €
+DAD;Code traceur : Dispensation adaptée (Dispositif supprimé par l'avenant 1 à la convention);Code traceur supprimé
+DA1;ROSP Dispensation adaptée : rémunération;Variable
+DA2;ROSP Dispensation adaptée : rémunération suite contestation;Variable
+DDO;Code traceur : Dispensation à domicile PRADO;Code traceur
+DDP;Dispensation à domicile PRADO : rémunération et rémunération suite contestation;Variable
+DUP;Dispensation à l'unité : rémunération;Variable
+GPD;Garde Pharmacie Dimanche;200 € (indemnité astreinte)
+GPF;Garde Pharmacie Férié;200 € (indemnité astreinte)
+GPN;Garde Pharmacie Nuit;200 € (indemnité astreinte)
+AOF;Aide aux officines - Dispositif "territoire fragile";Variable
+TAC;Code traceur : Accompagnements;Code traceur
+AC1;Accompagnement anticancéreux oraux au long cours - Entretiens 1ère année;15+15+30 € TTC (3 entretiens)
+AC3;Accompagnement anticancéreux oraux au long cours - Entretiens années suivantes;10+20 € TTC (2 entretiens)
+AC2;Accompagnement autres traitements anticancéreux oraux - Entretiens 1ère année;15+15+50 € TTC (3 entretiens)
+AC4;Accompagnement autres traitements anticancéreux oraux - Entretiens années suivantes;10+20 € TTC (2 entretiens)
+ASI;Accompagnement Asthme - AVK - AOD - Entretiens 1ère année;15+15+20 € TTC (3 entretiens)
+ASS;Accompagnement Asthme - AVK - AOD - Entretiens années suivantes;10+20 € TTC (2 entretiens)
+BMI;Bilan partagé de médication - Entretiens 1ère année;15+15+15+20 € TTC (4 étapes)
+BMS;Bilan partagé de médication sans changement de traitement - Entretiens années suivantes;10+20 € TTC (2 entretiens)
+BMT;Bilan partagé de médication avec changement de traitement - Entretiens années suivantes;10+20 € TTC (2 entretiens)
+BMC;Bilan partagé de médication suite contestation;Variable
+RDP;Mon bilan prévention;Variable
+EFE;Accompagnement de la femme enceinte;5 € TTC
+EPA;Accompagnement des patients sous traitement antalgique de palier II;5 € TTC

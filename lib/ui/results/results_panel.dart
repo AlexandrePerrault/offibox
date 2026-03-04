@@ -153,9 +153,16 @@ class _ResultsPanelState extends State<ResultsPanel> {
           ),
           boxShadow: [
             BoxShadow(
-              color: _offiboxTealLight.withValues(alpha: 0.08),
-              blurRadius: 8,
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 12,
               offset: const Offset(0, 2),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 1),
+              spreadRadius: 0,
             ),
           ],
         ),
@@ -172,20 +179,35 @@ class _ResultsPanelState extends State<ResultsPanel> {
               itemCount: itemCount,
               itemBuilder: (context, index) {
                 if (hasMore && index == displayCount) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                    child: InkWell(
-                      onTap: () => setState(() => _showAll = true),
-                      borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Afficher plus (${totalCount - _kMaxInitialResults} résultat${totalCount - _kMaxInitialResults > 1 ? 's' : ''})',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: OffiboxColors.primary,
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF7F8F9),
+                      border: Border(
+                        top: BorderSide(
+                          color: _offiboxTealLight.withValues(alpha: 0.12),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: resultTileVerticalPadding,
+                        horizontal: resultTileHorizontalPadding,
+                      ),
+                      child: InkWell(
+                        onTap: () => setState(() => _showAll = true),
+                        borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              'Afficher plus (${totalCount - _kMaxInitialResults} résultat${totalCount - _kMaxInitialResults > 1 ? 's' : ''})',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: OffiboxColors.primary,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -198,11 +220,12 @@ class _ResultsPanelState extends State<ResultsPanel> {
                 final tauxRemboursement = _tauxRemboursementForCis(widget.tauxRemboursementByCis, item.cis);
                 final isAlternate = index.isOdd;
                 final tileKey = ValueKey<String>(
-                    '${item.source.name}_${item.cip13 ?? ""}_${item.cis ?? ""}_${item.labelRaw ?? index}');
+                  '${item.source.name}_${item.cip13 ?? ""}_${item.cis ?? ""}_${item.labelRaw}',
+                );
                 return RepaintBoundary(
                   child: Container(
                     color: isAlternate
-                        ? const Color(0xFFF5F7F8)
+                        ? const Color(0xFFF7F8F9)
                         : Colors.white,
                     child: ResultTile(
                       key: tileKey,

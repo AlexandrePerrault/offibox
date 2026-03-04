@@ -14,6 +14,15 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
 
+  // Fenêtre en couche (layered) : pixels noirs rendus transparents pour voir le bureau.
+  HWND hwnd = GetHandle();
+  if (hwnd) {
+    SetWindowLong(hwnd, GWL_EXSTYLE,
+                 GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+    // LWA_COLORKEY : la couleur noire (fond Flutter transparent → noir) devient transparente.
+    SetLayeredWindowAttributes(hwnd, RGB(0, 0, 0), 0, LWA_COLORKEY);
+  }
+
   RECT frame = GetClientArea();
 
   // The size here must match the window dimensions to avoid unnecessary surface

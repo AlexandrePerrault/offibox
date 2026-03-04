@@ -1,0 +1,611 @@
+openapi: 3.1.1
+info:
+  title: API Médicaments FR
+  description: |
+    API haute performance pour accéder aux données des médicaments français issus de la Base de Données Publique des Médicaments (BDPM).
+
+    **Caractéristiques principales :**
+    - Données officielles mises à jour automatiquement 2 fois par jour (6h et 18h)
+    - Accès gratuit avec rate limiting équitable (1000 tokens initiaux, recharge à 3 tokens/sec)
+    - Données intègres et non altérées depuis la source BDPM
+    - Endpoints v1 modernes + endpoints legacy (dépréciés, suppression prévue le 31 juillet 2026)
+
+    **Remarque :** Les endpoints legacy sont toujours fonctionnels mais seront supprimés. Veuillez migrer vers les endpoints v1.
+
+    **Ressources utiles:**
+    - [Guide de migration vers v1](https://github.com/Giygas/medicaments-api/blob/main/docs/MIGRATION.md)
+    - [Base de données BDPM](https://base-donnees-publique.medicaments.gouv.fr)
+
+  version: 1.2.0
+  contact:
+    name: GitHub Repository
+    url: https://github.com/giygas/medicaments-api
+  license:
+    name: AGPL-3.0
+    url: https://www.gnu.org/licenses/agpl-3.0.html
+servers:
+  - url: https://medicaments-api.giygas.dev/
+
+security: []
+
+tags:
+  - name: Médicaments (v1)
+    description: Points de terminaison v1 liés aux médicaments
+  - name: Génériques (v1)
+    description: Points de terminaison v1 des groupes de médicaments génériques
+  - name: Présentations (v1)
+    description: Points de terminaison v1 des présentations de médicaments
+  - name: Système
+    description: Points de terminaison de santé et d'état du système
+  - name: Médicaments (Legacy)
+    description: Points de terminaison legacy liés aux médicaments (dépréciés)
+  - name: Génériques (Legacy)
+    description: Points de terminaison legacy des groupes de médicaments génériques (dépréciés)
+
+paths:
+  /v1/medicaments:
+    get:
+      summary: Obtenir des médicaments (v1)
+      description: |
+        Recherche et récupération de médicaments avec différents paramètres de requête.
+        Seul un paramètre est autorisé à la fois.
+      tags:
+        - Médicaments (v1)
+      parameters:
+        - $ref: "#/components/parameters/QueryPage"
+        - $ref: "#/components/parameters/QueryPageSize"
+        - $ref: "#/components/parameters/QuerySearch"
+        - $ref: "#/components/parameters/QueryCip"
+      responses:
+        "200":
+          description: Réponse réussie
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MedicamentArray"
+                  - $ref: "#/components/schemas/PaginatedMedicament"
+        "400":
+          description: Paramètres invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Aucun résultat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Trop de résultats retournés
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/medicaments/export:
+    get:
+      summary: Exporter tous les médicaments (v1)
+      description: |
+        Exporter la base de données complète de tous les médicaments.
+        Utilisez ETag et Last-Modified headers pour le cache conditionnel.
+      tags:
+        - Médicaments (v1)
+      responses:
+        "200":
+          description: Réponse réussie avec liste complète
+          headers:
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicamentArray"
+        "400":
+        "404":
+        "500":
+
+  /v1/medicaments/{cis}:
+    get:
+      summary: Obtenir un médicament par CIS (v1)
+      description: Récupérer un médicament spécifique par son code CIS (Code Identifiant de Spécialité).
+      tags:
+        - Médicaments (v1)
+      parameters:
+        - $ref: "#/components/parameters/PathCis"
+      responses:
+        "200":
+          description: Médicament trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Medicament"
+        "400":
+        "404":
+        "500":
+
+  /v1/generiques:
+    get:
+      summary: Rechercher des groupes génériques par libellé (v1)
+      description: Recherche et récupération de groupes génériques par libellé. Seul un paramètre est autorisé à la fois.
+      tags:
+        - Génériques (v1)
+      parameters:
+        - $ref: "#/components/parameters/QueryLibelle"
+        - $ref: "#/components/parameters/QueryGroup"
+      responses:
+        "200":
+          description: Réponse réussie
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeneriqueListResponse"
+        "400":
+        "404":
+        "500":
+
+  /v1/presentations/{cip}:
+    get:
+      summary: Obtenir des présentations (v1)
+      description: Recherche de présentations par code CIP (CIP7 ou CIP13).
+      tags:
+        - Présentations (v1)
+      parameters:
+        - $ref: "#/components/parameters/PathCip"
+      responses:
+        "200":
+          description: Réponse réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresentationResponse"
+        "400":
+        "404":
+        "429":
+        "500":
+
+  /v1/generiques/{groupID}:
+    get:
+      summary: Obtenir un groupe générique par ID (v1)
+      description: Récupérer un groupe générique spécifique par son ID. ETag et Last-Modified pour cache.
+      tags:
+        - Génériques (v1)
+      parameters:
+        - $ref: "#/components/parameters/PathGroupID"
+      responses:
+        "200":
+        "400":
+        "404":
+        "500":
+
+  /v1/diagnostics:
+    get:
+      summary: Obtenir les diagnostics système détaillés (v1)
+      description: Métriques système, intégrité des données, âge des données. Cache 10s.
+      tags:
+        - Système
+      responses:
+        "200":
+        "500":
+
+  /health:
+    get:
+      summary: Vérification de santé
+      description: |
+        États : healthy (données < 24h), degraded (données 24-48h ou mise à jour bloquée), unhealthy (503).
+      tags:
+        - Système
+      responses:
+        "200":
+          description: healthy ou degraded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: unhealthy
+
+  /database:
+    get:
+      deprecated: true
+      summary: "[LEGACY] Obtenir tous les médicaments"
+      description: "DEPRÉCIÉ - Suppression 31 juillet 2026. Migration : /v1/medicaments/export"
+      tags:
+        - Médicaments (Legacy)
+      responses:
+        "200":
+        "500":
+
+  /database/{pageNumber}:
+    get:
+      deprecated: true
+      summary: "[LEGACY] Pagination"
+      description: "DEPRÉCIÉ. Migration : /v1/medicaments?page={n}"
+      tags:
+        - Médicaments (Legacy)
+      parameters:
+        - name: pageNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+        "400":
+        "404":
+        "500":
+
+  /medicament/{element}:
+    get:
+      deprecated: true
+      summary: "[LEGACY] Recherche par nom"
+      description: "DEPRÉCIÉ. Migration : /v1/medicaments?search={query}"
+      tags:
+        - Médicaments (Legacy)
+      parameters:
+        - name: element
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 50
+      responses:
+        "200":
+        "400":
+        "404":
+        "500":
+
+  /medicament/id/{cis}:
+    get:
+      deprecated: true
+      summary: "[LEGACY] Médicament par CIS"
+      description: "DEPRÉCIÉ. Migration : /v1/medicaments/{cis}"
+      tags:
+        - Médicaments (Legacy)
+      parameters:
+        - name: cis
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 999999999
+      responses:
+        "200":
+        "400":
+        "404":
+        "500":
+
+  /generiques/{libelle}:
+    get:
+      deprecated: true
+      summary: "[LEGACY] Génériques par libellé"
+      description: "DEPRÉCIÉ. Migration : /v1/generiques?libelle={nom}"
+      tags:
+        - Génériques (Legacy)
+      parameters:
+        - name: libelle
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 50
+      responses:
+        "200":
+        "400":
+        "404":
+        "500":
+
+  /generiques/group/{groupId}:
+    get:
+      deprecated: true
+      summary: "[LEGACY] Groupe générique par ID"
+      description: "DEPRÉCIÉ. Migration : /v1/generiques/{groupID}"
+      tags:
+        - Génériques (Legacy)
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 99999
+      responses:
+        "200":
+        "400":
+        "404":
+        "500":
+
+components:
+  parameters:
+    QueryPage:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+    QueryPageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 10
+    QuerySearch:
+      name: search
+      in: query
+      required: false
+      description: "1-6 mots, logique ET. Max 250 résultats (429 si dépassé). Sans accents."
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 50
+        pattern: "^[a-zA-Z0-9\\s\\-\\.\\+/']+$"
+    QueryCip:
+      name: cip
+      in: query
+      required: false
+      schema:
+        type: string
+        pattern: "^[0-9]{7}|[0-9]{13}$"
+    QueryLibelle:
+      name: libelle
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 50
+        pattern: "^[a-zA-Z0-9\\s\\-\\.\\+/']+$"
+    QueryGroup:
+      name: group
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 99999
+    PathCis:
+      name: cis
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[0-9]{1,9}$"
+    PathCip:
+      name: cip
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[0-9]{7}|[0-9]{13}$"
+    PathGroupID:
+      name: groupID
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 99999
+
+  schemas:
+    PaginatedMedicament:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Medicament"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        maxPage:
+          type: integer
+    Medicament:
+      type: object
+      properties:
+        cis:
+          type: string
+          pattern: "^[0-9]{1,9}$"
+        elementPharmaceutique:
+          type: string
+        formePharmaceutique:
+          type: string
+        voiesAdministration:
+          type: array
+          items:
+            type: string
+        statusAutorisation:
+          type: string
+        typeProcedure:
+          type: string
+        etatComercialisation:
+          type: string
+        dateAMM:
+          type: string
+          format: date
+        titulaire:
+          type: string
+        surveillanceRenforcee:
+          type: string
+        composition:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompositionItem"
+        generiques:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeneriqueItem"
+        presentation:
+          type: array
+          items:
+            $ref: "#/components/schemas/PresentationResponse"
+        conditions:
+          type: array
+          items:
+            type: string
+    MedicamentArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/Medicament"
+    CompositionItem:
+      type: object
+      properties:
+        cis:
+          type: string
+        elementPharmaceutique:
+          type: string
+        codeSubstance:
+          type: string
+        denominationSubstance:
+          type: string
+        dosage:
+          type: string
+        referenceDosage:
+          type: string
+        natureComposant:
+          type: string
+    GeneriqueItem:
+      type: object
+      properties:
+        cis:
+          type: string
+        group:
+          type: string
+        libelle:
+          type: string
+    PresentationResponse:
+      type: object
+      properties:
+        cis:
+          type: string
+        cip7:
+          type: string
+        libelle:
+          type: string
+        statusAdministratif:
+          type: string
+        etatComercialisation:
+          type: string
+        dateDeclaration:
+          type: string
+        cip13:
+          type: string
+        agreement:
+          type: string
+        tauxRemboursement:
+          type: string
+        prix:
+          type: number
+          format: float
+    GeneriqueListResponse:
+      type: object
+      properties:
+        groupID:
+          type: string
+        libelle:
+          type: string
+        medicaments:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeneriqueMedicament"
+        orphanCIS:
+          type: array
+          items:
+            type: integer
+          nullable: true
+    GeneriqueMedicament:
+      type: object
+      properties:
+        cis:
+          type: string
+        elementPharmaceutique:
+          type: string
+        formePharmaceutique:
+          type: string
+        type:
+          type: string
+        composition:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeneriqueCompositionItem"
+    GeneriqueCompositionItem:
+      type: object
+      properties:
+        elementPharmaceutique:
+          type: string
+        substance:
+          type: string
+        dosage:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["healthy", "degraded", "unhealthy"]
+        data:
+          $ref: "#/components/schemas/HealthDataResponse"
+    HealthDataResponse:
+      type: object
+      properties:
+        last_update:
+          type: string
+          format: date-time
+        data_age_hours:
+          type: number
+        medicaments:
+          type: integer
+        generiques:
+          type: integer
+        is_updating:
+          type: boolean
+    DiagnosticsResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        uptime_seconds:
+          type: number
+        next_update:
+          type: string
+        data_age_hours:
+          type: number
+        system:
+          type: object
+        data_integrity:
+          type: object

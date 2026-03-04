@@ -3,7 +3,10 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-export const registerDevice = onCall(async (request) => {
+/** 2nd gen : RAM limitée + timeout court pour limiter les coûts. */
+const callableOptions = { memory: "256MiB" as const, timeoutSeconds: 30 };
+
+export const registerDevice = onCall(callableOptions, async (request) => {
 
   const auth = request.auth;
 
@@ -89,7 +92,7 @@ export const registerDevice = onCall(async (request) => {
 /** Emails exemptés de la limite de 5 appareils */
 const ADMIN_EMAILS = ["offibox17@gmail.com", "offibox@gmail.com"];
 
-export const getAdminUsers = onCall(async (request) => {
+export const getAdminUsers = onCall(callableOptions, async (request) => {
   const auth = request.auth;
   if (!auth || !ADMIN_EMAILS.includes(auth.token?.email?.toLowerCase() ?? "")) {
     throw new HttpsError("permission-denied", "Accès réservé à l'administrateur");

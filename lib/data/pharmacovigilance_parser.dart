@@ -137,3 +137,87 @@ Future<List<SearchResult>> parsePharmacovigilance(String url) async {
   }
   return results;
 }
+
+// ——— Centres anti poison ———
+/// CSV : ville (0), téléphone (1), mail (2), adresse (3).
+SearchResult fromCentresAntiPoisonRow(List<dynamic> row) {
+  final ville = normalizeText(_getCol(row, 0));
+  final tel = _getCol(row, 1);
+  final mail = _getCol(row, 2);
+  final adresse = normalizeAddressForStorage(_getCol(row, 3));
+  if (ville.isEmpty) throw StateError('Ligne centre anti poison sans ville');
+  final displayLabel = 'Centre anti poison - ${ville.toUpperCase()}';
+  return SearchResult(
+    source: SourceType.centresAntiPoison,
+    label: displayLabel,
+    labelRaw: ville,
+    laboratory: '',
+    phone: tel.isNotEmpty ? tel : null,
+    email: mail.isNotEmpty ? mail : null,
+    groupLabel: adresse.isNotEmpty ? adresse : null,
+  );
+}
+
+Future<List<SearchResult>> parseCentresAntiPoison(String url) async {
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode != 200) throw Exception('Erreur HTTP centres anti poison');
+  var text = utf8.decode(response.bodyBytes, allowMalformed: true);
+  if (text.contains('\uFFFD')) text = latin1.decode(response.bodyBytes);
+  text = text.replaceAll('\uFEFF', '').trim();
+  final rows = const CsvToListConverter(
+    fieldDelimiter: ',',
+    textDelimiter: '"',
+    eol: '\n',
+    shouldParseNumbers: false,
+  ).convert(text);
+  final results = <SearchResult>[];
+  for (var i = 1; i < rows.length; i++) {
+    try {
+      results.add(fromCentresAntiPoisonRow(rows[i]));
+    } catch (_) {}
+  }
+  return results;
+}
+
+// ——— CHU ———
+/// CSV : nom (0), adresse (1), "", "", telephone (4), email (5), url (6).
+SearchResult fromChuRow(List<dynamic> row) {
+  final nom = normalizeText(_getCol(row, 0));
+  final adresse = normalizeAddressForStorage(_getCol(row, 1));
+  final tel = _getCol(row, 4);
+  final email = _getCol(row, 5);
+  final urlStr = _getCol(row, 6);
+  if (nom.isEmpty) throw StateError('Ligne CHU sans nom');
+  final displayLabel = nom.toUpperCase();
+  return SearchResult(
+    source: SourceType.chu,
+    label: displayLabel,
+    labelRaw: nom,
+    laboratory: '',
+    phone: tel.isNotEmpty ? tel : null,
+    email: email.isNotEmpty ? email : null,
+    groupLabel: adresse.isNotEmpty ? adresse : null,
+    url: urlStr.isNotEmpty ? urlStr : null,
+  );
+}
+
+Future<List<SearchResult>> parseChu(String url) async {
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode != 200) throw Exception('Erreur HTTP CHU');
+  var text = utf8.decode(response.bodyBytes, allowMalformed: true);
+  if (text.contains('\uFFFD')) text = latin1.decode(response.bodyBytes);
+  text = text.replaceAll('\uFEFF', '').trim();
+  final rows = const CsvToListConverter(
+    fieldDelimiter: ',',
+    textDelimiter: '"',
+    eol: '\n',
+    shouldParseNumbers: false,
+  ).convert(text);
+  final results = <SearchResult>[];
+  for (var i = 1; i < rows.length; i++) {
+    try {
+      results.add(fromChuRow(rows[i]));
+    } catch (_) {}
+  }
+  return results;
+}

@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:offibox/services/firestore_user_cache.dart';
+
+/// Écriture "status: blocked" au plus une fois par session (évite une écriture à chaque affichage).
+bool _statusBlockedWrittenThisSession = false;
+
 class TrialExpiredPage extends StatefulWidget {
   const TrialExpiredPage({super.key});
 
@@ -17,13 +22,16 @@ class _TrialExpiredPageState extends State<TrialExpiredPage> {
   }
 
   Future<void> _markStatusBlocked() async {
+    if (_statusBlockedWrittenThisSession) return;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+    _statusBlockedWrittenThisSession = true;
     try {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'status': 'blocked',
         'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true),);
+      FirestoreUserCache.instance.invalidate(user.uid);
     } catch (_) {}
   }
 

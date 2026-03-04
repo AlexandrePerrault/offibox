@@ -3,17 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
+import 'package:offibox/ui/widgets/document_viewer_toolbar.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/utils/platform_utils.dart';
 import 'package:webview_windows/webview_windows.dart';
 
-/// URL Microsoft Office Viewer pour afficher un fichier Word (DOC/DOCX).
+/// URL Microsoft Office Viewer pour afficher un fichier Word (DOC/DOCX) ou Open Document (.odt).
 String _wordViewerUrl(String wordUrl) {
   final encoded = Uri.encodeComponent(wordUrl.trim());
   return 'https://view.officeapps.live.com/op/embed.aspx?src=$encoded';
 }
 
-/// Panneau Word (DOC/DOCX) sous la barre. Format 16:9, largeur = largeur barre. Mêmes fonctions que XLS : télécharger, rechercher (Ctrl+F), fermer.
+/// Panneau Word (DOC/DOCX/ODT) sous la barre. Format 16:9, largeur = largeur barre. Mêmes fonctions que XLS : télécharger, rechercher (Ctrl+F), fermer.
 class WordPanelBelowBar extends StatefulWidget {
   const WordPanelBelowBar({
     super.key,
@@ -39,11 +40,13 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
 
   double _opacity = 0;
   bool _closing = false;
+  bool _searchExpanded = false;
   bool _initError = false;
   String? _initErrorMessage;
 
-  /// Hauteur 16:9 par rapport à la largeur barre.
+  /// Hauteur 16:9 par rapport à la largeur barre (sans le bandeau logo).
   double get _panelHeight => widget.barWidth * 9 / 16;
+  double get _totalHeight => _panelHeight;
 
   @override
   void initState() {
@@ -68,6 +71,11 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
   }
 
   void _downloadFile() {
+    if (_closing) return;
+    openUrl(widget.wordUrl);
+  }
+
+  void _printFile() {
     if (_closing) return;
     openUrl(widget.wordUrl);
   }
@@ -134,6 +142,52 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
     if (mounted) widget.onClose();
   }
 
+  void _openFullscreen() {
+    if (_closing || !mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => FullscreenDocumentPage(
+          onClose: () => Navigator.of(context).pop(),
+          child: _WordFullscreenContent(wordUrl: widget.wordUrl),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBarContent() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: SizedBox(
+            height: 32,
+            child: TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              onChanged: _onSearchChanged,
+              onSubmitted: (_) => _searchInFile(),
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
+              decoration: InputDecoration(
+                hintText: '3 lettres min puis Entrée',
+                hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                prefixIcon: const Icon(Icons.search, size: 20, color: Color(0xFF5A9094)),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: BorderSide.none,
+                ),
+                isDense: true,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFallback() {
     return Center(
       child: Column(
@@ -142,7 +196,7 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
           Icon(Icons.description_outlined, size: 48, color: Colors.grey.shade400),
           const SizedBox(height: 12),
           Text(
-            'Document Word (DOC / DOCX)',
+            'Document Word / Open Office (DOC, DOCX, ODT)',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
           ),
           const SizedBox(height: 8),
@@ -195,7 +249,7 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
             color: Colors.transparent,
             child: Container(
               width: double.infinity,
-              height: _panelHeight,
+              height: _totalHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
@@ -212,82 +266,20 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Barre du haut : Télécharger, Rechercher (même disposition que XLS), Fermer
-                    Material(
-                      color: const Color(0xFF5A9094),
-                      child: SizedBox(
-                        height: 44,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(width: 10),
-                            Tooltip(
-                              message: 'Télécharger ce fichier',
-                              child: TextButton.icon(
-                                onPressed: _downloadFile,
-                                icon: const Icon(Icons.download, size: 18, color: Colors.white),
-                                label: const Text(
-                                  'Télécharger ce fichier',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            if (isWindows && !_initError && _webViewController.value.isInitialized) ...[
-                              const Text(
-                                'Rechercher dans ce fichier',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: SizedBox(
-                                  height: 32,
-                                  child: TextField(
-                                    controller: _searchController,
-                                    focusNode: _searchFocusNode,
-                                    onChanged: _onSearchChanged,
-                                    onSubmitted: (_) => _searchInFile(),
-                                    style: const TextStyle(fontSize: 13, color: Colors.black87),
-                                    decoration: InputDecoration(
-                                      hintText: '3 lettres min puis Entrée pour occurrence suivante',
-                                      hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                      prefixIcon: const Icon(Icons.search, size: 20, color: Color(0xFF5A9094)),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      isDense: true,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                            const Spacer(),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: _closeWithFade,
-                                borderRadius: BorderRadius.circular(20),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Icon(Icons.close, size: 20, color: Colors.white),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                        ),
+                    DocumentViewerToolbar(
+                      barHeight: 44,
+                      onPrint: _printFile,
+                      onDownload: _downloadFile,
+                      onExpandFullscreen: _openFullscreen,
+                      onClose: _closeWithFade,
+                      onSearchTap: isWindows && !_initError && _webViewController.value.isInitialized
+                          ? () => setState(() => _searchExpanded = !_searchExpanded)
+                          : null,
+                      searchExpanded: _searchExpanded,
+                      searchBarContent: _searchExpanded && isWindows && !_initError ? _buildSearchBarContent() : null,
+                      sourceWidget: documentViewerSourceLabel(
+                        label: shortUrlForDisplay(widget.wordUrl),
+                        url: widget.wordUrl,
                       ),
                     ),
                     // Zone 16:9 pour le lecteur Word
@@ -323,4 +315,60 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
 
 class _WordSearchIntent extends Intent {
   const _WordSearchIntent();
+}
+
+/// Contenu plein écran pour un document Word (WebView avec viewer Office).
+class _WordFullscreenContent extends StatefulWidget {
+  const _WordFullscreenContent({required this.wordUrl});
+
+  final String wordUrl;
+
+  @override
+  State<_WordFullscreenContent> createState() => _WordFullscreenContentState();
+}
+
+class _WordFullscreenContentState extends State<_WordFullscreenContent> {
+  final WebviewController _controller = WebviewController();
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      await _controller.initialize();
+      await _controller.setBackgroundColor(Colors.white);
+      await _controller.loadUrl(_wordViewerUrl(widget.wordUrl));
+      if (mounted) setState(() => _initialized = true);
+    } catch (_) {
+      if (mounted) setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      );
+    }
+    return Webview(
+      _controller,
+      permissionRequested: (
+        String url,
+        WebviewPermissionKind kind,
+        bool isUserInitiated,
+      ) async =>
+          WebviewPermissionDecision.allow,
+    );
+  }
 }

@@ -5,12 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'package:offibox/app/offibox_app.dart';
 import 'package:offibox/constants/app_update_config.dart';
 import 'package:offibox/providers/offibox_providers.dart';
 import 'package:offibox/services/app_update_service.dart';
 import 'package:offibox/window/widgets/update_available_dialog.dart';
+
+/// Durée minimale du préchauffage (barre 10 → 100 %) avant de passer à la suite.
+const Duration _kMinPreheatDuration = Duration(seconds: 12);
+/// Intervalle entre chaque palier de 10 % (10, 20, …, 100). Réparti sur la durée min pour une progression fluide.
+const Duration _kProgressStepInterval = Duration(milliseconds: 1200);
 
 /// Phases du splash au démarrage (avec fondu entre chaque).
 enum _SplashPhase {
@@ -40,17 +46,37 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
   _SplashPhase _splashPhase = _SplashPhase.loading;
   bool _phaseTransitionScheduled = false;
   bool _updateCheckDone = false;
+  /// Résultat de la vérification faite pendant le splash (pour afficher le dialogue sans rappeler l'API).
+  AppUpdateInfo? _pendingUpdateInfo;
   String _appVersion = '1.0';
+  DateTime? _splashStartTime;
+  int _timeBasedProgress = 10; // 10, 20, …, 100 par paliers
+  Timer? _progressTimer;
 
   @override
   void initState() {
     super.initState();
     if (Platform.isWindows) {
+      _splashStartTime = DateTime.now();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(offiboxControllerProvider).init();
       });
+      _progressTimer = Timer.periodic(_kProgressStepInterval, (_) {
+        if (!mounted) return;
+        if (_timeBasedProgress >= 100) {
+          _progressTimer?.cancel();
+          return;
+        }
+        setState(() => _timeBasedProgress = (_timeBasedProgress + 10).clamp(10, 100));
+      });
     }
+  }
+
+  @override
+  void dispose() {
+    _progressTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _moveToCheckingUpdate() async {
@@ -66,7 +92,12 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
       _appVersion = info.version;
       _splashPhase = _SplashPhase.ok;
     });
-    await Future.delayed(const Duration(milliseconds: 1200));
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (!mounted) return;
+    try {
+      await windowManager.setAlwaysOnTop(true);
+      await windowManager.focus();
+    } catch (_) {}
     if (!mounted) return;
     setState(() => _splashDone = true);
   }
@@ -76,7 +107,11 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
     _updateCheckDone = true;
     SharedPreferences.getInstance().then((prefs) async {
       final doNotAsk = prefs.getBool(AppUpdateConfig.doNotAskKey) ?? false;
-      final info = await AppUpdateService.checkForUpdate(force: doNotAsk);
+      AppUpdateInfo? info = _pendingUpdateInfo;
+      _pendingUpdateInfo = null;
+      if (info == null) {
+        info = await AppUpdateService.checkForUpdate(force: doNotAsk);
+      }
       if (!mounted) return;
       if (info == null) return;
       if (doNotAsk) {
@@ -86,7 +121,7 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
       await showDialog<bool>(
         context: context,
         barrierDismissible: false,
-        builder: (ctx) => UpdateAvailableDialog(updateInfo: info),
+        builder: (ctx) => UpdateAvailableDialog(updateInfo: info!),
       );
     });
   }
@@ -98,25 +133,33 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
     }
 
     final controller = ref.watch(offiboxControllerProvider);
-    final clamped = controller.loadingProgress.clamp(0, 100);
-    final stepped = clamped >= 100 ? 100 : (clamped ~/ 10) * 10;
-    final progress = stepped / 100.0;
-    final loadingComplete = !controller.loading && controller.loadingProgress >= 100;
+    // Barre uniquement pilotée par le temps (10 → 20 → … → 100 %) pour un démarrage toujours à 10 %
+    final displayedProgress = _timeBasedProgress;
+    final progress = displayedProgress / 100.0;
+    final elapsed = _splashStartTime != null
+        ? DateTime.now().difference(_splashStartTime!)
+        : Duration.zero;
+    final minDurationReached = elapsed >= _kMinPreheatDuration;
+    final loadingComplete = !controller.loading &&
+        controller.loadingProgress >= 100 &&
+        minDurationReached;
 
-    // Quand le chargement est terminé : passer en "recherche de mise à jour" puis "Chargement Ok.... Version X.XX"
+    // Quand le chargement est terminé (données + durée min) : passer en "recherche de mise à jour" puis "Chargement Ok"
     if (loadingComplete && !_splashDone && _splashPhase == _SplashPhase.loading && !_phaseTransitionScheduled) {
       _phaseTransitionScheduled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _moveToCheckingUpdate();
         if (!mounted) return;
         // Afficher "Recherche de mise à jour…" au moins 600 ms tout en lançant la vérification
-        await Future.wait([
-          Future.delayed(const Duration(milliseconds: 600)),
+        final updateResult = await Future.wait([
+          Future<void>.delayed(const Duration(milliseconds: 600)),
           SharedPreferences.getInstance().then((prefs) async {
             final doNotAsk = prefs.getBool(AppUpdateConfig.doNotAskKey) ?? false;
-            await AppUpdateService.checkForUpdate(force: doNotAsk);
+            return AppUpdateService.checkForUpdate(force: doNotAsk);
           }),
         ]);
+        final info = updateResult.length > 1 ? updateResult[1] as AppUpdateInfo? : null;
+        if (mounted && info != null) _pendingUpdateInfo = info;
         if (!mounted) return;
         await _moveToOk();
       });
@@ -132,7 +175,7 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
     // Une seule structure de splash : message et barre selon la phase (AnimatedSwitcher fera le fondu)
     final showBar = _splashPhase == _SplashPhase.loading;
     final String message = switch (_splashPhase) {
-      _SplashPhase.loading => 'Chargement des données… ($stepped%)',
+      _SplashPhase.loading => 'Chargement des données — $displayedProgress %',
       _SplashPhase.checkingUpdate => 'Recherche de mise à jour…',
       _SplashPhase.ok => 'Chargement Ok.... Version $_appVersion',
     };

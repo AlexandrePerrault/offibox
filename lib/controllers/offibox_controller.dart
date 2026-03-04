@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,7 @@ import 'package:offibox/data/data_loader_core.dart' show buildBdmListFromPrefetc
 import 'package:offibox/data/data_loader_extra.dart';
 import 'package:offibox/data/bdm_parser.dart';
 import 'package:offibox/data/keywords_parser.dart';
+import 'package:offibox/data/codes_actes_parser.dart';
 import 'package:offibox/data/lpp_loader.dart';
 import 'package:offibox/data/lpp_index.dart';
 import 'package:offibox/data/search_result_mapper.dart' as mapper;
@@ -24,7 +26,6 @@ import 'package:offibox/data/hospital_cip_utils.dart' show loadHospitalCipSets, 
 import 'package:offibox/data/exception_otc_loader.dart' show loadExceptionOtcSets, ExceptionOtcSets;
 import 'package:offibox/data/statut_cis_loader.dart';
 import 'package:offibox/data/cis_dispo_loader.dart' show loadAnsmStatutsByCis, AnsmStatutInfo, loadArretCommercialisationByCis, ArretCommercialisationInfo;
-import 'package:offibox/data/taux_remboursement_loader.dart';
 import 'package:offibox/data/ansm_rappels_loader.dart';
 import 'package:offibox/data/bdm_cip_quantite_loader.dart';
 import 'package:offibox/data/bdpm_labels_loader.dart';
@@ -32,13 +33,18 @@ import 'package:offibox/data/videos_loader.dart';
 import 'package:offibox/data/fiches_voc_loader.dart';
 import 'package:offibox/data/fic03spe_loader.dart';
 import 'package:offibox/core/search_filter.dart';
+import 'package:offibox/utils/normalize.dart';
 import 'package:offibox/utils/open_url.dart' as url_util;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:offibox/services/pdf_preloader.dart';
+import 'package:offibox/services/cerp_client_service.dart';
 import 'package:offibox/cache/search_warmup.dart';
 
 const String _kAnsmStatutsLastRefreshDateKey = 'ansm_statuts_last_refresh_date';
 const String _kAnsmRappelsLastRefreshDateKey = 'ansm_rappels_last_refresh_date';
+
+/// Nombre max de résultats affichés sous la barre quand on clique sur "+" dans le menu filtre.
+const int _kFilterListMaxResults = 30;
 
 class OffiboxController extends ChangeNotifier {
   // ========================================================================
@@ -100,6 +106,12 @@ class OffiboxController extends ChangeNotifier {
   late SearchEngine _searchEngine; // réassigné quand phase2 puis extra sont chargés
   Timer? _debounce;
   Timer? _loadingProgressTimer;
+  Timer? _searchingDelayTimer;
+  int _searchSeq = 0;
+
+  /// True pendant une recherche (utile pour afficher une animation "patientez").
+  /// On l’active après un petit délai pour éviter le clignotement sur les recherches instantanées.
+  bool searching = false;
 
   DateTime? lastGithubUpdate;
 
@@ -170,7 +182,7 @@ class OffiboxController extends ChangeNotifier {
     final phase2Future = _loadPhase2Rest();
     final extraDataFuture = Future.wait([loadExtraData(), loadVideosByCip13(), loadFichesVoc()]);
 
-    // Phase 1 : BDM + outils métier + sites web (affichage rapide). Phase 2 + extra fusionnés ensuite.
+    // Phase 1 : BDM + outils métier + sites web + codes actes (affichage rapide). Phase 2 + extra fusionnés ensuite.
     final phase1 = await Future.wait([
       loadHospitalCipSets(),
       loadExceptionOtcSets(),
@@ -180,6 +192,7 @@ class OffiboxController extends ChangeNotifier {
       parseBDM(BDM_URL),
       parseKeywords(OUTILS_METIER_CSV_URL),
       parseKeywords(SITES_WEB_CSV_URL, sourceType: SourceType.siteWeb),
+      parseCodesActesPharmacie(CODES_ACTES_PHARMACIE_URL),
     ]);
 
     final hospitalSets = phase1[0] as HospitalCipSets;
@@ -189,9 +202,7 @@ class OffiboxController extends ChangeNotifier {
       debugPrint('[Offibox] Exception: ${exceptionOtcSets.exceptionCips.length} CIP13, OTC/autre: ${exceptionOtcSets.otcCips.length} CIP13 (exception_otc_2026.csv)');
     }
     _loadingProgressTimer?.cancel();
-    loadingProgress = 50;
-    notifyListeners();
-    // Paliers 50 → 60 → … → 100 pendant le compute.
+    // Ne pas sauter à 50 % : on garde la progression actuelle (10, 20, 30…) et on continue jusqu'à 100.
     target = 100;
     _loadingProgressTimer = Timer.periodic(const Duration(milliseconds: 120), (_) {
       if (loadingProgress >= target) {
@@ -208,6 +219,7 @@ class OffiboxController extends ChangeNotifier {
     final bdmRaw = phase1[5] as List<Map<String, dynamic>>;
     final keywords = phase1[6] as List<SearchResult>;
     final sitesWeb = phase1[7] as List<SearchResult>;
+    final codesActes = phase1[8] as List<SearchResult>;
 
     // Date de mise à jour AMC en arrière-plan (n’empêche plus l’affichage « prêt »)
     // Mapping BDM en isolate pour ne pas bloquer l'UI (preload plus rapide).
@@ -224,7 +236,7 @@ class OffiboxController extends ChangeNotifier {
       princepsToGenericName: princepsToGen,
     );
     final bdmList = await compute(buildBdmListFromPrefetched, bdmArgs);
-    final core = [...bdmList, ...keywords, ...sitesWeb];
+    final core = [...bdmList, ...keywords, ...sitesWeb, ...codesActes];
 
     allResults = List.unmodifiable(core);
     _searchEngine = SearchEngine(
@@ -240,7 +252,7 @@ class OffiboxController extends ChangeNotifier {
     notifyListeners();
 
     lastGithubUpdate = null;
-    unawaited(fetchLastUpdate(AMC_URL).then((v) {
+    unawaited(_fetchLastGithubUpdate().then((v) {
       lastGithubUpdate = v;
       notifyListeners();
     }),);
@@ -295,7 +307,13 @@ class OffiboxController extends ChangeNotifier {
 
     // Fusionner les données « extra » déjà préchargées en parallèle
     final extraResults = await extraDataFuture;
-    final extra = extraResults[0] as List<SearchResult>;
+    final cerpOk = await CerpClientService.isCurrentUserCerpBaValidated();
+    final extraRaw = extraResults[0] as List<SearchResult>;
+    // Toujours copier : loadExtraData() retourne List.unmodifiable (removeWhere échouerait sinon)
+    final extra = List<SearchResult>.from(extraRaw);
+    if (!cerpOk) {
+      extra.removeWhere((r) => r.source == SourceType.cerp);
+    }
     final videos = extraResults[1] as Map<String, String>;
     final vocList = extraResults[2] as List<VocFicheEntry>;
     allResults = List.unmodifiable([...allResults, ...extra]);
@@ -317,7 +335,8 @@ class OffiboxController extends ChangeNotifier {
         .where((r) =>
             r.source == SourceType.catalogue &&
             r.catalogueUrl != null &&
-            r.catalogueUrl!.toLowerCase().endsWith('.pdf'))
+            r.catalogueUrl!.toLowerCase().endsWith('.pdf'),
+        )
         .toList();
     if (cataloguePdfs.isNotEmpty) {
       unawaited(PdfPreloader.preloadCatalogues(cataloguePdfs));
@@ -442,6 +461,7 @@ class OffiboxController extends ChangeNotifier {
   }
 
   /// Chargement des données « extra » (catalogues, vidéos, fiches VOC) — appelé via _loadPhase2ThenExtra après préchargement en parallèle.
+  // ignore: unused_element
   Future<void> _loadExtra() async {
     final results = await Future.wait([loadExtraData(), loadVideosByCip13(), loadFichesVoc()]);
     final extra = results[0] as List<SearchResult>;
@@ -466,7 +486,8 @@ class OffiboxController extends ChangeNotifier {
         .where((r) =>
             r.source == SourceType.catalogue &&
             r.catalogueUrl != null &&
-            r.catalogueUrl!.toLowerCase().endsWith('.pdf'),)
+            r.catalogueUrl!.toLowerCase().endsWith('.pdf'),
+        )
         .toList();
     if (cataloguePdfs.isNotEmpty) {
       unawaited(PdfPreloader.preloadCatalogues(cataloguePdfs));
@@ -480,12 +501,20 @@ class OffiboxController extends ChangeNotifier {
   void filter(String query, {SearchFilter? searchFilter}) {
     if (!_engineReady) return;
 
+    final seq = ++_searchSeq;
+    _scheduleSearchingIndicator(seq);
+
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 50), () {
       // Exécuter la recherche après le prochain frame pour éviter le lag à la saisie.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_engineReady) return;
-        _runFilter(query, searchFilter);
+        if (seq != _searchSeq) return;
+        try {
+          _runFilter(query, searchFilter);
+        } finally {
+          _stopSearchingIndicator(seq);
+        }
       });
     });
   }
@@ -494,7 +523,20 @@ class OffiboxController extends ChangeNotifier {
   void filterImmediate(String query, {SearchFilter? searchFilter}) {
     if (!_engineReady) return;
     _debounce?.cancel();
-    _runFilter(query, searchFilter);
+
+    final seq = ++_searchSeq;
+    _scheduleSearchingIndicator(seq);
+
+    // Laisser un frame pour afficher l’animation avant le travail CPU.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_engineReady) return;
+      if (seq != _searchSeq) return;
+      try {
+        _runFilter(query, searchFilter);
+      } finally {
+        _stopSearchingIndicator(seq);
+      }
+    });
   }
 
   /// URL Ameli pour un code LPP (7 chiffres) — utilisé aussi pour les codes absents du CSV.
@@ -512,6 +554,33 @@ class OffiboxController extends ChangeNotifier {
     return [mapper.fromLppCode(q, url)];
   }
 
+  /// Pour une recherche précise (ex. "biatain 23 Tal") : si un seul médicament BDM contient tous les tokens du libellé, on n'affiche que celui-là.
+  static List<SearchResult> _tryPreciseMatchOnly(String query, List<SearchResult> results) {
+    final q = query.trim();
+    if (q.isEmpty) return results;
+    final tokens = q
+        .split(RegExp(r'\s+'))
+        .map((s) => normalizeLoose(s))
+        .where((t) => t.length >= 2 || RegExp(r'^\d+$').hasMatch(t))
+        .toList();
+    if (tokens.length < 2) return results;
+    final bdm = results.where((r) => r.source == SourceType.bdm).toList();
+    if (bdm.isEmpty) return results;
+    final labelNorm = (SearchResult r) => normalizeLoose(r.labelRaw);
+    final matches = bdm.where((r) {
+      final lab = labelNorm(r);
+      for (final t in tokens) {
+        if (!lab.contains(t)) return false;
+      }
+      return true;
+    }).toList();
+    if (matches.isEmpty) return results;
+    if (matches.length == 1) return matches;
+    // Plusieurs correspondances : garder le plus spécifique (libellé le plus court)
+    matches.sort((a, b) => a.labelRaw.length.compareTo(b.labelRaw.length));
+    return [matches.first];
+  }
+
   void _runFilter(String query, SearchFilter? searchFilter) {
     currentQuery = query;
     lastScanPayload = null;
@@ -520,14 +589,15 @@ class OffiboxController extends ChangeNotifier {
     if (searchFilter != null && searchFilter.hasActiveFilters) {
       results = searchFilter.applyTo(results, genericCipSet: genericCipSet, cisArretCommercialisation: cisArretCommercialisation);
     }
+    results = _tryPreciseMatchOnly(query, results);
     if (identical(results, filteredResults)) return;
     filteredResults = results;
     notifyListeners();
   }
 
-  /// Filtre immédiat (sans debounce) pour scan DataMatrix.
-  /// Stocke [payload] (expiration, lot, n° série) pour affichage en ligne 1 du résultat injecté.
-  void filterFromScan(String cip13, {SearchFilter? searchFilter, Gs1ScanPayload? payload}) {
+  /// Filtre immédiat (sans debounce) pour scan DataMatrix ou QR mutuelle.
+  /// Si [restrictToSource] est fourni (ex. AMC), ne garde que les résultats de cette source avant de sélectionner.
+  void filterFromScan(String cip13, {SearchFilter? searchFilter, Gs1ScanPayload? payload, SourceType? restrictToSource}) {
     if (!_engineReady) return;
 
     _debounce?.cancel();
@@ -537,6 +607,9 @@ class OffiboxController extends ChangeNotifier {
     results = _ensureLppFallback(cip13, results);
     if (searchFilter != null && searchFilter.hasActiveFilters) {
       results = searchFilter.applyTo(results, genericCipSet: genericCipSet, cisArretCommercialisation: cisArretCommercialisation);
+    }
+    if (restrictToSource != null) {
+      results = results.where((r) => r.source == restrictToSource).toList();
     }
     filteredResults = const [];
     if (results.isNotEmpty) {
@@ -549,23 +622,53 @@ class OffiboxController extends ChangeNotifier {
   /// Réapplique le filtre courant (après changement de filtre côté UI).
   void applyFilter(SearchFilter searchFilter) {
     if (currentQuery.isEmpty || currentQuery.length < 2) return;
-    var results = _searchEngine.search(currentQuery);
-    results = _ensureLppFallback(currentQuery, results);
-    if (searchFilter.hasActiveFilters) {
-      results = searchFilter.applyTo(results, genericCipSet: genericCipSet, cisArretCommercialisation: cisArretCommercialisation);
-    }
-    if (identical(results, filteredResults)) return;
-    filteredResults = results;
-    notifyListeners();
+    final seq = ++_searchSeq;
+    _scheduleSearchingIndicator(seq);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_engineReady) return;
+      if (seq != _searchSeq) return;
+      try {
+        var results = _searchEngine.search(currentQuery);
+        results = _ensureLppFallback(currentQuery, results);
+        if (searchFilter.hasActiveFilters) {
+          results = searchFilter.applyTo(
+            results,
+            genericCipSet: genericCipSet,
+            cisArretCommercialisation: cisArretCommercialisation,
+          );
+        }
+        results = _tryPreciseMatchOnly(currentQuery, results);
+        results = _sortByLabelAndTake(results, _kFilterListMaxResults);
+        if (identical(results, filteredResults)) return;
+        filteredResults = results;
+        notifyListeners();
+      } finally {
+        _stopSearchingIndicator(seq);
+      }
+    });
   }
 
-  /// Affiche tous les résultats d'une source (ex. LPP, DM) dans le panneau de résultats.
+  /// Affiche les résultats d'une source (ex. LPP, DM) sous la barre, tri alphabétique, limité à [_kFilterListMaxResults].
   void showFullListForSource(SourceType source) {
     if (!_engineReady) return;
-    final results = allResults.where((r) => r.source == source).toList();
+    final results = _sortByLabelAndTake(
+      allResults.where((r) => r.source == source).toList(),
+      _kFilterListMaxResults,
+    );
     filteredResults = results;
     currentQuery = 'Liste : ${_sourceListLabel(source)}';
     notifyListeners();
+  }
+
+  static List<SearchResult> _sortByLabelAndTake(List<SearchResult> list, int maxCount) {
+    final sorted = List<SearchResult>.from(list);
+    sorted.sort((a, b) {
+      final la = a.labelRaw.toLowerCase();
+      final lb = b.labelRaw.toLowerCase();
+      return la.compareTo(lb);
+    });
+    return sorted.length <= maxCount ? sorted : sorted.sublist(0, maxCount);
   }
 
   static String _sourceListLabel(SourceType s) {
@@ -574,16 +677,19 @@ class OffiboxController extends ChangeNotifier {
       case SourceType.lpp: return 'LPP';
       case SourceType.dm: return 'Dispositifs médicaux';
       case SourceType.veto: return 'Vétérinaire';
+      case SourceType.amo: return 'AMO';
       case SourceType.amc: return 'Mutuelles';
       case SourceType.keyword: return 'Mots-clés';
       case SourceType.siteWeb: return 'Sites web';
-      case SourceType.pharmacovigilance: return 'CRPV';
+      case SourceType.pharmacovigilance: return 'Annuaires';
+      case SourceType.centresAntiPoison: return 'Centres anti poison';
+      case SourceType.chu: return 'CHU';
       default: return s.name;
     }
   }
 
-  /// Affiche toute la liste correspondant au filtre courant (ex. tous les stupéfiants, génériques par labo).
-  /// Utilisé quand un sous-filtre BDM est sélectionné et que l'utilisateur clique "Afficher la liste".
+  /// Affiche la liste correspondant au filtre sous la barre (tri alphabétique, limité à [_kFilterListMaxResults]).
+  /// Utilisé quand on clique "+" sur une ligne du menu filtre ou "Afficher la liste".
   void showFullListForFilter(SearchFilter searchFilter) {
     if (!_engineReady || searchFilter.bdmOnlySubFilters.isEmpty) return;
     final results = searchFilter.applyTo(
@@ -591,7 +697,7 @@ class OffiboxController extends ChangeNotifier {
       genericCipSet: genericCipSet,
       cisArretCommercialisation: cisArretCommercialisation,
     );
-    filteredResults = results;
+    filteredResults = _sortByLabelAndTake(results, _kFilterListMaxResults);
     if (searchFilter.bdmOnlySubFilters.length == 1 &&
         searchFilter.bdmOnlySubFilters.first == BdmSubFilter.generiques &&
         searchFilter.genericLaboratory != null &&
@@ -655,7 +761,13 @@ Future<void> openResult(SearchResult item) async {
 
 
 
-  if (item.source == SourceType.amc) return;
+  // 🏥 MUTUELLES (AMC) : ouvrir l’URL dans le panneau web (géré par la fenêtre) ou en secours dans le navigateur
+  if (item.source == SourceType.amc) {
+    if (item.url?.trim().isNotEmpty == true) {
+      await openUrl(item.url!);
+    }
+    return;
+  }
 
   // 🐾 VETO
   if (item.source == SourceType.veto) {
@@ -716,6 +828,28 @@ if (item.source == SourceType.lpp &&
     return null;
   }
 
+  /// Date du dernier commit du dépôt offiboxdata (alignée sur le dernier changement des fichiers GitHub).
+  static const String _kGithubRepoCommitsUrl =
+      'https://api.github.com/repos/AlexandrePerrault/offiboxdata/commits?per_page=1&sha=main';
+
+  Future<DateTime?> _fetchLastGithubUpdate() async {
+    try {
+      final response = await http.get(
+        Uri.parse(_kGithubRepoCommitsUrl),
+        headers: {'Accept': 'application/vnd.github.v3+json'},
+      );
+      if (response.statusCode != 200) return await fetchLastUpdate(AMC_URL);
+      final list = json.decode(response.body) as List<dynamic>?;
+      if (list == null || list.isEmpty) return await fetchLastUpdate(AMC_URL);
+      final commit = list.first as Map<String, dynamic>?;
+      final commitObj = commit?['commit'] as Map<String, dynamic>?;
+      final committer = commitObj?['committer'] as Map<String, dynamic>?;
+      final dateStr = committer?['date'] as String?;
+      if (dateStr != null) return DateTime.tryParse(dateStr);
+    } catch (_) {}
+    return fetchLastUpdate(AMC_URL);
+  }
+
   // ========================================================================
   // 🧼 RESET
   // ========================================================================
@@ -740,12 +874,39 @@ if (item.source == SourceType.lpp &&
 
   void cancelSearch() {
     _debounce?.cancel();
+    _searchingDelayTimer?.cancel();
+    if (searching) {
+      searching = false;
+      notifyListeners();
+    }
     clearResults();
+  }
+
+  void _scheduleSearchingIndicator(int seq) {
+    _searchingDelayTimer?.cancel();
+    // N’affiche l’animation qu’après un délai : évite le flicker.
+    _searchingDelayTimer = Timer(const Duration(milliseconds: 140), () {
+      if (seq != _searchSeq) return;
+      if (!searching) {
+        searching = true;
+        notifyListeners();
+      }
+    });
+  }
+
+  void _stopSearchingIndicator(int seq) {
+    if (seq != _searchSeq) return;
+    _searchingDelayTimer?.cancel();
+    if (searching) {
+      searching = false;
+      notifyListeners();
+    }
   }
 
 @override
 void dispose() {
   _debounce?.cancel();
+  _searchingDelayTimer?.cancel();
   scanController.dispose();
   super.dispose();
 }
@@ -853,3 +1014,5 @@ class _Phase2Result {
   final Set<String> hospitalCip13Set;
   final Map<String, String> cip13ToFic03Status;
 }
+
+

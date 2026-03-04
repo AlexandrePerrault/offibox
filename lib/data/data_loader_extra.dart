@@ -61,14 +61,16 @@ Future<List<SearchResult>> _loadAmcAmo() async {
 Future<List<SearchResult>> loadExtraData() async {
   final results = <SearchResult>[];
 
-  // Chargement en parallèle de toutes les URL (DM, Veto, Labos, CERP, Mutuelles, CRPV)
+  // Chargement en parallèle de toutes les URL (DM, Veto, Labos, CERP, Mutuelles, CRPV, Centres anti poison, CHU)
   final extra = await Future.wait([
     parsePansements(PANSEMENTS_URL),
     parseVeto(VETO_URL),
     parseLaboratoires(LABORATOIRES_URL),
-    parseCerp(CERP_URL),
+    parseCoetpharm2026(COETPHARM_2026_URL),
     _loadAmcAmo(),
     parsePharmacovigilance(PHARMACOVIGILANCE_URL),
+    parseCentresAntiPoison(CENTRES_ANTI_POISON_URL),
+    parseChu(CHU_URL),
   ]);
 
   try {
@@ -100,6 +102,14 @@ Future<List<SearchResult>> loadExtraData() async {
 
   try {
     results.addAll(extra[5] as List<SearchResult>);
+  } catch (_) {}
+
+  try {
+    results.addAll(extra[6] as List<SearchResult>);
+  } catch (_) {}
+
+  try {
+    results.addAll(extra[7] as List<SearchResult>);
   } catch (_) {}
 
   // ─────────────────────────

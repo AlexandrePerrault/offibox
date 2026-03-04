@@ -73,10 +73,11 @@ class _EspaceProLoginDialogState extends State<EspaceProLoginDialog> {
   }
 
   Widget _buildLabLogo(double size) {
-    final path = widget.iconPath?.trim();
-    if (path == null || path.isEmpty) {
+    final raw = widget.iconPath?.trim();
+    if (raw == null || raw.isEmpty) {
       return Icon(Icons.business_rounded, size: size, color: _purple);
     }
+    final path = raw.replaceAll(r'\', '/');
     final lower = path.toLowerCase();
     if (lower.endsWith('.svg')) {
       return SvgPicture.asset(

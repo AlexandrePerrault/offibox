@@ -22,11 +22,21 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    flavorDimensions += "app"
+    productFlavors {
+        create("offibox") {
+            dimension = "app"
+            applicationId = "com.example.offibox"
+            resValue("string", "app_name", "Offibox")
+        }
+        create("offiboxCerp") {
+            dimension = "app"
+            applicationId = "com.example.offibox.cerp"
+            resValue("string", "app_name", "Offibox-CERP")
+        }
+    }
+
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.offibox"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

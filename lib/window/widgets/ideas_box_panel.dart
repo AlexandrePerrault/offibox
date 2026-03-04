@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/constants/ui_constants.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/firebase_options.dart';
 
 /// Panneau « Boîte à idées » affiché sous la barre : suggestions, zone texte (500 car.), email.
@@ -300,17 +301,8 @@ class _IdeasBoxPanelState extends State<IdeasBoxPanel> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Tooltip(
+                    OffiboxTooltip(
                       message: 'Envoyer',
-                      decoration: BoxDecoration(
-                        color: OffiboxColors.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Spinnaker',
-                        fontSize: 13,
-                      ),
                       child: FilledButton.icon(
                         onPressed: _sending ? null : _send,
                         icon: _sending

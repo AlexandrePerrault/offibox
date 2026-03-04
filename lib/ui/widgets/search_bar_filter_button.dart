@@ -8,6 +8,8 @@ import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/providers/offibox_providers.dart';
 import 'package:offibox/search/mte_molecules.dart';
+import 'package:offibox/ui/widgets/hover_pill_button.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 
 /// Bouton circulaire avec survol : couleur offibox light par défaut, teal au survol.
 /// Pas d'animation pour éviter le lag.
@@ -122,18 +124,16 @@ class _SearchBarFilterButtonState extends State<SearchBarFilterButton> {
       ),
     );
     if (widget.menuMinTopY != null) {
-      return Tooltip(
+      return OffiboxTooltip(
         message: 'filtrer les résultats',
-        textStyle: const TextStyle(color: _offiboxTeal, fontFamily: 'Spinnaker'),
         child: GestureDetector(
           onTap: () => _openFilterUnderBar(context),
           child: button,
         ),
       );
     }
-    return Tooltip(
+    return OffiboxTooltip(
       message: 'filtrer les résultats',
-      textStyle: const TextStyle(color: _offiboxTeal, fontFamily: 'Spinnaker'),
       child: PopupMenuButton<void>(
         offset: const Offset(-260, 8),
         position: PopupMenuPosition.under,
@@ -228,18 +228,12 @@ class _FilterListTileState extends State<_FilterListTile> {
               ),
               if (widget.trailing != null) widget.trailing!,
               if (widget.onShowSelection != null)
-                Tooltip(
-                  message: 'Afficher la sélection',
-                  child: IconButton(
-                    onPressed: widget.onShowSelection,
-                    icon: const Icon(Icons.add, size: 20),
-                    color: _hovering ? Colors.white : _offiboxTeal,
-                    style: IconButton.styleFrom(
-                      padding: const EdgeInsets.all(4),
-                      minimumSize: const Size(28, 28),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
+                HoverPillButton(
+                  icon: Icons.add,
+                  label: '',
+                  tooltip: 'Afficher la sélection',
+                  onTap: widget.onShowSelection!,
+                  height: 26,
                 ),
             ],
           ),
@@ -271,14 +265,69 @@ class _FilterPanelState extends State<_FilterPanel> {
     SourceType.dm,
     SourceType.veto,
     SourceType.amc,
+    SourceType.pharmacovigilance,
+    SourceType.centresAntiPoison,
+    SourceType.chu,
     SourceType.keyword,
     SourceType.siteWeb,
   ];
 
+  /// Une ligne du panneau = soit une source, soit le groupe « Annuaires » (pharmacovigilance + centres anti poison + CHU).
+  static List<({bool isAnnuaire, SourceType? source})> _displayRows() {
+    const annuaire = SearchFilterNotifier.annuaireSources;
+    final rows = <({bool isAnnuaire, SourceType? source})>[];
+    var annuaireAdded = false;
+    for (final s in _filterableSources) {
+      if (annuaire.contains(s)) {
+        if (!annuaireAdded) {
+          rows.add((isAnnuaire: true, source: null));
+          annuaireAdded = true;
+        }
+      } else {
+        rows.add((isAnnuaire: false, source: s));
+      }
+    }
+    return rows;
+  }
+
+  static const String _annuaireGroupLabel = 'Annuaires';
+
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  /// Libellé commun (common span) quand il existe, sinon null.
+  static String? _sourceCommonSpanLabel(SourceType s) {
+    switch (s) {
+      case SourceType.lpp:
+        return 'LPP';
+      case SourceType.dm:
+        return 'DM';
+      case SourceType.veto:
+        return 'VETO';
+      case SourceType.amc:
+        return 'MUT';
+      case SourceType.amo:
+        return 'AMO';
+      case SourceType.keyword:
+        return 'Outils métier';
+      case SourceType.codesActes:
+        return 'Codes actes';
+      case SourceType.siteWeb:
+        return 'site internet';
+      case SourceType.pharmacovigilance:
+        return 'annuaire';
+      case SourceType.centresAntiPoison:
+        return 'centres anti poison';
+      case SourceType.chu:
+        return 'CHU';
+      default:
+        return null;
+    }
+  }
+
   static String _sourceLabel(SourceType s) {
+    final spanLabel = _sourceCommonSpanLabel(s);
+    if (spanLabel != null) return spanLabel;
     switch (s) {
       case SourceType.bdm:
         return 'Médicaments (BDM)';
@@ -290,6 +339,14 @@ class _FilterPanelState extends State<_FilterPanel> {
         return 'Vétérinaire';
       case SourceType.amc:
         return 'Mutuelles';
+      case SourceType.amo:
+        return 'AMO';
+      case SourceType.pharmacovigilance:
+        return 'Annuaires';
+      case SourceType.centresAntiPoison:
+        return 'Centres anti poison';
+      case SourceType.chu:
+        return 'CHU';
       case SourceType.keyword:
         return 'Mots-clés';
       case SourceType.siteWeb:
@@ -359,7 +416,7 @@ class _FilterPanelState extends State<_FilterPanel> {
     for (final labName in _genericLaboratoryNames) {
       final labUpper = labName.toUpperCase();
       map[labName] = generics.where((r) {
-        final label = (r.labelRaw ?? r.label ?? '').toUpperCase();
+        final label = r.labelRaw.toUpperCase();
         return label.contains(labUpper);
       }).length;
     }
@@ -402,11 +459,15 @@ class _FilterPanelState extends State<_FilterPanel> {
         final countBdmSub = _countBdmSub(baseFiltered, genericCipSet: genericCipSet);
         final countByLab = _countGeneriquesByLaboratory(baseFiltered, genericCipSet: genericCipSet);
 
-        final filteredSources = _searchQuery.isEmpty
-            ? _filterableSources
-            : _filterableSources
-                .where((s) => _sourceLabel(s).toLowerCase().contains(_searchQuery))
-                .toList();
+        final allDisplayRows = _displayRows();
+        final filteredDisplayRows = _searchQuery.isEmpty
+            ? allDisplayRows
+            : allDisplayRows.where((row) {
+                final label = row.isAnnuaire
+                    ? _annuaireGroupLabel
+                    : _sourceLabel(row.source!);
+                return label.toLowerCase().contains(_searchQuery);
+              }).toList();
 
         void showSelection() {
           Navigator.of(context).pop();
@@ -496,7 +557,28 @@ class _FilterPanelState extends State<_FilterPanel> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                ...filteredSources.map((source) {
+                ...filteredDisplayRows.map((row) {
+                  if (row.isAnnuaire) {
+                    final enabled = filterNotifier.isAnnuaireGroupEnabled;
+                    final count = SearchFilterNotifier.annuaireSources
+                        .fold<int>(0, (sum, s) => sum + (countBySource[s] ?? 0));
+                    final title =
+                        '$_annuaireGroupLabel ($count résultat${count != 1 ? 's' : ''})';
+                    return _FilterListTile(
+                      value: enabled,
+                      onChanged: (_) => filterNotifier.toggleAnnuaireGroup(),
+                      title: title,
+                      onShowSelection: () {
+                        Navigator.of(context).pop();
+                        final onlyAnnuaire = SearchFilter(
+                          disabledSources: Set<SourceType>.from(_filterableSources)
+                            ..removeAll(SearchFilterNotifier.annuaireSources),
+                        );
+                        controller.showFullListForFilter(onlyAnnuaire);
+                      },
+                    );
+                  }
+                  final source = row.source!;
                   final enabled = filter.isSourceEnabled(source);
                   final count = countBySource[source] ?? 0;
                   final title = '${_sourceLabel(source)} ($count résultat${count != 1 ? 's' : ''})';
@@ -538,7 +620,7 @@ class _FilterPanelState extends State<_FilterPanel> {
                                 onTap: () => filterNotifier.toggleBdmSubFilter(sub),
                                 onShowSelection: isGeneriques ? null : () => showFullListForBdmSub(sub),
                                 trailing: isGeneriques
-                                    ? Tooltip(
+                                    ? OffiboxTooltip(
                                         message: _generiquesLabExpanded ? 'Masquer laboratoires' : 'Afficher laboratoires',
                                         child: IconButton(
                                           onPressed: () => setState(() => _generiquesLabExpanded = !_generiquesLabExpanded),
@@ -643,7 +725,7 @@ class _MedicamentsFilterRow extends StatelessWidget {
       value: enabled,
       onChanged: onChanged,
       title: title,
-      trailing: Tooltip(
+      trailing: OffiboxTooltip(
         message: expanded ? 'Masquer le sous-menu' : 'Afficher le sous-menu',
         child: InkWell(
           onTap: onExpandTap,
@@ -714,18 +796,12 @@ class _BdmSubFilterTile extends StatelessWidget {
                 ),
                 if (trailing != null) trailing!,
                 if (trailing == null && onShowSelection != null)
-                  Tooltip(
-                    message: 'Afficher la sélection',
-                    child: IconButton(
-                      onPressed: onShowSelection,
-                      icon: const Icon(Icons.add, size: 18),
-                      color: OffiboxColors.primary,
-                      style: IconButton.styleFrom(
-                        padding: const EdgeInsets.all(2),
-                        minimumSize: const Size(24, 24),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),
+                  HoverPillButton(
+                    icon: Icons.add,
+                    label: '',
+                    tooltip: 'Afficher la sélection',
+                    onTap: onShowSelection!,
+                    height: 26,
                   ),
               ],
             ),

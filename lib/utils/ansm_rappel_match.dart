@@ -1,6 +1,5 @@
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
-import 'package:offibox/data/ansm_rappels_loader.dart';
 
 /// Construit un slug type ANSM à partir du libellé et du laboratoire (ex. "doliprane-2-4-pour-cent-suspension-buvable-opella-healthcare-france-sas").
 /// Utilisé pour comparer au slug extrait de l'URL du rappel et cibler uniquement le produit concerné.
@@ -49,6 +48,19 @@ bool isProductConcernedByLastRappel(SearchResult item, AnsmRappelItem rappel) {
   }
   // 2) Fallback si pas de slug : pas d'alerte (évite "tous les produits contenant X")
   return false;
+}
+
+/// Retourne le rappel correspondant au produit (liste triée par date décroissante) pour le badge ligne 3, ou null.
+AnsmRappelItem? findMatchingRappel(SearchResult item, List<AnsmRappelItem> rappels) {
+  final productSlug = slugFromProduct(item);
+  if (productSlug.isEmpty) return null;
+  for (final rappel in rappels) {
+    final rappelSlug = rappel.slug?.trim();
+    if (rappelSlug != null && rappelSlug.isNotEmpty && productSlug == rappelSlug) {
+      return rappel;
+    }
+  }
+  return null;
 }
 
 /// Indique si la date du rappel est à moins de [maxDays] jours.

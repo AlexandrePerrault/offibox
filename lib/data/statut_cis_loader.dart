@@ -4,29 +4,21 @@ import 'package:offibox/utils/normalize.dart';
 
 /// Normalise le libellé STATUT (CSV statut CIS 2026 : ? = é/è/à mal encodé).
 /// Couvre : réservé, limitée, délivrance, prescription, spécialistes, etc.
+/// On applique d’abord les remplacements spécifiques (pour garder è dans particulière, etc.),
+/// puis normalizeText pour le reste (mojibake, espaces).
 String _normalizeStatut(String raw) {
-  // Placeholders $1/$2 (export Excel/CSV) → réservée / réservé / sécurisée
+  // 1) Corriger les mots avec ? AVANT normalizeText pour garder les bons accents (è pas é)
+  // Typo BDPM (CIS_CPD_bdpm.txt) : stuéiants → stupéfiants
   var s = raw
-      .replaceAll(r'$1é$2er$1ée', 'réservée')
-      .replaceAll(r'$1é$2ervé', 'réservé')
-      .replaceAll(r'$1é$2uri$1ée', 'sécurisée')
-      .replaceAll(RegExp(r'\$1[éèe]\$2uri\$1[éèe]e'), 'sécurisée')
-      .replaceAll(RegExp(r'\$1[éèe]\$2er\$1[éèe]e'), 'réservée')
-      .replaceAll(RegExp(r'\$1[éèe]\$2erv[éèe]'), 'réservé');
-  s = normalizeText(s)
-      // Rattrapage placeholders après normalisation (encodage CSV variable)
-      .replaceAll(RegExp(r'\$1[éèe]\$2er\$1[éèe]e'), 'réservée')
-      .replaceAll(RegExp(r'\$1[éèe]\$2erv[éèe]'), 'réservé')
+      .replaceAll('stuéiants', 'stupéfiants')
+      .replaceAll('stuéiant', 'stupéfiant')
       // réservé / réservée
       .replaceAll('r?serv?e', 'réservée')
       .replaceAll('r?serv?', 'réservé')
-      .replaceAll('rÃ©servÃ©', 'réservé')
-      .replaceAll('r\u00e9serv\u00e9', 'réservé')
       // limitée / limités
       .replaceAll('limit?e', 'limitée')
       .replaceAll('limit?s', 'limités')
-      .replaceAll('prescription limit?e', 'prescription limitée')
-      // délivrance
+      // délivrance, fractionnée
       .replaceAll('d?livrance', 'délivrance')
       .replaceAll('fractionn?e', 'fractionnée')
       .replaceAll('fractionn?s', 'fractionnés')
@@ -46,7 +38,6 @@ String _normalizeStatut(String raw) {
       .replaceAll('prescription r?serv?e aux sp?cialistes', 'prescription réservée aux spécialistes')
       .replaceAll('m?decin', 'médecin')
       .replaceAll('m?decins', 'médecins')
-      .replaceAll('éecins', 'médecins')
       .replaceAll('m?dicament', 'médicament')
       .replaceAll('exer?ant', 'exerçant')
       .replaceAll('?tablissement', 'établissement')
@@ -56,11 +47,7 @@ String _normalizeStatut(String raw) {
       .replaceAll('particuli?res', 'particulières')
       .replaceAll('particuli?re', 'particulière')
       .replaceAll('s?curis?e', 'sécurisée')
-      .replaceAll('éuriée', 'sécurisée')
-      .replaceAll('éuriee', 'sécurisée')
       .replaceAll('hospitali?re', 'hospitalière')
-      .replaceAll('hospitalée', 'hospitalière')
-      .replaceAll('coméents', 'compétents')
       .replaceAll('comp?tents', 'compétents')
       .replaceAll('g?n?rale', 'générale')
       .replaceAll('g?rontologie', 'gériatrie')
@@ -70,11 +57,31 @@ String _normalizeStatut(String raw) {
       .replaceAll('n?cessitant', 'nécessitant')
       .replaceAll('n?cessaire', 'nécessaire')
       .replaceAll('d?tention', 'détention')
+      .replaceAll('dispositions particuli?res', 'dispositions particulières');
+
+  // 2) Placeholders export Excel/CSV
+  s = s
+      .replaceAll(r'$1é$2er$1ée', 'réservée')
+      .replaceAll(r'$1é$2ervé', 'réservé')
+      .replaceAll(r'$1é$2uri$1ée', 'sécurisée')
+      .replaceAll(RegExp(r'\$1[éèe]\$2uri\$1[éèe]e'), 'sécurisée')
+      .replaceAll(RegExp(r'\$1[éèe]\$2er\$1[éèe]e'), 'réservée')
+      .replaceAll(RegExp(r'\$1[éèe]\$2erv[éèe]'), 'réservé');
+
+  // 3) Normalisation globale (mojibake, espaces, apostrophes)
+  s = normalizeText(s);
+
+  // 4) Rattrapage après normalisation
+  s = s
+      .replaceAll(RegExp(r'\$1[éèe]\$2er\$1[éèe]e'), 'réservée')
+      .replaceAll(RegExp(r'\$1[éèe]\$2erv[éèe]'), 'réservé')
+      .replaceAll('éecins', 'médecins')
+      .replaceAll('hospitalée', 'hospitalière')
+      .replaceAll('coméents', 'compétents')
+      .replaceAll('éuriée', 'sécurisée')
+      .replaceAll('éuriee', 'sécurisée')
       .replaceAll('DELIVRANCE', 'DÉLIVRANCE')
-      .replaceAll('dispositions particuli?res', 'dispositions particulières')
-      .trim();
-  s = s.replaceAll(RegExp(r'\s\?\s'), ' à ').trim();
-  // Nettoyage placeholders résiduels ($1, $2, etc.) pouvant subsister
+      .replaceAll(RegExp(r'\s\?\s'), ' à ');
   s = s.replaceAll(RegExp(r'\$\d+'), '').trim();
   return s.replaceAll(RegExp(r'\s+'), ' ').trim();
 }

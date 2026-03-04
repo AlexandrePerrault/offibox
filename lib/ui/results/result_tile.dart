@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:offibox/data/bdm_cip_quantite_loader.dart';
 import 'package:offibox/data/bdpm_labels_loader.dart';
+import 'package:offibox/utils/normalize.dart';
 import 'package:offibox/data/cis_dispo_loader.dart';
 import 'package:offibox/data/generiques.dart';
 import 'package:offibox/models/search_result.dart';
@@ -8,9 +9,8 @@ import 'package:offibox/models/source_type.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/ui/results/result_line_1.dart';
 import 'package:offibox/ui/results/result_line_2_code.dart';
-import 'package:offibox/ui/results/result_line_3_actions.dart';
-import 'package:offibox/ui/results/result_line_4_rappel_alert.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
+import 'package:offibox/constants/ui_constants.dart';
 
 /// Une ligne de résultat : label, codes, actions. Réduit la complexité de ResultsPanel.
 class ResultTile extends StatelessWidget {
@@ -100,7 +100,10 @@ class ResultTile extends StatelessWidget {
           visualDensity: isSingleResult
               ? VisualDensity.standard
               : const VisualDensity(vertical: -3),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: resultTileHorizontalPadding,
+            vertical: resultTileVerticalPadding / 2,
+          ),
           onTap: onOpen,
           title: LayoutBuilder(
             builder: (context, constraints) {
@@ -128,7 +131,7 @@ class ResultTile extends StatelessWidget {
                     generiques2026PrincepsKeyToGenericName: generiques2026PrincepsKeyToGenericName,
                     cip13ToFic03Status: cip13ToFic03Status,
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: resultLineGap),
                   ResultLine2Code(
                     item: item,
                     onOpenUrl: onOpenUrl,
@@ -151,22 +154,8 @@ class ResultTile extends StatelessWidget {
                       if (item.liste2) 'Liste 2',
                     ],
                   ),
-                  const SizedBox(height: 3),
-                  ResultLine4RappelAlert(
-                    item: item,
-                    ansmLastRappel: ansmLastRappel,
-                    onOpenUrl: onOpenUrl,
-                  ),
-                  if (isSingleResult) const SizedBox(height: 6),
-                  ResultLine3Actions(
-                    item: item,
-                    generiques2026CisSet: generiques2026CisSet,
-                    onOpenUrl: onOpenUrl,
-                    vocPatientUrl: vocPatientUrl,
-                    vocProUrl: vocProUrl,
-                    videosByCip13: videosByCip13,
-                    onOpenTherapeuticVideo: onOpenTherapeuticVideo,
-                  ),
+                  // Panneau de résultats : uniquement lignes 1 et 2 pour plus de clarté.
+                  // Lignes 3 et 4 (Sources, biosimilaires, rappel) affichées dans la barre une fois le produit injecté (SelectedResultView).
                 ],
               );
               // Si le titre est contraint en hauteur (ex. panneau étroit), rendre le contenu scrollable pour éviter RenderFlex overflow.
@@ -265,8 +254,7 @@ class _HoverableResultState extends State<_HoverableResult> {
 }
 
 /// Helpers pour construire le label d'affichage à partir d'un SearchResult.
-/// Pour BDM : on préfère le libellé issu des TXT BDPM (CIS_bdpm + CIS_CIP_bdpm) au format
-/// "CIP_espaces : dénomination, forme (présentation)" ; sinon BDM_CIP_QUANTITE (col E) ; sinon labelRaw.
+/// Pour BDM : nom et dosage (format "nom dosage forme, conditionnement"), affiché en MAJUSCULES avec Spinnaker.
 class ResultLabelHelper {
   static String displayLabel(SearchResult item) {
     String displayLabel = item.label;
@@ -282,7 +270,7 @@ class ResultLabelHelper {
         if (cached != null && cached.libelle.trim().isNotEmpty) {
           displayLabel = _stripLeadingCipFromLabel(cached.libelle.trim());
         } else {
-          final raw = (item.labelRaw ?? item.label).trim();
+          final raw = item.labelRaw.trim();
           if (raw.isNotEmpty) {
             displayLabel = _stripLeadingCipFromLabel(raw);
           } else {
@@ -290,15 +278,16 @@ class ResultLabelHelper {
           }
         }
       }
+      return stripGuillemets(displayLabel.trim().toUpperCase());
     }
-    if (item.source == SourceType.amc) return 'Mutuelle ${displayLabel.trim()}';
+    if (item.source == SourceType.amc) return 'Mutuelle ${stripGuillemets(displayLabel.trim())}';
     // 📘 LPP : afficher le libellé quand présent (recherche par code ou libellé)
     if (item.source == SourceType.lpp &&
         item.lppLibelle != null &&
         item.lppLibelle!.trim().isNotEmpty) {
-      return item.lppLibelle!.trim();
+      return stripGuillemets(item.lppLibelle!.trim());
     }
-    return displayLabel.trim();
+    return stripGuillemets(displayLabel.trim());
   }
 
   /// Retire en tête de chaîne un préfixe CIP (ex. "CIP : 3400930040935" ou "34009 300 409 3 5 : ").
@@ -309,8 +298,8 @@ class ResultLabelHelper {
     ).trim();
   }
 
-  /// Libellé BDM : nom du médicament (avant dosage) en majuscules.
-  static String _formatBdmLibelle(String libelle, String dosage) {
+  /// Libellé BDM : nom du médicament (avant dosage) en majuscules. (Réservé pour usage futur.)
+  static String formatBdmLibelle(String libelle, String dosage) {
     if (libelle.isEmpty) return libelle;
     int splitAt = -1;
     if (dosage.isNotEmpty) {

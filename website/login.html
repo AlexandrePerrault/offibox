@@ -229,12 +229,12 @@
 <body>
   <div class="login-left">
     <a href="index.html">
-      <img src="assets/icons/logo_offibox.png" alt="Offibox">
+      <img src="../assets/icons/logo%20sans%20texte.png" alt="Offibox">
     </a>
     <h1>Bienvenue sur <span class="highlight">Offibox</span></h1>
     <p>Connectez-vous pour accéder à votre espace et télécharger l'application. Utilisez votre compte Google ou votre adresse e-mail.</p>
     <div class="login-visual">
-      <img src="assets/icons/logo_offibox.png" alt="">
+      <img src="../assets/icons/logo%20sans%20texte.png" alt="">
     </div>
   </div>
 
@@ -280,14 +280,17 @@
   </div>
 
   <script>
-    document.getElementById('login-form').addEventListener('submit', function(e) {
+    const privateSpaceUrl = 'https://www.offibox.fr/espace-priv%C3%A9';
+
+    document.getElementById('login-form').addEventListener('submit', function (e) {
       e.preventDefault();
-      // À brancher sur votre backend ou Firebase Auth
-      alert('Connexion : branchez ce formulaire à votre service d\'authentification (ex. Firebase). Pour l\'instant, téléchargez l\'app et connectez-vous depuis l\'application.');
+      // Ici on simule une connexion réussie, puis on envoie l'utilisateur vers l'espace privé.
+      window.location.href = privateSpaceUrl;
     });
-    document.getElementById('btn-google').addEventListener('click', function() {
-      // À brancher sur Google Sign-In
-      alert('Connexion Google : à brancher sur votre service (ex. Firebase Auth). Depuis l\'application desktop, la connexion Google est déjà disponible.');
+
+    document.getElementById('btn-google').addEventListener('click', function () {
+      // Idem : clic sur Google = redirection vers l'espace privé.
+      window.location.href = privateSpaceUrl;
     });
   </script>
 </body>

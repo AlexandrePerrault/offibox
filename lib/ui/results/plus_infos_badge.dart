@@ -4,17 +4,27 @@ import 'package:offibox/utils/normalize.dart';
 
 /// Affiche la composition : "Composition :" puis à la ligne chaque composant (substance, dosage).
 /// Déduplique les lignes quand une substance est contenue dans une autre (ex. DARIDOREXANT vs CHLORHYDRATE DE DARIDOREXANT).
-/// Format affiché : "SUBSTANCE, X mg pour un comprimé".
+/// La référence "pour un comprimé", "pour une gélule", etc. est supprimée. Format affiché : "SUBSTANCE, X mg".
 class CompositionLinesForPlusInfos extends StatelessWidget {
   const CompositionLinesForPlusInfos({super.key, required this.compositionLine});
 
   final String compositionLine;
 
+  /// Style de base pour le contenu (composition, listes, statuts).
   static const TextStyle _style = TextStyle(
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Spinnaker',
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
+    height: 1.4,
+  );
+
+  /// Style des titres de section (Composition, Statut, Taux) : plus marqué pour une bonne lisibilité.
+  static const TextStyle _sectionTitleStyle = TextStyle(
+    fontSize: 15,
+    fontFamily: 'Spinnaker',
+    fontWeight: FontWeight.w700,
     height: 1.35,
+    color: Color(0xFF1A1A1A),
   );
 
   /// Retourne la substance (col D) : texte avant le premier " : ".
@@ -51,18 +61,25 @@ class CompositionLinesForPlusInfos extends StatelessWidget {
     return kept;
   }
 
-  /// Reformate une partie "SUBSTANCE : DOSAGE : pour F" en "SUBSTANCE, DOSAGE" (sans "pour un comprimé" si affiché une fois en bas).
-  static String _formatPart(String part, {bool stripPourUnComprime = false}) {
-    String s = part.trim();
-    if (stripPourUnComprime) {
-      s = s.replaceFirst(RegExp(r'\s+pour un comprimé\s*$', caseSensitive: false), '').trim();
-    }
+  /// Supprime " pour ..." ou ", pour" partout (composition = DCI et dosage uniquement).
+  static String _stripPourReference(String s) {
+    return s
+        .replaceFirst(RegExp(r'\s+pour\s+.+$', caseSensitive: false), '')
+        .replaceFirst(RegExp(r',\s*pour\s*$', caseSensitive: false), '')
+        .replaceFirst(RegExp(r'\s+pour\s*$', caseSensitive: false), '')
+        .trim();
+  }
+
+  /// Reformate une partie en "DCI, dosage" uniquement (sans " pour ...").
+  static String _formatPart(String part) {
+    String s = _stripPourReference(part.trim());
     final idx = s.indexOf(' : ');
-    if (idx <= 0) return s;
-    final substance = s.substring(0, idx).trim();
+    if (idx <= 0) return normalizeText(s);
+    final substance = normalizeText(s.substring(0, idx).trim());
     String rest = s.substring(idx + 3).replaceAll(RegExp(r'\s*:\s*$'), '').trim();
+    rest = _stripPourReference(rest);
     if (rest.isEmpty) return substance;
-    return '$substance, $rest';
+    return '$substance, ${normalizeText(rest)}';
   }
 
   @override
@@ -71,24 +88,21 @@ class CompositionLinesForPlusInfos extends StatelessWidget {
     if (rawParts.isEmpty) return const SizedBox.shrink();
     final parts = _deduplicateParts(rawParts);
     if (parts.isEmpty) return const SizedBox.shrink();
-    const String pourUnComprime = 'pour un comprimé';
-    final bool allHavePourUnComprime = parts.every((p) => p.toLowerCase().contains(pourUnComprime));
-    final displayParts = parts.map((p) => _formatPart(p, stripPourUnComprime: allHavePourUnComprime)).toList();
+    final displayParts = parts.map((p) => _formatPart(p)).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         RichText(
           text: TextSpan(
-            style: _style.copyWith(color: Colors.black),
+            style: _style.copyWith(color: const Color(0xFF1A1A1A)),
             children: [
-              const TextSpan(text: '• '),
+              const TextSpan(text: '• ', style: _sectionTitleStyle),
               TextSpan(
                 text: 'Composition :',
-                style: _style.copyWith(
-                  color: Colors.black,
+                style: _sectionTitleStyle.copyWith(
                   decoration: TextDecoration.underline,
-                  decorationColor: Colors.black,
+                  decorationColor: const Color(0xFF1A1A1A),
                 ),
               ),
             ],
@@ -98,11 +112,6 @@ class CompositionLinesForPlusInfos extends StatelessWidget {
           padding: const EdgeInsets.only(top: 4),
           child: Text('– $p', style: _style),
         )),
-        if (allHavePourUnComprime && displayParts.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(pourUnComprime, style: _style),
-          ),
       ],
     );
   }
@@ -138,15 +147,17 @@ class PlusInfosBadge extends StatelessWidget {
           'Plus d\'infos',
           style: TextStyle(fontFamily: 'Spinnaker', fontWeight: FontWeight.w600),
         ),
-        content: SingleChildScrollView(
-          child: Column(
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (compositionLine != null && compositionLine!.trim().isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: CompositionLinesForPlusInfos(compositionLine: compositionLine!.trim()),
+                  child: CompositionLinesForPlusInfos(compositionLine: normalizeText(compositionLine!.trim())),
                 ),
               if (listes.isNotEmpty)
                 Padding(
@@ -154,9 +165,11 @@ class PlusInfosBadge extends StatelessWidget {
                   child: Text(
                     listes.join(', '),
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontFamily: 'Spinnaker',
-                      height: 1.35,
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                      color: Color(0xFF1A1A1A),
                     ),
                   ),
                 ),
@@ -166,79 +179,77 @@ class PlusInfosBadge extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: RichText(
                     text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontFamily: 'Spinnaker',
-                        fontWeight: FontWeight.w600,
-                        height: 1.35,
-                        color: Colors.black,
-                      ),
+                      style: CompositionLinesForPlusInfos._sectionTitleStyle.copyWith(fontWeight: FontWeight.w500),
                       children: [
-                        const TextSpan(text: '• '),
+                        const TextSpan(text: '• ', style: CompositionLinesForPlusInfos._sectionTitleStyle),
                         TextSpan(
                           text: 'Taux de remboursement :',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontFamily: 'Spinnaker',
-                            fontWeight: FontWeight.w600,
-                            height: 1.35,
-                            color: Colors.black,
+                          style: CompositionLinesForPlusInfos._sectionTitleStyle.copyWith(
                             decoration: TextDecoration.underline,
-                            decorationColor: Colors.black,
+                            decorationColor: const Color(0xFF1A1A1A),
                           ),
                         ),
-                        TextSpan(text: ' ${tauxRemboursement!.trim()}'),
+                        TextSpan(
+                          text: ' ${tauxRemboursement!.trim()}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Spinnaker',
+                            fontWeight: FontWeight.w500,
+                            height: 1.4,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               ],
-              if (statuts.isNotEmpty) ...[
+              if (statuts.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
-                  child: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontFamily: 'Spinnaker',
-                        fontWeight: FontWeight.w600,
-                        height: 1.35,
-                        color: Colors.black,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: CompositionLinesForPlusInfos._sectionTitleStyle,
+                          children: [
+                            const TextSpan(text: '• '),
+                            TextSpan(
+                              text: 'Statuts :',
+                              style: CompositionLinesForPlusInfos._sectionTitleStyle.copyWith(
+                                decoration: TextDecoration.underline,
+                                decorationColor: const Color(0xFF1A1A1A),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      children: [
-                        const TextSpan(text: '• '),
-                        TextSpan(
-                          text: 'Statut :',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontFamily: 'Spinnaker',
-                            fontWeight: FontWeight.w600,
-                            height: 1.35,
-                            color: Colors.black,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.black,
+                      ...statuts.map((s) => Padding(
+                        padding: const EdgeInsets.only(left: 12, top: 4),
+                        child: RichText(
+                          text: TextSpan(
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Spinnaker',
+                              fontWeight: FontWeight.w500,
+                              height: 1.4,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                            children: [
+                              const TextSpan(text: '• '),
+                              TextSpan(text: normalizeText(s)),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      )),
+                    ],
                   ),
                 ),
-                ...statuts.map(
-                  (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text(
-                      '– ${normalizeText(s)}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontFamily: 'Spinnaker',
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
+        ),
         ),
         actions: [
           TextButton(
@@ -250,35 +261,43 @@ class PlusInfosBadge extends StatelessWidget {
     );
   }
 
+  /// Hauteur du badge (taille initiale, alignée visuellement avec RCP / MEDDISPAR).
+  static const double _badgeHeight = 36;
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showStatutsDialog(context),
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-          decoration: BoxDecoration(
-            color: _teal.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: _teal.withValues(alpha: 0.4), width: 1),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.info_outline, size: 11, color: _teal),
-              const SizedBox(width: 5),
-              Text(
-                'plus d\'infos',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontFamily: 'Spinnaker',
-                  fontWeight: FontWeight.w700,
-                  color: isDisabled ? Colors.grey : _teal,
+    return IntrinsicWidth(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showStatutsDialog(context),
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            height: _badgeHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: _teal.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: _teal.withValues(alpha: 0.4), width: 1),
+            ),
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.info_outline, size: 14, color: _teal),
+                const SizedBox(width: 6),
+                Text(
+                  'plus d\'infos',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'Spinnaker',
+                    fontWeight: FontWeight.w700,
+                    color: isDisabled ? Colors.grey : _teal,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

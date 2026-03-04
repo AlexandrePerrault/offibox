@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:offibox/constants/offibox_window_ui.dart';
-import 'package:offibox/services/pdf_cache.dart';
+import 'package:offibox/services/pdf_cache.dart' show PdfCacheService, PdfTooLargeException;
+import 'package:offibox/utils/open_url.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 /// Viewer PDF de catalogue avec recherche par mots-clés et recensement de toutes les occurrences.
@@ -176,7 +176,7 @@ class _CataloguePdfViewerState extends State<CataloguePdfViewer> {
           IconButton(
             tooltip: 'Occurrence précédente',
             icon: const Icon(Icons.keyboard_arrow_up),
-            onPressed: hasResults && searcher != null && uniquePos > 0
+            onPressed: hasResults && uniquePos > 0
                 ? () async {
                     await searcher.goToMatchOfIndex(uniqueIndices[uniquePos - 1]);
                     if (mounted) setState(() {});
@@ -186,7 +186,7 @@ class _CataloguePdfViewerState extends State<CataloguePdfViewer> {
           IconButton(
             tooltip: 'Occurrence suivante (ou Entrée dans la barre de recherche)',
             icon: const Icon(Icons.keyboard_arrow_down),
-            onPressed: hasResults && searcher != null && uniquePos >= 0 && uniquePos < total - 1
+            onPressed: hasResults && uniquePos >= 0 && uniquePos < total - 1
                 ? () async {
                     await searcher.goToMatchOfIndex(uniqueIndices[uniquePos + 1]);
                     if (mounted) setState(() {});
@@ -245,7 +245,7 @@ class _CataloguePdfViewerState extends State<CataloguePdfViewer> {
                     _searchDebounce = Timer(const Duration(milliseconds: 300), () => _startSearch(v));
                   },
                   onSubmitted: (v) {
-                    if (hasResults && searcher != null) {
+                    if (hasResults) {
                       final matches = searcher.matches;
                       final indices = matches.isNotEmpty ? _uniqueMatchIndices(matches) : <int>[];
                       final idx = searcher.currentIndex ?? -1;
@@ -290,17 +290,51 @@ class _CataloguePdfViewerState extends State<CataloguePdfViewer> {
               future: _pdfFileFuture,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
+                  final err = snapshot.error;
+                  final isTooLarge = err is PdfTooLargeException;
+                  final isTimeout = err is TimeoutException;
                   return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Erreur chargement PDF',
-                          style: TextStyle(color: Colors.red.shade700, fontSize: 14),
-                        ),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isTooLarge ? Icons.picture_as_pdf : Icons.error_outline,
+                            size: 48,
+                            color: isTooLarge ? Colors.orange.shade700 : Colors.red.shade300,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            isTooLarge
+                                ? 'Document volumineux (${(err as PdfTooLargeException).sizeMo.toStringAsFixed(1)} Mo)'
+                                : isTimeout
+                                    ? 'Le chargement est trop long'
+                                    : 'Erreur chargement PDF',
+                            style: TextStyle(
+                              color: isTooLarge ? Colors.orange.shade900 : Colors.red.shade700,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (isTooLarge || isTimeout) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              isTooLarge
+                                  ? 'Pour un affichage plus rapide, ouvrez-le dans le navigateur.'
+                                  : 'Ouvrir dans le navigateur pour essayer ?',
+                              style: const TextStyle(fontSize: 12, color: Colors.black54),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            FilledButton.icon(
+                              onPressed: () => openUrl(widget.pdfUrl),
+                              icon: const Icon(Icons.open_in_browser, size: 18),
+                              label: const Text('Ouvrir dans le navigateur'),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   );
                 }

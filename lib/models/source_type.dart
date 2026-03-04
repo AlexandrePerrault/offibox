@@ -15,6 +15,9 @@ enum SourceType {
   cerp,
   amo,
   pharmacovigilance,
+  centresAntiPoison,
+  chu,
+  codesActes,
 }
 
 extension SourceTypePriority on SourceType {
@@ -24,6 +27,7 @@ extension SourceTypePriority on SourceType {
         return 0;
       case SourceType.keyword:
       case SourceType.siteWeb:
+      case SourceType.codesActes:
         return 1;
       case SourceType.dm:
         return 2;
@@ -39,6 +43,8 @@ extension SourceTypePriority on SourceType {
       case SourceType.cerp:
         return 6;
       case SourceType.pharmacovigilance:
+      case SourceType.centresAntiPoison:
+      case SourceType.chu:
         return 5;
     }
   }

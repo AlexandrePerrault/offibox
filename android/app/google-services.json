@@ -20,7 +20,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCi1AhMabx9PZYeNnZxZqfyogtrmEWp8pA"
+          "current_key": "AIzaSyDhhdZmQw0fRCUC3GtX0OyBP8xG5RBjqcs"
         }
       ],
       "services": {
@@ -29,6 +29,13 @@
             {
               "client_id": "264737328165-cskk83jevrjrc94veihvcfo3jola2p63.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "264737328165-fp2vtfqfmlvs59di3cb6ku7o82v57rqo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.offibox"
+              }
             }
           ]
         }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/utils/ansm_rappel_match.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/utils/open_url.dart';
 
 /// Ligne 3 : alerte rappel (pendant 7 jours) — message en rouge "Ce médicament a fait l'objet d'un rappel le [date]" + badge "+ d'infos" vers l'URL ANSM.
@@ -51,7 +52,7 @@ class ResultLine4RappelAlert extends StatelessWidget {
           ),
           if (url.isNotEmpty) ...[
             const SizedBox(width: 8),
-            Tooltip(
+            OffiboxTooltip(
               message: 'Plus d\'infos sur le rappel (ANSM)',
               child: GestureDetector(
                 onTap: () {

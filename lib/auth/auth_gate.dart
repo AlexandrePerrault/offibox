@@ -1,42 +1,26 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:window_manager/window_manager.dart';
 
+import 'package:offibox/auth/auth_state_provider.dart';
 import 'package:offibox/auth/login_page.dart';
 import 'package:offibox/auth/first_launch_check.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/core/filter_notifier.dart';
 import 'package:offibox/providers/offibox_providers.dart';
+import 'package:offibox/services/app_update_service.dart';
+import 'package:offibox/services/google_calendar_desktop_auth.dart';
 import 'package:offibox/ui/widgets/debug_banner.dart';
 import 'package:offibox/window/widgets/about_dialog.dart';
 import 'package:offibox/ui/widgets/hamburger_menu.dart';
 import 'package:offibox/window/widgets/offibox_top_bar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-/// Sur Windows, authStateChanges() peut déclencher une erreur "non-platform thread"
-/// (voir https://github.com/firebase/flutterfire/issues/13340). On utilise un stream
-/// par polling pour éviter d'écouter le canal natif depuis un mauvais thread.
-Stream<User?> _authStreamForPlatform() {
-  if (Platform.isWindows) {
-    final controller = StreamController<User?>.broadcast();
-    Timer? timer;
-    Future<void> emit() async {
-      try {
-        controller.add(FirebaseAuth.instance.currentUser);
-      } catch (_) {}
-    }
-    emit(); // valeur initiale
-    timer = Timer.periodic(const Duration(seconds: 2), (_) => emit());
-    controller.onCancel = () => timer.cancel();
-    return controller.stream;
-  }
-  return FirebaseAuth.instance.authStateChanges();
-}
 
 /// Écran selon l'état d'auth (login ou FirstLaunchCheck).
 /// Affiche la barre Offibox (pill + search) dès le départ.
@@ -49,11 +33,94 @@ class AuthGate extends ConsumerStatefulWidget {
 
 class _AuthGateState extends ConsumerState<AuthGate> {
   bool _expanded = false;
+  bool _windowSizeSynced = false;
+  bool _postLoginFlowDone = false;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
   final GlobalKey<HamburgerMenuState> _menuPopupKey =
       GlobalKey<HamburgerMenuState>();
   Timer? _searchDebounce;
+
+  static bool _isGoogleUser(User? user) {
+    return user != null &&
+        user.providerData.any((p) => p.providerId == 'google.com');
+  }
+
+  Future<void> _runPostGoogleLoginFlow(BuildContext context) async {
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const AlertDialog(
+        title: Text('Téléchargement en cours'),
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 16),
+            Expanded(child: Text('Vérification de la dernière version…')),
+          ],
+        ),
+      ),
+    );
+    try {
+      final info = await AppUpdateService.checkForUpdate(force: true);
+      if (info != null && mounted) {
+        Navigator.of(context).pop();
+        if (!mounted) return;
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Téléchargement en cours'),
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Téléchargement de la version ${info.version}…',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        await AppUpdateService.downloadAndOpen(info);
+        if (mounted) Navigator.of(context).pop();
+      } else if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (_) {
+      if (mounted) Navigator.of(context).pop();
+    }
+    try {
+      if (mounted && GoogleCalendarDesktopAuth.isNeeded) {
+        await GoogleCalendarDesktopAuth.signIn();
+        if (mounted) ref.invalidate(calendarEventsProvider);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _syncWindowSizeToExpanded(BuildContext context) async {
+    if (!Platform.isWindows || !mounted) return;
+    try {
+      final w = _expanded
+          ? (MediaQuery.sizeOf(context).width * 0.8).round() + 48
+          : (OffiboxWindowUI.collapsedWidth + 24).round();
+      final h = _expanded ? 420.0 : OffiboxWindowUI.barHeight + 24;
+      await windowManager.setSize(Size(w.toDouble(), h));
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -93,34 +160,59 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   @override
   Widget build(BuildContext context) {
     final controller = ref.watch(offiboxControllerProvider);
+    final authAsync = ref.watch(authStateProvider);
 
-    return StreamBuilder<User?>(
-      stream: _authStreamForPlatform(),
-      builder: (context, snapshot) {
-        String debugLabel;
-        Widget content;
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          debugLabel = 'AuthGate: waiting auth stream';
-          content = const Scaffold(
-            backgroundColor: Color(0xFFE8F0F1),
-            body: Center(child: CircularProgressIndicator()),
-          );
+    String debugLabel = 'AuthGate';
+    Widget content = const LoginPage();
+    switch (authAsync) {
+      case AsyncLoading():
+        debugLabel = 'AuthGate: waiting auth stream';
+        content = const Scaffold(
+          backgroundColor: Color(0xFFE8F0F1),
+          body: Center(child: CircularProgressIndicator()),
+        );
+        break;
+      case AsyncData(:final value):
+        final user = value;
+        if (user == null) {
+          debugLabel = 'AuthGate: LoginPage';
+          content = const LoginPage();
         } else {
-          final user = snapshot.data;
-          if (user == null) {
-            debugLabel = 'AuthGate: LoginPage';
-            content = const LoginPage();
-          } else {
-            debugLabel = 'AuthGate: FirstLaunchCheck';
-            content = const FirstLaunchCheck();
-          }
+          debugLabel = 'AuthGate: FirstLaunchCheck';
+          content = const FirstLaunchCheck();
         }
+        break;
+      case AsyncError():
+        debugLabel = 'AuthGate: LoginPage';
+        content = const LoginPage();
+        break;
+    }
 
-        return Stack(
+    final userForWindowSync = authAsync.valueOrNull;
+    if (userForWindowSync != null && !_windowSizeSynced) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _syncWindowSizeToExpanded(context);
+        if (mounted) setState(() => _windowSizeSynced = true);
+      });
+    }
+    final userForPostLogin = authAsync.valueOrNull;
+    if (userForPostLogin != null && _isGoogleUser(userForPostLogin) && !_postLoginFlowDone) {
+      _postLoginFlowDone = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _runPostGoogleLoginFlow(context);
+      });
+    }
+    final showOnlyPill = !_expanded && (authAsync.valueOrNull != null);
+    return Stack(
           fit: StackFit.expand,
           children: [
-            DebugBanner(label: debugLabel, child: content),
+            if (showOnlyPill)
+              const ColoredBox(
+                color: Colors.transparent,
+                child: SizedBox.expand(),
+              )
+            else
+              DebugBanner(label: debugLabel, child: content),
             Positioned(
               top: OffiboxWindowUI.topMargin,
               right: OffiboxWindowUI.rightMargin,
@@ -141,9 +233,14 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                   onToggleWindow: () {
                     setState(() {
                       _expanded = !_expanded;
+                      _windowSizeSynced = false;
                       if (!_expanded) {
                         ref.read(offiboxControllerProvider).clearResults();
                       }
+                    });
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _syncWindowSizeToExpanded(context);
+                      if (mounted) setState(() => _windowSizeSynced = true);
                     });
                   },
                   selectedResult: controller.selectedResult,
@@ -188,7 +285,11 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                         title: const Text('Raccourcis clavier'),
                         content: const SingleChildScrollView(
                           child: Text(
-                            'Ctrl+O : Ouvrir\nCtrl+L : Réinitialiser\nCtrl+C : Copier\nCtrl+Q : Quitter\nÉchap : Fermer',
+                            '''Ctrl+O : Ouvrir
+Ctrl+L : Réinitialiser
+Ctrl+C : Copier
+Ctrl+Q : Quitter
+Échap : Fermer''',
                           ),
                         ),
                         actions: [
@@ -218,7 +319,9 @@ class _AuthGateState extends ConsumerState<AuthGate> {
             ),
           ],
         );
-      },
-    );
   }
 }
+
+
+
+

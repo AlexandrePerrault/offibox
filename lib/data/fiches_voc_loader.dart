@@ -43,7 +43,7 @@ Future<List<VocFicheEntry>> loadFichesVoc() async {
             medicament: medicament,
             urlPatient: urlPatient,
             urlPro: urlPro,
-          ));
+          ),);
         }
       }
     }

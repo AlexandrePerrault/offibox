@@ -493,8 +493,8 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
 
     // 🏭 Catalogue (nom du labo) en startsWith avant tout le reste (ex. "viatris" → Viatris labo avant médicaments contenant "viatris")
     if (queryNorm.length >= 2) {
-      final aLabelNorm = _normalize(a.labelRaw ?? '');
-      final bLabelNorm = _normalize(b.labelRaw ?? '');
+      final aLabelNorm = _normalize(a.labelRaw);
+      final bLabelNorm = _normalize(b.labelRaw);
       final aIsCatalogueStarts = a.source == SourceType.catalogue && aLabelNorm.startsWith(queryNorm);
       final bIsCatalogueStarts = b.source == SourceType.catalogue && bLabelNorm.startsWith(queryNorm);
       if (aIsCatalogueStarts && !bIsCatalogueStarts) return -1;
@@ -503,8 +503,8 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
 
     // 🟪 Règle startsWith : les résultats dont le libellé COMMENCE par la requête passent devant (ex. "centre" → CENTRE DE PHARMACOVIGILANCE en premier)
     if (queryNorm.length >= 2) {
-      final aLabelNorm = _normalize(a.labelRaw ?? '');
-      final bLabelNorm = _normalize(b.labelRaw ?? '');
+      final aLabelNorm = _normalize(a.labelRaw);
+      final bLabelNorm = _normalize(b.labelRaw);
       final aStarts = aLabelNorm.startsWith(queryNorm);
       final bStarts = bLabelNorm.startsWith(queryNorm);
       if (aStarts && !bStarts) return -1;
@@ -578,10 +578,12 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     switch (r.source) {
       case SourceType.keyword:
         return -100; // 1. Outils métier
+      case SourceType.codesActes:
+        return -95;  // 2. Codes actes pharmacie
       case SourceType.catalogue:
-        return -90;  // 2. Catalogues / laboratoires
+        return -90;  // 3. Catalogues / laboratoires
       case SourceType.siteWeb:
-        return -80;  // 3. Sites web
+        return -80;  // 4. Sites web
       case SourceType.amc:
         return -70;  // 4. Mutuelles
       case SourceType.bdm:
@@ -595,7 +597,8 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
       case SourceType.amo:
       case SourceType.cerp:
       case SourceType.pharmacovigilance:
-      default:
+      case SourceType.centresAntiPoison:
+      case SourceType.chu:
         return 800;  // 9. En dernier
     }
   }

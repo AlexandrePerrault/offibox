@@ -5,8 +5,9 @@ import 'package:offibox/data/bdm_parser.dart';
 import 'package:offibox/data/data_sources.dart';
 import 'package:offibox/utils/normalize.dart';
 
-/// Index des colonnes — CIS_bdpm : col A = 0 (code CIS), col B = 1 (nom/dénomination), col C = 2 (forme).
-/// CIS_CIP_bdpm : col C = 2 (libellé de présentation).
+/// Index des colonnes (alignés medicaments-api / docs/BDPM_PIPELINE_ALIGNED.md).
+/// CIS_bdpm : 0=CIS, 1=Dénomination, 2=Forme pharmaceutique.
+/// CIS_CIP_bdpm : 0=CIS, 1=CIP7, 2=Libellé présentation, 6=CIP13, 8=Taux remboursement.
 const int _cisBdpmColCodeCis = 0;
 const int _cisBdpmColDenomination = 1;
 const int _cisBdpmColFormePharmaceutique = 2;
@@ -224,8 +225,20 @@ String _simplifyPresentation(String s, {String form = ''}) {
   return t.replaceAll(RegExp(r'\s{2,}'), ' ').replaceAll(RegExp(r'[,;\s]+$'), '').replaceAll(RegExp(r'^[,;\s]+'), '').trim();
 }
 
-/// Construit le libellé normalisé : "DÉNOMINATION, forme, présentation" (dénomination en majuscules, forme et présentation en minuscules).
-/// Ex. DOLIPRANE 2,4 POUR CENT, suspension buvable, 1 flacon(s) de 100 ml avec seringue(s) pour administration orale.
+/// Normalise le conditionnement pour l'affichage : "1 boîte(s) de 8" → "boîte de 8", etc.
+String _normalizeConditionnement(String s) {
+  if (s.isEmpty) return s;
+  String t = s.toLowerCase().replaceAll(RegExp(r'\s+'), ' ').trim();
+  t = t.replaceFirst(RegExp(r'^1\s+boîte[s]?\s+de\s+'), 'boîte de ');
+  t = t.replaceFirst(RegExp(r'^1\s+flacon[s]?\s+de\s+'), 'flacon de ');
+  t = t.replaceFirst(RegExp(r'^1\s+tube[s]?\s+de\s+'), 'tube de ');
+  t = t.replaceFirst(RegExp(r'^1\s+seringue[s]?\s+de\s+'), 'seringue de ');
+  t = t.replaceFirst(RegExp(r'^1\s+seringue[s]?\s*$'), '1 seringue');
+  return t.replaceAll(RegExp(r'\s{2,}'), ' ').trim();
+}
+
+/// Construit le libellé au format "nom dosage forme, conditionnement" (ex. doliprane 1000 mg comprimés, boîte de 8).
+/// Aligné sur le style medicaments-api : dénomination + forme galénique + conditionnement lisible.
 String _buildLabel({
   required String denom,
   required String form,
@@ -244,40 +257,45 @@ String _buildLabel({
     return libellePresentation.trim();
   }
 
-  final parts = <String>[];
-  if (denomTrim.isNotEmpty) parts.add(denomTrim.toUpperCase());
+  final denomLower = denomTrim.toLowerCase();
+  final formLower = formTrim.toLowerCase();
   bool addForm = formTrim.isNotEmpty;
   if (addForm) {
-    final formNorm = formTrim.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
     final libNorm = lib.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
-    if (formNorm.length >= 3 && libNorm.contains(formNorm)) addForm = false;
+    if (formLower.length >= 3 && libNorm.contains(formLower)) addForm = false;
   }
-  if (addForm) parts.add(formTrim.toLowerCase());
-  if (skipLib) return parts.join(', ');
-  if (parts.isEmpty) return lib.toLowerCase();
-  // Enlever en début de présentation la forme si elle y figure déjà.
+
+  if (skipLib) {
+    if (denomTrim.isEmpty && !addForm) return lib;
+    return addForm ? '$denomLower $formLower' : denomLower;
+  }
+
   String libDisplay = lib;
   if (formTrim.isNotEmpty && formTrim.length >= 3) {
-    final formNorm = formTrim.toLowerCase().trim();
     final libLower = libDisplay.toLowerCase();
-    if (libLower.startsWith(formNorm)) {
-      libDisplay = libDisplay.substring(formNorm.length).replaceAll(RegExp(r'^[\s,;\-]+'), '').trim();
-    } else if (libLower.contains(formNorm) && libLower.indexOf(formNorm) <= 2) {
-      libDisplay = libDisplay.substring(libLower.indexOf(formNorm) + formNorm.length).replaceAll(RegExp(r'^[\s,;\-]+'), '').trim();
+    if (libLower.startsWith(formLower)) {
+      libDisplay = libDisplay.substring(formLower.length).replaceAll(RegExp(r'^[\s,;\-]+'), '').trim();
+    } else if (libLower.contains(formLower) && libLower.indexOf(formLower) <= 2) {
+      libDisplay = libDisplay.substring(libLower.indexOf(formLower) + formLower.length).replaceAll(RegExp(r'^[\s,;\-]+'), '').trim();
     }
   }
-  if (libDisplay.isEmpty) return parts.join(', ');
-  parts.add(libDisplay.toLowerCase());
-  return parts.join(', ');
+  final conditionnement = _normalizeConditionnement(libDisplay);
+  if (conditionnement.isEmpty) {
+    return addForm ? '$denomLower $formLower' : denomLower;
+  }
+  return addForm
+      ? '$denomLower $formLower, $conditionnement'
+      : '$denomLower, $conditionnement';
 }
 
-/// Indices CIS_COMPO_bdpm.txt (tab) : col A=0 (CIS), col D=3, E=4, F=5 pour "composition : D : E pour F".
+/// Indices CIS_COMPO_bdpm.txt : 0=CIS, 3=Dénomination substance (DCI), 4=Dosage, 5=Réf. dosage.
+/// Affichage composition : DCI et dosage uniquement (sans " pour colF").
 const int _cisCompoColCis = 0;
 const int _cisCompoColD = 3;
 const int _cisCompoColE = 4;
 const int _cisCompoColF = 5;
 
-/// Charge CIS_COMPO_bdpm.txt et retourne CIS → "colD : colE pour colF" (première ligne par CIS ; si plusieurs substances, joint avec " ; ").
+/// Charge CIS_COMPO_bdpm.txt et retourne CIS → "DCI : dosage" (première ligne par CIS ; si plusieurs substances, joint avec " ; ").
 Future<Map<String, String>> loadCompositionBdpmByCis() async {
   try {
     final res = await http.get(Uri.parse(CIS_COMPO_BDPM_TXT_URL));
@@ -293,9 +311,8 @@ Future<Map<String, String>> loadCompositionBdpmByCis() async {
       if (cis.isEmpty) continue;
       final d = cols[_cisCompoColD].trim();
       final e = cols[_cisCompoColE].trim();
-      final f = cols[_cisCompoColF].trim();
-      final phrase = '$d : $e pour $f';
-      if (phrase == ' :  pour ') continue;
+      final phrase = d.isEmpty && e.isEmpty ? '' : '$d : $e';
+      if (phrase == ' : ') continue;
       out.putIfAbsent(cis, () => []).add(phrase);
     }
     return out.map((cis, list) => MapEntry(cis, list.join(' ; ')));

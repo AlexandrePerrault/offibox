@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/ui/widgets/offibox_info_bar.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/ui/widgets/window/floating_search_bar.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/utils/gs1_scan_payload.dart';
@@ -15,6 +16,7 @@ import 'package:offibox/ui/widgets/hamburger_menu.dart';
 import 'package:offibox/ui/widgets/youtube_video_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/pharmaradio_flash_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/therapeutic_video_panel_below_bar.dart';
+import 'package:offibox/window/widgets/about_dialog.dart';
 
 /// Croix de fermeture (ligne 1, au-dessus du logo) : rouge, inversion au survol, ne chevauche jamais le texte.
 class _CloseBarButton extends StatefulWidget {
@@ -34,7 +36,7 @@ class _CloseBarButtonState extends State<_CloseBarButton> {
   Widget build(BuildContext context) {
     final bg = _hovered ? Colors.white : _red;
     final fg = _hovered ? _red : Colors.white;
-    return Tooltip(
+    return OffiboxTooltip(
       message: 'Refermer',
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -78,6 +80,7 @@ class OffiboxTopBar extends StatelessWidget {
     required this.expanded,
     this.infoBarExpanded = true,
     this.onToggleInfoBar,
+    this.onInfoBarUrlTap,
     required this.barWidth,
     required this.searchController,
     required this.searchFocus,
@@ -106,11 +109,16 @@ class OffiboxTopBar extends StatelessWidget {
     this.onClose,
     this.onShowAbout,
     this.onShowShortcuts,
+    this.onShowContact,
+    this.onShowVersionHistory,
     this.onOpenGoogleAgenda,
     this.onConnectGoogleAgenda,
     this.onOpenIdBox,
     this.isGoogleConnected = false,
+    this.canConnectGoogleAgenda = true,
     this.onEscape,
+    /// Clic droit sur le logo → proposer la fermeture (même comportement que 2e Échap).
+    this.onProposeQuit,
     this.infoBarItems,
     this.leadingFilterButton,
     this.appVersion = '1.0.0',
@@ -132,9 +140,11 @@ class OffiboxTopBar extends StatelessWidget {
     this.onOpenPharmaradioFlash,
     this.onClosePharmaradioFlash,
     this.onScanDataMatrix,
+    this.onScanMutuelleQr,
     this.scanPayload,
     this.recalledProductNames,
     this.ansmLastRappel,
+    this.rappelForLine3Badge,
     this.cisArretCommercialisation,
     this.arretCommercialisationByCis,
     this.tauxRemboursementByCis,
@@ -143,6 +153,8 @@ class OffiboxTopBar extends StatelessWidget {
     this.barBottomY,
     this.barTopY,
     this.rightMargin,
+    /// Date de MAJ des données (dernier commit GitHub offiboxdata). Si null, affiche [kVersionDate].
+    this.dataUpdateDate,
   });
 
   /// Au clic sur "Espace pro" (catalogue) : affiche la fenêtre de connexion (lab + identifiants).
@@ -181,12 +193,16 @@ class OffiboxTopBar extends StatelessWidget {
   final VoidCallback? onClosePharmaradioFlash;
   /// Scan DataMatrix : (cip13, payload expiration/lot/série) → on vide le champ et on injecte le résultat.
   final void Function(String cip13, Gs1ScanPayload? payload)? onScanDataMatrix;
+  /// QR mutuelle (carte Vitale) : code préfectoral 8 chiffres → sélectionne la mutuelle et affiche son libellé.
+  final void Function(String codePrefectoral)? onScanMutuelleQr;
   /// Payload du dernier scan GS1 pour affichage expiration/lot/n° série en ligne 1.
   final Gs1ScanPayload? scanPayload;
   /// Noms normalisés des produits en rappel ANSM (alerte en rouge italique en ligne 2).
   final Set<String>? recalledProductNames;
   /// Dernier rappel ANSM (ticker) : date en ligne 2, alerte ligne 4 si < 15 jours.
   final AnsmRappelItem? ansmLastRappel;
+  /// Rappel correspondant au résultat sélectionné (badge ligne 3 « rappel de produit + date »).
+  final AnsmRappelItem? rappelForLine3Badge;
   /// CIS avec « arrêt de commercialisation » (CIS_CIP_Dispo_Spec) — badge ligne 2 pour ces NSFP.
   final Set<String>? cisArretCommercialisation;
   /// CIS → date + URL pour le badge « arrêt de commercialisation » (clic → ouvrir URL).
@@ -203,11 +219,15 @@ class OffiboxTopBar extends StatelessWidget {
   final double? barTopY;
   /// Marge droite (px) : le menu est aligné à droite avec la barre (bord droit = écran - rightMargin).
   final double? rightMargin;
+  /// Date de MAJ des données (ex. dernier commit GitHub). Format JJ/MM/AAAA. Si null, utilise [kVersionDate].
+  final String? dataUpdateDate;
 
   final bool expanded;
   /// Barre d’infos (DGS-Urgent, ANSM, etc.) : true = déployée, false = repliée
   final bool infoBarExpanded;
   final VoidCallback? onToggleInfoBar;
+  /// Au clic sur une URL de la barre d’infos (rappel, alerte ANSM, DGS-Urgent, etc.) : ouvrir dans le panneau sous la barre. Si null, ouverture dans le navigateur (comportement par défaut du widget).
+  final void Function(String url)? onInfoBarUrlTap;
   final double barWidth;
 
   final TextEditingController searchController;
@@ -245,12 +265,18 @@ class OffiboxTopBar extends StatelessWidget {
   final VoidCallback? onClose;
   final VoidCallback? onShowAbout;
   final VoidCallback? onShowShortcuts;
+  final VoidCallback? onShowContact;
+  final VoidCallback? onShowVersionHistory;
   final VoidCallback? onOpenGoogleAgenda;
   /// Connexion OAuth Google Calendar (Windows/Desktop). Null si non disponible.
   final VoidCallback? onConnectGoogleAgenda;
   final bool isGoogleConnected;
+  /// Si false, l'entrée « Connecter l'agenda Google » est grisée (ex. compte non Gmail).
+  final bool canConnectGoogleAgenda;
   /// ESC dans la barre de recherche → refermer la barre (ex. fermer avec Échap).
   final VoidCallback? onEscape;
+  /// Clic droit sur le logo → proposer la fermeture (dialogue « Fermer l’application ? »).
+  final VoidCallback? onProposeQuit;
   /// Ouvre le panneau « Boîte à idées » sous la barre.
   final VoidCallback? onOpenIdBox;
   /// Items de la barre d’infos (si null, liste par défaut utilisée).
@@ -272,8 +298,8 @@ class OffiboxTopBar extends StatelessWidget {
   /// Largeur réservée à droite (logo + hamburger + marges).
   static double get _logoAndMenuWidth =>
       OffiboxWindowUI.pillSize + _gapLogoMenu + OffiboxWindowUI.menuButtonSize + _rightBlockPadding;
-  /// Largeur fixe de la zone du bouton filtre (gauche) — même base que le bouton menu + marge.
-  static double get filterButtonZoneWidth => OffiboxWindowUI.menuButtonSize + 4;
+  /// Largeur fixe de la zone du bouton filtre (gauche) — diamètre égal au menu hamburger (menuButtonSize) + padding gauche 12.
+  static double get filterButtonZoneWidth => OffiboxWindowUI.menuButtonSize + 12;
 
   @override
   Widget build(BuildContext context) {
@@ -310,6 +336,7 @@ class OffiboxTopBar extends StatelessWidget {
                                 onChanged: onToggleInfoBar != null
                                     ? (_) => onToggleInfoBar!()
                                     : null,
+                                onUrlTap: onInfoBarUrlTap,
                               )
                             : OffiboxInfoBar(
                                 key: const ValueKey<bool>(false),
@@ -320,6 +347,7 @@ class OffiboxTopBar extends StatelessWidget {
                                 onChanged: onToggleInfoBar != null
                                     ? (_) => onToggleInfoBar!()
                                     : null,
+                                onUrlTap: onInfoBarUrlTap,
                               ),
                       );
                     },
@@ -375,9 +403,11 @@ class OffiboxTopBar extends StatelessWidget {
               onOpenPharmaradioFlash: onOpenPharmaradioFlash,
               leadingMenuButton: expanded ? leadingFilterButton : null,
               onScanDataMatrix: onScanDataMatrix,
+              onScanMutuelleQr: onScanMutuelleQr,
               scanPayload: scanPayload,
               recalledProductNames: recalledProductNames,
               ansmLastRappel: ansmLastRappel,
+              rappelForLine3Badge: rappelForLine3Badge,
               cisArretCommercialisation: cisArretCommercialisation,
               arretCommercialisationByCis: arretCommercialisationByCis,
               tauxRemboursementByCis: tauxRemboursementByCis,
@@ -397,6 +427,18 @@ class OffiboxTopBar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      if (expanded) ...[
+                        Text(
+                          'mis à jour le ${dataUpdateDate ?? kVersionDate}',
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            color: Colors.grey.shade500,
+                            fontSize: 10,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       if (expanded &&
                           menuPopupKey != null &&
                           onOpenOffibox != null &&
@@ -416,10 +458,13 @@ class OffiboxTopBar extends StatelessWidget {
                             onClose: onClose!,
                             onShowAbout: onShowAbout,
                             onShowShortcuts: onShowShortcuts,
+                            onShowContact: onShowContact,
+                            onShowVersionHistory: onShowVersionHistory,
                             onOpenGoogleAgenda: onOpenGoogleAgenda,
                             onConnectGoogleAgenda: onConnectGoogleAgenda,
                             onOpenIdBox: onOpenIdBox,
                             isGoogleConnected: isGoogleConnected,
+                            canConnectGoogleAgenda: canConnectGoogleAgenda,
                             menuOffsetDy: 0,
                             barWidth: barWidth,
                             barBottomY: barBottomY,
@@ -429,17 +474,20 @@ class OffiboxTopBar extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                       ],
-                      Tooltip(
+                      const SizedBox(width: 6),
+                      OffiboxTooltip(
                         message: 'Version $appVersion',
                         child: OffiboxPill(
+                          expanded: expanded,
                           onTap: onToggleWindow,
-                          onSecondaryTap: (expanded &&
-                                  menuPopupKey != null &&
-                                  onOpenOffibox != null &&
-                                  onMinimize != null &&
-                                  onClose != null)
-                              ? () => menuPopupKey!.currentState?.openMenu()
-                              : null,
+                          onSecondaryTap: onProposeQuit ??
+                              ((expanded &&
+                                      menuPopupKey != null &&
+                                      onOpenOffibox != null &&
+                                      onMinimize != null &&
+                                      onClose != null)
+                                  ? () => menuPopupKey!.currentState?.openMenu()
+                                  : null),
                         ),
                       ),
                     ],

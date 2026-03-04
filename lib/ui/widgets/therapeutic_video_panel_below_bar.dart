@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:offibox/ui/widgets/document_viewer_toolbar.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/utils/platform_utils.dart';
 import 'package:webview_windows/webview_windows.dart';
@@ -147,6 +148,19 @@ class _TherapeuticVideoPanelBelowBarState
     if (mounted) widget.onClose();
   }
 
+  void _openFullscreen() {
+    if (_closing || !mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => FullscreenDocumentPage(
+          onClose: () => Navigator.of(context).pop(),
+          child: _TherapeuticFullscreenContent(videoUrl: widget.videoUrl),
+        ),
+      ),
+    );
+  }
+
   static const double _logoBaseHeight = 36;
   static const double _logoScale = 1.30; // +30 %
 
@@ -290,72 +304,59 @@ class _TherapeuticVideoPanelBelowBarState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  DocumentViewerToolbar(
+                    barHeight: 44,
+                    onDownload: () {
+                      if (!_closing) openUrl(widget.videoUrl);
+                    },
+                    onExpandFullscreen: _openFullscreen,
+                    onClose: _closeWithFade,
+                  ),
                   _buildSourceHeader(),
-                  Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      SizedBox(
-                        width: widget.barWidth,
-                        height: _videoHeight,
-                        child: !_hasUserStarted
-                            ? _buildPlayOverlay()
-                            : (isWindows
-                                ? (_initError
-                                    ? _buildFallback()
-                                    : _webViewController.value.isInitialized
-                                        ? Webview(
-                                            _webViewController,
-                                            permissionRequested: (String url,
-                                                    WebviewPermissionKind kind,
-                                                    bool isUserInitiated) async =>
-                                                WebviewPermissionDecision.allow,
-                                          )
-                                        : const Center(
-                                            child: CircularProgressIndicator(
-                                                color: Colors.white70),
-                                          ))
-                                : Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'Vidéo thérapeutique',
-                                          style: TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 14),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        TextButton.icon(
-                                          onPressed: _openInBrowserThenClose,
-                                          icon: const Icon(Icons.open_in_browser,
-                                              color: Colors.white70),
-                                          label: const Text(
-                                            'Ouvrir dans le navigateur',
-                                            style: TextStyle(
-                                                color: Colors.white70),
-                                          ),
-                                        ),
-                                      ],
+                  SizedBox(
+                    width: widget.barWidth,
+                    height: _videoHeight,
+                    child: !_hasUserStarted
+                        ? _buildPlayOverlay()
+                        : (isWindows
+                            ? (_initError
+                                ? _buildFallback()
+                                : _webViewController.value.isInitialized
+                                    ? Webview(
+                                        _webViewController,
+                                        permissionRequested: (String url,
+                                                WebviewPermissionKind kind,
+                                                bool isUserInitiated) async =>
+                                            WebviewPermissionDecision.allow,
+                                      )
+                                    : const Center(
+                                        child: CircularProgressIndicator(
+                                            color: Colors.white70),
+                                      ))
+                            : Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Vidéo thérapeutique',
+                                      style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14),
                                     ),
-                                  )),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Material(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(20),
-                          child: InkWell(
-                            onTap: _closeWithFade,
-                            borderRadius: BorderRadius.circular(20),
-                            child: const Padding(
-                              padding: EdgeInsets.all(6),
-                              child: Icon(Icons.close,
-                                  size: 20, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                                    const SizedBox(height: 12),
+                                    TextButton.icon(
+                                      onPressed: _openInBrowserThenClose,
+                                      icon: const Icon(Icons.open_in_browser,
+                                          color: Colors.white70),
+                                      label: const Text(
+                                        'Ouvrir dans le navigateur',
+                                        style: TextStyle(
+                                            color: Colors.white70),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
                   ),
                 ],
               ),
@@ -363,6 +364,84 @@ class _TherapeuticVideoPanelBelowBarState
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Contenu plein écran pour une vidéo thérapeutique (WebView).
+class _TherapeuticFullscreenContent extends StatefulWidget {
+  const _TherapeuticFullscreenContent({required this.videoUrl});
+
+  final String videoUrl;
+
+  @override
+  State<_TherapeuticFullscreenContent> createState() => _TherapeuticFullscreenContentState();
+}
+
+class _TherapeuticFullscreenContentState extends State<_TherapeuticFullscreenContent> {
+  final WebviewController _controller = WebviewController();
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (isWindows) _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      await _controller.initialize();
+      await _controller.setBackgroundColor(Colors.black);
+      await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+      _controller.loadingState.listen((LoadingState state) {
+        if (state == LoadingState.navigationCompleted) _isolateVideo();
+      });
+      await _controller.loadUrl(widget.videoUrl.trim());
+      if (mounted) setState(() => _initialized = true);
+    } catch (_) {
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> _isolateVideo() async {
+    const script = '''
+      (function() {
+        var v = document.querySelector('iframe, video');
+        if (v) {
+          document.body.style.overflow = 'hidden';
+          document.body.style.background = '#000';
+          var all = document.querySelectorAll('body *');
+          for (var i = 0; i < all.length; i++) all[i].style.visibility = 'hidden';
+          v.style.visibility = 'visible';
+          v.style.position = 'fixed';
+          v.style.top = '0';
+          v.style.left = '0';
+          v.style.width = '100%';
+          v.style.height = '100%';
+          v.style.zIndex = '9999';
+        }
+      })();
+    ''';
+    try {
+      await _controller.executeScript(script);
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isWindows || !_initialized) {
+      return const Center(child: CircularProgressIndicator(color: Colors.white));
+    }
+    return Webview(
+      _controller,
+      permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
+          WebviewPermissionDecision.allow,
     );
   }
 }

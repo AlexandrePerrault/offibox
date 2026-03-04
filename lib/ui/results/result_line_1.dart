@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,6 +16,7 @@ import 'package:offibox/ui/spans/search_result_span_cache.dart';
 import 'package:offibox/utils/normalize.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/constants/ui_constants.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 
 class ResultLine1 extends StatelessWidget {
   final SearchResult item;
@@ -68,16 +70,7 @@ class ResultLine1 extends StatelessWidget {
     final cisKeyBdm = item.source == SourceType.bdm && item.cis != null
         ? item.cis!.replaceAll(RegExp(r'\D'), '').trim()
         : '';
-    final generique2026InfoBdm = (item.source == SourceType.bdm &&
-            generiques2026ByCis != null &&
-            cisKeyBdm.isNotEmpty)
-        ? generiques2026ByCis![cisKeyBdm]
-        : null;
-    final labelRawBdm = item.labelRaw?.trim() ?? '';
-    final isPrincepsByKeyBdm = item.source == SourceType.bdm &&
-        generiques2026PrincepsKeyToGenericName != null &&
-        labelRawBdm.isNotEmpty &&
-        generiques2026PrincepsKeyToGenericName!.containsKey(normalizePrincepsKey(labelRawBdm));
+    final labelRawBdm = item.labelRaw.trim();
     /// Statut fic03spe (R = Princeps, G = Générique) pour ce BDM ; prioritaire sur génériques 2026 pour les badges.
     final fic03Status = item.source == SourceType.bdm
         ? getFic03StatusForItem(item.cis, item.cip13, cip13ToFic03Status)
@@ -92,7 +85,7 @@ class ResultLine1 extends StatelessWidget {
 
     final cacheKey = useBdmFastPath
         ? 'bdm-fast-$cip13Clean-$cisKeyBdm-F$fic03Status-S${statutsForCis?.length ?? 0}-${tauxRemboursement ?? ''}-${compositionLine ?? ''}-${listes?.join('|') ?? ''}-H${hospitalCip13Set?.length ?? 0}-$isDisabled-$hasNsfpDate'
-        : '${item.source}-${item.source == SourceType.lpp ? item.cip13 : item.cip13 ?? item.label}::${query.toLowerCase()}::${statutsForCis?.join('|') ?? ''}::${tauxRemboursement ?? ''}::${compositionLine ?? ''}::${listes?.join('|') ?? ''}::H${hospitalCip13Set?.length ?? 0}::S${item.isStupefiant}::E${item.isException}::O${item.isOtc}::P${item.isPih}::H${item.hospitalOnly}::F$fic03Status';
+        : '${item.source}-${item.source == SourceType.lpp ? item.cip13 : item.cip13 ?? item.label}::${query.toLowerCase()}::${statutsForCis?.join('|') ?? ''}::${tauxRemboursement ?? ''}::${compositionLine ?? ''}::${listes?.join('|') ?? ''}::H${hospitalCip13Set?.length ?? 0}::S${item.isStupefiant}::E${item.isException}::O${item.isOtc}::P${item.isPih}::H${item.hospitalOnly}::F$fic03Status${item.source == SourceType.dm ? '::${item.url ?? ''}' : ''}';
 
     final cachedSpans = SearchResultSpanCache.get(cacheKey, () {
       final spans = <InlineSpan>[];
@@ -199,14 +192,22 @@ class ResultLine1 extends StatelessWidget {
         );
         if (item.iconUrl != null && item.iconUrl!.trim().isNotEmpty) {
           spans.add(const TextSpan(text: ' '));
-          final labName = (item.label ?? item.laboratory ?? '').trim();
+          final labName = (item.laboratory.isEmpty ? item.label : item.laboratory).trim();
           spans.add(WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Padding(
               padding: const EdgeInsets.only(right: 6),
               child: logoWithTooltipZoom(
                 tooltip: labName.isNotEmpty ? labName : 'Catalogue laboratoire',
-                child: _labIconWidget(item.iconUrl!, keywordLogoInnerSize),
+                child: Container(
+                  width: _labLine1IconBoxSize,
+                  height: _labLine1IconBoxSize,
+                  padding: const EdgeInsets.all((_labLine1IconBoxSize - _labLine1IconInnerSize) / 2),
+                  decoration: _labLine1IconDecoration(),
+                  child: Center(
+                    child: _labIconWidget(item.iconUrl!, _labLine1IconInnerSize),
+                  ),
+                ),
               ),
             ),
           ),);
@@ -216,13 +217,17 @@ class ResultLine1 extends StatelessWidget {
           spans.add(const TextSpan(text: ' '));
           spans.add(WidgetSpan(
             alignment: PlaceholderAlignment.middle,
-            child: _SiteWebLinkExternalBadge(
-              url: item.url!.trim(),
-              onOpenUrl: onOpenUrl,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _SiteWebLinkExternalBadge(
+                url: item.url!.trim(),
+                onOpenUrl: onOpenUrl,
+                useLabIconStyle: true,
+              ),
             ),
           ));
         }
-        // Ligne 1 laboratoires : Tél (col C), Fax (col D), Mail (col E du CSV) — dans cet ordre
+        // Ligne 1 laboratoires : Tél (col C), Fax (col D), Mail (col E) — même taille icônes + contour 3D
         if (item.phone != null && item.phone!.trim().isNotEmpty) {
           spans.add(const TextSpan(text: ' '));
           spans.add(WidgetSpan(
@@ -230,11 +235,17 @@ class ResultLine1 extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(right: 6),
               child: _wrapBadgeIfDisabled(
-                CodeBadgeWithCopy(
-                  label: 'Tél',
-                  value: item.phone!.replaceAll('"', '').replaceAll("'", ''),
-                  tooltip: 'Copier le numéro',
-                  leadingIcon: Icons.phone,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: _labLine1IconDecoration(color: const Color(0xFFF1F5F9)),
+                  child: CodeBadgeWithCopy(
+                    label: 'Tél',
+                    value: item.phone!.replaceAll('"', '').replaceAll("'", ''),
+                    tooltip: 'Copier le numéro',
+                    leadingIcon: Icons.phone,
+                    fontSize: 11,
+                    leadingIconSize: _labLine1IconInnerSize,
+                  ),
                 ),
                 isDisabled,
               ),
@@ -248,11 +259,17 @@ class ResultLine1 extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(right: 6),
               child: _wrapBadgeIfDisabled(
-                CodeBadgeWithCopy(
-                  label: 'Fax',
-                  value: item.fax!.replaceAll('"', '').replaceAll("'", ''),
-                  tooltip: 'Copier le fax',
-                  leadingIcon: Icons.fax,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: _labLine1IconDecoration(color: const Color(0xFFF1F5F9)),
+                  child: CodeBadgeWithCopy(
+                    label: 'Fax',
+                    value: item.fax!.replaceAll('"', '').replaceAll("'", ''),
+                    tooltip: 'Copier le fax',
+                    leadingIcon: Icons.fax,
+                    fontSize: 11,
+                    leadingIconSize: _labLine1IconInnerSize,
+                  ),
                 ),
                 isDisabled,
               ),
@@ -267,23 +284,19 @@ class ResultLine1 extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(right: 6),
               child: _wrapBadgeIfDisabled(
-                Tooltip(
-                  message: 'Ouvrir le client mail',
-                  child: InkWell(
-                    onTap: () => openUrl('mailto:$email'),
-                    borderRadius: BorderRadius.circular(999),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: const Color(0xFFCBD5E1)),
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: _labLine1IconDecoration(color: const Color(0xFFF1F5F9)),
+                  child: OffiboxTooltip(
+                    message: 'Ouvrir le client mail',
+                    child: InkWell(
+                      onTap: () => openUrl('mailto:$email'),
+                      borderRadius: BorderRadius.circular(8),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.email_outlined, size: 12, color: Colors.black54),
-                          const SizedBox(width: 4),
+                          Icon(Icons.email_outlined, size: _labLine1IconInnerSize, color: Colors.black54),
+                          const SizedBox(width: 6),
                           Text('Mail : $email', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
                           const SizedBox(width: 6),
                           InkWell(
@@ -291,7 +304,7 @@ class ResultLine1 extends StatelessWidget {
                               Clipboard.setData(ClipboardData(text: email));
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mail copié'), duration: Duration(milliseconds: 900), behavior: SnackBarBehavior.floating));
                             },
-                            child: const Icon(Icons.copy, size: 12, color: Colors.black54),
+                            child: Icon(Icons.copy, size: _labLine1IconInnerSize, color: Colors.black54),
                           ),
                         ],
                       ),
@@ -305,29 +318,66 @@ class ResultLine1 extends StatelessWidget {
         }
       }
 
-      // Stupéfiant / Exception / OTC / PIH / HOP en ligne 1 (common_spans)
-      if (item.isStupefiant == true) {
-        spans.add(stupSquareSpan());
-        spans.add(const TextSpan(text: ' '));
-      }
-      if (item.isException == true) {
-        spans.add(exceptionSquareSpan());
-        spans.add(const TextSpan(text: ' '));
-      }
-      if (item.isOtc == true) {
-        spans.add(otcSquareSpan());
-        spans.add(const TextSpan(text: ' '));
-      }
-      if (item.isPih == true) {
-        spans.add(pihSquareSpan());
-        spans.add(const TextSpan(text: ' '));
-      }
-      if (item.hospitalOnly == true) {
-        spans.add(hopSquareSpan());
-        spans.add(const TextSpan(text: ' '));
+      // Stupéfiant / Exception / OTC / PIH / HOP en ligne 1 — pour BDM ils sont ajoutés après la gélule (avant le libellé) plus bas
+      if (item.source != SourceType.bdm) {
+        if (item.isStupefiant == true) {
+          spans.add(stupSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.isException == true) {
+          spans.add(exceptionSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.isOtc == true) {
+          spans.add(otcSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.isPih == true) {
+          spans.add(pihSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.hospitalOnly == true) {
+          spans.add(hopSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
       }
 
       spans.addAll(buildMedicinePictos(item));
+
+      // BDM : badges STUPS / EXCEPTION / SURV / OTC / PIH / HOP toujours après la gélule, avant le libellé (ligne 1).
+      if (item.source == SourceType.bdm &&
+          (item.isStupefiant == true ||
+              item.isException == true ||
+              item.isSurveillanceParticuliere == true ||
+              item.isOtc == true ||
+              item.isPih == true ||
+              item.hospitalOnly == true)) {
+        spans.add(const TextSpan(text: ' '));
+        if (item.isStupefiant == true) {
+          spans.add(stupSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.isException == true) {
+          spans.add(exceptionSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.isSurveillanceParticuliere == true) {
+          spans.add(surveillanceSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.isOtc == true) {
+          spans.add(otcSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.isPih == true) {
+          spans.add(pihSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+        if (item.hospitalOnly == true) {
+          spans.add(hopSquareSpan());
+          spans.add(const TextSpan(text: ' '));
+        }
+      }
 
       if (item.source == SourceType.amc) {
         spans.add(amcVitaleIconSpan());
@@ -400,6 +450,24 @@ class ResultLine1 extends StatelessWidget {
         }
       }
 
+      // 📋 Codes actes pharmacie — ligne 1 : badge "Codes actes" + Code — Libellé — Tarif (surbrillance)
+      if (item.source == SourceType.codesActes) {
+        spans.add(codesActesBadgeSpan());
+        spans.add(const TextSpan(text: ' '));
+        final line1Text = (item.label).trim();
+        if (line1Text.isNotEmpty) {
+          final highlightSpans = highlightText(
+            context: context,
+            text: line1Text,
+            searchQuery: query,
+            italic: isDisabled,
+            forceGrey: isDisabled,
+            disableBold: false,
+          );
+          spans.addAll(highlightSpans);
+        }
+      }
+
       // 🌐 Sites web — ligne 1 : badge "site internet" #ED1566 + nom col B (surbrillance) + [icône PDF] + logo col C ; clic nom/logo → url col D
       if (item.source == SourceType.siteWeb) {
         spans.add(siteInternetBadgeSpan());
@@ -445,7 +513,8 @@ class ResultLine1 extends StatelessWidget {
             iconPath.isNotEmpty &&
             !iconPath.toLowerCase().contains('monitor_www')) {
           spans.add(const TextSpan(text: ' '));
-          final siteWebTooltip = (item.commentaire ?? item.label ?? 'Site internet').trim();
+          final rawTooltip = (item.commentaire ?? item.label).trim();
+          final siteWebTooltip = rawTooltip.isEmpty ? 'Site internet' : rawTooltip;
           spans.add(WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Padding(
@@ -476,8 +545,10 @@ class ResultLine1 extends StatelessWidget {
         }
       }
 
-      // 🟪 CRPV — logo annuaire + commonspan annuaire + libellé "centre de pharmacovigilance de [ville]" + tél, fax (ligne 1)
-      if (item.source == SourceType.pharmacovigilance) {
+      // 🟪 Annuaires (CRPV, Centres anti poison, CHU) — logo annuaire + span + libellé + tél, fax (ligne 1)
+      if (item.source == SourceType.pharmacovigilance ||
+          item.source == SourceType.centresAntiPoison ||
+          item.source == SourceType.chu) {
         spans.add(WidgetSpan(
           alignment: PlaceholderAlignment.middle,
           child: Padding(
@@ -600,8 +671,8 @@ class ResultLine1 extends StatelessWidget {
             ),
           );
         }
-      } else if (item.source != SourceType.keyword && item.source != SourceType.catalogue && item.source != SourceType.siteWeb && item.source != SourceType.pharmacovigilance) {
-        String cleanLabel = normalizeText(label);
+      } else if (item.source != SourceType.keyword && item.source != SourceType.catalogue && item.source != SourceType.siteWeb && item.source != SourceType.codesActes && item.source != SourceType.pharmacovigilance && item.source != SourceType.centresAntiPoison && item.source != SourceType.chu) {
+        String cleanLabel = cleanLabelLine1(label);
         if (item.source == SourceType.amc) {
           cleanLabel = cleanLabel.replaceFirst(
             RegExp(r'^mutuelle\s+', caseSensitive: false),
@@ -616,19 +687,31 @@ class ResultLine1 extends StatelessWidget {
             .replaceAll(RegExp(r'\s{2,}'), ' ')
             .trim();
 
-        spans.addAll(
-          highlightText(
-            context: context,
-            text: cleanLabel,
-            searchQuery: query,
-            italic: isDisabled,
-            forceGrey: isDisabled,
-            disableBold: isDisabled,
-            isHop: item.hospitalOnly,
-            isNsfp: item.isNsfpEffective,
-            disableLinks: isOrganisme,
-          ),
+        final labelSpans = highlightText(
+          context: context,
+          text: cleanLabel,
+          searchQuery: query,
+          italic: isDisabled,
+          forceGrey: isDisabled,
+          disableBold: isDisabled,
+          isHop: item.hospitalOnly,
+          isNsfp: item.isNsfpEffective,
+          disableLinks: isOrganisme,
         );
+        // DM (pansements) : clic sur le nom ouvre la fiche produit (même URL que le badge Fiche produit).
+        if (item.source == SourceType.dm &&
+            item.url != null &&
+            item.url!.trim().isNotEmpty) {
+          final ficheUrl = item.url!.trim();
+          final recognizer = TapGestureRecognizer()
+            ..onTap = () => onOpenUrl(ficheUrl);
+          spans.add(TextSpan(
+            recognizer: recognizer,
+            children: labelSpans,
+          ));
+        } else {
+          spans.addAll(labelSpans);
+        }
       }
 
       if (item.source == SourceType.amc || item.source == SourceType.amo) {
@@ -786,7 +869,7 @@ Widget offiboxCopyWidget({
   String tooltip = 'Copier',
   bool disabled = false,
 }) {
-  return Tooltip(
+  return OffiboxTooltip(
     message: tooltip,
     child: InkWell(
       onTap: disabled
@@ -843,11 +926,46 @@ void _buildBdmFastPathSpans({
     spans.add(geSquareSpanGreen());
     spans.add(const TextSpan(text: ' '));
   }
-  final effectiveLabel = label.trim().isEmpty ? (item.label ?? '') : label;
+  // BDM : badges STUPS / EXCEPTION / SURV / OTC / PIH / HOP après la gélule, avant le libellé (ligne 1).
+  if (item.source == SourceType.bdm &&
+      (item.isStupefiant == true ||
+          item.isException == true ||
+          item.isSurveillanceParticuliere == true ||
+          item.isOtc == true ||
+          item.isPih == true ||
+          item.hospitalOnly == true)) {
+    spans.add(const TextSpan(text: ' '));
+    if (item.isStupefiant == true) {
+      spans.add(stupSquareSpan());
+      spans.add(const TextSpan(text: ' '));
+    }
+    if (item.isException == true) {
+      spans.add(exceptionSquareSpan());
+      spans.add(const TextSpan(text: ' '));
+    }
+    if (item.isSurveillanceParticuliere == true) {
+      spans.add(surveillanceSquareSpan());
+      spans.add(const TextSpan(text: ' '));
+    }
+    if (item.isOtc == true) {
+      spans.add(otcSquareSpan());
+      spans.add(const TextSpan(text: ' '));
+    }
+    if (item.isPih == true) {
+      spans.add(pihSquareSpan());
+      spans.add(const TextSpan(text: ' '));
+    }
+    if (item.hospitalOnly == true) {
+      spans.add(hopSquareSpan());
+      spans.add(const TextSpan(text: ' '));
+    }
+  }
+  final effectiveLabel = label.trim().isEmpty ? item.label : label;
+  final displayLabel = cleanLabelLine1(effectiveLabel);
   spans.addAll(
     highlightText(
       context: context,
-      text: effectiveLabel,
+      text: displayLabel,
       searchQuery: query,
       italic: isDisabled,
       forceGrey: isDisabled,
@@ -857,9 +975,9 @@ void _buildBdmFastPathSpans({
   _addCodeBadgeSpans(spans: spans, context: context, item: item, isDisabled: isDisabled);
   // BDM : badge « plus d'infos » affiché en ligne 2 après les autres badges (voir ResultLine2Code).
   final showPlusInfos = (statutsForCis != null && statutsForCis.isNotEmpty) ||
-      (tauxRemboursement != null && tauxRemboursement!.trim().isNotEmpty) ||
-      (compositionLine != null && compositionLine!.trim().isNotEmpty) ||
-      (listes != null && listes!.isNotEmpty);
+      (tauxRemboursement != null && tauxRemboursement.trim().isNotEmpty) ||
+      (compositionLine != null && compositionLine.trim().isNotEmpty) ||
+      (listes != null && listes.isNotEmpty);
   if (showPlusInfos && item.source != SourceType.bdm) {
     spans.add(const TextSpan(text: ' '));
     spans.add(
@@ -871,7 +989,7 @@ void _buildBdmFastPathSpans({
             statuts: statutsForCis ?? const [],
             tauxRemboursement: tauxRemboursement,
             compositionLine: compositionLine,
-            listes: listes ?? const [],
+            listes: listes,
             isDisabled: isDisabled,
           ),
         ),
@@ -927,32 +1045,7 @@ void _addCodeBadgeSpans({
     ),
   );
 
-  // DM : icône lien externe juste après le code EAN (ligne 1).
-  if (item.source == SourceType.dm && item.url != null && item.url!.trim().isNotEmpty) {
-    final ficheUrl = item.url!.trim();
-    spans.add(
-      WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 6),
-          child: Tooltip(
-            message: ficheUrl,
-            child: InkWell(
-              onTap: () => openUrl(ficheUrl),
-              borderRadius: BorderRadius.circular(4),
-              child: SvgPicture.asset(
-                'assets/icons/link-external.svg',
-                width: 20,
-                height: 20,
-                fit: BoxFit.contain,
-                colorFilter: const ColorFilter.mode(OffiboxColors.primary, BlendMode.srcIn),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // DM (pansements) : plus d’icône lien externe en ligne 1 (clic sur le nom ouvre la fiche).
 }
 
 Widget _wrapBadgeIfDisabled(Widget child, bool isDisabled) {
@@ -962,6 +1055,31 @@ Widget _wrapBadgeIfDisabled(Widget child, bool isDisabled) {
 
 /// Normalise le chemin d'asset (antislashs → slashes) pour éviter les erreurs de chargement sur Windows.
 String _normalizeAssetPath(String path) => path.trim().replaceAll(r'\', '/');
+
+/// Taille unique des icônes laboratoire en ligne 1 (logo, lien externe, tél, fax, mail).
+const double _labLine1IconBoxSize = 36;
+const double _labLine1IconInnerSize = 28;
+
+/// Décoration commune : contour (liseré) + léger effet 3D pour les icônes laboratoire ligne 1.
+BoxDecoration _labLine1IconDecoration({Color? color}) {
+  return BoxDecoration(
+    color: color ?? Colors.white,
+    borderRadius: BorderRadius.circular(8),
+    border: Border.all(color: const Color(0xFFCBD5E1), width: 1),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.1),
+        offset: const Offset(0, 2),
+        blurRadius: 3,
+      ),
+      BoxShadow(
+        color: Colors.white.withValues(alpha: 0.9),
+        offset: const Offset(0, -1),
+        blurRadius: 0,
+      ),
+    ],
+  );
+}
 
 Widget _labIconWidget(String iconPath, double size) {
   final normalized = _normalizeAssetPath(iconPath);
@@ -991,20 +1109,17 @@ Widget _labIconWidget(String iconPath, double size) {
   );
 }
 
-/// True si l'URL pointe vers un PDF (extension .pdf dans le chemin, avant ? ou #).
-bool _isPdfUrl(String url) {
-  final path = url.split(RegExp(r'[?#]')).first.trim().toLowerCase();
-  return path.endsWith('.pdf');
-}
-
 /// Badge link-external à droite du libellé site web : couleur offibox, inversion au tooltip (survol) et au clic ; ouvre l'URL col D.
+/// Si [useLabIconStyle] true (ligne 1 laboratoire), même taille que les autres icônes + contour 3D.
 class _SiteWebLinkExternalBadge extends StatefulWidget {
   const _SiteWebLinkExternalBadge({
     required this.url,
     required this.onOpenUrl,
+    this.useLabIconStyle = false,
   });
   final String url;
   final void Function(String url) onOpenUrl;
+  final bool useLabIconStyle;
 
   @override
   State<_SiteWebLinkExternalBadge> createState() => _SiteWebLinkExternalBadgeState();
@@ -1018,9 +1133,19 @@ class _SiteWebLinkExternalBadgeState extends State<_SiteWebLinkExternalBadge> {
 
   @override
   Widget build(BuildContext context) {
-    const double size = 20;
+    final double size = widget.useLabIconStyle ? _labLine1IconInnerSize : 20;
+    final double boxSize = widget.useLabIconStyle ? _labLine1IconBoxSize : (20 + 8);
     const String asset = 'assets/icons/link-external.svg';
-    return Tooltip(
+    final decoration = widget.useLabIconStyle
+        ? _labLine1IconDecoration(color: _inverted ? OffiboxColors.primary : Colors.white).copyWith(
+            border: Border.all(color: OffiboxColors.primary, width: 1),
+          )
+        : BoxDecoration(
+            color: _inverted ? OffiboxColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: OffiboxColors.primary, width: 1),
+          );
+    return OffiboxTooltip(
       message: widget.url,
       waitDuration: const Duration(milliseconds: 500),
       child: MouseRegion(
@@ -1036,15 +1161,10 @@ class _SiteWebLinkExternalBadgeState extends State<_SiteWebLinkExternalBadge> {
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: _inverted ? OffiboxColors.primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: OffiboxColors.primary,
-                width: 1,
-              ),
-            ),
+            width: widget.useLabIconStyle ? boxSize : null,
+            height: widget.useLabIconStyle ? boxSize : null,
+            padding: EdgeInsets.all(widget.useLabIconStyle ? (boxSize - size) / 2 : 4),
+            decoration: decoration,
             child: SizedBox(
               width: size,
               height: size,

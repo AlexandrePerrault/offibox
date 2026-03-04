@@ -15,6 +15,9 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as nodemailer from "nodemailer";
 
+/** Options runtime 2nd gen : RAM limitée + timeout court = moins cher. Pas de 1GB pour un email. */
+const runOpts = { memory: "256MiB" as const, timeoutSeconds: 30 };
+
 const FROM_EMAIL = "no-reply@offibox.fr";
 const FROM_NAME = "Offibox";
 
@@ -79,12 +82,12 @@ async function sendEmail(to: string, subject: string, text: string): Promise<"sm
   return "firestore";
 }
 
-const IDEAS_RECIPIENT = "offibox17@gmail.com";
+const IDEAS_RECIPIENT = "contact@offibox.fr";
 const IDEAS_SUBJECT = "Boîte à idées";
 
-/** Email de bienvenue (1ère connexion, essai 15 jours) */
+/** Email de bienvenue (1ère connexion, essai 15 jours). onCreate ciblé = pas de surcoût onWrite. */
 export const onUserFirstConnection = onDocumentCreated(
-  "users/{userId}",
+  { document: "users/{userId}", ...runOpts },
   async (event) => {
     const after = event.data?.data();
 
@@ -120,7 +123,7 @@ L'équipe Offibox`;
 
 /** Envoi email fin d'essai (tous les jours à 8h) */
 export const sendTrialEndEmails = onSchedule(
-  { schedule: "0 8 * * *", timeZone: "Europe/Paris" },
+  { schedule: "0 8 * * *", timeZone: "Europe/Paris", ...runOpts },
   async () => {
     const db = admin.firestore();
     const now = new Date();
@@ -154,7 +157,7 @@ L'équipe Offibox`;
 );
 
 /** Envoi depuis la Boîte à idées (sans ouvrir le client mail) */
-export const sendIdeasEmail = onCall(async (request) => {
+export const sendIdeasEmail = onCall(runOpts, async (request) => {
   const data = request.data as { message?: string; email?: string } | undefined;
   const message = typeof data?.message === "string" ? data.message.trim() : "";
   const contactEmail = typeof data?.email === "string" ? data.email.trim() : "";
@@ -171,10 +174,10 @@ export const sendIdeasEmail = onCall(async (request) => {
 });
 
 /** Boîte à idées — version HTTP pour clients desktop (Windows) où le callable n’est pas disponible.
- *  Destinataire : offibox17@gmail.com (IDEAS_RECIPIENT).
+ *  Destinataire : contact@offibox.fr (IDEAS_RECIPIENT).
  *  Pour que le mail parte vraiment : configurer SMTP (SMTP_HOST, SMTP_USER, SMTP_PASS) ou l’extension Firestore "Trigger Email".
  */
-export const sendIdeasEmailHttp = onRequest(async (req, res) => {
+export const sendIdeasEmailHttp = onRequest(runOpts, async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;

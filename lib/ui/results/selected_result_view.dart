@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:offibox/data/cis_dispo_loader.dart';
 import 'package:offibox/data/generiques.dart';
 import 'package:offibox/models/search_result.dart';
+import 'package:offibox/models/source_type.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/ui/results/result_line_1.dart';
 import 'package:offibox/ui/results/result_tile.dart';
@@ -47,6 +48,8 @@ class SelectedResultView extends StatelessWidget {
   final Set<String>? recalledProductNames;
   /// Dernier rappel ANSM (ticker) : date en ligne 2, alerte ligne 4 si < 15 jours.
   final AnsmRappelItem? ansmLastRappel;
+  /// Rappel correspondant à ce médicament pour le badge rouge ligne 3 « rappel de produit + date » (clic → ANSM).
+  final AnsmRappelItem? rappelForLine3Badge;
   /// CIS avec « arrêt de commercialisation » (CIS_CIP_Dispo_Spec) — badge ligne 2 pour ces NSFP.
   final Set<String>? cisArretCommercialisation;
   /// CIS → date + URL pour le badge « arrêt de commercialisation » (clic → ouvrir URL).
@@ -86,6 +89,7 @@ class SelectedResultView extends StatelessWidget {
     this.scanPayload,
     this.recalledProductNames,
     this.ansmLastRappel,
+    this.rappelForLine3Badge,
     this.cisArretCommercialisation,
     this.arretCommercialisationByCis,
     this.vocPatientUrl,
@@ -108,6 +112,12 @@ class SelectedResultView extends StatelessWidget {
       parts.add('N° série : ${scanPayload!.serialNumber}');
     }
     final scanLine = parts.isNotEmpty ? parts.join(' · ') : null;
+
+    final bool isVetoInjectable = item.source == SourceType.veto &&
+        item.labelRaw.toLowerCase().contains('inject');
+    final double line2ToLine3Height = item.source == SourceType.veto
+        ? (isVetoInjectable ? 0.0 : 2.0)
+        : 9.0;
 
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
@@ -144,7 +154,7 @@ class SelectedResultView extends StatelessWidget {
             cip13ToFic03Status: cip13ToFic03Status,
             scaleDownToFitLine1: true,
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 2),
           ResultLine2Code(
             item: item,
             onOpenUrl: onOpenUrl,
@@ -167,8 +177,7 @@ class SelectedResultView extends StatelessWidget {
             compositionLine: compositionLine,
             listes: listes,
           ),
-          const SizedBox(height: 3),
-          const SizedBox(height: 6),
+          SizedBox(height: line2ToLine3Height),
           ResultLine3Actions(
             item: item,
             generiques2026CisSet: generiques2026CisSet,
@@ -178,6 +187,7 @@ class SelectedResultView extends StatelessWidget {
             vocProUrl: vocProUrl,
             videosByCip13: videosByCip13,
             onOpenTherapeuticVideo: onOpenTherapeuticVideo,
+            rappelForLine3Badge: rappelForLine3Badge,
           ),
           ResultLine4RappelAlert(
             item: item,

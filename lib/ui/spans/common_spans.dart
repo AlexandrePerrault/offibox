@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/ui/widgets/hover_pill_button.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/utils/open_url.dart';
 
 /// 🎨 COULEUR OFFIBOX
@@ -77,7 +78,7 @@ WidgetSpan squareTagSpan({
 
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
-    child: Tooltip(
+    child: OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 300),
       child: url == null
@@ -118,7 +119,7 @@ Widget squareTagWidget({
       ),
     ),
   );
-  return Tooltip(
+  return OffiboxTooltip(
     message: tooltip,
     waitDuration: const Duration(milliseconds: 300),
     child: url == null
@@ -215,7 +216,7 @@ InlineSpan? bloodPictoSpan(SearchResult item) {
     alignment: PlaceholderAlignment.middle,
     child: Padding(
       padding: const EdgeInsets.only(right: 4),
-      child: Tooltip(
+      child: OffiboxTooltip(
         message: 'Médicament dérivé du sang',
         waitDuration: const Duration(milliseconds: 300),
         child: InkWell(
@@ -239,7 +240,7 @@ WidgetSpan nsfpIconSpan({
 }) {
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
-    child: Tooltip(
+    child: OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 300),
       child: const Padding(
@@ -305,7 +306,7 @@ WidgetSpan clickableMarkerSpan({
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
     child: (tooltip != null && tooltip.isNotEmpty)
-        ? Tooltip(message: tooltip, child: content)
+        ? OffiboxTooltip(message: tooltip, child: content)
         : content,
   );
 }
@@ -460,7 +461,7 @@ WidgetSpan dmSquareSpan({
 }) {
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
-    child: Tooltip(
+    child: OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 300),
       child: Container(
@@ -492,7 +493,7 @@ WidgetSpan vetoSquareSpan({
 }) {
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
-    child: Tooltip(
+    child: OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 300),
       child: Container(
@@ -631,6 +632,17 @@ WidgetSpan outilsMetierSpan({
   );
 }
 
+/// 📋 Codes actes pharmacie — badge "codes actes" (style outils métier, bleu-vert)
+WidgetSpan codesActesBadgeSpan({
+  String tooltip = 'Codes actes pharmacie',
+}) {
+  return squareTagSpan(
+    label: 'CODES ACTES',
+    color: const Color(0xFF0D7377),
+    tooltip: tooltip,
+  );
+}
+
 /// 🌐 Sites web — badge "site internet" (rose #ED1566, texte blanc)
 WidgetSpan siteInternetBadgeSpan({
   String tooltip = 'Site internet',
@@ -675,7 +687,7 @@ class _LogoTooltipZoomState extends State<_LogoTooltipZoom> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: Tooltip(
+      child: OffiboxTooltip(
         message: widget.tooltip,
         waitDuration: const Duration(milliseconds: 300),
         child: AnimatedScale(
@@ -795,7 +807,7 @@ WidgetSpan keywordPlusAndOutilsMetierSpan({
           ),
           const SizedBox(width: 6),
           Center(
-            child: Tooltip(
+            child: OffiboxTooltip(
               message: tooltip,
               waitDuration: const Duration(milliseconds: 300),
               child: Container(
@@ -829,11 +841,15 @@ WidgetSpan keywordPlusAndOutilsMetierSpan({
 const double keywordLogoBoxSize = injectedLogoBoxSize;
 const double keywordLogoInnerSize = injectedLogoInnerSize;
 
+/// Normalise un chemin d'asset (antislashs → slashes) pour le bundle Flutter.
+String _normalizeAssetPath(String path) => path.trim().replaceAll(r'\', '/');
+
 /// 🟢 Mots-clés — logo (asset) dans un widget blanc à bords arrondis et légère ombre, taille uniforme avec sites web. Zoom x1.5 au tooltip.
 WidgetSpan keywordLogoWrappedSpan({
   required String iconAssetPath,
   String? tooltip,
 }) {
+  final path = _normalizeAssetPath(iconAssetPath);
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
     child: Padding(
@@ -858,7 +874,7 @@ WidgetSpan keywordLogoWrappedSpan({
           child: ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: Image.asset(
-              iconAssetPath,
+              path,
               width: injectedLogoInnerSize,
               height: injectedLogoInnerSize,
               fit: BoxFit.contain,
@@ -873,13 +889,14 @@ WidgetSpan keywordLogoWrappedSpan({
 
 /// 🟢 Mots-clés — icône personnalisée (ex. BDNM) dans la barre, même emplacement fixe que le bloc +
 WidgetSpan keywordCustomIconSpan({required String iconAssetPath}) {
+  final path = _normalizeAssetPath(iconAssetPath);
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
     child: SizedBox(
       width: keywordIconBoxWidth,
       height: keywordIconBoxHeight,
       child: Image.asset(
-        iconAssetPath,
+        path,
         fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => const SizedBox.shrink(),
       ),
@@ -894,6 +911,17 @@ WidgetSpan laboratoireSpan({
   return squareTagSpan(
     label: 'LABORATOIRE',
     color: const Color(0xFF9155A7),
+    tooltip: tooltip,
+  );
+}
+
+/// 🏷️ CO&PHARM — badge "produit" (bleu lagon, texte blanc)
+WidgetSpan produitSpan({
+  String tooltip = 'Produit Co&Pharm',
+}) {
+  return squareTagSpan(
+    label: 'produit',
+    color: const Color(0xFF00B4D8), // bleu lagon
     tooltip: tooltip,
   );
 }
@@ -931,7 +959,7 @@ WidgetSpan crpvPlusInfosIconSpan({
     alignment: PlaceholderAlignment.middle,
     child: Padding(
       padding: const EdgeInsets.only(left: 6),
-      child: Tooltip(
+      child: OffiboxTooltip(
         message: tooltip,
         waitDuration: const Duration(milliseconds: 300),
         child: InkWell(
@@ -979,7 +1007,7 @@ InlineSpan amcVitaleIconSpan({
     alignment: PlaceholderAlignment.middle,
     child: Padding(
       padding: const EdgeInsets.only(right: 6),
-      child: Tooltip(
+      child: OffiboxTooltip(
         message: tooltip,
         waitDuration: const Duration(milliseconds: 250),
         child: SvgPicture.asset(

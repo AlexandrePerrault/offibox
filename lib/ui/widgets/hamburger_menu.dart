@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/constants/ui_constants.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 
 /// Menu hamburger : Raccourcis clavier, Ouvrir offibox.fr, Réduire, Fermer, À propos.
 class HamburgerMenu extends StatefulWidget {
@@ -13,10 +14,14 @@ class HamburgerMenu extends StatefulWidget {
     required this.onClose,
     this.onShowAbout,
     this.onShowShortcuts,
+    this.onShowContact,
+    this.onShowVersionHistory,
     this.onOpenGoogleAgenda,
     this.onConnectGoogleAgenda,
     this.onOpenIdBox,
     this.isGoogleConnected = false,
+    /// Si false (ex. pas de compte Gmail), l'entrée « Connecter l'agenda Google » est affichée mais grisée.
+    this.canConnectGoogleAgenda = true,
     this.popupKey,
     /// Décalage vertical du menu (pour l’ouvrir sous la barre de recherche).
     this.menuOffsetDy = 0,
@@ -31,12 +36,18 @@ class HamburgerMenu extends StatefulWidget {
   final VoidCallback onClose;
   final VoidCallback? onShowAbout;
   final VoidCallback? onShowShortcuts;
+  /// Ouvre le dialogue Contact (téléphone, mail, adresse + formulaire).
+  final VoidCallback? onShowContact;
+  /// Ouvre le dialogue « Historique des versions » (releases GitHub + notes).
+  final VoidCallback? onShowVersionHistory;
   final VoidCallback? onOpenGoogleAgenda;
   /// Appelé pour lancer la connexion OAuth Google Calendar (Windows/Desktop). Si null, l’entrée « Connecter l’agenda Google » est masquée.
   final VoidCallback? onConnectGoogleAgenda;
   /// Ouvre le panneau « Boîte à idées » sous la barre.
   final VoidCallback? onOpenIdBox;
   final bool isGoogleConnected;
+  /// Autorise l'action « Connecter l'agenda Google » (ex. compte Gmail). Si false, l'entrée est grisée.
+  final bool canConnectGoogleAgenda;
   /// Clé pour ouvrir le menu depuis l'extérieur (ex. clic droit sur le logo). Type GlobalKey<HamburgerMenuState>.
   final GlobalKey<HamburgerMenuState>? popupKey;
   /// Décalage vertical (dy) pour placer le menu sous la barre de recherche.
@@ -55,7 +66,7 @@ class HamburgerMenu extends StatefulWidget {
 }
 
 /// Action du menu (pour showMenu).
-enum _HamburgerAction { shortcuts, openOffibox, minimize, close, idBox, about, googleAgenda, connectGoogleAgenda }
+enum _HamburgerAction { shortcuts, openOffibox, minimize, close, idBox, contact, versionHistory, about, googleAgenda, connectGoogleAgenda }
 
 class HamburgerMenuState extends State<HamburgerMenu> {
   bool _hovering = false;
@@ -64,7 +75,9 @@ class HamburgerMenuState extends State<HamburgerMenu> {
   /// Ouvre le menu (sous la barre, aligné à droite). Appelé par le bouton ou par popupKey.currentState?.openMenu().
   void openMenu() => _openMenu(context);
 
-  static const double _menuWidth = 280;
+  static const double _menuWidth = 224;
+  /// Hauteur d’un item (réduite de ~20 % par rapport au défaut 48).
+  static const double _itemHeight = 38;
 
   void _openMenu(BuildContext context) async {
     final overlay = Overlay.maybeOf(context);
@@ -125,6 +138,12 @@ class HamburgerMenuState extends State<HamburgerMenu> {
       case _HamburgerAction.idBox:
         widget.onOpenIdBox?.call();
         break;
+      case _HamburgerAction.contact:
+        widget.onShowContact?.call();
+        break;
+      case _HamburgerAction.versionHistory:
+        widget.onShowVersionHistory?.call();
+        break;
       case _HamburgerAction.about:
         widget.onShowAbout?.call();
         break;
@@ -142,38 +161,49 @@ class HamburgerMenuState extends State<HamburgerMenu> {
           if (widget.onShowShortcuts != null)
             const PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.shortcuts,
+              height: _itemHeight,
               child: _MenuItemRow(
                 icon: Icons.keyboard,
                 label: 'Raccourcis clavier',
               ),
             ),
-          if (widget.onShowShortcuts != null) const PopupMenuDivider(height: 3),
+          if (widget.onShowShortcuts != null) const PopupMenuDivider(height: 2.4),
           const PopupMenuItem<_HamburgerAction>(
             value: _HamburgerAction.openOffibox,
+            height: _itemHeight,
             child: _MenuItemRow(
               label: 'Ouvrir offibox.fr',
               isOffiboxFrLabel: true,
               iconAssetPath: 'assets/icons/logo_offibox2.png',
             ),
           ),
-          if (widget.isGoogleConnected && widget.onOpenGoogleAgenda != null)
-            const PopupMenuItem<_HamburgerAction>(
+          // Toujours afficher une entrée Agenda : grisée si déjà connecté, sinon « Connecter » (activé seulement si Gmail).
+          if (widget.isGoogleConnected)
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.googleAgenda,
-              child: _MenuItemRow(
+              height: _itemHeight,
+              enabled: false,
+              child: const _MenuItemRow(
                 icon: Icons.event_note_outlined,
-                label: 'Google Agenda',
+                label: 'Agenda Google (connecté)',
+                isGreyed: true,
               ),
             ),
           if (!widget.isGoogleConnected && widget.onConnectGoogleAgenda != null)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.connectGoogleAgenda,
+              height: _itemHeight,
+              enabled: widget.canConnectGoogleAgenda,
               child: _MenuItemRow(
                 icon: Icons.event_note_outlined,
-                label: 'Connecter l\'agenda Google',
+                label: widget.canConnectGoogleAgenda
+                    ? 'Connecter l\'agenda Google'
+                    : 'Connecter l\'agenda Google (compte Gmail requis)',
+              ),
             ),
-          ),
           const PopupMenuItem<_HamburgerAction>(
             value: _HamburgerAction.minimize,
+            height: _itemHeight,
             child: _MenuItemRow(
               icon: Icons.minimize,
               label: 'Réduire',
@@ -182,6 +212,7 @@ class HamburgerMenuState extends State<HamburgerMenu> {
           ),
           const PopupMenuItem<_HamburgerAction>(
             value: _HamburgerAction.close,
+            height: _itemHeight,
             child: _MenuItemRow(
               icon: Icons.close,
               label: 'Quitter',
@@ -190,15 +221,35 @@ class HamburgerMenuState extends State<HamburgerMenu> {
           if (widget.onOpenIdBox != null)
             const PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.idBox,
+              height: _itemHeight,
               child: _MenuItemRow(
                 label: 'Id Box',
                 isIdBoxLabel: true,
                 iconAssetPath: 'assets/icons/ampoule_idees.jpg',
               ),
             ),
+          if (widget.onShowContact != null)
+            const PopupMenuItem<_HamburgerAction>(
+              value: _HamburgerAction.contact,
+              height: _itemHeight,
+              child: _MenuItemRow(
+                icon: Icons.alternate_email,
+                label: 'Contact',
+              ),
+            ),
+          if (widget.onShowVersionHistory != null)
+            const PopupMenuItem<_HamburgerAction>(
+              value: _HamburgerAction.versionHistory,
+              height: _itemHeight,
+              child: _MenuItemRow(
+                icon: Icons.history,
+                label: 'Historique des versions',
+              ),
+            ),
           if (widget.onShowAbout != null)
             const PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.about,
+              height: _itemHeight,
               child: _MenuItemRow(
                 icon: Icons.info_outline,
                 label: 'À propos',
@@ -210,9 +261,8 @@ class HamburgerMenuState extends State<HamburgerMenu> {
   @override
   Widget build(BuildContext context) {
     const size = OffiboxWindowUI.menuButtonSize;
-    return Tooltip(
+    return OffiboxTooltip(
       message: 'Menu',
-      textStyle: const TextStyle(color: HamburgerMenu._offiboxTeal, fontFamily: 'Spinnaker'),
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovering = true),
         onExit: (_) => setState(() => _hovering = false),
@@ -256,6 +306,8 @@ class _MenuItemRow extends StatefulWidget {
   final bool isIdBoxLabel;
   /// Chemin d’une image (ex. ampoule) affichée devant le label.
   final String? iconAssetPath;
+  /// Affiche l'entrée en gris (ex. « Agenda Google (connecté) » non cliquable).
+  final bool isGreyed;
 
   const _MenuItemRow({
     this.icon,
@@ -265,6 +317,7 @@ class _MenuItemRow extends StatefulWidget {
     this.isOffiboxFrLabel = false,
     this.isIdBoxLabel = false,
     this.iconAssetPath,
+    this.isGreyed = false,
   });
 
   @override
@@ -275,6 +328,9 @@ class _MenuItemRowState extends State<_MenuItemRow> {
   bool _hovering = false;
 
   static const Color _idBoxGreen = Color(0xFF2E7D32);
+  static const Color _greyedColor = Color(0xFF9E9E9E);
+  /// Largeur fixe de la colonne d’icônes pour les aligner verticalement.
+  static const double _iconSlotWidth = 24;
 
   Widget _buildOffiboxFrStyle(BuildContext context) {
     final baseStyle = TextStyle(
@@ -361,44 +417,54 @@ class _MenuItemRowState extends State<_MenuItemRow> {
           borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
         ),
         margin: EdgeInsets.zero,
-        padding: const EdgeInsets.symmetric(vertical: 0.48, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 0.48, horizontal: 3),
         child: SizedBox(
           width: double.infinity,
           child: Row(
             children: [
               if (widget.useExternalLink)
-                ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    _hovering ? Colors.white : HamburgerMenu._offiboxTeal,
-                    BlendMode.srcIn,
-                  ),
-                  child: Image.asset(
-                    'assets/icons/monitor_www.png',
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.open_in_browser,
-                      size: 20,
-                      color: _hovering ? Colors.white : HamburgerMenu._offiboxTeal,
+                SizedBox(
+                  width: _iconSlotWidth,
+                  child: Center(
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        _hovering ? Colors.white : HamburgerMenu._offiboxTeal,
+                        BlendMode.srcIn,
+                      ),
+                      child: Image.asset(
+                        'assets/icons/monitor_www.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.open_in_browser,
+                          size: 20,
+                          color: _hovering ? Colors.white : HamburgerMenu._offiboxTeal,
+                        ),
+                      ),
                     ),
                   ),
                 )
               else if (widget.iconAssetPath != null)
-                Image.asset(
-                  widget.iconAssetPath!,
-                  width: 20,
-                  height: 20,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Icon(
-                    Icons.lightbulb_outline,
-                    size: 20,
-                    color: _hovering ? Colors.white : HamburgerMenu._offiboxTeal,
+                SizedBox(
+                  width: _iconSlotWidth,
+                  child: Center(
+                    child: Image.asset(
+                      widget.iconAssetPath!,
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.lightbulb_outline,
+                        size: 20,
+                        color: _hovering ? Colors.white : HamburgerMenu._offiboxTeal,
+                      ),
+                    ),
                   ),
                 )
               else if (widget.icon != null)
                 SizedBox(
-                  width: 20,
+                  width: _iconSlotWidth,
                   height: 20,
                   child: Center(
                     child: Transform.rotate(
@@ -406,12 +472,14 @@ class _MenuItemRowState extends State<_MenuItemRow> {
                       child: Icon(
                         widget.icon,
                         size: 20,
-                        color: _hovering ? Colors.white : HamburgerMenu._offiboxTeal,
+                        color: widget.isGreyed
+                            ? _greyedColor
+                            : (_hovering ? Colors.white : HamburgerMenu._offiboxTeal),
                       ),
                     ),
                   ),
                 ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               widget.isOffiboxFrLabel
                   ? _buildOffiboxFrStyle(context)
                   : widget.isIdBoxLabel
@@ -422,7 +490,9 @@ class _MenuItemRowState extends State<_MenuItemRow> {
                         fontSize: 13,
                         fontFamily: 'Spinnaker',
                         fontWeight: FontWeight.w500,
-                        color: _hovering ? Colors.white : Colors.grey.shade800,
+                        color: widget.isGreyed
+                            ? _greyedColor
+                            : (_hovering ? Colors.white : Colors.grey.shade800),
                       ),
                     ),
             ],

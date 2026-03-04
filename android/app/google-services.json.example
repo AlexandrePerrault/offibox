@@ -1,0 +1,25 @@
+{
+  "project_info": {
+    "project_number": "VOTRE_PROJECT_NUMBER",
+    "project_id": "offibox-prod",
+    "storage_bucket": "offibox-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "VOTRE_MOBILESDK_APP_ID",
+        "android_client_info": {
+          "package_name": "com.example.offibox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "REMPLACER_PAR_VOTRE_CLE_API_OU_TELECHARGER_DEPUIS_FIREBASE_CONSOLE"
+        }
+      ],
+      "services": {},
+      "configuration_version": "1"
+    }
+  ]
+}

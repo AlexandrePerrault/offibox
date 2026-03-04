@@ -154,19 +154,6 @@ class _SearchFieldWithOffiboxPlaceholderState
             fontFamily: 'Spinnaker',
           ),
           children: [
-            /// 🔍 Icône recherche (couleur Offibox)
-            const WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: Icon(
-                  Icons.search,
-                  size: 18,
-                  color: OffiboxColors.primary,
-                ),
-              ),
-            ),
-
             const TextSpan(text: 'Rechercher sur '),
 
             /// 🟦 Logo Offibox — même couleur que l’aspect transparent de la barre
@@ -201,6 +188,19 @@ class _SearchFieldWithOffiboxPlaceholderState
               ),
             ),
             const TextSpan(text: ')'),
+
+            /// 🔍 Icône recherche à droite du texte (10 % plus grande qu’avant : 20)
+            const WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(
+                  Icons.search,
+                  size: 20,
+                  color: OffiboxColors.primary,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -244,6 +244,7 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
     required this.onOpenSelected,
     this.scanController,
     this.onScanDataMatrix,
+    this.onScanMutuelleQr,
     this.onEscape,
     this.onSubmit,
     this.onFilterHoverChange,
@@ -270,8 +271,9 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   this.leadingMenuButton,
   this.scanPayload,
   this.recalledProductNames,
-  this.ansmLastRappel,
-  this.cisArretCommercialisation,
+    this.ansmLastRappel,
+    this.rappelForLine3Badge,
+    this.cisArretCommercialisation,
   this.arretCommercialisationByCis,
   this.tauxRemboursementByCis,
   this.getVocUrlsForItem,
@@ -293,6 +295,8 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   final VoidCallback? onOpenSelected;
   final ScanController? scanController;
   final void Function(String cip13, Gs1ScanPayload? payload)? onScanDataMatrix;
+  /// QR mutuelle (carte Vitale) : code préfectoral 8 chiffres → sélectionne la mutuelle et affiche son libellé.
+  final void Function(String codePrefectoral)? onScanMutuelleQr;
   final Map<String, List<String>>? statutsByCis;
   final Map<String, AnsmStatutInfo>? ansmStatutsByCis;
   final Map<String, Generique2026Info>? generiques2026ByCis;
@@ -328,6 +332,8 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   final Set<String>? recalledProductNames;
   /// Dernier rappel ANSM (ticker) : date en ligne 2, alerte ligne 4 si < 15 jours.
   final AnsmRappelItem? ansmLastRappel;
+  /// Rappel correspondant au résultat sélectionné (badge ligne 3 « rappel de produit + date »).
+  final AnsmRappelItem? rappelForLine3Badge;
   /// CIS avec « arrêt de commercialisation » (CIS_CIP_Dispo_Spec) — badge ligne 2 pour ces NSFP.
   final Set<String>? cisArretCommercialisation;
   /// CIS → date + URL pour le badge « arrêt de commercialisation » (clic → ouvrir URL).
@@ -361,11 +367,12 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
         final double maxW = constraints.maxWidth.isFinite ? constraints.maxWidth : 600.0;
         final isExpandedWithResult = widget.selectedResult != null;
         final selected = widget.selectedResult;
-        // Pansements (DM) : pas de ligne 2 → hauteur réduite comme outils métier / sites web / catalogues
+        // Pansements (DM) / Codes actes : pas de ligne 2 → hauteur réduite comme outils métier / sites web / catalogues
         final isSingleLineSource = selected != null &&
             (selected.source == SourceType.keyword ||
                 selected.source == SourceType.siteWeb ||
                 selected.source == SourceType.catalogue ||
+                selected.source == SourceType.codesActes ||
                 selected.source == SourceType.dm);
         // Hauteur selon le nombre de lignes (2, 3 ou 4) pour les médicaments.
         double expandedHeight = _barHeightExpanded;
@@ -524,6 +531,7 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
                                   scanPayload: widget.scanPayload,
                                   recalledProductNames: widget.recalledProductNames,
                                   ansmLastRappel: widget.ansmLastRappel,
+                                  rappelForLine3Badge: widget.rappelForLine3Badge,
                                   cisArretCommercialisation: widget.cisArretCommercialisation,
                                   arretCommercialisationByCis: widget.arretCommercialisationByCis,
                                   vocPatientUrl: () {
@@ -557,7 +565,14 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
                                     widget.onScanDataMatrix!(cip13, payload);
                                   }
                                 : null,
+                            onScanMutuelleQr: widget.onScanMutuelleQr != null
+                                ? (code) {
+                                    widget.textController.text = '';
+                                    widget.onScanMutuelleQr!(code);
+                                  }
+                                : null,
                           );
+                          if (result.isMutuelleQr) return;
                           if (!result.isDataMatrix) {
                             widget.onSubmit?.call(value);
                           } else if (result.cip13 != null && widget.onScanDataMatrix == null) {

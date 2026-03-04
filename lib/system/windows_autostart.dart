@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:win32_registry/win32_registry.dart';
 
-class WindowsAutostart {
-  static const String _appName = 'Offibox';
+import 'package:offibox/config/app_config.dart';
 
+class WindowsAutostart {
   static void enable() {
     final exePath = Platform.resolvedExecutable;
 
@@ -13,14 +13,13 @@ class WindowsAutostart {
       desiredAccessRights: AccessRights.allAccess,
     );
 
-   key.createValue(
-  RegistryValue(
-    'Offibox',
-    RegistryValueType.string,
-    exePath,
-  ),
-);
-
+    key.createValue(
+      RegistryValue(
+        AppConfig.appName,
+        RegistryValueType.string,
+        exePath,
+      ),
+    );
 
     key.close();
   }
@@ -33,7 +32,7 @@ class WindowsAutostart {
     );
 
     try {
-      key.deleteValue(_appName);
+      key.deleteValue(AppConfig.appName);
     } catch (_) {}
 
     key.close();

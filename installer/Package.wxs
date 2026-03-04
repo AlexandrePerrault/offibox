@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml Version="1.1.18" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Id="Offibox.Msi"
            Name="Offibox"
            Manufacturer="Offibox"
-           Version="1.0.11"
+           Version="1.1.18"
            UpgradeCode="B7B3E8A2-9F4C-4D1E-8A5B-2C6D9E1F3A4B">
     <MajorUpgrade DowngradeErrorMessage="Une version plus récente d'Offibox est déjà installée." />
     <MediaTemplate EmbedCab="yes" />

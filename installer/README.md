@@ -2,6 +2,27 @@
 
 Deux méthodes possibles : **WiX v4 (SDK + dotnet build)** ou **WiX v3 (script PowerShell)**.
 
+## Logo pendant le chargement
+
+Pour afficher le logo Offibox pendant l’installation (bannière et fond des dialogues) :
+
+- **WiX v3 :** Placer deux images BMP dans `installer\wix\Resources\` :
+  - `banner.bmp` : 493 × 58 px (bannière en haut des écrans)
+  - `dialog.bmp` : 493 × 312 px (fond des écrans Bienvenue / Fin)
+  Puis lancer la liaison avec :  
+  `light ... -dWixUIBannerBmp=Resources\banner.bmp -dWixUIDialogBmp=Resources\dialog.bmp`
+- **WiX v4 :** Adapter selon la doc WiX v4 (variables d’interface).
+
+## Options à proposer (toutes cochables)
+
+L’installateur doit proposer et permettre de cocher/décocher :
+
+1. **Créer une icône sur le bureau**
+2. **Lancer Offibox au démarrage de Windows (recommandé)** → écrit `HKCU\Software\Offibox\LaunchAtStartup` = 1 ; l’app lit cette clé au premier lancement (voir `main.dart`).
+3. **Lancer Offibox** → exécuter `offibox.exe` à la fin de l’installation.
+
+En WiX v3, cela peut être fait via **WixUI_FeatureTree** (icône bureau = feature optionnelle) + **dialogue personnalisé** ou cases sur l’écran de fin pour « démarrage Windows » et « lancer maintenant ».
+
 ---
 
 ## Méthode 1 : WiX v4 (éditeur de texte + .NET SDK)
@@ -31,7 +52,7 @@ Le MSI est produit dans `website\download\` si la config du projet le permet, si
 .\build_msi.ps1
 ```
 
-Le script produit **`website\download\Offibox-Setup-1.0.11.msi`** (voir `installer\wix\Product.wxs`).
+Le script produit **`website\download\Offibox-Setup-1.1.18.msi`** (voir `installer\wix\Product.wxs`).
 
 ---
 

@@ -2,6 +2,14 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+/// Exception levée quand le PDF est trop volumineux pour un affichage rapide in-app (proposition d’ouverture dans le navigateur).
+class PdfTooLargeException implements Exception {
+  PdfTooLargeException(this.sizeBytes, this.url);
+  final int? sizeBytes;
+  final String url;
+  double get sizeMo => sizeBytes != null ? sizeBytes! / (1024 * 1024) : 0;
+}
+
 /// Cache PDF des catalogues (partagé viewer / recherche / préchargement).
 /// Chemin : offibox/pdf/{laboratory_normalized}/{url.hashCode.abs()}.pdf
 ///
@@ -13,6 +21,11 @@ import 'package:path_provider/path_provider.dart';
 class PdfCacheService {
   /// Quota max du cache PDF (environ 400 Mo). Au-delà, éviction LRU.
   static const int quotaBytes = 400 * 1024 * 1024;
+
+  /// Au-delà de cette taille (Mo), on propose d’ouvrir dans le navigateur pour un affichage plus rapide (ex. calendrier vaccinal).
+  static const int maxPdfSizeBytes = 8 * 1024 * 1024; // 8 Mo
+  static const Duration headTimeout = Duration(seconds: 5);
+  static const Duration downloadTimeout = Duration(seconds: 35);
 
   static String _normalizeLaboratory(String laboratory) {
     return laboratory
@@ -81,7 +94,22 @@ class PdfCacheService {
 
     await _evictIfOverQuota(root);
 
-    final response = await http.get(Uri.parse(pdfUrl));
+    // Vérifier la taille (HEAD) pour les PDF volumineux → proposition d’ouverture dans le navigateur
+    try {
+      final headResponse = await http.head(Uri.parse(pdfUrl)).timeout(headTimeout);
+      if (headResponse.statusCode == 200) {
+        final contentLength = headResponse.contentLength;
+        if (contentLength != null && contentLength > maxPdfSizeBytes) {
+          throw PdfTooLargeException(contentLength, pdfUrl);
+        }
+      }
+    } on PdfTooLargeException {
+      rethrow;
+    } catch (_) {
+      // HEAD échoué ou sans Content-Length : on tente le GET quand même
+    }
+
+    final response = await http.get(Uri.parse(pdfUrl)).timeout(downloadTimeout);
     if (response.statusCode != 200) {
       throw Exception('Erreur téléchargement PDF');
     }

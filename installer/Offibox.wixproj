@@ -1,13 +1,16 @@
 <Project Sdk="WixToolset.Sdk/6.0.0">
 
-  <!-- Ne pas compiler l'ancien WiX v3 (installer/wix/Product.wxs) -->
+  <!-- Ne compiler que Package.wxs (v4) : éviter que le SDK inclue Harvest.wxs / Product.wxs.v3 (v3). -->
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="wix\**\*.wxs" />
+    <Compile Include="Package.wxs" />
   </ItemGroup>
 
   <PropertyGroup>
     <OutputPath>..\website\download</OutputPath>
-    <PackageFileName>Offibox-Setup.1.0.11.msi</PackageFileName>
+    <PackageFileName>Offibox-Setup.1.1.18.msi</PackageFileName>
     <ReleaseFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../build/windows/x64/runner/Release'))</ReleaseFullPath>
     <!-- Installation sous LocalAppData : ICE64, ICE38, ICE91 (per-user), ICE60 (font/language) -->
     <SuppressIces>ICE38;ICE60;ICE64;ICE91</SuppressIces>

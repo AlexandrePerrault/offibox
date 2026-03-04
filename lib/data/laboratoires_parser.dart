@@ -5,12 +5,11 @@ import 'package:offibox/models/source_type.dart';
 
 /// Laboratoires de secours si le CSV est vide ou échoue (pour que VIATRIS etc. restent visibles).
 const String _viatrisEspacePro = 'https://www.monespacepharmacien.viatris.com/s/login/?language=fr';
-const String _viatrisEspaceProAlt = 'https://www.monespacepharmacien.viatris.com/s/login/?language=fr&ec=302&startURL=%2Fs%2F';
 const String _viatrisService = 'https://service.viatris.fr/users/login';
 const String _viatrisMyris = 'https://myris.viatris.fr/login';
 
 List<SearchResult> get defaultLaboratoiresFallback => [
-  SearchResult(
+  const SearchResult(
     label: 'VIATRIS',
     labelRaw: 'VIATRIS',
     source: SourceType.catalogue,
@@ -61,12 +60,12 @@ Future<List<SearchResult>> parseLaboratoires(String url) async {
     final label = firstCol.toUpperCase();
     if (label.isEmpty) continue;
 
-    // Col 1 = icône (path assets/... ou "ok" à ignorer)
+    // Col 1 = icône (path assets/... ou "ok" à ignorer). Normaliser \ en / pour Flutter asset bundle.
     final rawIcon = _v(row, 1);
     final iconUrl = (rawIcon != null &&
             rawIcon.isNotEmpty &&
             (rawIcon.startsWith('assets/') || rawIcon.contains('.svg') || rawIcon.contains('.png')))
-        ? rawIcon
+        ? rawIcon.replaceAll(r'\', '/')
         : null;
 
     // F=5 Espace pro, G=6 Catalogue, H=7, I=8 nom site 2, J=9 url, K=10 nom badge 4, L=11 url

@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
+import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/ui/widgets/hover_pill_button.dart';
 import 'package:offibox/search/result_action_registry.dart';
 import 'package:offibox/ui/results/result_line_1.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/constants/ui_constants.dart';
+import 'package:offibox/constants/offibox_window_ui.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 
-/// Taille d'affichage pour les logos "Source :". Véto/LPP = 52 ; e-pansement = 52 * 1.5 (plus lisible).
+/// Taille d'affichage pour les logos "Source :". Véto = 52 ; LPP = 52 × 0,7 (−30 %) ; e-pansement = 52 * 1.5 (plus lisible).
 const double _sourceLogoSize = 52;
+const double _sourceLogoSizeLpp = 52 * 0.7; // −30 % par rapport à la taille standard
 const double _sourceLogoSizeDm = 52;
 const double _sourceLogoSizeDmEpansement = 52 * 1.5; // 78
 const String _externalLinkAsset = 'assets/icons/link-external.svg';
@@ -42,6 +46,8 @@ class ResultLine3Actions extends StatelessWidget {
   final Map<String, String>? videosByCip13;
   /// Clic sur le pill vidéo → ouvre le panneau vidéo thérapeutique.
   final void Function(String url)? onOpenTherapeuticVideo;
+  /// Si non null, affiche un badge rouge « rappel de produit + date » (ligne 3), clic → URL ANSM du rappel.
+  final AnsmRappelItem? rappelForLine3Badge;
 
   const ResultLine3Actions({
     super.key,
@@ -53,12 +59,13 @@ class ResultLine3Actions extends StatelessWidget {
     this.vocProUrl,
     this.videosByCip13,
     this.onOpenTherapeuticVideo,
+    this.rappelForLine3Badge,
   });
 
   @override
 Widget build(BuildContext context) {
-  // Mots-clés / Sites web : rien en ligne 3 (libellé déjà en ligne 1, badges en ligne 2)
-  if (item.source == SourceType.keyword || item.source == SourceType.siteWeb) {
+  // Mots-clés / Sites web / Codes actes : rien en ligne 3 (libellé déjà en ligne 1)
+  if (item.source == SourceType.keyword || item.source == SourceType.siteWeb || item.source == SourceType.codesActes) {
     return const SizedBox.shrink();
   }
   // LPP : tout en ligne 2 (+ d'infos + Source logo) — pas de ligne 3
@@ -67,8 +74,12 @@ Widget build(BuildContext context) {
   }
 
   final cisKey = item.cis?.replaceAll(RegExp(r'\D'), '').trim() ?? '';
-  // Masquer RCP/MEDDISPAR en ligne 3 uniquement pour les princeps génériques 2026 (affichés en ligne 2). Les biosimilaires gardent le hover pill MEDDISPAR.
-  final hideRcpMeddispar = generiques2026CisSet != null && cisKey.isNotEmpty && generiques2026CisSet!.contains(cisKey);
+  // Masquer RCP/MEDDISPAR en ligne 3 quand ils sont affichés en ligne 2 : génériques 2026 ou non génériques BDM (plus d'infos + RCP + MEDDISPAR sur la même ligne).
+  final hideRcpMeddispar =
+      (generiques2026CisSet != null && cisKey.isNotEmpty && generiques2026CisSet!.contains(cisKey)) ||
+      (item.source == SourceType.bdm &&
+          ((item.url != null && item.url!.trim().isNotEmpty) ||
+              (item.meddisparUrl != null && item.meddisparUrl!.trim().isNotEmpty)));
 
   final actions = line3Actions
       .where((action) {
@@ -80,8 +91,8 @@ Widget build(BuildContext context) {
 
   final hasCommentaire =
       item.commentaire != null && item.commentaire!.trim().isNotEmpty;
-  // Ne pas afficher le bloc commentaire pour les mots-clés / sites web (déjà en ligne 1)
-  final showCommentaire = hasCommentaire && item.source != SourceType.keyword && item.source != SourceType.siteWeb;
+  // Ne pas afficher le bloc commentaire pour les mots-clés / sites web / codes actes (déjà en ligne 1)
+  final showCommentaire = hasCommentaire && item.source != SourceType.keyword && item.source != SourceType.siteWeb && item.source != SourceType.codesActes;
 
   // Source : + logo. BDM/véto = dans le Wrap ; LPP/DM (pansements) injectés = une ligne "Source :" + logo sous les résultats (comme médicaments).
   final bool isDm = item.source == SourceType.dm;
@@ -92,8 +103,11 @@ Widget build(BuildContext context) {
   final Widget? _vetoSourceWidget = isVeto
       ? ResultLine3Actions.buildSourceRow(item, true, onOpenUrl)
       : null;
-  final dmSourceNextToFiche = null; // Pansements : source affichée en ligne via sourceRow (e_pansement.png)
   final openUrlFn = onOpenUrl ?? openUrl;
+  // Pansements (DM) : badge « Fiche produit » dans le Wrap (au-dessus de la ligne Sources).
+  final Widget? dmSourceNextToFiche = (isDm && isInjected)
+      ? _buildDmFicheProduitBadge(item, openUrlFn)
+      : null;
   final bool useAnsmLogoForBdm = item.source == SourceType.bdm &&
       (generiques2026CisSet != null && cisKey.isNotEmpty && generiques2026CisSet!.contains(cisKey) ||
           item.isGeneric == true);
@@ -223,14 +237,20 @@ Widget build(BuildContext context) {
       if (vocPills.isNotEmpty ||
           actionWidgets.isNotEmpty ||
           dmSourceNextToFiche != null ||
-          _bdmSourceWidget != null ||
-          _vetoSourceWidget != null ||
-          hasVideoPill)
+          hasVideoPill ||
+          rappelForLine3Badge != null)
         Wrap(
           spacing: 6,
           runSpacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            if (rappelForLine3Badge != null && item.source == SourceType.bdm) ...[
+              _RappelProduitBadge(
+                rappel: rappelForLine3Badge!,
+                onOpenUrl: openUrlFn,
+              ),
+              const SizedBox(width: 6),
+            ],
             ...actionWidgets,
             if (hasVideoPill) ...[
               if (actionWidgets.isNotEmpty) const SizedBox(width: 6),
@@ -240,25 +260,16 @@ Widget build(BuildContext context) {
                 tooltip:
                     "Outils d'aide à l'utilisation des thérapeutiques inhalées dans l'asthme et la BPCO chez l'adulte",
                 onTap: () =>
-                    onOpenTherapeuticVideo!(therapeuticVideoUrl!),
+                    onOpenTherapeuticVideo!(therapeuticVideoUrl),
               ),
             ],
-            if ((vocPills.isNotEmpty || dmSourceNextToFiche != null || _bdmSourceWidget != null || _vetoSourceWidget != null) &&
+            if ((vocPills.isNotEmpty || dmSourceNextToFiche != null) &&
                 (actionWidgets.isNotEmpty || hasVideoPill))
               const SizedBox(width: 6),
             ...vocPills,
             if (dmSourceNextToFiche != null) ...[
               if (vocPills.isNotEmpty || actionWidgets.isNotEmpty) const SizedBox(width: 6),
               dmSourceNextToFiche,
-            ],
-            // Source : après les badges (BDM = Base de Données + logo ; véto = ANSES).
-            if (_bdmSourceWidget != null) ...[
-              if (actionWidgets.isNotEmpty || vocPills.isNotEmpty || dmSourceNextToFiche != null) const SizedBox(width: 6),
-              _bdmSourceWidget!,
-            ],
-            if (_vetoSourceWidget != null) ...[
-              if (actionWidgets.isNotEmpty || vocPills.isNotEmpty || dmSourceNextToFiche != null || _bdmSourceWidget != null) const SizedBox(width: 6),
-              _vetoSourceWidget!,
             ],
           ],
         ),
@@ -281,7 +292,7 @@ Widget build(BuildContext context) {
               ),
             ),
             HoverPillButton(
-              label: 'BONNES PRATIQUES DE SUBSTITUTION des biosimilaires',
+              label: 'Substitution des biosimilaires',
               icon: Icons.article_outlined,
               tooltip: 'OMEDIT Île-de-France – bonnes pratiques de substitution (©)',
               onTap: () => openUrlFn(
@@ -320,18 +331,59 @@ Widget build(BuildContext context) {
         ),
       ],
 
-      // Source : + logo (italique, police plus petite) quand le résultat est injecté (BDM / véto / LPP).
-      if (sourceRow != null) ...[
-        if (actions.isNotEmpty || showCommentaire) const SizedBox(height: 6),
-        sourceRow,
+      // Source : toujours en dernière ligne (en bas) pour BDM, véto, DM/LPP injecté.
+      if (_bdmSourceWidget != null || _vetoSourceWidget != null || sourceRow != null) ...[
+        const SizedBox(height: 6),
+        if (_bdmSourceWidget != null) _bdmSourceWidget,
+        if (_vetoSourceWidget != null) _vetoSourceWidget,
+        if (sourceRow != null) sourceRow,
       ],
     ],
   );
-  }
+}
 
   /// Retourne la ligne "Source :" + logo pour BDM, véto ou LPP en mode injecté, sinon null.
   Widget? _buildSourceRowWhenInjected() {
     return buildSourceRow(item, isInjected, onOpenUrl);
+  }
+
+  /// Badge « Fiche produit » pour les pansements (DM), avec « Source : » + logo à gauche (sans icône external link dans le badge).
+  static Widget _buildDmFicheProduitBadge(SearchResult item, void Function(String url) openUrlFn) {
+    final ficheUrl = item.url?.trim().isNotEmpty == true ? item.url!.trim() : _dmSourceUrl;
+    const double fontSize = 11;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Source : ',
+            style: TextStyle(
+              fontSize: fontSize,
+              fontFamily: 'Spinnaker',
+              fontStyle: FontStyle.italic,
+              color: Colors.black54,
+            ),
+          ),
+          OffiboxTooltip(
+            message: _dmSourceTooltip,
+            child: InkWell(
+              onTap: () => openUrlFn(ficheUrl),
+              borderRadius: BorderRadius.circular(4),
+              child: _sourceLogo(_dmSourceAsset, _sourceLogoSizeDmEpansement),
+            ),
+          ),
+          const SizedBox(width: 6),
+          HoverPillButton(
+            label: 'Fiche produit',
+            icon: Icons.description_outlined,
+            tooltip: _dmSourceTooltip,
+            onTap: () => openUrlFn(ficheUrl),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Widget "Source(s) :" + logo ou texte pour affichage en ligne 2/3. BDM = texte ; véto/LPP = logo ; DM = logo ×1,5 + icône external link (tooltip "Fiche produit").
@@ -355,14 +407,15 @@ Widget build(BuildContext context) {
           tooltip: null,
         );
       case SourceType.dm:
-        return _buildDmSourceRowWithExternalLink(item, onOpenUrl);
+        // DM : source + Fiche produit sont dans le badge (dmSourceNextToFiche), pas de ligne Source séparée.
+        return null;
       case SourceType.lpp:
         return _buildSourceRowWithAsset(
           url: _lppSourceUrl,
           asset: _lppSourceAsset,
           onOpenUrl: onOpenUrl,
           tooltip: null,
-          logoSize: _sourceLogoSize,
+          logoSize: _sourceLogoSizeLpp,
           preserveAspectRatio: true,
         );
       default:
@@ -430,7 +483,7 @@ Widget build(BuildContext context) {
   }) {
     const double fontSize = 11;
     final openUrlFn = onOpenUrl ?? openUrl;
-    return Tooltip(
+    return OffiboxTooltip(
       message: tooltip ?? url,
       child: InkWell(
         onTap: () => openUrlFn(url),
@@ -485,7 +538,7 @@ Widget build(BuildContext context) {
               color: Colors.black54,
             ),
           ),
-          Tooltip(
+          OffiboxTooltip(
             message: _dmSourceTooltip,
             child: InkWell(
               onTap: () => openUrlFn(ficheUrl),
@@ -494,7 +547,7 @@ Widget build(BuildContext context) {
             ),
           ),
           const SizedBox(width: 6),
-          Tooltip(
+          OffiboxTooltip(
             message: _dmSourceTooltip,
             child: InkWell(
               onTap: () => openUrlFn(ficheUrl),
@@ -524,7 +577,7 @@ Widget build(BuildContext context) {
     final size = logoSize ?? _sourceLogoSize;
     const double fontSize = 11;
     final openUrlFn = onOpenUrl ?? openUrl;
-    return Tooltip(
+    return OffiboxTooltip(
       message: tooltip ?? url,
       child: InkWell(
         onTap: () => openUrlFn(url),
@@ -612,6 +665,44 @@ Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(size / 4),
       child: raw,
+    );
+  }
+}
+
+/// Badge rouge « rappel de produit + date » (ligne 3), clic → URL ANSM du rappel.
+class _RappelProduitBadge extends StatelessWidget {
+  const _RappelProduitBadge({required this.rappel, required this.onOpenUrl});
+
+  final AnsmRappelItem rappel;
+  final void Function(String url) onOpenUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateStr = rappel.dateStr?.trim().isNotEmpty == true ? rappel.dateStr! : '';
+    final label = dateStr.isNotEmpty ? 'rappel de produit $dateStr' : 'rappel de produit';
+    final url = rappel.url.trim();
+    return OffiboxTooltip(
+      message: 'Ouvrir l\'information ANSM',
+      waitDuration: const Duration(milliseconds: 400),
+      child: InkWell(
+        onTap: () => onOpenUrl(url),
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: OffiboxWindowUI.tickerInfosRed,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

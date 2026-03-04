@@ -76,7 +76,9 @@ final List<ResultAction> line3Actions = [
     icon: Icons.mail_outline,
     tooltip: 'Envoyer un mail',
     isVisible: (item) =>
-        item.source == SourceType.pharmacovigilance &&
+        (item.source == SourceType.pharmacovigilance ||
+            item.source == SourceType.centresAntiPoison ||
+            item.source == SourceType.chu) &&
         item.email != null &&
         item.email!.isNotEmpty,
     onTap: (item) => () {
@@ -116,6 +118,20 @@ final List<ResultAction> line3Actions = [
         'https://signalement.social-sante.gouv.fr/espace-declaration/guidage?profil=PROFESSIONNEL_SANTE',
       );
     },
+  ),
+
+  // =========================
+  // 🏥 CHU — Ouvrir la fiche (l'annuaire service-public)
+  // =========================
+  ResultAction(
+    label: 'Ouvrir la fiche',
+    icon: Icons.open_in_new,
+    tooltip: 'Voir la fiche sur l\'annuaire du service public',
+    isVisible: (item) =>
+        item.source == SourceType.chu &&
+        item.url != null &&
+        item.url!.trim().isNotEmpty,
+    onTap: (item) => () => openUrl(item!.url!),
   ),
 
   // =========================
@@ -166,7 +182,7 @@ final List<ResultAction> line3Actions = [
   ),
 
   // =========================
-  // 🐶 RCP VÉTO
+  // 🐶 RCP VÉTO (au-dessus de la ligne Sources en barre injectée)
   // =========================
   ResultAction(
     label: 'RCP VÉTO',
@@ -177,13 +193,15 @@ final List<ResultAction> line3Actions = [
           item.source == SourceType.veto ||
           item.label.toUpperCase().contains('VETO') ||
           item.label.contains('🐾');
-
-      return isVeto &&
-          item.url != null &&
-          item.url!.isNotEmpty;
+      final hasUrl = (item.url != null && item.url!.trim().isNotEmpty) ||
+          (item.rcpVetoUrl != null && item.rcpVetoUrl!.trim().isNotEmpty);
+      return isVeto && hasUrl;
     },
     onTap: (item) => () {
-      openUrl(item.url!);
+      final url = item.rcpVetoUrl?.trim().isNotEmpty == true
+          ? item.rcpVetoUrl!
+          : item.url;
+      if (url != null && url.trim().isNotEmpty) openUrl(url.trim());
     },
   ),
 

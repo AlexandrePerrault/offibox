@@ -14,6 +14,27 @@ class SearchFilterNotifier extends StateNotifier<SearchFilter> {
     state = state.toggleSourceDisabled(source);
   }
 
+  /// Annuaires = pharmacovigilance + centres anti poison + CHU. Toggle les trois ensemble.
+  static const List<SourceType> annuaireSources = [
+    SourceType.pharmacovigilance,
+    SourceType.centresAntiPoison,
+    SourceType.chu,
+  ];
+
+  void toggleAnnuaireGroup() {
+    final disabled = Set<SourceType>.from(state.disabledSources);
+    final anyEnabled = annuaireSources.any((s) => !disabled.contains(s));
+    if (anyEnabled) {
+      disabled.addAll(annuaireSources);
+    } else {
+      disabled.removeAll(annuaireSources);
+    }
+    state = state.copyWith(disabledSources: disabled);
+  }
+
+  bool get isAnnuaireGroupEnabled =>
+      annuaireSources.every((s) => !state.disabledSources.contains(s));
+
   /// Réactive une source (enlève du set des masquées). Utilisé pour "rebrancher" les médicaments.
   void enableSource(SourceType source) {
     if (!state.disabledSources.contains(source)) return;

@@ -19,7 +19,14 @@ import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/utils/ansm_rappel_match.dart';
 import 'package:offibox/ui/results/plus_infos_badge.dart';
 import 'package:offibox/ui/results/result_line_3_actions.dart';
-import 'package:offibox/ui/spans/common_spans.dart';
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
+
+/// URLs des calendriers vaccinaux (badges pour les médicaments dont le libellé contient "vaccin").
+const String kCalendrierVaccinal2025Url =
+    'https://sante.gouv.fr/IMG/pdf/pdf_calendrier_vaccinal-12-2025.pdf';
+/// Page « Carte postale » du calendrier simplifié (s’ouvre dans le navigateur ; le lien direct content/download pouvait échouer au clic).
+const String kCalendrierSimplifieUrl =
+    'https://www.santepubliquefrance.fr/determinants-de-sante/vaccination/documents/carte-postale/calendrier-simplifie-des-vaccinations-2025-carte-postale';
 
 String normalizeAddress(String input) {
   return utf8.decode(latin1.encode(input), allowMalformed: true);
@@ -64,7 +71,7 @@ String formatGenericNameForPrincepsBadge(String colA) {
   return t.split(RegExp(r'\s+')).first.trim().toUpperCase();
 }
 
-/// Formate le nom princeps (ex. "STILNOX" → "Stilnox") pour l'affichage du badge "princeps: X".
+/// Formate le nom princeps (ex. "STILNOX" → "Stilnox") pour l'affichage du badge "princeps : X".
 String princepsDisplayNameFromUppercase(String princepsUppercase) {
   if (princepsUppercase.isEmpty) return princepsUppercase;
   return princepsUppercase[0] + princepsUppercase.substring(1).toLowerCase();
@@ -112,7 +119,13 @@ bool _isPdfUrl(String url) {
 
 bool _isXlsUrl(String url) {
   final path = url.split(RegExp(r'[?#]')).first.trim().toLowerCase();
-  return path.endsWith('.xls') || path.endsWith('.xlsx');
+  return path.endsWith('.xls') || path.endsWith('.xlsx') || path.endsWith('.ods');
+}
+
+/// True si l'URL pointe vers un document Word / Open Office texte (.doc, .docx, .odt).
+bool _isWordUrl(String url) {
+  final path = url.split(RegExp(r'[?#]')).first.trim().toLowerCase();
+  return path.endsWith('.doc') || path.endsWith('.docx') || path.endsWith('.odt');
 }
 
 /// Logo PDF rouge (assets/icons/pdf_red.svg) pour le badge "document" et fiches VOC.
@@ -231,8 +244,10 @@ class ResultLine2Code extends StatelessWidget {
     return item.groupLabel != null && item.groupLabel!.isNotEmpty;
   }
 
-  // 🟪 CRPV — ligne 2 = adresse
-  if (item.source == SourceType.pharmacovigilance) {
+  // 🟪 Annuaires (CRPV, Centres anti poison, CHU) — ligne 2 = adresse
+  if (item.source == SourceType.pharmacovigilance ||
+      item.source == SourceType.centresAntiPoison ||
+      item.source == SourceType.chu) {
     return item.groupLabel != null && item.groupLabel!.isNotEmpty;
   }
 
@@ -258,6 +273,11 @@ class ResultLine2Code extends StatelessWidget {
   // 🏷️ Mots-clés : ligne 2 = HoverPill(s) nom col C/D, E/F, G/H
   if (item.source == SourceType.keyword) {
     return (item.badge1Url ?? item.badge2Url ?? item.badge3Url ?? item.url)?.trim().isNotEmpty ?? false;
+  }
+
+  // 📋 Codes actes : pas de ligne 2 (tout en ligne 1 : Code — Libellé — Tarif)
+  if (item.source == SourceType.codesActes) {
+    return false;
   }
 
   // 🌐 Sites web : ligne 2 = HoverPill(s) col E/F, G/H, I/J uniquement
@@ -287,7 +307,7 @@ Widget build(BuildContext context) {
       item.groupLabel!.isNotEmpty) {
     final address = normalizeText(item.groupLabel!);
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: EdgeInsets.only(top: resultLineGap),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 4,
@@ -301,7 +321,7 @@ Widget build(BuildContext context) {
               fontFamily: 'Spinnaker',
             ),
           ),
-          Tooltip(
+          OffiboxTooltip(
             message: "Copier l'adresse",
             child: InkWell(
               borderRadius: BorderRadius.circular(999),
@@ -331,14 +351,16 @@ Widget build(BuildContext context) {
   }
 
   // ─────────────────────────────
-  // 🟪 CRPV — ADRESSE (ligne 2)
+  // 🟪 Annuaires (CRPV, Centres anti poison, CHU) — ADRESSE (ligne 2)
   // ─────────────────────────────
-  if (item.source == SourceType.pharmacovigilance &&
+  if ((item.source == SourceType.pharmacovigilance ||
+          item.source == SourceType.centresAntiPoison ||
+          item.source == SourceType.chu) &&
       item.groupLabel != null &&
       item.groupLabel!.isNotEmpty) {
     final address = normalizeText(item.groupLabel!);
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: EdgeInsets.only(top: resultLineGap),
       child: Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 4,
@@ -352,7 +374,7 @@ Widget build(BuildContext context) {
             fontFamily: 'Spinnaker',
           ),
         ),
-        Tooltip(
+        OffiboxTooltip(
           message: 'Copier l’adresse',
           child: InkWell(
             borderRadius: BorderRadius.circular(999),
@@ -402,7 +424,7 @@ Widget build(BuildContext context) {
     );
     final sourceWidget = isInjected ? ResultLine3Actions.buildSourceRow(item, isInjected, onOpenUrl) : null;
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: EdgeInsets.only(top: resultLineGap),
       child: sourceWidget != null
           ? Row(
               mainAxisSize: MainAxisSize.min,
@@ -428,13 +450,14 @@ Widget build(BuildContext context) {
       final urlTrim = url.trim();
       final useYouTubePanel = isYouTube && onOpenYouTubeVideo != null;
       final isPdf = _isPdfUrl(url);
+      final isWord = _isWordUrl(url);
       final isXls = _isXlsUrl(url);
-      // XLS/PDF : afficher tout le libellé (badge hover pill) — pas de troncature à 160px
-      final maxLabelWidth = (isXls || isPdf) ? 500.0 : null;
+      // XLS/PDF/Word : afficher tout le libellé (badge hover pill) — pas de troncature à 160px
+      final maxLabelWidth = (isXls || isPdf || isWord) ? 500.0 : null;
       pills.add(HoverPillButton(
         label: name,
         maxLabelWidth: maxLabelWidth,
-        icon: useYouTubePanel || isPdf || isXls ? null : iconForUrl(url),
+        icon: useYouTubePanel || isPdf || isWord || isXls ? null : iconForUrl(url),
         iconWidget: useYouTubePanel
             ? SvgPicture.asset(
                 'assets/icons/youtube.svg',
@@ -444,9 +467,11 @@ Widget build(BuildContext context) {
               )
             : isPdf
                 ? _pdfIconWidget()
-                : isXls
-                    ? _excelIconWidget()
-                    : _externalLinkIconWidget(),
+                : isWord
+                    ? _pdfIconWidget()
+                    : isXls
+                        ? _excelIconWidget()
+                        : _externalLinkIconWidget(),
         tooltip: urlTrim,
         onTap: () {
           if (useYouTubePanel) {
@@ -460,7 +485,7 @@ Widget build(BuildContext context) {
       ),);
     }
 
-    // Pill pour url ligne 1 (col D) : PDF → "document" ; XLS → "tableur" ; pas de pill "site internet" (l’icône external link en ligne 1 suffit)
+    // Pill pour url ligne 1 (col D) : PDF → "document" ; Word/ODT → "document" ; XLS/ODS → "tableur"
     if (urlLigne1 != null && urlLigne1.isNotEmpty && !_isYouTubeUrl(urlLigne1)) {
       if (_isPdfUrl(urlLigne1)) {
         pills.add(HoverPillButton(
@@ -475,11 +500,24 @@ Widget build(BuildContext context) {
             }
           },
         ));
+      } else if (_isWordUrl(urlLigne1)) {
+        pills.add(HoverPillButton(
+          label: 'document',
+          iconWidget: _pdfIconWidget(),
+          tooltip: 'Ouvrir le document (Word / Open Office)',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(urlLigne1.trim());
+            } else {
+              openUrl(urlLigne1.trim());
+            }
+          },
+        ));
       } else if (_isXlsUrl(urlLigne1)) {
         pills.add(HoverPillButton(
           label: 'tableur',
           iconWidget: _excelIconWidget(),
-          tooltip: 'Ouvrir le fichier Excel',
+          tooltip: 'Ouvrir le fichier Excel / tableur',
           onTap: () {
             if (onOpenUrl != null) {
               onOpenUrl!(urlLigne1.trim());
@@ -507,7 +545,7 @@ Widget build(BuildContext context) {
       if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
       addPill(item.badge3Name!, item.badge3Url!, isYouTube: _isYouTubeUrl(item.badge3Url!));
     }
-    // Fallback : si aucune pill et qu'on a url ligne 1 (YouTube ou PDF/tableur uniquement ; pas de pill "site internet", l’icône external link en ligne 1 suffit)
+    // Fallback : si aucune pill et qu'on a url ligne 1 (YouTube ou PDF/Word/tableur uniquement)
     if (pills.isEmpty && urlLigne1 != null && urlLigne1.isNotEmpty) {
       if (_isYouTubeUrl(urlLigne1)) {
         addPill('site internet', urlLigne1, isYouTube: true);
@@ -524,11 +562,24 @@ Widget build(BuildContext context) {
             }
           },
         ));
+      } else if (_isWordUrl(urlLigne1)) {
+        pills.add(HoverPillButton(
+          label: 'document',
+          iconWidget: _pdfIconWidget(),
+          tooltip: 'Ouvrir le document (Word / Open Office)',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(urlLigne1.trim());
+            } else {
+              openUrl(urlLigne1.trim());
+            }
+          },
+        ));
       } else if (_isXlsUrl(urlLigne1)) {
         pills.add(HoverPillButton(
           label: 'tableur',
           iconWidget: _excelIconWidget(),
-          tooltip: 'Ouvrir le fichier Excel',
+          tooltip: 'Ouvrir le fichier Excel / tableur',
           onTap: () {
             if (onOpenUrl != null) {
               onOpenUrl!(urlLigne1.trim());
@@ -542,7 +593,7 @@ Widget build(BuildContext context) {
     }
     if (pills.isNotEmpty) {
       return Padding(
-        padding: const EdgeInsets.only(top: 4),
+        padding: EdgeInsets.only(top: resultLineGap),
         child: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 6,
@@ -558,9 +609,9 @@ Widget build(BuildContext context) {
   // ─────────────────────────────
   if (item.source == SourceType.siteWeb) {
     final pills = <Widget>[];
-    final isPharmaradio = (item.label?.toLowerCase().contains('pharmaradio') ?? false) ||
+    final isPharmaradio = item.label.toLowerCase().contains('pharmaradio') ||
         (item.commentaire?.toLowerCase().contains('pharmaradio') ?? false) ||
-        (item.labelRaw?.toLowerCase().contains('pharmaradio') ?? false);
+        item.labelRaw.toLowerCase().contains('pharmaradio');
     if (isPharmaradio && onOpenPharmaradioFlash != null) {
       pills.add(HoverPillButton(
         label: 'Flash info',
@@ -575,12 +626,13 @@ Widget build(BuildContext context) {
       final urlTrim = url.trim();
       final useYouTubePanel = isYouTube && onOpenYouTubeVideo != null;
       final isPdf = _isPdfUrl(url);
+      final isWord = _isWordUrl(url);
       final isXls = _isXlsUrl(url);
-      final maxLabelWidth = (isXls || isPdf) ? 500.0 : null;
+      final maxLabelWidth = (isXls || isPdf || isWord) ? 500.0 : null;
       pills.add(HoverPillButton(
         label: name,
         maxLabelWidth: maxLabelWidth,
-        icon: useYouTubePanel || isPdf || isXls ? null : iconForUrl(url),
+        icon: useYouTubePanel || isPdf || isWord || isXls ? null : iconForUrl(url),
         iconWidget: useYouTubePanel
             ? SvgPicture.asset(
                 'assets/icons/youtube.svg',
@@ -590,9 +642,11 @@ Widget build(BuildContext context) {
               )
             : isPdf
                 ? _pdfIconWidget()
-                : isXls
-                    ? _excelIconWidget()
-                    : _externalLinkIconWidget(),
+                : isWord
+                    ? _pdfIconWidget()
+                    : isXls
+                        ? _excelIconWidget()
+                        : _externalLinkIconWidget(),
         tooltip: urlTrim,
         onTap: () {
           if (useYouTubePanel) {
@@ -605,7 +659,7 @@ Widget build(BuildContext context) {
         },
       ),);
     }
-    // Ne pas ajouter de pill "site internet" quand l’icône external link est déjà en ligne 1 (item.url)
+    // Ne pas ajouter de pill "site internet" quand l'icône external link est déjà en ligne 1 (item.url)
     final hasMainUrl = item.url != null && item.url!.trim().isNotEmpty;
     final skipSiteInternetPill = (String name) =>
         hasMainUrl && name.toLowerCase().trim() == 'site internet';
@@ -629,7 +683,7 @@ Widget build(BuildContext context) {
     }
     if (pills.isNotEmpty) {
       return Padding(
-        padding: const EdgeInsets.only(top: 4),
+        padding: EdgeInsets.only(top: resultLineGap),
         child: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 6,
@@ -648,16 +702,17 @@ Widget build(BuildContext context) {
     void addCataloguePill(String name, String url) {
       if (name.isEmpty || url.isEmpty) return;
       final isPdf = _isPdfUrl(url);
+      final isWord = _isWordUrl(url);
       final isXls = _isXlsUrl(url);
-      // XLS/PDF : afficher tout le libellé du badge
-      final maxLabelWidth = (isXls || isPdf) ? 500.0 : null;
+      // XLS/PDF/Word : afficher tout le libellé du badge
+      final maxLabelWidth = (isXls || isPdf || isWord) ? 500.0 : null;
       final isCatalogueBadge = name == 'Catalogue';
       if (isCatalogueBadge && onOpenCataloguePanel != null) {
         cataloguePills.add(HoverPillButton(
           label: name,
           maxLabelWidth: maxLabelWidth,
-          icon: isPdf || isXls ? null : iconForUrl(url),
-          iconWidget: isPdf ? _pdfIconWidget() : isXls ? _excelIconWidget() : _externalLinkIconWidget(),
+          icon: isPdf || isWord || isXls ? null : iconForUrl(url),
+          iconWidget: isPdf ? _pdfIconWidget() : isWord ? _pdfIconWidget() : isXls ? _excelIconWidget() : _externalLinkIconWidget(),
           tooltip: url,
           onTap: onOpenCataloguePanel!,
         ),);
@@ -666,8 +721,8 @@ Widget build(BuildContext context) {
       cataloguePills.add(HoverPillButton(
         label: name,
         maxLabelWidth: maxLabelWidth,
-        icon: isPdf || isXls ? null : iconForUrl(url),
-        iconWidget: isPdf ? _pdfIconWidget() : isXls ? _excelIconWidget() : _externalLinkIconWidget(),
+        icon: isPdf || isWord || isXls ? null : iconForUrl(url),
+        iconWidget: isPdf ? _pdfIconWidget() : isWord ? _pdfIconWidget() : isXls ? _excelIconWidget() : _externalLinkIconWidget(),
         tooltip: url,
         onTap: () {
           if (onOpenUrl != null) {
@@ -685,8 +740,8 @@ Widget build(BuildContext context) {
         final badge1Url = item.badge1Url!;
         cataloguePills.add(HoverPillButton(
           label: item.badge1Name!,
-          icon: _isPdfUrl(item.badge1Url!) || _isXlsUrl(item.badge1Url!) ? null : iconForUrl(item.badge1Url!),
-          iconWidget: _isPdfUrl(item.badge1Url!) ? _pdfIconWidget() : _isXlsUrl(item.badge1Url!) ? _excelIconWidget() : _externalLinkIconWidget(),
+          icon: _isPdfUrl(item.badge1Url!) || _isWordUrl(item.badge1Url!) || _isXlsUrl(item.badge1Url!) ? null : iconForUrl(item.badge1Url!),
+          iconWidget: _isPdfUrl(item.badge1Url!) ? _pdfIconWidget() : _isWordUrl(item.badge1Url!) ? _pdfIconWidget() : _isXlsUrl(item.badge1Url!) ? _excelIconWidget() : _externalLinkIconWidget(),
           tooltip: 'accès espace pro',
           onTap: () {
             openEspacePro(
@@ -700,8 +755,8 @@ Widget build(BuildContext context) {
       } else if (isEspacePro) {
         cataloguePills.add(HoverPillButton(
           label: item.badge1Name!,
-          icon: _isPdfUrl(item.badge1Url!) || _isXlsUrl(item.badge1Url!) ? null : iconForUrl(item.badge1Url!),
-          iconWidget: _isPdfUrl(item.badge1Url!) ? _pdfIconWidget() : _isXlsUrl(item.badge1Url!) ? _excelIconWidget() : _externalLinkIconWidget(),
+          icon: _isPdfUrl(item.badge1Url!) || _isWordUrl(item.badge1Url!) || _isXlsUrl(item.badge1Url!) ? null : iconForUrl(item.badge1Url!),
+          iconWidget: _isPdfUrl(item.badge1Url!) ? _pdfIconWidget() : _isWordUrl(item.badge1Url!) ? _pdfIconWidget() : _isXlsUrl(item.badge1Url!) ? _excelIconWidget() : _externalLinkIconWidget(),
           tooltip: 'accès espace pro',
           onTap: () {
             if (onOpenUrl != null) {
@@ -729,7 +784,7 @@ Widget build(BuildContext context) {
     }
     if (cataloguePills.isNotEmpty) {
       return Padding(
-        padding: const EdgeInsets.only(top: 4),
+        padding: EdgeInsets.only(top: resultLineGap),
         child: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 6,
@@ -754,48 +809,7 @@ Widget build(BuildContext context) {
 
     final line2Children = <Widget>[];
 
-    // Badges métier (commonspans) : Stups, Exception, OTC, PIH, HOP — même ordre et style qu’en ligne 1.
-    if (item.isStupefiant == true) {
-      line2Children.add(squareTagWidget(
-        label: 'S/AS',
-        color: Colors.red.shade700,
-        tooltip: 'Médicament stupéfiant ou assimilé stupéfiant',
-        url: 'https://www.meddispar.fr/Substances-veneneuses/Medicaments-stupefiants-et-assimiles/Criteres#nav-buttons',
-      ));
-    }
-    if (item.isException == true) {
-      line2Children.add(squareTagWidget(
-        label: 'EXCEPTION',
-        color: Colors.blue.shade600,
-        tooltip: 'Médicament d’exception',
-        url: 'https://www.meddispar.fr/Medicaments-d-exception/Criteres#nav-buttons',
-      ));
-    }
-    if (item.isOtc == true) {
-      line2Children.add(squareTagWidget(
-        label: 'OTC/autre',
-        color: Colors.lightGreenAccent.shade700,
-        tooltip: 'OTC / autre / NR',
-        url: 'https://ansm.sante.fr/',
-      ));
-    }
-    if (item.isPih == true) {
-      line2Children.add(squareTagWidget(
-        label: 'PIH',
-        color: Colors.orange.shade700,
-        tooltip: 'Prescription initiale hospitalière',
-        url: 'https://www.meddispar.fr/Medicaments-a-prescription-restreinte/'
-            'Medicaments-a-prescription-initiale-hospitaliere/Criteres#nav-buttons',
-      ));
-    }
-    if (item.hospitalOnly == true) {
-      line2Children.add(squareTagWidget(
-        label: 'HOP',
-        color: Colors.blue.shade700,
-        tooltip: 'Réservé à l’usage hospitalier',
-      ));
-    }
-    if (line2Children.isNotEmpty) line2Children.add(const SizedBox(width: 6));
+    // Badges S/AS, EXCEPTION, OTC, PIH, HOP : affichés uniquement en ligne 1 (ResultLine1), pas ici.
 
     // Badge « arrêt de commercialisation » pour NSFP dont le CIS est dans CIS_CIP_Dispo_Spec (exception affichée).
     final isArretCommercialisation = item.isNsfpEffective == true &&
@@ -813,68 +827,31 @@ Widget build(BuildContext context) {
       line2Children.add(const SizedBox(width: 6));
     }
 
-    // Produit concerné par un rappel ANSM : pendant 7 jours, message + badge "+ d'infos" (comme ligne 1)
+    // Produit concerné par un rappel de lot ANSM : badge rouge "rappel de lot" (ligne 2), même taille que RCP, < 2 mois uniquement.
     final matchesLastRappel = ansmLastRappel != null &&
         isProductConcernedByLastRappel(item, ansmLastRappel!);
     final inCsvRappel = recalledProductNames != null &&
-        item.labelRaw != null &&
-        item.labelRaw!.trim().isNotEmpty &&
-        recalledProductNames!.contains(normalizeProductNameForRappel(item.labelRaw!));
+        item.labelRaw.trim().isNotEmpty &&
+        recalledProductNames!.contains(normalizeProductNameForRappel(item.labelRaw));
     final isConcerned = matchesLastRappel || inCsvRappel;
-    final rappelRecent7j = ansmLastRappel != null && isRappelRecent(ansmLastRappel!, maxDays: 7);
+    final rappelMoins2Mois = ansmLastRappel != null && isRappelRecent(ansmLastRappel!, maxDays: 60);
+    final rappelUrl = ansmLastRappel?.url.trim();
 
-    if (isConcerned && rappelRecent7j && ansmLastRappel!.url.trim().isNotEmpty) {
-      line2Children.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Ce médicament fait l\'objet d\'un rappel de lot',
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: Colors.red.shade700,
-                fontFamily: 'Spinnaker',
-              ),
-            ),
-            const SizedBox(width: 8),
-            HoverPillButton(
-              label: '+ d\'infos',
-              icon: Icons.info_outline,
-              tooltip: 'Plus d\'infos sur le rappel (ANSM)',
-              onTap: () {
-                if (onOpenUrl != null) {
-                  onOpenUrl!(ansmLastRappel!.url.trim());
-                } else {
-                  openUrl(ansmLastRappel!.url.trim());
-                }
-              },
-            ),
-          ],
-        ),
-      );
-    } else if (isConcerned) {
-      // Rappel > 7 jours ou pas d'URL : message seul (sans badge)
-      line2Children.add(
-        Text(
-          'Ce médicament fait l\'objet d\'un rappel de lot',
-          style: TextStyle(
-            fontSize: 12,
-            fontStyle: FontStyle.italic,
-            color: Colors.red.shade700,
-            fontFamily: 'Spinnaker',
-          ),
-        ),
-      );
+    if (isConcerned && rappelMoins2Mois && rappelUrl != null && rappelUrl.isNotEmpty) {
+      if (line2Children.isNotEmpty) line2Children.add(const SizedBox(width: 6));
+      line2Children.add(_RappelDeLotBadge(
+        url: rappelUrl,
+        onOpenUrl: onOpenUrl,
+      ));
     }
 
-    // Badge générique 2026 : "princeps: [nom princeps]" (rose) ou "générique: [DCI]" (rose) + RCP et MEDDISPAR en HoverPill
+    // Badge générique 2026 : "princeps : [nom princeps col. princeps A]" (rose), pas la DCI ; RCP et MEDDISPAR en HoverPill
     final generique2026Info = (generiques2026ByCis != null && cisKey.isNotEmpty)
         ? generiques2026ByCis![cisKey]
         : null;
     if (generique2026Info != null) {
       if (item.isGeneric == true) {
-        // Produits génériques (CIS en col D du CSV génériques 2026) : afficher "princeps: [nom court]" (ex. princeps: Xanax).
+        // Produits génériques (CIS en col D du CSV génériques 2026) : afficher "princeps : [nom court col. princeps A]" (ex. princeps : Stilnox), pas la DCI.
         final princepsLabel = generique2026Info.princepsDisplay.trim();
         if (princepsLabel.isNotEmpty) {
           final shortName = shortPrincepsDisplayForBadge(princepsLabel);
@@ -922,10 +899,40 @@ Widget build(BuildContext context) {
           },
         ),);
       }
+      // Badges calendriers vaccinaux pour médicaments dont le libellé contient "vaccin".
+      final labelForVaccin = '${item.label} ${item.labelRaw ?? ''}'.toLowerCase();
+      if (item.source == SourceType.bdm && labelForVaccin.contains('vaccin')) {
+        if (line2Children.isNotEmpty) line2Children.add(const SizedBox(width: 6));
+        line2Children.add(HoverPillButton(
+          label: 'Calendrier vaccinal 2025',
+          icon: Icons.calendar_month_outlined,
+          tooltip: 'Calendrier vaccinal 2025 (version Décembre 2025)',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(kCalendrierVaccinal2025Url);
+            } else {
+              openUrl(kCalendrierVaccinal2025Url);
+            }
+          },
+        ));
+        line2Children.add(const SizedBox(width: 6));
+        line2Children.add(HoverPillButton(
+          label: 'Calendrier simplifié',
+          icon: Icons.calendar_view_month_outlined,
+          tooltip: 'Calendrier simplifié des vaccinations',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(kCalendrierSimplifieUrl);
+            } else {
+              openUrl(kCalendrierSimplifieUrl);
+            }
+          },
+        ));
+      }
     }
     // Badge biosimilaire de [bioréférent]. RCP et MEDDISPAR restent en ligne 3 (hover pills).
     // Espacement réduit entre badges pour biosimilaires afin de laisser la place à l’icône Source BDNM.
-    final spacingBetweenBadges = hasBiosim ? 4.0 : 6.0;
+    final spacingBetweenBadges = hasBiosim ? 2.0 : 3.0;
     if (hasBiosim) {
       line2Children.add(_BiosimilaireBadge(bioreferent: item.biosimilaireOf!));
       final biosimInfo = (biosimilairesInfoByCip != null && item.cip13 != null)
@@ -965,7 +972,7 @@ Widget build(BuildContext context) {
       }
       final String tooltipStatut = 'statut ANSM : ${ansmLabel(statutLibelle)} $extraInfo';
       line2Children.add(
-        Tooltip(
+        OffiboxTooltip(
           message: tooltipStatut,
           waitDuration: const Duration(milliseconds: 400),
           child: IntrinsicHeight(
@@ -1014,7 +1021,7 @@ Widget build(BuildContext context) {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Tooltip(
+                OffiboxTooltip(
                   message: 'Cliquer pour + d\'infos',
                   waitDuration: const Duration(milliseconds: 900),
                   child: Material(
@@ -1073,14 +1080,78 @@ Widget build(BuildContext context) {
       ));
     }
 
+    // Non génériques : RCP et MEDDISPAR sur la même ligne que + d'infos (ligne 2).
+    if (generique2026Info == null) {
+      if (item.url != null && item.url!.trim().isNotEmpty) {
+        if (line2Children.isNotEmpty) line2Children.add(SizedBox(width: spacingBetweenBadges));
+        line2Children.add(HoverPillButton(
+          label: 'RCP',
+          icon: Icons.description_outlined,
+          tooltip: 'Accéder au RCP',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(item.url!.trim());
+            } else {
+              openUrl(item.url!.trim());
+            }
+          },
+        ));
+      }
+      if (item.meddisparUrl != null && item.meddisparUrl!.trim().isNotEmpty) {
+        if (line2Children.isNotEmpty) line2Children.add(SizedBox(width: spacingBetweenBadges));
+        line2Children.add(HoverPillButton(
+          label: 'MEDDISPAR',
+          icon: Icons.warning_amber_rounded,
+          tooltip: 'Fiche MEDDISPAR',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(item.meddisparUrl!.trim());
+            } else {
+              openUrl(item.meddisparUrl!.trim());
+            }
+          },
+        ));
+      }
+      // Badges calendriers vaccinaux pour médicaments BDM dont le libellé contient "vaccin".
+      final labelForVaccin = '${item.label} ${item.labelRaw ?? ''}'.toLowerCase();
+      if (item.source == SourceType.bdm && labelForVaccin.contains('vaccin')) {
+        if (line2Children.isNotEmpty) line2Children.add(SizedBox(width: spacingBetweenBadges));
+        line2Children.add(HoverPillButton(
+          label: 'Calendrier vaccinal 2025',
+          icon: Icons.calendar_month_outlined,
+          tooltip: 'Calendrier vaccinal 2025 (version Décembre 2025)',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(kCalendrierVaccinal2025Url);
+            } else {
+              openUrl(kCalendrierVaccinal2025Url);
+            }
+          },
+        ));
+        line2Children.add(SizedBox(width: spacingBetweenBadges));
+        line2Children.add(HoverPillButton(
+          label: 'Calendrier simplifié',
+          icon: Icons.calendar_view_month_outlined,
+          tooltip: 'Calendrier simplifié des vaccinations',
+          onTap: () {
+            if (onOpenUrl != null) {
+              onOpenUrl!(kCalendrierSimplifieUrl);
+            } else {
+              openUrl(kCalendrierSimplifieUrl);
+            }
+          },
+        ));
+      }
+    }
+
     // Source : BDM affichée en ligne 3 après RCP et MEDDISPAR (voir result_line_3_actions.dart).
     if (line2Children.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: EdgeInsets.only(top: resultLineGap),
       child: Wrap(
-        spacing: hasBiosim ? 4 : 8,
-        runSpacing: hasBiosim ? 4 : 6,
+        spacing: hasBiosim ? 2 : 4,
+        runSpacing: hasBiosim ? 2 : 3,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: line2Children,
       ),
@@ -1104,7 +1175,7 @@ Widget build(BuildContext context) {
     ];
     if (wrapChildren.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: EdgeInsets.only(top: resultLineGap),
       child: Wrap(
         spacing: 8,
         runSpacing: 4,
@@ -1175,7 +1246,7 @@ class _ArretCommercialisationBadge extends StatelessWidget {
       ),
     );
 
-    return Tooltip(
+    return OffiboxTooltip(
       message: canOpen
           ? 'Ouvrir la fiche ANSM (arrêt de commercialisation)'
           : 'Médicament en arrêt de commercialisation (CIS_CIP_Dispo_Spec)',
@@ -1238,13 +1309,13 @@ class _BiosimilaireBadge extends StatelessWidget {
   }
 }
 
-/// Badge « Infos dispensation » : ouvre une fenêtre blanche type plus d'infos avec le contenu de la colonne 5 (puces).
+/// Badge « + » rose (même police/hauteur que « biosimilaire de ») : tooltip « infos dispensation », au clic ouvre la fenêtre avec le contenu colonne 5 (puces).
 class _BiosimilaireInfosBadge extends StatelessWidget {
   const _BiosimilaireInfosBadge({required this.infoText});
 
   final String infoText;
 
-  static const _purple = Color(0xFF7C3AED);
+  static const _rose = Color(0xFFC2185B);
 
   void _showDialog(BuildContext context) {
     final bullets = infoText
@@ -1310,33 +1381,30 @@ class _BiosimilaireInfosBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showDialog(context),
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: _purple.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: _purple.withValues(alpha: 0.4), width: 1),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.info_outline, size: 14, color: _purple),
-              const SizedBox(width: 6),
-              Text(
-                'INFOS DISPENSATION',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontFamily: 'Spinnaker',
-                  fontWeight: FontWeight.w600,
-                  color: _purple,
-                ),
+    return OffiboxTooltip(
+      message: 'infos dispensation',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showDialog(context),
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: _rose.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: _rose, width: 1),
+            ),
+            child: Text(
+              '+',
+              style: const TextStyle(
+                fontSize: 11,
+                fontFamily: 'Spinnaker',
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
+                color: _rose,
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1355,7 +1423,7 @@ class _RcpBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return OffiboxTooltip(
       message: 'Accéder au RCP',
       waitDuration: const Duration(milliseconds: 600),
       child: InkWell(
@@ -1389,7 +1457,48 @@ class _RcpBadge extends StatelessWidget {
   }
 }
 
-/// Badge rose "princeps: [nom]" pour les génériques (ex. princeps: Xanax). Clic → répertoire ANSM génériques.
+/// Badge rouge "rappel de lot" (ligne 2), même taille que RCP. Tooltip "plus d'infos", clic → lien ANSM.
+class _RappelDeLotBadge extends StatelessWidget {
+  const _RappelDeLotBadge({required this.url, this.onOpenUrl});
+
+  final String url;
+  final void Function(String url)? onOpenUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return OffiboxTooltip(
+      message: 'plus d\'infos',
+      waitDuration: const Duration(milliseconds: 600),
+      child: InkWell(
+        onTap: () {
+          if (onOpenUrl != null) {
+            onOpenUrl!(url);
+          } else {
+            openUrl(url);
+          }
+        },
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: OffiboxWindowUI.tickerInfosRed,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: const Text(
+            'rappel de lot',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Badge rose "princeps : [nom]" pour les génériques (ex. princeps : Stilnox). Clic → répertoire ANSM génériques.
 class _GeneriqueEqualsBadge extends StatelessWidget {
   const _GeneriqueEqualsBadge({
     required this.princepsDisplayName,
@@ -1409,7 +1518,7 @@ class _GeneriqueEqualsBadge extends StatelessWidget {
     final tooltip = tooltipFullPrinceps != null && tooltipFullPrinceps!.trim().isNotEmpty
         ? '${tooltipFullPrinceps!.trim()} — accès au répertoire des génériques'
         : 'accès au répertoire des génériques';
-    return Tooltip(
+    return OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 600),
       child: InkWell(
@@ -1428,7 +1537,7 @@ class _GeneriqueEqualsBadge extends StatelessWidget {
               const Icon(Icons.medication, size: 14, color: Colors.white),
               const SizedBox(width: 4),
               Text(
-                'princeps: $princepsDisplayName',
+                'princeps : $princepsDisplayName',
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -1502,7 +1611,7 @@ class _MeddisparBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return OffiboxTooltip(
       message: 'Fiche MEDDISPAR',
       waitDuration: const Duration(milliseconds: 600),
       child: InkWell(
@@ -1547,7 +1656,7 @@ class _BioreferentBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return OffiboxTooltip(
       message: 'Bioréférent',
       waitDuration: const Duration(milliseconds: 600),
       child: InkWell(
@@ -1586,6 +1695,7 @@ class CodeBadgeWithCopy extends StatelessWidget {
     required this.tooltip,
     this.leadingIcon,
     this.fontSize = 11,
+    this.leadingIconSize,
   });
 
   final String label;
@@ -1594,11 +1704,13 @@ class CodeBadgeWithCopy extends StatelessWidget {
   final IconData? leadingIcon;
   /// Taille de police du badge (défaut 11). Réduire à 10 en ligne 1 pour éviter la troncature.
   final double fontSize;
+  /// Taille des icônes (leading + copy). Si null, dérivée de [fontSize].
+  final double? leadingIconSize;
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = fontSize.clamp(10.0, 12.0).round();
-    return Tooltip(
+    final iconSize = (leadingIconSize ?? fontSize.clamp(10.0, 12.0)).toDouble();
+    return OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 900),
       child: InkWell(
@@ -1627,7 +1739,7 @@ class CodeBadgeWithCopy extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (leadingIcon != null) ...[
-                Icon(leadingIcon, size: iconSize.toDouble(), color: Colors.black54),
+                Icon(leadingIcon, size: iconSize, color: Colors.black54),
                 SizedBox(width: fontSize <= 10 ? 3 : 4),
               ],
               Text(
@@ -1639,7 +1751,7 @@ class CodeBadgeWithCopy extends StatelessWidget {
                 ),
               ),
               SizedBox(width: fontSize <= 10 ? 4 : 6),
-              Icon(Icons.copy, size: iconSize.toDouble(), color: Colors.black54),
+              Icon(Icons.copy, size: iconSize, color: Colors.black54),
             ],
           ),
         ),
@@ -1664,7 +1776,7 @@ class _CodeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return OffiboxTooltip(
       message: 'Copier le code',
       waitDuration: const Duration(milliseconds: 900),
       child: InkWell(

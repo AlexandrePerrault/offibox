@@ -3,6 +3,10 @@ import 'package:http/http.dart' as http;
 const String _ansmInformationsUrl =
     'https://ansm.sante.fr/informations-de-securite/';
 
+/// URL filtrée : rappels de produit « Médicaments » uniquement (source pour le dernier rappel et la liste).
+const String ansmInformationsMedicamentsUrl =
+    'https://ansm.sante.fr/informations-de-securite/?safety_news_filter%5BsafetyNewsModels%5D%5B%5D=5&safety_news_filter%5BhealthProducts%5D%5B%5D=20&safety_news_filter%5BhealthProducts%5D%5B%5D=22&safety_news_filter%5BhealthProducts%5D%5B%5D=25&safety_news_filter%5BstartDate%5D=&safety_news_filter%5BendDate%5D=';
+
 /// Dernier rappel de produit ANSM affiché sur la barre d'info (date + libellé complet + URL).
 class AnsmRappelItem {
   const AnsmRappelItem({
@@ -27,7 +31,7 @@ class AnsmLastRappelService {
 
   static Future<AnsmRappelItem?> fetchLast() async {
     try {
-      final response = await http.get(Uri.parse(_ansmInformationsUrl));
+      final response = await http.get(Uri.parse(ansmInformationsMedicamentsUrl));
       if (response.statusCode != 200) return null;
       return _parse(response.body);
     } catch (_) {
@@ -74,17 +78,16 @@ class AnsmLastRappelService {
         url: href,
         dateStr: dateStr.isNotEmpty ? dateStr : null,
         slug: slug.isNotEmpty ? slug : null,
-      ));
+      ),);
       isMedicament.add(isMed);
     }
     if (rappels.isEmpty) return null;
-    // Priorité : rappels "Médicaments" (ex. Doliprane), tri par date décroissante
+    // Barre d'infos : uniquement le dernier rappel « Médicaments » (pas les dispositifs médicaux)
     final medicaments = <AnsmRappelItem>[];
     for (var i = 0; i < rappels.length; i++) {
       if (isMedicament[i]) medicaments.add(rappels[i]);
     }
-    final toSort = medicaments.isNotEmpty ? medicaments : rappels;
-    toSort.sort((a, b) {
+    medicaments.sort((a, b) {
       final da = _parseDate(a.dateStr);
       final db = _parseDate(b.dateStr);
       if (da == null && db == null) return 0;
@@ -92,7 +95,67 @@ class AnsmLastRappelService {
       if (db == null) return -1;
       return db.compareTo(da); // plus récent en premier
     });
-    return toSort.isNotEmpty ? toSort.first : null;
+    return medicaments.isNotEmpty ? medicaments.first : null;
+  }
+
+  /// Liste des rappels « Médicaments » (pour badge ligne 3 sur chaque médicament concerné). Tri par date décroissante.
+  static Future<List<AnsmRappelItem>> fetchAllMedicamentRappels({int maxCount = 80}) async {
+    try {
+      final response = await http.get(Uri.parse(ansmInformationsMedicamentsUrl));
+      if (response.statusCode != 200) return [];
+      return _parseAllMedicamentRappels(response.body, maxCount: maxCount);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static List<AnsmRappelItem> _parseAllMedicamentRappels(String html, {int maxCount = 80}) {
+    final linkRegex = RegExp(
+      r'<a\s+href=["\x27]([^"\x27]*informations-de-securite/[^"\x27]+)["\x27][^>]*>([\s\S]*?)</a>',
+      caseSensitive: false,
+      dotAll: true,
+    );
+    final List<AnsmRappelItem> medicaments = [];
+    for (final match in linkRegex.allMatches(html)) {
+      var href = match.group(1) ?? '';
+      final inner = match.group(2) ?? '';
+      if (!inner.contains('RAPPEL DE PRODUIT')) continue;
+      if (!inner.toLowerCase().contains('médicaments')) continue;
+      if (href.startsWith('//')) href = 'https:$href';
+      if (href.startsWith('/')) href = 'https://ansm.sante.fr$href';
+      if (!href.startsWith('http')) href = 'https://ansm.sante.fr/$href';
+      final rawTitle = inner
+          .replaceAll(RegExp(r'<[^>]+>'), ' ')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+      String dateStr = '';
+      String libelle = rawTitle;
+      final dateMatch = RegExp(r'PUBLIÉ LE (\d{2}/\d{2}/\d{4})', caseSensitive: false).firstMatch(rawTitle);
+      if (dateMatch != null) {
+        dateStr = dateMatch.group(1) ?? '';
+        libelle = rawTitle.substring(dateMatch.end).trim();
+      }
+      if (libelle.isEmpty) libelle = 'Rappel de produit ANSM';
+      final label = dateStr.isNotEmpty
+          ? 'Rappel ANSM - $dateStr : $libelle'
+          : 'Rappel ANSM : $libelle';
+      final slug = _slugFromRappelUrl(href);
+      medicaments.add(AnsmRappelItem(
+        label: label,
+        url: href,
+        dateStr: dateStr.isNotEmpty ? dateStr : null,
+        slug: slug.isNotEmpty ? slug : null,
+      ));
+    }
+    medicaments.sort((a, b) {
+      final da = _parseDate(a.dateStr);
+      final db = _parseDate(b.dateStr);
+      if (da == null && db == null) return 0;
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return db.compareTo(da);
+    });
+    return medicaments.length <= maxCount ? medicaments : medicaments.sublist(0, maxCount);
   }
 
   /// Extrait le slug produit de l'URL (segment après informations-de-securite/).

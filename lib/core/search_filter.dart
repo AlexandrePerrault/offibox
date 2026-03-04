@@ -131,7 +131,7 @@ class SearchFilter {
           if (!_bdmMatchesSubFilter(r, sub, genericCipSet: genericCipSet)) continue;
           if (sub == BdmSubFilter.generiques && genericLaboratory != null && genericLaboratory!.isNotEmpty) {
             final lab = genericLaboratory!.trim().toUpperCase();
-            final label = (r.labelRaw ?? r.label ?? '').toUpperCase();
+            final label = r.labelRaw.toUpperCase();
             if (!label.contains(lab)) continue;
           }
           return true;

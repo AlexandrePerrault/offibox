@@ -30,8 +30,10 @@ class OffiboxWindowUI {
   static const double topMargin = 76;
   static const double gapBelowBar = 8;
 
-  /// Hauteur barre d'infos (ticker) — adaptée au texte +15 % ; barres (pills) +15 % hauteur.
-  static const double tickerBarHeight = 38; // 33 * 1.15
+  /// Hauteur barre d'infos (ticker).
+  static const double tickerBarHeight = 38;
+  /// Hauteur des badges (toggle INFOS, pills rouges/bleus) — moitié de la barre, centrés.
+  static const double tickerBadgeHeight = 19;
   static const double tickerBarGap = 6;
 
   /// Style unifié badge INFOS + messages déroulants (rouge mat, pill, typo).

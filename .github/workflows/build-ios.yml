@@ -1,0 +1,60 @@
+# Build iOS (gratuit sur GitHub Actions - 2000 min/mois si repo privé, illimité si public)
+# Pour installer sur ton iPad : voir section "Installation sur l'iPad" en bas du fichier
+
+name: Build iOS
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Permet de lancer le build à la main (Actions > Build iOS > Run workflow)
+
+jobs:
+  build:
+    runs-on: macos-latest  # Un Mac virtuel (obligatoire pour compiler iOS)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+          channel: "stable"
+          cache: true
+
+      - name: Versions
+        run: |
+          flutter --version
+          xcodebuild -version
+
+      - name: Restaurer les paquets
+        run: flutter pub get
+
+      # Fichier Firebase pour iOS (optionnel en CI : sans lui la build peut échouer si le code le requiert)
+      - name: Vérifier GoogleService-Info.plist (optionnel)
+        run: |
+          if [ -f ios/Runner/GoogleService-Info.plist ]; then
+            echo "GoogleService-Info.plist présent"
+          else
+            echo "::warning::GoogleService-Info.plist absent. Crée une app iOS dans Firebase et place le fichier dans ios/Runner/"
+          fi
+
+      - name: Build iOS (sans signature)
+        run: flutter build ios --no-codesign
+        env:
+          FLUTTER_GIT_URL: https://github.com/flutter/flutter.git
+
+      - name: Archiver le build
+        run: |
+          cd build/ios/iphoneos
+          zip -r ../../../ios-build.zip Runner.app
+          cd ../../..
+
+      - name: Déposer le build en artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: ios-build.zip

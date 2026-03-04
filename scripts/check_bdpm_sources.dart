@@ -1,5 +1,5 @@
-// ignore_for_file: avoid_print
 /// Script de vérification quotidienne des sources BDPM officielles.
+// ignore_for_file: avoid_print
 /// Télécharge CIS_bdpm.txt et CIS_CIP_bdpm.txt, affiche la structure et des exemples de libellés.
 ///
 /// Exécution : depuis la racine du projet Flutter :
@@ -8,8 +8,6 @@
 ///   dart run --enable-experiment=non-nullable script scripts/check_bdpm_sources.dart
 ///
 /// À planifier (cron / Task Scheduler) pour une vérification quotidienne.
-
-import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 

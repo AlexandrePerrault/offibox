@@ -1,0 +1,2 @@
+# Pour le script d’extraction catalogue Santralia (extract_santralia_pdf.py)
+pymupdf>=1.24.0

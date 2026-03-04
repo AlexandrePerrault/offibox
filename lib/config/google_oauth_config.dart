@@ -22,16 +22,23 @@ class GoogleOAuthConfig {
   static Future<void> _loadFromFile() async {
     if (_loaded) return;
     _loaded = true;
-    try {
-      final dir = await getApplicationSupportDirectory();
-      final file = File(path.join(dir.path, 'google_oauth_credentials.json'));
-      if (!await file.exists()) return;
-      final content = await file.readAsString();
-      final map = json.decode(content) as Map<String, dynamic>;
-      _clientId = map['client_id'] as String?;
-      _clientSecret = map['client_secret'] as String?;
-    } catch (_) {
-      // Ignorer les erreurs de lecture
+    final candidates = <String>[
+      path.join((await getApplicationSupportDirectory()).path, 'google_oauth_credentials.json'),
+      path.join(Directory.current.path, 'config', 'oauth_credentials.json'),
+      path.join(Directory.current.path, '..', 'config', 'oauth_credentials.json'),
+    ];
+    for (final p in candidates) {
+      final file = File(p);
+      if (!await file.exists()) continue;
+      try {
+        final content = await file.readAsString();
+        final map = json.decode(content) as Map<String, dynamic>;
+        _clientId = map['client_id'] as String? ?? map['clientId'] as String?;
+        _clientSecret = map['client_secret'] as String? ?? map['clientSecret'] as String?;
+        if (_clientId != null && _clientSecret != null) return;
+      } catch (_) {
+        // Essayer le fichier suivant
+      }
     }
   }
 

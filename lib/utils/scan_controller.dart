@@ -7,14 +7,26 @@ class ScanController {
 
   /// Traite un scan : si DataMatrix/GS1 et [onScanDataMatrix] fourni, l’appelle avec CIP13 et payload ;
   /// sinon si GS1 appelle [onSearch](cip13). Retourne (isDataMatrix, cip13, payload).
-  ({bool isDataMatrix, String? cip13, Gs1ScanPayload? payload}) handle({
+  ({bool isDataMatrix, bool isMutuelleQr, String? cip13, Gs1ScanPayload? payload}) handle({
     required String raw,
     required void Function(String) onSearch,
     void Function(String cip13, Gs1ScanPayload? payload)? onScanDataMatrix,
+    void Function(String codePrefectoral)? onScanMutuelleQr,
   }) {
-    final normalized = raw.trim();
+    // Lecture en majuscules pour affichage cohérent du libellé en ligne 1 (scan minuscules ou majuscules).
+    final normalized = raw.trim().toUpperCase();
 
-    if (normalized.isEmpty) return (isDataMatrix: false, cip13: null, payload: null);
+    if (normalized.isEmpty) return (isDataMatrix: false, isMutuelleQr: false, cip13: null, payload: null);
+
+    final codePref = _parseMutuelleQr(normalized);
+    if (codePref != null) {
+      if (onScanMutuelleQr != null) {
+        onScanMutuelleQr(codePref);
+        return (isDataMatrix: false, isMutuelleQr: true, cip13: codePref, payload: null);
+      }
+      onSearch(codePref);
+      return (isDataMatrix: false, isMutuelleQr: true, cip13: codePref, payload: null);
+    }
 
     final parsed = _parseGs1(normalized);
     if (parsed != null) {
@@ -22,14 +34,27 @@ class ScanController {
       final payload = parsed.payload;
       if (onScanDataMatrix != null) {
         onScanDataMatrix(cip13, payload);
-        return (isDataMatrix: true, cip13: cip13, payload: payload);
+        return (isDataMatrix: true, isMutuelleQr: false, cip13: cip13, payload: payload);
       }
       onSearch(cip13);
-      return (isDataMatrix: true, cip13: cip13, payload: payload);
+      return (isDataMatrix: true, isMutuelleQr: false, cip13: cip13, payload: payload);
     }
 
     onSearch(normalized);
-    return (isDataMatrix: false, cip13: null, payload: null);
+    return (isDataMatrix: false, isMutuelleQr: false, cip13: null, payload: null);
+  }
+
+  /// QR mutuelle (carte Vitale) : ex. QC"1"00440008""31288747"... ou Q?C"1"00440008... (artefact scan) → code préfectoral 8 chiffres.
+  static String? _parseMutuelleQr(String raw) {
+    if (raw.length < 10) return null;
+    // Normaliser Q?C / Q.C (artefact de lecture) en QC pour reconnaissance
+    final normalized = raw.replaceAll(RegExp(r'Q[.?]C', caseSensitive: false), 'QC');
+    if (!normalized.toUpperCase().contains('QC')) return null;
+    // "1" suivi du code 8 chiffres (ex. "1"00440008)
+    final match = RegExp(r'"1"\s*"?(\d{8})').firstMatch(normalized);
+    if (match != null) return match.group(1);
+    final fallback = RegExp(r'\d{8}').firstMatch(normalized);
+    return fallback?.group(0);
   }
 
   /// Parse GS1 : (01)14 → CIP13, (21) → série, (17)6 → expiration MM/YY, (10) → lot.

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'package:offibox/ui/widgets/offibox_tooltip.dart';
+
 class HoverPillButton extends StatefulWidget {
   final String label;
   final IconData? icon;
@@ -52,7 +55,7 @@ class _HoverPillButtonState extends State<HoverPillButton> {
     final Color foregroundColor =
         _hovered ? offiboxTeal : Colors.white;
 
-    return Tooltip(
+    return OffiboxTooltip(
       message: widget.tooltip,
       waitDuration: const Duration(milliseconds: 900),
       child: MouseRegion(

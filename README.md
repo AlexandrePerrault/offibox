@@ -1,6 +1,19 @@
 # offibox
 
-A new Flutter project.
+**Offibox classique** : ce dépôt (dossier `offibox`) est le projet de l’application **Offibox** (version classique).  
+La variante **Offibox-CERP** est produite à partir de ce même code via les [flavors](docs/OFFIBOX_CERP_MARCHE_A_SUIVRE.md) ; les livrables et contenus spécifiques CERP (ex. catalogues par labo) sont rangés dans le dossier **`offibox CERP`** à la racine du projet (ex. `offibox CERP/SANTRALIA`).
+
+Pour distinguer clairement sur ton PC le classique du CERP, tu peux par exemple :
+- garder ce dossier tel quel pour le **classique** (build par défaut) ;
+- ou renommer ce dossier en **`offibox_classique`** et avoir à côté un dossier **`offibox_cerp`** (copie du dépôt ou sorties CERP).
+
+## Securite : cle API Google / Firebase
+
+Le fichier `android/app/google-services.json` (cles Firebase) **ne doit pas etre committe**. Il est dans `.gitignore`. Si une alerte Google signale une cle exposee sur GitHub :
+
+1. **Immediat** : [Google Cloud Console](https://console.cloud.google.com/) → projet offibox-prod → APIs et services → Identifiants → revoquer ou supprimer la cle concernee, puis en creer une nouvelle. Telecharger le nouveau `google-services.json` depuis Firebase et remplacer le fichier local.
+2. Ne plus jamais pousser `google-services.json`. Utiliser `android/app/google-services.json.example` comme modele (sans vraie cle).
+3. (Optionnel) Retirer le fichier de l’historique Git avec `git filter-repo` ou BFG puis `git push --force`.
 
 ## PDF (pdfrx)
 

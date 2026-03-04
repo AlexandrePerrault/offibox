@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:offibox/services/firestore_user_cache.dart';
+
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
 
@@ -39,6 +41,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         'maxDevices': 5,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true),);
+      FirestoreUserCache.instance.invalidate(user.uid);
 
       if (!mounted) return;
 

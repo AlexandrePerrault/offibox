@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:offibox/ui/widgets/document_viewer_toolbar.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/utils/platform_utils.dart';
 import 'package:webview_windows/webview_windows.dart';
@@ -219,6 +220,19 @@ class _YouTubeVideoPanelBelowBarState extends State<YouTubeVideoPanelBelowBar> {
     if (mounted) widget.onClose();
   }
 
+  void _openFullscreen() {
+    if (_closing || !mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => FullscreenDocumentPage(
+          onClose: () => Navigator.of(context).pop(),
+          child: _YoutubeFullscreenContent(youtubeUrl: widget.youtubeUrl),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFallback() {
     return Center(
       child: Column(
@@ -283,45 +297,33 @@ class _YouTubeVideoPanelBelowBarState extends State<YouTubeVideoPanelBelowBar> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      SizedBox(
-                        width: widget.barWidth,
-                        height: _videoHeight,
-                        child: _initError
-                            ? _buildFallback()
-                            : _useIframe
-                                ? (_ytController != null
-                                    ? YoutubePlayer(
-                                        controller: _ytController!,
-                                        aspectRatio: 16 / 9,
-                                      )
-                                    : const Center(child: CircularProgressIndicator(color: Colors.white70)))
-                                : (!_webViewController.value.isInitialized
-                                    ? const Center(child: CircularProgressIndicator(color: Colors.white70))
-                                    : Webview(
-                                        _webViewController,
-                                        permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
-                                            WebviewPermissionDecision.allow,
-                                      )),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Material(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(20),
-                          child: InkWell(
-                            onTap: _closeWithFade,
-                            borderRadius: BorderRadius.circular(20),
-                            child: const Padding(
-                              padding: EdgeInsets.all(6),
-                              child: Icon(Icons.close, size: 20, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  DocumentViewerToolbar(
+                    barHeight: 44,
+                    onDownload: () {
+                      if (!_closing) openUrl(widget.youtubeUrl);
+                    },
+                    onExpandFullscreen: _openFullscreen,
+                    onClose: _closeWithFade,
+                  ),
+                  SizedBox(
+                    width: widget.barWidth,
+                    height: _videoHeight,
+                    child: _initError
+                        ? _buildFallback()
+                        : _useIframe
+                            ? (_ytController != null
+                                ? YoutubePlayer(
+                                    controller: _ytController!,
+                                    aspectRatio: 16 / 9,
+                                  )
+                                : const Center(child: CircularProgressIndicator(color: Colors.white70)))
+                            : (!_webViewController.value.isInitialized
+                                ? const Center(child: CircularProgressIndicator(color: Colors.white70))
+                                : Webview(
+                                    _webViewController,
+                                    permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
+                                        WebviewPermissionDecision.allow,
+                                  )),
                   ),
                 ],
               ),
@@ -330,5 +332,85 @@ class _YouTubeVideoPanelBelowBarState extends State<YouTubeVideoPanelBelowBar> {
         ),
       ),
     );
+  }
+}
+
+/// Contenu plein écran pour une vidéo YouTube.
+class _YoutubeFullscreenContent extends StatefulWidget {
+  const _YoutubeFullscreenContent({required this.youtubeUrl});
+
+  final String youtubeUrl;
+
+  @override
+  State<_YoutubeFullscreenContent> createState() => _YoutubeFullscreenContentState();
+}
+
+class _YoutubeFullscreenContentState extends State<_YoutubeFullscreenContent> {
+  final WebviewController _webViewController = WebviewController();
+  YoutubePlayerController? _ytController;
+  bool _webViewInitialized = false;
+  bool _initError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (isWindows) {
+      _initWebView();
+    } else {
+      _initIframe();
+    }
+  }
+
+  void _initIframe() {
+    final videoId = _youtubeVideoId(widget.youtubeUrl);
+    if (videoId == null || videoId.isEmpty) {
+      setState(() => _initError = true);
+      return;
+    }
+    _ytController = YoutubePlayerController.fromVideoId(
+      videoId: videoId,
+      autoPlay: true,
+      params: const YoutubePlayerParams(showControls: true, showFullscreenButton: true, mute: false),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _initWebView() async {
+    try {
+      await _webViewController.initialize();
+      await _webViewController.setBackgroundColor(Colors.black);
+      await _webViewController.loadUrl(_youtubeEmbedUrl(widget.youtubeUrl));
+      if (mounted) setState(() => _webViewInitialized = true);
+    } catch (_) {
+      if (mounted) setState(() => _initError = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _webViewController.dispose();
+    _ytController?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_initError) {
+      return const Center(child: Text('Impossible de charger la vidéo', style: TextStyle(color: Colors.white)));
+    }
+    if (isWindows) {
+      if (!_webViewInitialized) {
+        return const Center(child: CircularProgressIndicator(color: Colors.white));
+      }
+      return Webview(
+        _webViewController,
+        permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
+            WebviewPermissionDecision.allow,
+      );
+    }
+    if (_ytController == null) {
+      return const Center(child: CircularProgressIndicator(color: Colors.white));
+    }
+    return YoutubePlayer(controller: _ytController!, aspectRatio: 16 / 9);
   }
 }

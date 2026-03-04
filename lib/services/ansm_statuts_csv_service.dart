@@ -108,7 +108,6 @@ class AnsmStatutsCsvService {
   static AnsmStatutItem? _parseFirstRowFromHtml(String html) {
     // Repérer une ligne de tableau : contient une date jj/mm/aaaa et un type de statut.
     final datePattern = RegExp(r'\d{1,2}/\d{1,2}/\d{4}');
-    final statutKeywords = ['Rupture de stock', 'Tension d\'approvisionnement', 'Arrêt de commercialisation', 'Remise à disposition'];
     // Chercher les <td>...</td> dans le premier <tr> de données (après l’en-tête).
     final trRegex = RegExp(r'<tr[^>]*>(.*?)</tr>', caseSensitive: false, dotAll: true);
     final tdRegex = RegExp(r'<td[^>]*>(.*?)</td>', caseSensitive: false, dotAll: true);
@@ -132,9 +131,8 @@ class AnsmStatutsCsvService {
       final dateMatch = datePattern.firstMatch(dateCell);
       final date = dateMatch?.group(0) ?? dateCell;
       final level = statusLevelFromLabel(statut);
-      var shortSpec = specialite;
-      if (shortSpec.length > 50) shortSpec = '${shortSpec.substring(0, 47)}…';
-      final label = 'info : ANSM: $statut ($date)${shortSpec.isNotEmpty ? ' – $shortSpec' : ''}';
+      // Tensions d'approvisionnement : afficher le texte en entier (pas de troncature)
+      final label = 'info : ANSM: $statut ($date)${specialite.trim().isNotEmpty ? ' – ${specialite.trim()}' : ''}';
       final slug = _slugForAnsmMedicament(specialite);
       final url = slug.isNotEmpty
           ? '$ansmDispoMedicamentsUrl/$slug'

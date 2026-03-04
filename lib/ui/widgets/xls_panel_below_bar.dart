@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
+import 'package:offibox/ui/widgets/document_viewer_toolbar.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/utils/platform_utils.dart';
 import 'package:webview_windows/webview_windows.dart';
@@ -39,11 +40,37 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
 
   double _opacity = 0;
   bool _closing = false;
+  bool _searchExpanded = false;
   bool _initError = false;
   String? _initErrorMessage;
+  /// Requête de recherche en cours (pour afficher le widget Résultat + prev/next).
+  String _activeSearchQuery = '';
 
-  /// Hauteur 16:9 par rapport à la largeur barre.
+  /// Hauteur 16:9 par rapport à la largeur barre (sans le bandeau logo).
   double get _panelHeight => widget.barWidth * 9 / 16;
+  double get _totalHeight => _panelHeight;
+
+  /// Échappe la chaîne pour l'injection dans du JS (guillemets simples).
+  String _escapeJsString(String s) {
+    return s.replaceAll(r'\', r'\\').replaceAll("'", r"\'").replaceAll('\n', r'\n').replaceAll('\r', r'\r');
+  }
+
+  /// Appelle window.find() dans la WebView (recherche dans les frames). Retourne true si une occurrence a été trouvée.
+  Future<bool> _runFind(String query, {required bool backwards}) async {
+    if (!_webViewController.value.isInitialized) return false;
+    final escaped = _escapeJsString(query);
+    try {
+      final result = await _webViewController.executeScript('''
+        (function() {
+          if (typeof window.find !== 'function') return false;
+          return window.find('$escaped', false, $backwards, true, false, true, false);
+        })();
+      ''');
+      return result == 'true' || result == true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   void initState() {
@@ -72,28 +99,54 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
     openUrl(widget.xlsUrl);
   }
 
-  /// Lance window.find() : 1re fois = 1re occurrence, rappels = occurrence suivante. À partir de 3 caractères.
+  void _printFile() {
+    if (_closing) return;
+    openUrl(widget.xlsUrl);
+  }
+
+  /// Lance la recherche : va au premier résultat et affiche la surbrillance (window.find avec searchInFrames).
   Future<void> _searchInFile() async {
     if (_closing || !_webViewController.value.isInitialized) return;
     final query = _searchController.text.trim();
-    if (query.isEmpty) return;
-    try {
-      final escaped = query.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
-      await _webViewController.executeScript('''
-        (function() {
-          if (typeof window.find === 'function') {
-            window.find('$escaped', false, false, true, false, false, true);
-          }
-        })();
-      ''');
-    } catch (_) {}
+    if (query.isEmpty) {
+      setState(() => _activeSearchQuery = '');
+      return;
+    }
+    await _runFind(query, backwards: false);
+    if (mounted) setState(() => _activeSearchQuery = query);
+  }
+
+  /// Occurrence suivante (comme PDF).
+  Future<void> _searchNext() async {
+    if (_activeSearchQuery.isEmpty) return;
+    await _runFind(_activeSearchQuery, backwards: false);
+    if (mounted) setState(() {});
+  }
+
+  /// Occurrence précédente (comme PDF).
+  Future<void> _searchPrev() async {
+    if (_activeSearchQuery.isEmpty) return;
+    await _runFind(_activeSearchQuery, backwards: true);
+    if (mounted) setState(() {});
+  }
+
+  void _clearXlsSearch() {
+    _activeSearchQuery = '';
+    _searchController.clear();
+    if (mounted) setState(() {});
   }
 
   void _onSearchChanged(String value) {
     _searchDebounce?.cancel();
     final query = value.trim();
-    if (query.length >= 3) {
-      _searchDebounce = Timer(const Duration(milliseconds: 300), () => _searchInFile());
+    if (query.isEmpty) {
+      setState(() => _activeSearchQuery = '');
+      return;
+    }
+    if (query.length >= 2) {
+      _searchDebounce = Timer(const Duration(milliseconds: 350), () => _searchInFile());
+    } else {
+      setState(() => _activeSearchQuery = '');
     }
   }
 
@@ -132,6 +185,91 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
     setState(() => _closing = true);
     await Future<void>.delayed(const Duration(milliseconds: 280));
     if (mounted) widget.onClose();
+  }
+
+  void _openFullscreen() {
+    if (_closing || !mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => FullscreenDocumentPage(
+          onClose: () => Navigator.of(context).pop(),
+          child: _XlsFullscreenContent(xlsUrl: widget.xlsUrl),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBarContent() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: SizedBox(
+            height: 32,
+            child: TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              onChanged: _onSearchChanged,
+              onSubmitted: (_) => _searchInFile(),
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
+              decoration: InputDecoration(
+                hintText: '2 caractères min puis Entrée',
+                hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                prefixIcon: const Icon(Icons.search, size: 20, color: Color(0xFF5A9094)),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: BorderSide.none,
+                ),
+                isDense: true,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Widget « Résultat » + précédent / suivant / effacer (comme pour le PDF).
+  Widget _buildSearchResultWidget() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Text(
+            'Résultat',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        IconButton(
+          tooltip: 'Occurrence précédente',
+          icon: const Icon(Icons.keyboard_arrow_up, color: Colors.white),
+          onPressed: _searchPrev,
+        ),
+        IconButton(
+          tooltip: 'Occurrence suivante',
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+          onPressed: _searchNext,
+        ),
+        IconButton(
+          tooltip: 'Effacer la recherche',
+          icon: const Icon(Icons.clear, color: Colors.white, size: 20),
+          onPressed: _clearXlsSearch,
+        ),
+      ],
+    );
   }
 
   Widget _buildFallback() {
@@ -195,7 +333,7 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
           color: Colors.transparent,
           child: Container(
             width: double.infinity,
-            height: _panelHeight,
+            height: _totalHeight,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
@@ -212,82 +350,26 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Barre du haut : Télécharger, Rechercher (1 loupe), Fermer — alignement horizontal
-                  Material(
-                    color: const Color(0xFF5A9094),
-                    child: SizedBox(
-                      height: 44,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(width: 10),
-                          Tooltip(
-                            message: 'Télécharger ce fichier',
-                            child: TextButton.icon(
-                              onPressed: _downloadFile,
-                              icon: const Icon(Icons.download, size: 18, color: Colors.white),
-                              label: const Text(
-                                'Télécharger ce fichier',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          if (isWindows && !_initError && _webViewController.value.isInitialized) ...[
-                            const Text(
-                              'Rechercher dans ce fichier',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: SizedBox(
-                                height: 32,
-                                child: TextField(
-                                  controller: _searchController,
-                                  focusNode: _searchFocusNode,
-                                  onChanged: _onSearchChanged,
-                                  onSubmitted: (_) => _searchInFile(),
-                                  style: const TextStyle(fontSize: 13, color: Colors.black87),
-                                  decoration: InputDecoration(
-                                    hintText: '3 lettres min puis Entrée pour occurrence suivante',
-                                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                    prefixIcon: const Icon(Icons.search, size: 20, color: Color(0xFF5A9094)),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    isDense: true,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                          const Spacer(),
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: _closeWithFade,
-                              borderRadius: BorderRadius.circular(20),
-                              child: const Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Icon(Icons.close, size: 20, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                      ),
+                  DocumentViewerToolbar(
+                    barHeight: 44,
+                    onPrint: _printFile,
+                    onDownload: _downloadFile,
+                    onExpandFullscreen: _openFullscreen,
+                    onClose: _closeWithFade,
+                    onSearchTap: isWindows && !_initError && _webViewController.value.isInitialized
+                        ? () => setState(() => _searchExpanded = !_searchExpanded)
+                        : null,
+                    searchExpanded: _searchExpanded,
+                    searchBarContent: _searchExpanded && isWindows && !_initError ? _buildSearchBarContent() : null,
+                    searchResultWidget: _searchExpanded &&
+                            isWindows &&
+                            !_initError &&
+                            _activeSearchQuery.isNotEmpty
+                        ? _buildSearchResultWidget()
+                        : null,
+                    sourceWidget: documentViewerSourceLabel(
+                      label: shortUrlForDisplay(widget.xlsUrl),
+                      url: widget.xlsUrl,
                     ),
                   ),
                   // Zone 16:9 pour le lecteur
@@ -323,4 +405,60 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
 
 class _XlsSearchIntent extends Intent {
   const _XlsSearchIntent();
+}
+
+/// Contenu plein écran pour un fichier XLS (WebView avec viewer Office).
+class _XlsFullscreenContent extends StatefulWidget {
+  const _XlsFullscreenContent({required this.xlsUrl});
+
+  final String xlsUrl;
+
+  @override
+  State<_XlsFullscreenContent> createState() => _XlsFullscreenContentState();
+}
+
+class _XlsFullscreenContentState extends State<_XlsFullscreenContent> {
+  final WebviewController _controller = WebviewController();
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      await _controller.initialize();
+      await _controller.setBackgroundColor(Colors.white);
+      await _controller.loadUrl(_xlsViewerUrl(widget.xlsUrl));
+      if (mounted) setState(() => _initialized = true);
+    } catch (_) {
+      if (mounted) setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      );
+    }
+    return Webview(
+      _controller,
+      permissionRequested: (
+        String url,
+        WebviewPermissionKind kind,
+        bool isUserInitiated,
+      ) async =>
+          WebviewPermissionDecision.allow,
+    );
+  }
 }

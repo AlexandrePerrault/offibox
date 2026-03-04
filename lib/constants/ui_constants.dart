@@ -11,3 +11,11 @@ const Color offiboxGrey = Color(0xFF6B7280);
 
 /// 📐 Tailles communes
 const double actionButtonSize = 40;
+
+/// 📐 Résultats de recherche (liste, tuiles)
+/// Espace vertical entre la ligne 1 (libellé) et la ligne 2 (codes / badges).
+const double resultLineGap = 4;
+/// Padding horizontal des tuiles dans le panneau de résultats.
+const double resultTileHorizontalPadding = 12;
+/// Padding vertical minimal d’une tuile (confort au clic).
+const double resultTileVerticalPadding = 10;

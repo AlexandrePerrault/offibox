@@ -14,7 +14,9 @@ import 'package:offibox/core/filter_notifier.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/controllers/offibox_controller.dart';
+import 'package:offibox/auth/auth_state_provider.dart';
 import 'package:offibox/providers/offibox_providers.dart';
+import 'package:offibox/utils/ansm_rappel_match.dart';
 import 'package:offibox/ui/results/results_panel.dart';
 import 'package:offibox/ui/widgets/fake_results.dart';
 import 'package:offibox/window/offibox_window_shortcuts.dart';
@@ -23,23 +25,29 @@ import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/ui/widgets/hamburger_menu.dart';
 import 'package:offibox/window/widgets/offibox_top_bar.dart';
 import 'package:offibox/ui/widgets/offibox_info_bar.dart';
+import 'package:offibox/ui/widgets/calendar_reminder_bubble.dart';
 import 'package:offibox/services/admin_service.dart';
 import 'package:offibox/services/google_calendar_service.dart';
 import 'package:offibox/services/google_calendar_desktop_auth.dart';
+import 'package:offibox/config/google_oauth_config.dart';
+import 'package:offibox/config/app_config.dart';
 import 'package:offibox/utils/open_url.dart';
-import 'package:offibox/utils/gs1_scan_payload.dart';
 import 'package:offibox/window/widgets/about_dialog.dart';
 import 'package:offibox/window/widgets/ideas_box_panel.dart';
 import 'package:offibox/ui/widgets/xls_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/word_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/pdf_panel_below_bar.dart';
-import 'dart:io' show Platform, Process;
+import 'package:offibox/ui/widgets/web_panel_below_bar.dart';
+import 'dart:io' show exit, Platform, Process;
 
 import 'package:offibox/data/espace_pro_credentials.dart';
 import 'package:offibox/ui/dialogs/espace_pro_login_dialog.dart';
+import 'package:offibox/ui/dialogs/contact_dialog.dart';
+import 'package:offibox/ui/dialogs/version_history_dialog.dart';
 import 'package:offibox/ui/screens/espace_pro_webview_screen.dart';
 import 'package:offibox/services/pdf_preloader.dart';
 import 'package:offibox/services/journees_mondiales.dart';
+import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/services/ansm_statuts_csv_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -55,10 +63,10 @@ class EscapeIntent extends Intent {
   const EscapeIntent();
 }
 
-/// Libellé court pour la barre d'infos : "Dernier rappel de lot (DD/MM/YYYY) : [produit – labo]".
+/// Libellé court pour la barre d'infos : "Dernier rappel de produit (DD/MM/YYYY) : [produit – labo]".
 String _lastRappelLabel(String fullLabel, String? dateStr) {
   final datePart = (dateStr != null && dateStr.trim().isNotEmpty) ? ' (${dateStr.trim()})' : '';
-  final prefix = 'Dernier rappel de lot$datePart : ';
+  final prefix = 'Dernier rappel de produit$datePart : ';
   final idx = fullLabel.indexOf(' : ');
   final libelle = idx >= 0 ? fullLabel.substring(idx + 3).trim() : fullLabel;
   const maxLen = 55;
@@ -93,6 +101,8 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   String? _xlsPanelUrl;
   /// Word (DOC/DOCX) ouvert sous la barre (format 16:9).
   String? _wordPanelUrl;
+  /// URL d’une page web ouverte sous la barre (même zone que PDF/Word/XLS).
+  String? _webPanelUrl;
   String _appVersion = '1.0.0';
 
   final GlobalKey<HamburgerMenuState> _menuPopupKey =
@@ -190,6 +200,7 @@ void initState() {
       _ansmRefreshTimer = Timer(delay, () {
         if (!mounted) return;
         ref.invalidate(ansmLastRappelProvider);
+        ref.invalidate(ansmMedicamentRappelsProvider);
         ref.invalidate(ansmLastStatutProvider);
         // Vérifier statuts ANSM et rappels de lot au moins une fois par jour
         final controller = ref.read(offiboxControllerProvider);
@@ -320,9 +331,9 @@ void initState() {
                       'assets/icons/logo_offibox_installer.png',
                       height: 32,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Text(
-                        'Offibox',
-                        style: TextStyle(
+                      errorBuilder: (_, __, ___) => Text(
+                        AppConfig.appName,
+                        style: const TextStyle(
                           fontSize: 13,
                           fontFamily: 'Spinnaker',
                           color: OffiboxColors.primary,
@@ -338,32 +349,35 @@ void initState() {
           ),
         ),
         actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          IntrinsicWidth(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _QuitDialogPill(
+                  label: 'Non',
+                  atRestTeal: true,
+                  onTap: () async {
+                    Navigator.of(ctx).pop();
+                    await windowManager.show();
+                    await windowManager.focus();
+                  },
+                ),
+                const SizedBox(width: 12),
+                _QuitDialogPill(
+                  label: 'Oui',
+                  atRestTeal: false,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    if (Platform.isWindows) {
+                      exit(0);
+                    } else {
+                      SystemNavigator.pop();
+                    }
+                  },
+                ),
+              ],
             ),
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await windowManager.show();
-              await windowManager.focus();
-            },
-            child: const Text('Non', style: TextStyle(fontSize: 13)),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              SystemNavigator.pop();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: OffiboxColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Oui', style: TextStyle(fontSize: 13)),
           ),
         ],
       ),
@@ -527,10 +541,22 @@ Widget build(BuildContext context) {
       });
     }
   });
+  ref.listen(authStateProvider, (prev, next) {
+    if (prev?.valueOrNull != next?.valueOrNull && next?.valueOrNull != null && mounted) {
+      GoogleCalendarService.hasGoogleCalendarAccess().then((connected) {
+        if (mounted) setState(() => _isGoogleConnected = connected);
+      });
+    }
+  });
   final dgsUrgent = ref.watch(dgsUrgentProvider).valueOrNull;
   final ansmRappel = ref.watch(ansmLastRappelProvider).valueOrNull;
   final ansmStatut = ref.watch(ansmLastStatutProvider).valueOrNull;
   final calendarEvents = ref.watch(calendarEventsProvider).valueOrNull ?? [];
+  final todayCalendarEvents = ref.watch(todayCalendarEventsProvider).valueOrNull ?? [];
+  final authUser = ref.watch(authStateProvider).valueOrNull;
+  /// Sur desktop (OAuth configuré), tout le monde peut cliquer « Connecter l'agenda » même si refus à l'installation.
+  final canConnectGoogleAgenda = GoogleCalendarDesktopAuth.isNeeded ||
+      (authUser?.email?.toLowerCase().endsWith('@gmail.com') ?? false);
   final nextJournee = JourneesMondiales.getNext(DateTime.now());
   final dgsLabel = dgsUrgent != null
       ? 'dernier ${dgsUrgent.title}${dgsUrgent.dateLabel.isNotEmpty ? ' (${dgsUrgent.dateLabel})' : ''}'
@@ -545,20 +571,25 @@ Widget build(BuildContext context) {
       isDgs: true,
       colorOverride: null,
     ),
-    if (ansmRappel != null)
-      (
-        label: _lastRappelLabel(ansmRappel.label, ansmRappel.dateStr),
-        url: ansmRappel.url,
-        tooltip: ansmRappel.label,
-        icon: TickerItemIcon.none,
-        isAnsm: true,
-        isDgs: false,
-        colorOverride: const Color(0xFFC62828), // rouge, texte blanc
-      ),
+    // Dernier rappel de produit (toujours affiché ; lien vers rappel ou page ANSM)
     (
-      label: ansmStatut?.label ?? 'Info médicament (ANSM)',
+      label: ansmRappel != null
+          ? _lastRappelLabel(ansmRappel.label, ansmRappel.dateStr)
+          : 'Dernier rappel de produit',
+      url: ansmRappel?.url ?? ansmInformationsMedicamentsUrl,
+      tooltip: '+ d\'infos',
+      icon: TickerItemIcon.none,
+      isAnsm: true,
+      isDgs: false,
+      colorOverride: ansmRappel != null ? const Color(0xFFC62828) : const Color(0xFF42A5F5), // rouge si rappel, sinon bleu
+    ),
+    // Dernière alerte ANSM (statuts médicaments : rupture, tension, etc.)
+    (
+      label: ansmStatut != null
+          ? 'Dernière alerte ANSM : ${ansmStatut.label}'
+          : 'Dernière alerte ANSM',
       url: ansmStatut?.url ?? 'https://ansm.sante.fr/',
-      tooltip: null, // pas de tooltip pour éviter doublon avec le libellé
+      tooltip: ansmStatut?.label ?? 'Voir les alertes ANSM',
       icon: TickerItemIcon.none,
       isAnsm: true,
       isDgs: false,
@@ -567,7 +598,7 @@ Widget build(BuildContext context) {
     // Journées mondiales (santé / WHO) en mauve dans la barre déroulante ; sinon fallback Actualités en gris
     if (nextJournee != null)
       (
-        label: nextJournee!.label,
+        label: nextJournee.label,
         url: 'https://www.who.int/fr/campaigns',
         tooltip: 'Cliquer pour plus d\'infos',
         icon: TickerItemIcon.none,
@@ -585,11 +616,14 @@ Widget build(BuildContext context) {
         isDgs: false,
         colorOverride: const Color(0xFF37474F), // gris anthracite
       ),
-    if (_isGoogleConnected && calendarEvents.isNotEmpty)
+    // RDV du jour (agenda Google connecté) : un seul badge "x rendez vous aujourd'hui", clic → fenêtre avec la liste
+    if (_isGoogleConnected && todayCalendarEvents.isNotEmpty)
       (
-        label: 'Prochain rdv',
-        url: 'https://calendar.google.com/',
-        tooltip: '${calendarEvents.first.timeLabel} ${calendarEvents.first.summary}',
+        label: todayCalendarEvents.length == 1
+            ? '1 rendez vous aujourd\'hui'
+            : '${todayCalendarEvents.length} rendez vous aujourd\'hui',
+        url: 'offibox://agenda-today',
+        tooltip: 'Cliquer pour voir les rendez-vous du jour',
         icon: TickerItemIcon.none,
         isAnsm: false,
         isDgs: false,
@@ -608,6 +642,10 @@ Widget build(BuildContext context) {
       OffiboxWindowUI.gapBelowBar;
   final maxPanelH = screenH - topY - 20;
   final selectedResult = controller.selectedResult;
+  final medicamentRappels = ref.watch(ansmMedicamentRappelsProvider).valueOrNull ?? [];
+  final rappelForLine3Badge = selectedResult != null && selectedResult.source == SourceType.bdm
+      ? findMatchingRappel(selectedResult, medicamentRappels)
+      : null;
   final effectiveExpandedBarHeight = _effectiveExpandedBarHeight(selectedResult);
   final expandedBarH = effectiveExpandedBarHeight ?? OffiboxWindowUI.barHeightExpanded;
   final topYBelowExpandedBar = OffiboxWindowUI.topMargin +
@@ -617,12 +655,13 @@ Widget build(BuildContext context) {
       OffiboxWindowUI.barHeightExpanded +
       OffiboxWindowUI.gapBelowBar +
       8;
-  /// Lecteur XLS : collé à la barre (sans les 8 px d’écart).
+  /// PDF/Word/XLS/Web : sous la barre de résultats, sans empiéter (hauteur réelle barre + écart).
   final topYBelowExpandedBarXls = OffiboxWindowUI.topMargin +
       (_infoBarExpanded
           ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap
           : 0) +
-      OffiboxWindowUI.barHeightExpanded;
+      expandedBarH +
+      OffiboxWindowUI.gapBelowBar;
   final isPdfHitResult = selectedResult != null &&
       selectedResult.source == SourceType.catalogue &&
       selectedResult.catalogueUrl != null &&
@@ -640,7 +679,7 @@ Widget build(BuildContext context) {
   };
 
   return Scaffold(
-    backgroundColor: const Color(0xFFE8F0F1),
+    backgroundColor: Colors.transparent,
     body: Shortcuts(
       shortcuts: shortcuts,
       child: Actions(
@@ -657,7 +696,7 @@ Widget build(BuildContext context) {
           ),
           QuitIntent: CallbackAction<QuitIntent>(
             onInvoke: (_) {
-              SystemNavigator.pop();
+              _showQuitConfirmationDialog(context);
               return null;
             },
           ),
@@ -690,9 +729,13 @@ Widget build(BuildContext context) {
           onKeyEvent: (event) {
             _handleKey(_windowFocus, event);
           },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
-            child: Stack(
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: const Color(0xFF1A1A1A),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
+              child: Stack(
         children: [
           // Clic à l'extérieur de la barre et des résultats → effacer la recherche et faire disparaître les résultats
           if (expanded)
@@ -710,6 +753,16 @@ Widget build(BuildContext context) {
               ),
             ),
           // ───────────────────────────
+          // BULLE RAPPEL RDV (30 min avant, au-dessus / à côté de la barre d'infos)
+          // ───────────────────────────
+          if (_isGoogleConnected && todayCalendarEvents.isNotEmpty)
+            CalendarReminderBubble(
+              events: todayCalendarEvents,
+              topOffset: OffiboxWindowUI.topMargin + 4,
+              leftOffset: 20,
+              barWidth: _barWidth(context),
+            ),
+          // ───────────────────────────
           // TOP BAR
           // ───────────────────────────
           Positioned(
@@ -718,12 +771,54 @@ Widget build(BuildContext context) {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final w = _barWidth(context);
-                return SizedBox(
-                  width: w,
-                  child: OffiboxTopBar(
+                return DragToMoveArea(
+                  child: SizedBox(
+                    width: w,
+                    child: OffiboxTopBar(
                     expanded: expanded,
       infoBarExpanded: _infoBarExpanded,
       onToggleInfoBar: () => setState(() => _infoBarExpanded = !_infoBarExpanded),
+      onInfoBarUrlTap: (url) {
+            if (url == 'offibox://agenda-today') {
+              final events = ref.read(todayCalendarEventsProvider).valueOrNull ?? [];
+              if (!context.mounted) return;
+              showDialog<void>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Rendez-vous du jour'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: events
+                          .map((ev) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Text(
+                                  '${ev.timeLabel}  ${ev.summary}',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Fermer'),
+                    ),
+                  ],
+                ),
+              );
+              return;
+            }
+            setState(() {
+              expanded = true;
+              _webPanelUrl = url;
+              _pdfPanelUrl = null;
+              _xlsPanelUrl = null;
+              _wordPanelUrl = null;
+            });
+          },
       barWidth: _barWidth(context),
       barBottomY: OffiboxWindowUI.topMargin +
           (_infoBarExpanded ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap : 0) +
@@ -757,9 +852,18 @@ Widget build(BuildContext context) {
               payload: payload,
             );
       },
+      onScanMutuelleQr: (codePrefectoral) {
+        _searchController.clear();
+        ref.read(offiboxControllerProvider).filterFromScan(
+              codePrefectoral,
+              searchFilter: ref.read(searchFilterProvider),
+              restrictToSource: SourceType.amc,
+            );
+      },
       scanPayload: controller.lastScanPayload,
       recalledProductNames: controller.recalledProductNames,
       ansmLastRappel: ref.watch(ansmLastRappelProvider).valueOrNull,
+      rappelForLine3Badge: rappelForLine3Badge,
       filterHovered: _filterHovered,
       onFilterHoverChange: (v) => setState(() => _filterHovered = v),
 
@@ -771,6 +875,7 @@ Widget build(BuildContext context) {
           setState(() {
             _xlsPanelUrl = null;
             _wordPanelUrl = null;
+            _webPanelUrl = null;
             _pdfPanelUrl = null;
             _pdfPanelLab = null;
             _pdfPanelInitialQuery = null;
@@ -787,6 +892,7 @@ Widget build(BuildContext context) {
 
       onToggleWindow: expanded ? _close : _open,
       onEscape: _close,
+      onProposeQuit: () => _showQuitConfirmationDialog(context),
 
       // 🔍 résultat sélectionné
       selectedResult: controller.selectedResult,
@@ -812,20 +918,38 @@ Widget build(BuildContext context) {
         final lower = u.toLowerCase();
         if (lower.endsWith('.pdf')) {
           setState(() {
+            expanded = true;
             _pdfPanelUrl = u;
             _pdfPanelLab = 'Document';
             _pdfPanelInitialQuery = null;
             _pdfPanelAutoSearch = false;
-          });
-        } else if (lower.endsWith('.xls') || lower.endsWith('.xlsx')) {
-          setState(() {
-            _xlsPanelUrl = u;
+            _webPanelUrl = null;
+            _xlsPanelUrl = null;
             _wordPanelUrl = null;
           });
-        } else if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
+        } else if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || lower.endsWith('.ods')) {
           setState(() {
+            expanded = true;
+            _xlsPanelUrl = u;
+            _wordPanelUrl = null;
+            _webPanelUrl = null;
+            _pdfPanelUrl = null;
+          });
+        } else if (lower.endsWith('.doc') || lower.endsWith('.docx') || lower.endsWith('.odt')) {
+          setState(() {
+            expanded = true;
             _wordPanelUrl = u;
             _xlsPanelUrl = null;
+            _webPanelUrl = null;
+            _pdfPanelUrl = null;
+          });
+        } else if (u.startsWith('http://') || u.startsWith('https://')) {
+          setState(() {
+            expanded = true;
+            _webPanelUrl = u;
+            _pdfPanelUrl = null;
+            _xlsPanelUrl = null;
+            _wordPanelUrl = null;
           });
         } else {
           openUrl(u);
@@ -881,7 +1005,7 @@ Widget build(BuildContext context) {
       },
 
       onOpenCataloguePdf: (BuildContext context, String pdfUrl, String labName, bool searchMode) {
-        final query = searchMode ? ref.read(offiboxControllerProvider).currentQuery?.trim() : null;
+        final query = searchMode ? ref.read(offiboxControllerProvider).currentQuery.trim() : null;
         setState(() {
           _pdfPanelUrl = pdfUrl;
           _pdfPanelLab = labName;
@@ -940,7 +1064,7 @@ Widget build(BuildContext context) {
         }
       },
       onMinimize: () => windowManager.minimize(),
-      onClose: () => SystemNavigator.pop(),
+      onClose: () => _showQuitConfirmationDialog(context),
       onShowAbout: () async {
         final controller = ref.read(offiboxControllerProvider);
         final packageInfo = await PackageInfo.fromPlatform();
@@ -976,6 +1100,20 @@ Widget build(BuildContext context) {
           ),
         );
       },
+      onShowContact: () {
+        showDialog<void>(
+          context: context,
+          barrierLabel: 'Fermer',
+          builder: (_) => const ContactDialog(),
+        );
+      },
+      onShowVersionHistory: () {
+        showDialog<void>(
+          context: context,
+          barrierLabel: 'Fermer',
+          builder: (_) => const VersionHistoryDialog(),
+        );
+      },
 
       onOpenGoogleAgenda: () async {
         _onLinkOpened();
@@ -986,19 +1124,47 @@ Widget build(BuildContext context) {
       },
       onConnectGoogleAgenda: GoogleCalendarDesktopAuth.isNeeded
           ? () async {
+              final configured = await GoogleOAuthConfig.isConfigured;
+              if (!configured && mounted) {
+                final credPath = await GoogleOAuthConfig.credentialsPath;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'OAuth non configuré. Créez config/oauth_credentials.json à la racine du projet '
+                      '(ou $credPath pour l\'app installée) avec client_id et client_secret '
+                      '(Google Cloud Console → APIs → Identifiants → OAuth 2.0).',
+                    ),
+                    duration: const Duration(seconds: 6),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               final ok = await GoogleCalendarService.signInForDesktop();
               if (!mounted) return;
               final connected = await GoogleCalendarService.hasGoogleCalendarAccess();
-              if (mounted) setState(() => _isGoogleConnected = connected);
               if (mounted) {
+                setState(() => _isGoogleConnected = connected);
+                if (connected) {
+                  ref.invalidate(calendarEventsProvider);
+                  ref.invalidate(todayCalendarEventsProvider);
+                }
+              }
+              if (mounted) {
+                final String message;
+                if (connected) {
+                  message = 'Agenda Google connecté';
+                } else if (ok) {
+                  message = 'Connexion annulée';
+                } else {
+                  message = 'Connexion impossible. Vérifiez : 1) API Calendrier activée dans Google Cloud, '
+                      '2) URI de redirection http://localhost (autoriser le port dynamique ou ajouter http://localhost) '
+                      'dans Identifiants OAuth 2.0, 3) Fichier credentials (client_id, client_secret) présent.';
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(connected
-                        ? 'Agenda Google connecté'
-                        : ok
-                            ? 'Connexion annulée'
-                            : 'Connexion impossible (vérifier la configuration OAuth)'),
-                    duration: const Duration(seconds: 3),
+                    content: Text(message),
+                    duration: Duration(seconds: connected ? 3 : 6),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -1007,18 +1173,39 @@ Widget build(BuildContext context) {
           : null,
       onOpenIdBox: () => setState(() => _showIdeasPanel = true),
       isGoogleConnected: _isGoogleConnected,
+      canConnectGoogleAgenda: canConnectGoogleAgenda,
 
       infoBarItems: infoBarItems,
       leadingFilterButton: null,
       appVersion: _appVersion,
+      // Date de MAJ = dernier commit offiboxdata (GitHub), affichée en heure locale
+      dataUpdateDate: controller.lastGithubUpdate != null
+          ? () {
+              final d = controller.lastGithubUpdate!.toLocal();
+              return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+            }()
+          : null,
 
       // 🔗 OUVERTURE EXPLICITE UNIQUEMENT (bouton)
       onOpenSelected: () {
         final result = ref.read(offiboxControllerProvider).selectedResult;
-        if (result != null) {
-          ref.read(offiboxControllerProvider).openResult(result);
+        if (result == null) return;
+        // Mutuelles / AMO : ouvrir le site web dans le panneau sous la barre
+        if ((result.source == SourceType.amc || result.source == SourceType.amo) &&
+            result.url != null &&
+            result.url!.trim().isNotEmpty) {
+          setState(() {
+            expanded = true;
+            _webPanelUrl = result.url!.trim();
+            _pdfPanelUrl = null;
+            _xlsPanelUrl = null;
+            _wordPanelUrl = null;
+          });
+          return;
         }
+        ref.read(offiboxControllerProvider).openResult(result);
       },
+                  ),
                   ),
                 );
               },
@@ -1039,61 +1226,7 @@ Widget build(BuildContext context) {
             ),
 
           // ───────────────────────────
-          // XLS/XLSX : panneau sous la barre (format 16:9)
-          // ───────────────────────────
-          if (expanded && _xlsPanelUrl != null)
-            Positioned(
-              top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
-              width: _barWidth(context),
-              child: XlsPanelBelowBar(
-                xlsUrl: _xlsPanelUrl!,
-                barWidth: _barWidth(context),
-                onClose: () => setState(() => _xlsPanelUrl = null),
-              ),
-            ),
-
-          // ───────────────────────────
-          // Word (DOC/DOCX) : panneau sous la barre (format 16:9, mêmes fonctions que XLS)
-          // ───────────────────────────
-          if (expanded && _wordPanelUrl != null)
-            Positioned(
-              top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
-              width: _barWidth(context),
-              child: WordPanelBelowBar(
-                wordUrl: _wordPanelUrl!,
-                barWidth: _barWidth(context),
-                onClose: () => setState(() => _wordPanelUrl = null),
-              ),
-            ),
-
-          // ───────────────────────────
-          // PDF : lecteur 16/9 sous la barre (tout PDF : clic lien ou résultat catalogue)
-          // ───────────────────────────
-          if (expanded && (_pdfPanelUrl != null || (isPdfHitResult && selectedResult.catalogueUrl != null && !_hidePdfHitPanel)))
-            Positioned(
-              top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
-              width: _barWidth(context),
-              child: PdfPanelBelowBar(
-                pdfUrl: (_pdfPanelUrl ?? selectedResult!.catalogueUrl!).trim(),
-                barWidth: _barWidth(context),
-                onClose: () => setState(() {
-                  if (_pdfPanelUrl != null) {
-                    _pdfPanelUrl = null;
-                    _pdfPanelLab = null;
-                    _pdfPanelInitialQuery = null;
-                    _pdfPanelAutoSearch = false;
-                  } else {
-                    _hidePdfHitPanel = true;
-                  }
-                }),
-              ),
-            ),
-
-          // ───────────────────────────
-          // RESULTS PANEL
+          // RESULTS PANEL (sous les panneaux document pour que XLS/PDF/Word/Web reçoivent les clics en priorité)
           // ───────────────────────────
           if (expanded &&
               _hasQuery &&
@@ -1161,13 +1294,69 @@ Widget build(BuildContext context) {
                                 .selectResult(item);
                             _searchController.clear();
                             _searchFocus.unfocus();
+                            // Mutuelles / AMO : ouvrir le site dans le panneau sous la barre au clic
+                            if ((item.source == SourceType.amc || item.source == SourceType.amo) &&
+                                item.url != null &&
+                                item.url!.trim().isNotEmpty) {
+                              setState(() {
+                                expanded = true;
+                                _webPanelUrl = item.url!.trim();
+                                _pdfPanelUrl = null;
+                                _xlsPanelUrl = null;
+                                _wordPanelUrl = null;
+                              });
+                            }
                           },
-                          onOpenUrlFromTile: (item, _) {
+                          onOpenUrlFromTile: (item, url) {
                             ref
                                 .read(offiboxControllerProvider)
                                 .selectResult(item);
                             _searchController.clear();
                             _searchFocus.unfocus();
+                            final u = url.trim();
+                            final lower = u.toLowerCase();
+                            if (lower.endsWith('.pdf')) {
+                              setState(() {
+                                expanded = true;
+                                _pdfPanelUrl = u;
+                                _pdfPanelLab = 'Document';
+                                _pdfPanelInitialQuery = null;
+                                _pdfPanelAutoSearch = false;
+                                _webPanelUrl = null;
+                                _xlsPanelUrl = null;
+                                _wordPanelUrl = null;
+                              });
+                            } else if (lower.endsWith('.xls') ||
+                                lower.endsWith('.xlsx') ||
+                                lower.endsWith('.ods')) {
+                              setState(() {
+                                expanded = true;
+                                _xlsPanelUrl = u;
+                                _wordPanelUrl = null;
+                                _webPanelUrl = null;
+                                _pdfPanelUrl = null;
+                              });
+                            } else if (lower.endsWith('.doc') ||
+                                lower.endsWith('.docx') ||
+                                lower.endsWith('.odt')) {
+                              setState(() {
+                                expanded = true;
+                                _wordPanelUrl = u;
+                                _xlsPanelUrl = null;
+                                _webPanelUrl = null;
+                                _pdfPanelUrl = null;
+                              });
+                            } else if (u.startsWith('http://') || u.startsWith('https://')) {
+                              setState(() {
+                                expanded = true;
+                                _webPanelUrl = u;
+                                _pdfPanelUrl = null;
+                                _xlsPanelUrl = null;
+                                _wordPanelUrl = null;
+                              });
+                            } else {
+                              openUrl(u);
+                            }
                           },
 
                           // (laisser vide pour l’instant)
@@ -1178,8 +1367,66 @@ Widget build(BuildContext context) {
                 ),
               ),
             ),
+
+          // ───────────────────────────
+          // XLS / PDF / Word / Web : au premier plan pour que les clics soient dans la zone document (pas en arrière-plan)
+          // ───────────────────────────
+          if (expanded && _xlsPanelUrl != null)
+            Positioned(
+              top: topYBelowExpandedBarXls,
+              right: OffiboxWindowUI.rightMargin,
+              width: _barWidth(context),
+              child: XlsPanelBelowBar(
+                xlsUrl: _xlsPanelUrl!,
+                barWidth: _barWidth(context),
+                onClose: () => setState(() => _xlsPanelUrl = null),
+              ),
+            ),
+          if (expanded && _wordPanelUrl != null)
+            Positioned(
+              top: topYBelowExpandedBarXls,
+              right: OffiboxWindowUI.rightMargin,
+              width: _barWidth(context),
+              child: WordPanelBelowBar(
+                wordUrl: _wordPanelUrl!,
+                barWidth: _barWidth(context),
+                onClose: () => setState(() => _wordPanelUrl = null),
+              ),
+            ),
+          if (expanded && _webPanelUrl != null)
+            Positioned(
+              top: topYBelowExpandedBarXls,
+              right: OffiboxWindowUI.rightMargin,
+              width: _barWidth(context),
+              child: WebPanelBelowBar(
+                url: _webPanelUrl!,
+                barWidth: _barWidth(context),
+                onClose: () => setState(() => _webPanelUrl = null),
+              ),
+            ),
+          if (expanded && (_pdfPanelUrl != null || (isPdfHitResult && selectedResult.catalogueUrl != null && !_hidePdfHitPanel)))
+            Positioned(
+              top: topYBelowExpandedBarXls,
+              right: OffiboxWindowUI.rightMargin,
+              width: _barWidth(context),
+              child: PdfPanelBelowBar(
+                pdfUrl: (_pdfPanelUrl ?? selectedResult!.catalogueUrl!).trim(),
+                barWidth: _barWidth(context),
+                onClose: () => setState(() {
+                  if (_pdfPanelUrl != null) {
+                    _pdfPanelUrl = null;
+                    _pdfPanelLab = null;
+                    _pdfPanelInitialQuery = null;
+                    _pdfPanelAutoSearch = false;
+                  } else {
+                    _hidePdfHitPanel = true;
+                  }
+                }),
+              ),
+            ),
         ],
       ),
+    ),
     ),
     ),
   ),
@@ -1187,4 +1434,71 @@ Widget build(BuildContext context) {
   );
 }
 
+}
+
+/// Badge Oui/Non du dialogue « Fermer Offibox » : style hover pill (couleurs inversées au survol).
+class _QuitDialogPill extends StatefulWidget {
+  const _QuitDialogPill({
+    required this.label,
+    required this.atRestTeal,
+    required this.onTap,
+  });
+
+  final String label;
+  /// true = au repos fond teal (Non), false = au repos fond blanc (Oui).
+  final bool atRestTeal;
+  final VoidCallback onTap;
+
+  @override
+  State<_QuitDialogPill> createState() => _QuitDialogPillState();
+}
+
+class _QuitDialogPillState extends State<_QuitDialogPill> {
+  static const Color _teal = Color(0xFF5A9094);
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isTealBg = _hovered ? !widget.atRestTeal : widget.atRestTeal;
+    final bg = isTealBg ? _teal : Colors.white;
+    final fg = isTealBg ? Colors.white : _teal;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOutCubic,
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _teal, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: _hovered ? 0.30 : 0.15),
+                blurRadius: _hovered ? 14 : 5,
+                offset: Offset(0, _hovered ? 6 : 3),
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            widget.label,
+            style: TextStyle(
+              fontSize: 13,
+              fontFamily: 'Spinnaker',
+              fontWeight: FontWeight.w600,
+              color: fg,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

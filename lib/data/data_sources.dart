@@ -25,6 +25,10 @@ const String OUTILS_METIER_CSV_URL =
 const String SITES_WEB_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/sites_web.csv';
 
+/// Codes actes pharmacie (col 1 = Code Acte, col 2 = Libellé, col 3 = Tarif ; séparateur ;).
+const String CODES_ACTES_PHARMACIE_URL =
+    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/codes_actes_pharmacie.csv';
+
 /// Vidéos thérapeutiques (feuille videos) : col B = CIP13, col C = URL. Affichage pill "video" en ligne 2 BDM.
 const String VIDEOS_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/videos.csv';
@@ -32,8 +36,13 @@ const String VIDEOS_CSV_URL =
 const String LABORATOIRES_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/LABORATOIRES.csv';
 
+/// CERP (Madouest, etc.) — désormais dans le dossier CERP
 const String CERP_URL =
-    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CERP.csv';
+    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CERP/CERP.csv';
+
+/// Co&Pharm 2026 (réservé CERP) : col1=CIP(7/13), col2=Libellé, col3=URL PDF, col4=URL logo
+const String COETPHARM_2026_URL =
+    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CERP/CO%26PHARM%202026.csv';
 
 
 const String STUPEFIANTS_HOP_URL =
@@ -55,6 +64,14 @@ const String AMC_URL =
 /// CSV : nom, adresse_complete, tel, fax, mail (séparateur virgule, champs entre guillemets).
 const String PHARMACOVIGILANCE_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/pharmacovigilance.csv';
+
+/// Centres anti poison — annuaire (ville, téléphone, mail, adresse).
+const String CENTRES_ANTI_POISON_URL =
+  'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/centres_anti_poison.csv';
+
+/// CHU — annuaire (nom, adresse, téléphone, email, url).
+const String CHU_URL =
+  'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/chu.csv';
 
 const String CIP_HOSPITALIERS_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CIP%20hospitaliers.csv';
@@ -89,17 +106,28 @@ const String CIS_CIP_DISPO_SPEC_URL =
 const String CIS_CIP_DISPO_SPEC_BDPM_TXT_URL =
   'https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CIP_Dispo_Spec.txt';
 
-/// Fichiers officiels BDPM pour reconstruction des libellés (nom, dosage, forme, quantité). Vérification quotidienne + exemples avant injection.
+// ============================================================================
+// Fichiers officiels BDPM (alignés medicaments-api)
+// https://github.com/Giygas/medicaments-api — downloader.go + tsvConverter.go
+// 5 fichiers TSV (tab), pas d'en-tête, UTF-8 ou ISO-8859-1 selon le fichier.
+// Pipeline : 1) Télécharger les 5 fichiers  2) Parser TSV  3) Indexer par CIS
+//            4) Construire médicaments (spécialité + présentations + compositions + génériques + conditions)
+// Colonnes (indices 0-based) :
+//   CIS_bdpm     : 0=CIS, 1=Dénomination, 2=Forme pharmaceutique, 3=Voies admin, 4=Statut AMM, 5=Type proc, 6=État comm, 7=Date AMM, 10=Titulaire, 11=Surveillance
+//   CIS_CIP_bdpm : 0=CIS, 1=CIP7, 2=Libellé présentation, 3=Statut, 4=État comm, 5=Date décl, 6=CIP13, 7=Agrément, 8=Taux remboursement, 9=Prix
+//   CIS_COMPO    : 0=CIS, 1=Désignation élément, 2=Code substance, 3=Dénomination substance, 4=Dosage, 5=Référence dosage, 6=Nature composant
+//   CIS_GENER    : 0=Id groupe, 1=Libellé, 2=CIS, 3=Type (0=Princeps, 1=Générique, 2=Complém. poso, 3=Substituable)
+//   CIS_CPD      : 0=CIS, 1=Condition (prescription / dispensation)
+// ============================================================================
+
 const String CIS_BDPM_TXT_URL =
   'https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_bdpm.txt';
 const String CIS_CIP_BDPM_TXT_URL =
   'https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CIP_bdpm.txt';
-
-/// Composition par CIS (CIS_COMPO_bdpm.txt) : col D, E, F pour affichage « composition : D : E pour F » dans + d'infos.
 const String CIS_COMPO_BDPM_TXT_URL =
   'https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_COMPO_bdpm.txt';
-
-/// Conditions de prescription et de dispensation par CIS (CIS_CPD_bdpm.txt) — source officielle des libellés de statut affichés dans « Plus d'infos ».
+const String CIS_GENER_BDPM_TXT_URL =
+  'https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_GENER_bdpm.txt';
 const String CIS_CPD_BDPM_TXT_URL =
   'https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CPD_bdpm.txt';
 

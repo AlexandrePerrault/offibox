@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "Offibox" "\0"
             VALUE "FileDescription", "offibox" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "offibox" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Offibox. All rights reserved." "\0"
             VALUE "OriginalFilename", "offibox.exe" "\0"
             VALUE "ProductName", "offibox" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

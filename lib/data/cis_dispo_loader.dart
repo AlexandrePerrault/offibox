@@ -209,7 +209,6 @@ class ArretCommercialisationInfo {
 /// Charge CIS_CIP_Dispo_Spec.txt et retourne pour chaque CIS avec "arrêt de commercialisation"
 /// la date d'arrêt (col 4) et l'URL (col 7). Format exemple : 62533756 \t \t 3 \t Arrêt de commercialisation \t 29/12/2025 \t 06/01/2026 \t \t https://...
 Future<Map<String, ArretCommercialisationInfo>> loadArretCommercialisationByCis() async {
-  const marker = 'arrêt de commercialisation';
   try {
     final res = await http.get(Uri.parse(CIS_CIP_DISPO_SPEC_BDPM_TXT_URL))
         .timeout(const Duration(seconds: 45));
