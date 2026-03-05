@@ -18,4 +18,9 @@ class AppUpdateConfig {
 
   /// Extension de l'installer Windows recherchée (MSI généré par WiX)
   static const String windowsAssetExtension = '.msi';
+
+  /// URL affichée sur iOS quand une mise à jour est disponible (TestFlight, page de téléchargement, etc.).
+  /// Si null, utilise la page GitHub Releases latest.
+  static String get iosUpdateUrl =>
+      'https://github.com/$githubRepo/releases/latest';
 }

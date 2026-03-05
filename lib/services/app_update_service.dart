@@ -17,9 +17,10 @@ class AppUpdateService {
   /// Vérifie si une mise à jour est disponible.
   /// [force] : si true, ignore la limite 1 fois/jour (pour auto-install quand "ne plus me demander").
   /// Retourne [AppUpdateInfo] si une nouvelle version existe, null sinon.
+  /// Windows : cherche un asset .msi. iOS : retourne l'URL des releases (ou TestFlight si configuré).
   static Future<AppUpdateInfo?> checkForUpdate({bool force = false}) async {
     if (kDebugMode) return null;
-    if (!Platform.isWindows) return null;
+    if (!Platform.isWindows && !Platform.isIOS) return null;
 
     final prefs = await SharedPreferences.getInstance();
     if (!force) {
@@ -47,22 +48,32 @@ class AppUpdateService {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = _normalizeVersion(packageInfo.version);
 
-      if (_isNewer(latestVersion, currentVersion)) {
-        String? downloadUrl;
-        for (final a in assets) {
-          final map = a as Map<String, dynamic>;
-          final name = map['browser_download_url'] as String? ?? '';
-          if (name.toLowerCase().endsWith(AppUpdateConfig.windowsAssetExtension)) {
-            downloadUrl = name;
-            break;
-          }
+      if (!_isNewer(latestVersion, currentVersion)) return null;
+
+      final versionStr = tagName.replaceFirst(RegExp(r'^v'), '').trim();
+
+      if (Platform.isIOS) {
+        return AppUpdateInfo(
+          version: versionStr,
+          downloadUrl: AppUpdateConfig.iosUpdateUrl,
+          isIos: true,
+        );
+      }
+
+      String? downloadUrl;
+      for (final a in assets) {
+        final map = a as Map<String, dynamic>;
+        final name = map['browser_download_url'] as String? ?? '';
+        if (name.toLowerCase().endsWith(AppUpdateConfig.windowsAssetExtension)) {
+          downloadUrl = name;
+          break;
         }
-        if (downloadUrl != null) {
-          return AppUpdateInfo(
-            version: tagName.replaceFirst(RegExp(r'^v'), '').trim(),
-            downloadUrl: downloadUrl,
-          );
-        }
+      }
+      if (downloadUrl != null) {
+        return AppUpdateInfo(
+          version: versionStr,
+          downloadUrl: downloadUrl,
+        );
       }
     } catch (_) {}
     return null;
@@ -108,7 +119,9 @@ class AppUpdateInfo {
   const AppUpdateInfo({
     required this.version,
     required this.downloadUrl,
+    this.isIos = false,
   });
   final String version;
   final String downloadUrl;
+  final bool isIos;
 }

@@ -9,6 +9,8 @@ import 'package:offibox/core/search_filter.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/providers/offibox_providers.dart';
+import 'package:offibox/services/app_update_service.dart';
+import 'package:offibox/window/widgets/update_available_dialog.dart';
 
 /// Full-screen message asking the user to rotate to landscape.
 class RotateToLandscapeMessage extends StatelessWidget {
@@ -63,9 +65,18 @@ class _IosOffiboxShellState extends ConsumerState<IosOffiboxShell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       ref.read(offiboxControllerProvider).init();
       ref.read(searchFilterProvider.notifier).enableSource(SourceType.bdm);
+      final updateInfo = await AppUpdateService.checkForUpdate();
+      if (!mounted) return;
+      if (updateInfo != null && context.mounted) {
+        await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => UpdateAvailableDialog(updateInfo: updateInfo),
+        );
+      }
     });
   }
 

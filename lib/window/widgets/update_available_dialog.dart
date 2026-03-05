@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:offibox/app/offibox_app.dart';
 import 'package:offibox/constants/app_update_config.dart';
@@ -27,6 +28,15 @@ class _UpdateAvailableDialogState extends State<UpdateAvailableDialog> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(AppUpdateConfig.doNotAskKey, true);
     }
+    if (widget.updateInfo.isIos) {
+      final uri = Uri.tryParse(widget.updateInfo.downloadUrl);
+      if (uri != null) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+      return;
+    }
     final ok = await AppUpdateService.downloadAndOpen(widget.updateInfo);
     if (!mounted) return;
     Navigator.of(context).pop(ok);
@@ -51,7 +61,9 @@ class _UpdateAvailableDialogState extends State<UpdateAvailableDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Nouvelle version disponible (${widget.updateInfo.version}). Installer maintenant ?',
+            widget.updateInfo.isIos
+                ? 'Une mise à jour est disponible (${widget.updateInfo.version}). Ouvrir la page de téléchargement ?'
+                : 'Nouvelle version disponible (${widget.updateInfo.version}). Installer maintenant ?',
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
@@ -68,7 +80,7 @@ class _UpdateAvailableDialogState extends State<UpdateAvailableDialog> {
                   backgroundColor: OffiboxApp.offiboxTeal,
                 ),
                 onPressed: _install,
-                child: const Text('Oui'),
+                child: Text(widget.updateInfo.isIos ? 'Ouvrir' : 'Oui'),
               ),
             ],
           ),
