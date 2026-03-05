@@ -27,7 +27,43 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "264737328165-cskk83jevrjrc94veihvcfo3jola2p63.apps.googleusercontent.com",
+              "client_id": "264737328165-aea49er0ie8b81qm2qvfkcbjqqn845gc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "264737328165-fp2vtfqfmlvs59di3cb6ku7o82v57rqo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.offibox"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264737328165:android:a0e25ad905259d32ddc3cc",
+        "android_client_info": {
+          "package_name": "com.example.offibox.cerp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "264737328165-cskk83jevrjrc94veihvcfo3jola2p63.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhhdZmQw0fRCUC3GtX0OyBP8xG5RBjqcs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "264737328165-aea49er0ie8b81qm2qvfkcbjqqn845gc.apps.googleusercontent.com",
               "client_type": 3
             },
             {
