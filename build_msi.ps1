@@ -27,7 +27,7 @@ $OutDir   = Join-Path $ProjectRoot "website\download"
 # Lire la version depuis pubspec.yaml (format X.Y.Z ou X.Y.Z+build)
 $PubspecPath = Join-Path $ProjectRoot "pubspec.yaml"
 $versionLine = Get-Content $PubspecPath -Raw | Select-String -Pattern "version:\s*([\d.]+)(?:\+\d+)?" | ForEach-Object { $_.Matches.Groups[1].Value }
-$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.18" }
+$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.24" }
 $OutMsi = Join-Path $OutDir "Offibox-Setup-$VersionName.msi"
 
 # WiX : variable d'environnement WIX ou chemin par défaut (doit pointer vers le dossier contenant heat.exe, souvent ...\bin)
@@ -56,6 +56,7 @@ if (-not (Test-Path $Heat)) {
 
 if (-not (Test-Path $ReleaseDir)) {
     Write-Host "ERREUR: Dossier Release introuvable. Lancez d'abord : flutter build windows" -ForegroundColor Red
+    Write-Host "  Pour l'autostart installateur : flutter build windows --dart-define=FLUTTER_BUILD_WINDOWS=true" -ForegroundColor Yellow
     Write-Host "  Attendu: $ReleaseDir" -ForegroundColor Yellow
     exit 1
 }
@@ -94,8 +95,74 @@ if (-not (Test-Path $HarvestObj)) {
     exit 1
 }
 Write-Host "Lien -> $OutMsi"
-# -b <path> : chemin de base pour résoudre SourceDir\... (Heat génère Source="SourceDir\fichier", Light cherche dans -b)
-& $Light -out $OutMsi $ProductObj $HarvestObj -b $ReleaseDir -ext WixUIExtension -ext WixUtilExtension -sval
+# WixUI_FeatureTree exige WixUIBannerBmp et WixUIDialogBmp (493x58 et 493x312). Créer des placeholders si absents.
+$BitmapDir = [System.IO.Path]::GetFullPath((Join-Path $WixDir "bitmap"))
+$BannerBmp = Join-Path $BitmapDir "bannrbmp.bmp"
+$DialogBmp = Join-Path $BitmapDir "dlgbmp.bmp"
+if (-not (Test-Path $BitmapDir)) { New-Item -ItemType Directory -Path $BitmapDir -Force | Out-Null }
+
+function New-MinimalBmpBytes {
+  param([int]$Width, [int]$Height)
+  $rowBytes = [int](([math]::Ceiling(($Width * 3) / 4) * 4))
+  $pixelDataSize = $rowBytes * $Height
+  $fileSize = 54 + $pixelDataSize
+  $ms = New-Object System.IO.MemoryStream
+  $bw = New-Object System.IO.BinaryWriter($ms)
+  $bw.Write([byte[]]@(0x42, 0x4D))
+  $bw.Write([uint32]$fileSize)
+  $bw.Write([uint16]0); $bw.Write([uint16]0)
+  $bw.Write([uint32]54)
+  $bw.Write([uint32]40)
+  $bw.Write([int32]$Width)
+  $bw.Write([int32]$Height)
+  $bw.Write([uint16]1)
+  $bw.Write([uint16]24)
+  $bw.Write([uint32]0)
+  $bw.Write([uint32]$pixelDataSize)
+  $bw.Write([int32]0); $bw.Write([int32]0); $bw.Write([uint32]0); $bw.Write([uint32]0)
+  $pad = $rowBytes - ($Width * 3)
+  for ($y = 0; $y -lt $Height; $y++) {
+    for ($x = 0; $x -lt $Width; $x++) { $bw.Write([byte[]]@(64, 16, 0)) }
+    for ($p = 0; $p -lt $pad; $p++) { $bw.Write([byte]0) }
+  }
+  $bw.Flush()
+  $ms.ToArray()
+}
+
+function Ensure-WixBitmap {
+  param([string]$Path, [int]$Width, [int]$Height)
+  if (Test-Path $Path) { return }
+  try {
+    Add-Type -AssemblyName System.Drawing
+    $bmp = New-Object System.Drawing.Bitmap($Width, $Height)
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.Clear([System.Drawing.Color]::FromArgb(0, 16, 64))
+    $g.Dispose()
+    $bmp.Save($Path, [System.Drawing.Imaging.ImageFormat]::Bmp)
+    $bmp.Dispose()
+    Write-Host "Placeholder cree : $Path" -ForegroundColor Gray
+  } catch {
+    Write-Host "Fallback BMP (sans System.Drawing) : $Path" -ForegroundColor Gray
+    [System.IO.File]::WriteAllBytes($Path, (New-MinimalBmpBytes -Width $Width -Height $Height))
+  }
+}
+Ensure-WixBitmap -Path $BannerBmp -Width 493 -Height 58
+Ensure-WixBitmap -Path $DialogBmp -Width 493 -Height 312
+$BannerBmp = [System.IO.Path]::GetFullPath($BannerBmp)
+$DialogBmp = [System.IO.Path]::GetFullPath($DialogBmp)
+if (-not (Test-Path $BannerBmp) -or -not (Test-Path $DialogBmp)) {
+  Write-Host "ERREUR: Bitmaps WiX introuvables apres creation." -ForegroundColor Red
+  exit 1
+}
+# light.exe exige -dVariable=Value (un seul argument par variable, pas -d puis valeur séparée).
+$LightArgs = @(
+  '-out', $OutMsi, $ProductObj, $HarvestObj,
+  '-b', $ReleaseDir,
+  '-ext', 'WixUIExtension', '-ext', 'WixUtilExtension', '-sval',
+  ('-dWixUIBannerBmp=' + $BannerBmp),
+  ('-dWixUIDialogBmp=' + $DialogBmp)
+)
+& $Light @LightArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERREUR: light a echoue (code $LASTEXITCODE)" -ForegroundColor Red
     exit $LASTEXITCODE

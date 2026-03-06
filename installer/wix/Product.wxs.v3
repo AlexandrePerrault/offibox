@@ -3,7 +3,7 @@
   <Product Id="*"
            Name="Offibox"
            Language="1033"
-           Version="1.1.18"
+           Version="1.1.24"
            Manufacturer="Offibox"
            UpgradeCode="B7B3E8A2-9F4C-4D1E-8A5B-2C6D9E1F3A4B">
 
@@ -82,9 +82,33 @@
       <Custom Action="LaunchOffibox" After="InstallFinalize">LAUNCHOFFIBOX AND NOT Installed</Custom>
     </InstallExecuteSequence>
 
-    <!-- UI : arbre de fonctionnalités (icône bureau cochable). Exit dialog : case "Lancer Offibox" (voir WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT). -->
-    <UIRef Id="WixUI_FeatureTree" />
+    <!-- UI : arbre de fonctionnalités + dialogue options (Lancer au démarrage) + exit (Lancer Offibox). -->
+    <UI>
+      <UIRef Id="WixUI_FeatureTree" />
+      <!-- Après "Personnaliser" (CustomizeDlg), afficher le dialogue Options. Back/Next de CustomOptionsDlg sont définis dans le Fragment ci-dessous. -->
+      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="CustomOptionsDlg">1</Publish>
+    </UI>
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Lancer Offibox" />
   </Product>
+
+  <!-- Dialogue personnalisé : options Lancer au démarrage + Lancer à la fin (toutes deux cochables). -->
+  <Fragment>
+    <UI>
+      <Dialog Id="CustomOptionsDlg" Width="370" Height="270" Title="[ProductName] - Options">
+        <Control Id="OptionsTitle" Type="Text" X="15" Y="6" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="Choisissez les options d'installation." />
+        <Control Id="CheckboxLaunchAtStartup" Type="CheckBox" X="20" Y="40" Width="330" Height="30" Property="LAUNCHATSTARTUP" CheckBoxValue="1" Text="Lancer Offibox au démarrage de Windows (recommandé)" />
+        <Control Id="CheckboxLaunchNow" Type="CheckBox" X="20" Y="75" Width="330" Height="30" Property="LAUNCHOFFIBOX" CheckBoxValue="1" Text="Lancer Offibox à la fin de l'installation" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Retour">
+          <Publish Event="NewDialog" Value="CustomizeDlg">1</Publish>
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Suivant">
+          <Publish Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Annuler">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+    </UI>
+  </Fragment>
 </Wix>
