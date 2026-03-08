@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <OutputPath>..\website\download</OutputPath>
-    <PackageFileName>Offibox-Setup.1.1.18.msi</PackageFileName>
+    <PackageFileName>Offibox-Setup.1.1.24.msi</PackageFileName>
     <ReleaseFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../build/windows/x64/runner/Release'))</ReleaseFullPath>
     <!-- Installation sous LocalAppData : ICE64, ICE38, ICE91 (per-user), ICE60 (font/language) -->
     <SuppressIces>ICE38;ICE60;ICE64;ICE91</SuppressIces>
