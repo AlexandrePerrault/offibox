@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FilterQuality;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,7 +62,7 @@ class _TherapeuticVideoPanelBelowBarState
 
   void _openInBrowserThenClose() {
     if (_closing) return;
-    openUrl(widget.videoUrl);
+    openUrlExternal(widget.videoUrl);
     _closeWithFade();
   }
 
@@ -93,9 +94,9 @@ class _TherapeuticVideoPanelBelowBarState
   Future<void> _initWebView() async {
     try {
       await _webViewController.initialize();
-      await _webViewController.setBackgroundColor(Colors.black);
+      await _webViewController.setBackgroundColor(Colors.white);
       await _webViewController.setPopupWindowPolicy(
-          WebviewPopupWindowPolicy.deny);
+          WebviewPopupWindowPolicy.deny,);
       _loadingSubscription =
           _webViewController.loadingState.listen((LoadingState state) {
         if (state == LoadingState.navigationCompleted) {
@@ -165,12 +166,12 @@ class _TherapeuticVideoPanelBelowBarState
   static const double _logoScale = 1.30; // +30 %
 
   Widget _buildSourceHeader() {
-    final logoHeight = _logoBaseHeight * _logoScale; // 46.8
+    const logoHeight = _logoBaseHeight * _logoScale; // 46.8
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
       ),
       child: Center(
         child: Row(
@@ -204,7 +205,7 @@ class _TherapeuticVideoPanelBelowBarState
     );
   }
 
-  /// Overlay noir 16:9 avec triangle play au centre (type YouTube). Clic → démarre le chargement.
+  /// Overlay blanc 16:9 avec triangle play au centre (type YouTube). Clic → démarre le chargement.
   Widget _buildPlayOverlay() {
     return GestureDetector(
       onTap: _onPlayPressed,
@@ -212,7 +213,7 @@ class _TherapeuticVideoPanelBelowBarState
       child: Container(
         width: widget.barWidth,
         height: _videoHeight,
-        color: Colors.black,
+        color: Colors.white,
         child: Center(
           child: Material(
             color: Colors.transparent,
@@ -226,7 +227,7 @@ class _TherapeuticVideoPanelBelowBarState
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -251,7 +252,7 @@ class _TherapeuticVideoPanelBelowBarState
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.warning_amber_rounded,
-              size: 40, color: Colors.orange.shade300),
+              size: 40, color: Colors.orange.shade300,),
           const SizedBox(height: 8),
           Text(
             _initErrorMessage ?? 'Impossible de charger la vidéo',
@@ -272,7 +273,9 @@ class _TherapeuticVideoPanelBelowBarState
   @override
   void dispose() {
     _loadingSubscription?.cancel();
-    _webViewController.dispose();
+    if (_webViewController.value.isInitialized) {
+      _webViewController.dispose();
+    }
     super.dispose();
   }
 
@@ -285,15 +288,15 @@ class _TherapeuticVideoPanelBelowBarState
       child: Padding(
         padding: const EdgeInsets.only(top: 6, left: 12, right: 12, bottom: 8),
         child: Material(
-          color: Colors.transparent,
+          color: Colors.white,
           child: Container(
             width: widget.barWidth,
             decoration: BoxDecoration(
-              color: Colors.black,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -306,9 +309,13 @@ class _TherapeuticVideoPanelBelowBarState
                 children: [
                   DocumentViewerToolbar(
                     barHeight: 44,
+                    backgroundColor: Colors.white,
                     onDownload: () {
-                      if (!_closing) openUrl(widget.videoUrl);
+                      if (!_closing) openUrlExternal(widget.videoUrl);
                     },
+                    downloadLabel: 'Ouvrir dans navigateur',
+                    downloadTooltip: 'Ouvrir dans le navigateur',
+                    downloadIcon: Icons.open_in_browser,
                     onExpandFullscreen: _openFullscreen,
                     onClose: _closeWithFade,
                   ),
@@ -322,39 +329,61 @@ class _TherapeuticVideoPanelBelowBarState
                             ? (_initError
                                 ? _buildFallback()
                                 : _webViewController.value.isInitialized
-                                    ? Webview(
-                                        _webViewController,
-                                        permissionRequested: (String url,
-                                                WebviewPermissionKind kind,
-                                                bool isUserInitiated) async =>
-                                            WebviewPermissionDecision.allow,
+                                    ? LayoutBuilder(
+                                        builder: (context, c) {
+                                          final dpr = MediaQuery.devicePixelRatioOf(context);
+                                          final w = (c.maxWidth * dpr).floorToDouble() / dpr;
+                                          final h = (c.maxHeight * dpr).floorToDouble() / dpr;
+                                          return Webview(
+                                            _webViewController,
+                                            width: w,
+                                            height: h,
+                                            scaleFactor: dpr,
+                                            filterQuality: FilterQuality.none,
+                                            permissionRequested: (String url,
+                                                    WebviewPermissionKind kind,
+                                                    bool isUserInitiated,) async =>
+                                                WebviewPermissionDecision.allow,
+                                          );
+                                        },
                                       )
-                                    : const Center(
-                                        child: CircularProgressIndicator(
-                                            color: Colors.white70),
+                                    : Container(
+                                        color: Colors.white,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            color: Colors.black54,
+                                          ),
+                                        ),
                                       ))
-                            : Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Vidéo thérapeutique',
-                                      style: TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 14),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    TextButton.icon(
-                                      onPressed: _openInBrowserThenClose,
-                                      icon: const Icon(Icons.open_in_browser,
-                                          color: Colors.white70),
-                                      label: const Text(
-                                        'Ouvrir dans le navigateur',
+                            : Container(
+                                color: Colors.white,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Vidéo thérapeutique',
                                         style: TextStyle(
-                                            color: Colors.white70),
+                                          color: Colors.grey.shade700,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 12),
+                                      TextButton.icon(
+                                        onPressed: _openInBrowserThenClose,
+                                        icon: Icon(
+                                          Icons.open_in_browser,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                        label: Text(
+                                          'Ouvrir dans le navigateur',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               )),
                   ),
@@ -429,7 +458,9 @@ class _TherapeuticFullscreenContentState extends State<_TherapeuticFullscreenCon
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_controller.value.isInitialized) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -438,10 +469,21 @@ class _TherapeuticFullscreenContentState extends State<_TherapeuticFullscreenCon
     if (!isWindows || !_initialized) {
       return const Center(child: CircularProgressIndicator(color: Colors.white));
     }
-    return Webview(
-      _controller,
-      permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
-          WebviewPermissionDecision.allow,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final dpr = MediaQuery.devicePixelRatioOf(context);
+        final w = (constraints.maxWidth * dpr).floorToDouble() / dpr;
+        final h = (constraints.maxHeight * dpr).floorToDouble() / dpr;
+        return Webview(
+          _controller,
+          width: w,
+          height: h,
+          scaleFactor: dpr,
+          filterQuality: FilterQuality.none,
+          permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
+              WebviewPermissionDecision.allow,
+        );
+      },
     );
   }
 }

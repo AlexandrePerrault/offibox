@@ -1,4 +1,4 @@
-# Build MSI Offibox après "flutter build windows"
+# Build MSI Offibox. Lance recensement Annuaire PS (data.gouv.fr), puis "flutter build windows", puis WiX.
 # Nécessite : WiX Toolset v3 (https://wixtoolset.org/)
 # Exécuter depuis la racine du projet : .\build_msi.ps1
 # Si -BumpVersion est passé (défaut : true), incrémente la version avant de builder (1.1.02 -> 1.1.03).
@@ -6,8 +6,13 @@
 # -PushToGitHub true : après succès, git add + commit + push + tag vX.Y.Z + creation d'une Release GitHub
 #   (titre + notes lues depuis release_notes.md si present, sinon "Release X.Y.Z") + upload du MSI en asset.
 #   C'est cette Release qui alimente la fenetre "Historique des versions" dans l'app (API GitHub Releases).
+#
+# Signature de code (éviter "Windows a protégé votre ordinateur" / SmartScreen) :
+#   Définir OFFIBOX_SIGN=1 et OFFIBOX_CERT_PATH=chemin\vers\certificat.pfx (et OFFIBOX_CERT_PASSWORD=motdepasse)
+#   ou utiliser -Sign true -CertPath "..." -CertPassword "..." en paramètres.
+#   Nécessite : Windows SDK (signtool.exe) et un certificat de signature de code (CA reconnue par Microsoft).
 
-param([string]$BumpVersion = "true", [string]$PushToGitHub = "false")
+param([string]$BumpVersion = "true", [string]$PushToGitHub = "false", [string]$Sign = "false", [string]$CertPath = "", [string]$CertPassword = "")
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = $PSScriptRoot
@@ -18,6 +23,14 @@ if ($doBump) {
   $p = Start-Process -FilePath "powershell.exe" -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File',$bumpScript -WorkingDirectory $ProjectRoot -Wait -PassThru -NoNewWindow
   if ($p.ExitCode -ne 0) { exit $p.ExitCode }
 }
+
+# Recenser le nombre de professionnels (Annuaire PS) pour « À propos » et rebuild pour figer la valeur dans la version
+Write-Host "Recensement Annuaire PS (data.gouv.fr)..." -ForegroundColor Cyan
+$p = Start-Process -FilePath "dart" -ArgumentList "run","scripts/update_annuaire_ps_count.dart" -WorkingDirectory $ProjectRoot -Wait -PassThru -NoNewWindow
+if ($p.ExitCode -ne 0) { Write-Host "ATTENTION: script annuaire PS a echoue (code $($p.ExitCode)), valeur par defaut conservee." -ForegroundColor Yellow }
+Write-Host "Build Windows..." -ForegroundColor Cyan
+$p = Start-Process -FilePath "flutter" -ArgumentList "build","windows" -WorkingDirectory $ProjectRoot -Wait -PassThru -NoNewWindow
+if ($p.ExitCode -ne 0) { Write-Host "ERREUR: flutter build windows a echoue (code $($p.ExitCode))" -ForegroundColor Red; exit $p.ExitCode }
 
 Write-Host "Preparation WiX..." -ForegroundColor Cyan
 $ReleaseDir = Join-Path $ProjectRoot "build\windows\x64\runner\Release"
@@ -62,6 +75,35 @@ if (-not (Test-Path $ReleaseDir)) {
 }
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+
+# 0) Optionnel : signature de l'exe AVANT harvest (pour que le MSI contienne l'exe signe)
+$doSign = ($Sign -match '^(1|true|yes|on)$') -or ($env:OFFIBOX_SIGN -match '^(1|true|yes|on)$')
+$signCertPath = if ($CertPath) { $CertPath } else { $env:OFFIBOX_CERT_PATH }
+$signCertPassword = if ($CertPassword) { $CertPassword } else { $env:OFFIBOX_CERT_PASSWORD }
+if ($doSign -and $signCertPath -and (Test-Path $signCertPath)) {
+  $Signtool = $env:SIGNTOOL_PATH
+  if (-not $Signtool -or -not (Test-Path $Signtool)) {
+    $KitsRoot = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+    if (Test-Path $KitsRoot) {
+      $latest = Get-ChildItem -Path $KitsRoot -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
+      if ($latest) {
+        $x64 = Join-Path $latest.FullName "x64\signtool.exe"
+        if (Test-Path $x64) { $Signtool = $x64 }
+      }
+    }
+  }
+  if ($Signtool -and (Test-Path $Signtool)) {
+    $ExeToSign = Join-Path $ReleaseDir "offibox.exe"
+    if (Test-Path $ExeToSign) {
+      Write-Host "Signature de l'executable (avant MSI)..." -ForegroundColor Cyan
+      $timestampUrl = "http://timestamp.digicert.com"
+      $signArgs = @("sign", "/tr", $timestampUrl, "/td", "sha256", "/fd", "sha256", "/f", $signCertPath, "/v")
+      if ($signCertPassword) { $signArgs = $signArgs + @("/p", $signCertPassword) }
+      & $Signtool @signArgs $ExeToSign
+      if ($LASTEXITCODE -ne 0) { Write-Host "ATTENTION: signature exe echouee (code $LASTEXITCODE)" -ForegroundColor Yellow }
+    }
+  }
+}
 
 # 1) Harvest du dossier Release
 $HarvestWxs = Join-Path $WixDir "Harvest.wxs"
@@ -169,6 +211,36 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "MSI cree : $OutMsi" -ForegroundColor Green
+
+# 3b) Signature du MSI (evite l'avertissement SmartScreen "Windows a protege votre ordinateur")
+if ($doSign -and $signCertPath -and (Test-Path $signCertPath)) {
+  if (-not $Signtool -or -not (Test-Path $Signtool)) {
+    $KitsRoot = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+    if (Test-Path $KitsRoot) {
+      $latest = Get-ChildItem -Path $KitsRoot -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
+      if ($latest) {
+        $x64 = Join-Path $latest.FullName "x64\signtool.exe"
+        if (Test-Path $x64) { $Signtool = $x64 }
+      }
+    }
+  }
+  if ($Signtool -and (Test-Path $Signtool)) {
+    Write-Host "Signature du MSI..." -ForegroundColor Cyan
+    $timestampUrl = "http://timestamp.digicert.com"
+    $signArgs = @("sign", "/tr", $timestampUrl, "/td", "sha256", "/fd", "sha256", "/f", $signCertPath, "/v")
+    if ($signCertPassword) { $signArgs = $signArgs + @("/p", $signCertPassword) }
+    & $Signtool @signArgs $OutMsi
+    if ($LASTEXITCODE -eq 0) {
+      Write-Host "MSI signe (SmartScreen ne bloquera pas l'installation)." -ForegroundColor Green
+    } else {
+      Write-Host "ATTENTION: signature MSI echouee (code $LASTEXITCODE). Le MSI reste non signe." -ForegroundColor Yellow
+    }
+  } else {
+    Write-Host "Signature demandee mais signtool introuvable. Installez Windows SDK ou definissez SIGNTOOL_PATH." -ForegroundColor Yellow
+  }
+} elseif ($doSign -and (-not $signCertPath -or -not (Test-Path $signCertPath))) {
+  Write-Host "Signature demandee (OFFIBOX_SIGN=1) mais certificat absent. Definissez OFFIBOX_CERT_PATH (fichier .pfx)." -ForegroundColor Yellow
+}
 
 # 4) Optionnel : pousser vers GitHub (commit + push + tag)
 $doPush = $PushToGitHub -notmatch '^(0|false|no|off)$'

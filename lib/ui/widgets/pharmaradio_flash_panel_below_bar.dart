@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FilterQuality;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,7 +52,7 @@ class _PharmaradioFlashInfoPanelBelowBarState
 
   void _openInBrowserThenClose() {
     if (_closing) return;
-    openUrl(kPharmaradioFlashInfoUrl);
+    openUrlExternal(kPharmaradioFlashInfoUrl);
     _closeWithFade();
   }
 
@@ -60,7 +61,7 @@ class _PharmaradioFlashInfoPanelBelowBarState
       await _webViewController.initialize();
       await _webViewController.setBackgroundColor(Colors.white);
       await _webViewController.setPopupWindowPolicy(
-          WebviewPopupWindowPolicy.deny);
+          WebviewPopupWindowPolicy.deny,);
       _loadingSubscription =
           _webViewController.loadingState.listen((LoadingState state) {});
       await _webViewController.loadUrl(kPharmaradioFlashInfoUrl);
@@ -97,16 +98,18 @@ class _PharmaradioFlashInfoPanelBelowBarState
   @override
   void dispose() {
     _loadingSubscription?.cancel();
-    _webViewController.dispose();
+    if (_webViewController.value.isInitialized) {
+      _webViewController.dispose();
+    }
     super.dispose();
   }
 
   Widget _buildLogoHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
       ),
       child: Row(
         children: [
@@ -181,12 +184,23 @@ class _PharmaradioFlashInfoPanelBelowBarState
                             child: _initError
                                   ? _buildFallback()
                                   : _webViewController.value.isInitialized
-                                      ? Webview(
-                                          _webViewController,
-                                          permissionRequested: (String url,
-                                                  WebviewPermissionKind kind,
-                                                  bool isUserInitiated) async =>
-                                              WebviewPermissionDecision.allow,
+                                      ? LayoutBuilder(
+                                          builder: (context, c) {
+                                            final dpr = MediaQuery.devicePixelRatioOf(context);
+                                            final w = (c.maxWidth * dpr).floorToDouble() / dpr;
+                                            final h = (c.maxHeight * dpr).floorToDouble() / dpr;
+                                            return Webview(
+                                              _webViewController,
+                                              width: w,
+                                              height: h,
+                                              scaleFactor: dpr,
+                                              filterQuality: FilterQuality.none,
+                                              permissionRequested: (String url,
+                                                      WebviewPermissionKind kind,
+                                                      bool isUserInitiated,) async =>
+                                                  WebviewPermissionDecision.allow,
+                                            );
+                                          },
                                         )
                                       : const Center(
                                           child: SizedBox(
@@ -260,12 +274,12 @@ class _PharmaradioFlashInfoPanelBelowBarState
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.warning_amber_rounded,
-                size: 40, color: Colors.orange.shade300),
+                size: 40, color: Colors.orange.shade300,),
             const SizedBox(height: 8),
             Text(
               _initErrorMessage ?? 'Impossible de charger le flash info',
               style: TextStyle(
-                  color: Colors.orange.shade800, fontSize: 12),
+                  color: Colors.orange.shade800, fontSize: 12,),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),

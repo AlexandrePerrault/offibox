@@ -135,10 +135,14 @@ export const getAdminUsers = onCall(callableOptions, async (request) => {
   return { users };
 });
 
+// Fax (Telnyx) — catalogue équipement CERP
+export { sendCerpEquipmentFax } from "./fax";
+
 // Export des fonctions email (emails.ts)
 export {
   onUserFirstConnection,
   sendTrialEndEmails,
   sendIdeasEmail,
   sendIdeasEmailHttp,
+  sendContactEmail,
 } from "./emails";

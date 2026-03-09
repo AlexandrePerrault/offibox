@@ -20,6 +20,9 @@ import 'package:offibox/utils/ansm_rappel_match.dart';
 import 'package:offibox/ui/results/plus_infos_badge.dart';
 import 'package:offibox/ui/results/result_line_3_actions.dart';
 import 'package:offibox/ui/widgets/offibox_tooltip.dart';
+import 'package:offibox/ui/widgets/pharmaradio_flash_panel_below_bar.dart' show kPharmaradioFlashInfoUrl;
+import 'package:offibox/ui/spans/common_spans.dart';
+import 'package:offibox/utils/normalize.dart' show normalizePrincepsKey;
 
 /// URLs des calendriers vaccinaux (badges pour les médicaments dont le libellé contient "vaccin").
 const String kCalendrierVaccinal2025Url =
@@ -169,6 +172,44 @@ IconData iconForUrl(String url) {
   return Icons.open_in_new;
 }
 
+/// Extrait une DCI depuis un libellé générique (col A du CSV génériques 2026).
+/// Ex: "ACIDE ACETYLSALICYLIQUE 75 MG" -> "ACIDE ACETYLSALICYLIQUE"
+String dciFromGenericLabel(String label) {
+  final t = label.trim();
+  if (t.isEmpty) return '';
+  final parts = t.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+  if (parts.isEmpty) return '';
+  final kept = <String>[];
+  for (final p in parts) {
+    // Dès qu'on voit un dosage/numéro, on s'arrête.
+    if (RegExp(r'^\d').hasMatch(p) || RegExp(r'\d').hasMatch(p)) break;
+    // Stop sur unités usuelles si jamais le CSV ne met pas de nombre (rare)
+    final up = p.toUpperCase();
+    if (up == 'MG' || up == 'G' || up == 'MCG' || up == 'µG' || up == 'UI') break;
+    kept.add(p);
+  }
+  return kept.isEmpty ? parts.first : kept.join(' ');
+}
+
+/// Extrait le(s) DCI depuis la chaîne composition BDM (format "DCI : dosage" ou "DCI1 : d1 ; DCI2 : d2").
+/// Retourne une chaîne pour le badge, ex. "travoprost" ou "paracetamol, cafeine".
+String dciFromCompositionLine(String compositionLine) {
+  final raw = compositionLine.trim();
+  if (raw.isEmpty) return '';
+  final segments = raw.split(RegExp(r'\s*;\s*')).map((e) => e.trim()).where((e) => e.isNotEmpty);
+  final dcis = <String>[];
+  for (final seg in segments) {
+    final idx = seg.indexOf(':');
+    if (idx > 0) {
+      final dci = seg.substring(0, idx).trim();
+      if (dci.isNotEmpty) dcis.add(dci.toLowerCase());
+    } else if (seg.isNotEmpty) {
+      dcis.add(seg.toLowerCase());
+    }
+  }
+  return dcis.join(', ');
+}
+
 class ResultLine2Code extends StatelessWidget {
   final SearchResult item;
   final void Function(String url)? onOpenUrl;
@@ -186,7 +227,10 @@ class ResultLine2Code extends StatelessWidget {
   final VoidCallback? onOpenCataloguePanel;
   /// Si fourni, au clic sur un pill YouTube on affiche la vidéo sous la barre au lieu d'ouvrir l'URL.
   final void Function(String youtubeUrl)? onOpenYouTubeVideo;
-  /// Vidéo de démonstration (videos.csv) : pill en ligne 3 (voir ResultLine3Actions).
+  /// Vidéo de démonstration (videos.csv) : affichée en ligne 2 quand injecté, à droite de RCP.
+  final Map<String, String>? videosByCip13;
+  /// Au clic sur le pill « vidéo de démonstration » : affiche le panneau vidéo thérapeutique.
+  final void Function(String url)? onOpenTherapeuticVideo;
   /// Si fourni, au clic sur le pill « Flash info » (Pharmaradio) on affiche le panneau sous la barre.
   final VoidCallback? onOpenPharmaradioFlash;
   /// Quand true (résultat injecté dans la barre), affiche le badge "générique = [col A]" pour les produits en col B (princeps).
@@ -209,6 +253,12 @@ class ResultLine2Code extends StatelessWidget {
   final String? compositionLine;
   /// Listes (ex. ["Liste 1", "Liste 2"]) pour la modale « plus d'infos ».
   final List<String>? listes;
+  /// URL fiche VOC patient (OMÉDIT) — affichée en ligne 2 quand injecté.
+  final String? vocPatientUrl;
+  /// URL fiche VOC pro (OMÉDIT) — affichée en ligne 2 quand injecté.
+  final String? vocProUrl;
+  /// Au clic sur le badge DCI (princeps) : lance une recherche avec la DCI pour afficher les génériques sous la barre.
+  final void Function(String dci)? onDciTap;
 
   const ResultLine2Code({
     super.key,
@@ -221,6 +271,8 @@ class ResultLine2Code extends StatelessWidget {
     this.onOpenEspacePro,
     this.onOpenCataloguePanel,
     this.onOpenYouTubeVideo,
+    this.videosByCip13,
+    this.onOpenTherapeuticVideo,
     this.onOpenPharmaradioFlash,
     this.isInjected = false,
     this.recalledProductNames,
@@ -232,6 +284,9 @@ class ResultLine2Code extends StatelessWidget {
     this.tauxRemboursement,
     this.compositionLine,
     this.listes,
+    this.vocPatientUrl,
+    this.vocProUrl,
+    this.onDciTap,
   });
 
   String _cleanCode(String value) {
@@ -244,10 +299,19 @@ class ResultLine2Code extends StatelessWidget {
     return item.groupLabel != null && item.groupLabel!.isNotEmpty;
   }
 
-  // 🟪 Annuaires (CRPV, Centres anti poison, CHU) — ligne 2 = adresse
+  // 🟪 Annuaires (CRPV, Centres anti poison, CHU, CEIP-A) — ligne 2 = adresse ; annuaire RPPS + tél/fax (sans doublon)
   if (item.source == SourceType.pharmacovigilance ||
       item.source == SourceType.centresAntiPoison ||
-      item.source == SourceType.chu) {
+      item.source == SourceType.chu ||
+      item.source == SourceType.ceipAddictovigilance ||
+      item.source == SourceType.annuaireSanteRpps) {
+    if (item.source == SourceType.annuaireSanteRpps) {
+      final hasAddress = item.groupLabel != null && item.groupLabel!.trim().isNotEmpty;
+      final hasPhone = item.phone != null && item.phone!.trim().isNotEmpty;
+      final isLiberal = item.commentaire?.trim() == 'mode=liberal';
+      final hasFax = isLiberal && item.fax != null && item.fax!.trim().isNotEmpty;
+      return hasAddress || hasPhone || hasFax;
+    }
     return item.groupLabel != null && item.groupLabel!.isNotEmpty;
   }
 
@@ -307,7 +371,7 @@ Widget build(BuildContext context) {
       item.groupLabel!.isNotEmpty) {
     final address = normalizeText(item.groupLabel!);
     return Padding(
-      padding: EdgeInsets.only(top: resultLineGap),
+      padding: const EdgeInsets.only(top: resultLineGap),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 4,
@@ -351,20 +415,42 @@ Widget build(BuildContext context) {
   }
 
   // ─────────────────────────────
-  // 🟪 Annuaires (CRPV, Centres anti poison, CHU) — ADRESSE (ligne 2)
+  // 🟪 Annuaires (CRPV, Centres anti poison, CHU, CEIP-A) — ADRESSE (ligne 2) ; annuaire RPPS + Tél/Fax ; CEIP-A + badge "site internet"
   // ─────────────────────────────
-  if ((item.source == SourceType.pharmacovigilance ||
-          item.source == SourceType.centresAntiPoison ||
-          item.source == SourceType.chu) &&
-      item.groupLabel != null &&
-      item.groupLabel!.isNotEmpty) {
-    final address = normalizeText(item.groupLabel!);
-    return Padding(
-      padding: EdgeInsets.only(top: resultLineGap),
-      child: Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 4,
-      children: [
+  if (item.source == SourceType.pharmacovigilance ||
+      item.source == SourceType.centresAntiPoison ||
+      item.source == SourceType.chu ||
+      item.source == SourceType.ceipAddictovigilance ||
+      item.source == SourceType.annuaireSanteRpps) {
+    final hasAddress = item.groupLabel != null && item.groupLabel!.trim().isNotEmpty;
+    final address = hasAddress ? normalizeText(item.groupLabel!) : '';
+    final isAnnuaireRpps = item.source == SourceType.annuaireSanteRpps;
+    final isLiberal = item.commentaire?.trim() == 'mode=liberal';
+    final phoneRaw = (item.phone ?? '').replaceAll('"', '').replaceAll("'", '').trim();
+    final faxRaw = (item.fax ?? '').replaceAll('"', '').replaceAll("'", '').trim();
+    // Tél/Fax annuaire RPPS : affichés en ligne 3 (badges comme RPPS/MSS), pas ici. CRPV et CEIP-A : afficher fax si présent.
+    final showFax = !isAnnuaireRpps && (isLiberal || item.source == SourceType.pharmacovigilance || item.source == SourceType.ceipAddictovigilance) && faxRaw.isNotEmpty && faxRaw != phoneRaw;
+    final showPhone = !isAnnuaireRpps && phoneRaw.isNotEmpty;
+
+    if (!hasAddress && !showPhone && !showFax) return const SizedBox.shrink();
+
+    final children = <Widget>[
+      if (isAnnuaireRpps && hasAddress) ...[
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: Colors.black26),
+          ),
+          child: const Text(
+            'Structure',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black87),
+          ),
+        ),
+        const SizedBox(width: 6),
+      ],
+      if (hasAddress) ...[
         Text(
           address,
           style: const TextStyle(
@@ -399,9 +485,46 @@ Widget build(BuildContext context) {
           ),
         ),
       ],
-    ),
-  );
-}
+      if (showPhone) ...[
+        if (hasAddress) const SizedBox(width: 10),
+        CodeBadgeWithCopy(
+          label: 'Tél',
+          value: phoneRaw,
+          tooltip: 'Copier le numéro',
+          leadingIcon: Icons.phone,
+        ),
+      ],
+      if (showFax) ...[
+        if (showPhone || hasAddress) const SizedBox(width: 6),
+        CodeBadgeWithCopy(
+          label: 'Fax',
+          value: faxRaw,
+          tooltip: 'Copier le fax',
+          leadingIcon: Icons.fax,
+        ),
+      ],
+      // CEIP-A : badge "site internet" → addictovigilance.fr
+      if (item.source == SourceType.ceipAddictovigilance && (item.url?.trim().isNotEmpty ?? false)) ...[
+        if (hasAddress || showPhone || showFax) const SizedBox(width: 10),
+        HoverPillButton(
+          label: 'site internet',
+          icon: Icons.language,
+          tooltip: 'https://addictovigilance.fr/',
+          onTap: () => openUrl(item.url!.trim()),
+        ),
+      ],
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: resultLineGap),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        runSpacing: 4,
+        children: children,
+      ),
+    );
+  }
 
   // ─────────────────────────────
   // 📘 LPP — ligne 2 : pill "+ d'infos" (style meddispar), tooltip "accès nomenclature LPP", clic → URL col B
@@ -424,7 +547,7 @@ Widget build(BuildContext context) {
     );
     final sourceWidget = isInjected ? ResultLine3Actions.buildSourceRow(item, isInjected, onOpenUrl) : null;
     return Padding(
-      padding: EdgeInsets.only(top: resultLineGap),
+      padding: const EdgeInsets.only(top: resultLineGap),
       child: sourceWidget != null
           ? Row(
               mainAxisSize: MainAxisSize.min,
@@ -439,16 +562,67 @@ Widget build(BuildContext context) {
   }
 
   // ─────────────────────────────
-  // 🏷️ Mots-clés — ligne 2 : pill "site internet" (col D) + HoverPill(s) E/F, G/H, I/J ; icône YouTube si vidéo
+  // 🏷️ Mots-clés — ligne 2 : en liste = common span + libellé (col B) ; puis pills (col D, E/F, G/H, I/J)
   // ─────────────────────────────
   if (item.source == SourceType.keyword) {
     final pills = <Widget>[];
     final urlLigne1 = item.url?.trim();
+    Widget? keywordLibelleRow;
+    if (!isInjected) {
+      final libelle = (item.commentaire ?? item.label).trim();
+      if (libelle.isNotEmpty) {
+        keywordLibelleRow = Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                fontFamily: 'Spinnaker',
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+              children: [
+                keywordPlusAndOutilsMetierSpan(),
+                TextSpan(text: ' ${libelle.toUpperCase()}'),
+                if (item.keywordAppearanceDate != null && item.keywordAppearanceDate!.trim().isNotEmpty) ...[
+                  const TextSpan(text: ' '),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Tooltip(
+                      message: item.keywordAppearanceDate!.trim(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade700,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'nouveau',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Spinnaker',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      }
+    }
 
     void addPill(String name, String url, {bool isYouTube = false}) {
       if (name.isEmpty || url.isEmpty) return;
       final urlTrim = url.trim();
       final useYouTubePanel = isYouTube && onOpenYouTubeVideo != null;
+      // Toujours afficher l'icône YouTube quand l'URL est une vidéo,
+      // même dans la liste de résultats (avant injection dans la barre).
+      final showYouTubeIcon = isYouTube;
       final isPdf = _isPdfUrl(url);
       final isWord = _isWordUrl(url);
       final isXls = _isXlsUrl(url);
@@ -457,8 +631,8 @@ Widget build(BuildContext context) {
       pills.add(HoverPillButton(
         label: name,
         maxLabelWidth: maxLabelWidth,
-        icon: useYouTubePanel || isPdf || isWord || isXls ? null : iconForUrl(url),
-        iconWidget: useYouTubePanel
+        icon: showYouTubeIcon || isPdf || isWord || isXls ? null : iconForUrl(url),
+        iconWidget: showYouTubeIcon
             ? SvgPicture.asset(
                 'assets/icons/youtube.svg',
                 width: 24,
@@ -485,7 +659,7 @@ Widget build(BuildContext context) {
       ),);
     }
 
-    // Pill pour url ligne 1 (col D) : PDF → "document" ; Word/ODT → "document" ; XLS/ODS → "tableur"
+    // Pill pour url principale (col E) : PDF → "document" ; Word/ODT → "document" ; XLS/ODS → "tableur"
     if (urlLigne1 != null && urlLigne1.isNotEmpty && !_isYouTubeUrl(urlLigne1)) {
       if (_isPdfUrl(urlLigne1)) {
         pills.add(HoverPillButton(
@@ -499,7 +673,7 @@ Widget build(BuildContext context) {
               openUrl(urlLigne1.trim());
             }
           },
-        ));
+        ),);
       } else if (_isWordUrl(urlLigne1)) {
         pills.add(HoverPillButton(
           label: 'document',
@@ -512,7 +686,7 @@ Widget build(BuildContext context) {
               openUrl(urlLigne1.trim());
             }
           },
-        ));
+        ),);
       } else if (_isXlsUrl(urlLigne1)) {
         pills.add(HoverPillButton(
           label: 'tableur',
@@ -525,7 +699,7 @@ Widget build(BuildContext context) {
               openUrl(urlLigne1.trim());
             }
           },
-        ));
+        ),);
       }
       // Sinon (URL site web) : pas de pill "site internet", l’icône external link en ligne 1 suffit
     }
@@ -561,7 +735,7 @@ Widget build(BuildContext context) {
               openUrl(urlLigne1.trim());
             }
           },
-        ));
+        ),);
       } else if (_isWordUrl(urlLigne1)) {
         pills.add(HoverPillButton(
           label: 'document',
@@ -574,7 +748,7 @@ Widget build(BuildContext context) {
               openUrl(urlLigne1.trim());
             }
           },
-        ));
+        ),);
       } else if (_isXlsUrl(urlLigne1)) {
         pills.add(HoverPillButton(
           label: 'tableur',
@@ -587,44 +761,84 @@ Widget build(BuildContext context) {
               openUrl(urlLigne1.trim());
             }
           },
-        ));
+        ),);
       }
       // URL site web : pas de pill "site internet", l’icône external link en ligne 1 suffit
     }
-    if (pills.isNotEmpty) {
+    if (keywordLibelleRow != null || pills.isNotEmpty) {
       return Padding(
-        padding: EdgeInsets.only(top: resultLineGap),
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 6,
-          runSpacing: 4,
-          children: pills,
+        padding: const EdgeInsets.only(top: resultLineGap),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (keywordLibelleRow != null) keywordLibelleRow,
+            if (pills.isNotEmpty)
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 6,
+                runSpacing: 4,
+                children: pills,
+              ),
+          ],
         ),
       );
     }
   }
 
   // ─────────────────────────────
-  // 🌐 Sites web — ligne 2 : HoverPill(s) col E/F, G/H, I/J (noms col E, G, I → url F, H, J)
+  // 🌐 Sites web — ligne 2 : en liste = common span + libellé (col B) ; puis HoverPill(s) E/F, G/H, I/J
   // ─────────────────────────────
   if (item.source == SourceType.siteWeb) {
     final pills = <Widget>[];
+    Widget? siteWebLibelleRow;
+    if (!isInjected) {
+      final libelle = (item.commentaire ?? item.label).trim();
+      if (libelle.isNotEmpty) {
+        siteWebLibelleRow = Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                fontFamily: 'Spinnaker',
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+              children: [
+                siteInternetBadgeSpan(),
+                TextSpan(text: ' ${libelle.toUpperCase()}'),
+              ],
+            ),
+          ),
+        );
+      }
+    }
     final isPharmaradio = item.label.toLowerCase().contains('pharmaradio') ||
         (item.commentaire?.toLowerCase().contains('pharmaradio') ?? false) ||
         item.labelRaw.toLowerCase().contains('pharmaradio');
     if (isPharmaradio && onOpenPharmaradioFlash != null) {
       pills.add(HoverPillButton(
-        label: 'Flash info',
+        label: 'Flash info du jour',
         icon: Icons.newspaper,
         tooltip: 'Afficher le flash info Pharmaradio sous la barre',
         onTap: onOpenPharmaradioFlash!,
-      ));
+      ),);
+      pills.add(HoverPillButton(
+        label: 'Player Pharmaradio',
+        icon: Icons.play_circle_outline,
+        tooltip: 'Écouter Pharmaradio',
+        onTap: () => openUrlExternal(kPharmaradioFlashInfoUrl),
+      ),);
     }
     void addPill(String name, String url, {bool isYouTube = false}) {
       if (name.isEmpty || url.isEmpty) return;
       if (isPharmaradio && name.toLowerCase().contains('flash info du jour')) return;
       final urlTrim = url.trim();
       final useYouTubePanel = isYouTube && onOpenYouTubeVideo != null;
+      // Toujours afficher l'icône YouTube quand l'URL est une vidéo,
+      // même dans la liste de résultats (avant injection dans la barre).
+      final showYouTubeIcon = isYouTube;
       final isPdf = _isPdfUrl(url);
       final isWord = _isWordUrl(url);
       final isXls = _isXlsUrl(url);
@@ -632,8 +846,8 @@ Widget build(BuildContext context) {
       pills.add(HoverPillButton(
         label: name,
         maxLabelWidth: maxLabelWidth,
-        icon: useYouTubePanel || isPdf || isWord || isXls ? null : iconForUrl(url),
-        iconWidget: useYouTubePanel
+        icon: showYouTubeIcon || isPdf || isWord || isXls ? null : iconForUrl(url),
+        iconWidget: showYouTubeIcon
             ? SvgPicture.asset(
                 'assets/icons/youtube.svg',
                 width: 24,
@@ -661,7 +875,7 @@ Widget build(BuildContext context) {
     }
     // Ne pas ajouter de pill "site internet" quand l'icône external link est déjà en ligne 1 (item.url)
     final hasMainUrl = item.url != null && item.url!.trim().isNotEmpty;
-    final skipSiteInternetPill = (String name) =>
+    bool skipSiteInternetPill(String name) =>
         hasMainUrl && name.toLowerCase().trim() == 'site internet';
     if (item.badge1Name != null && item.badge1Url != null && item.badge1Name!.trim().isNotEmpty && item.badge1Url!.trim().isNotEmpty) {
       if (!skipSiteInternetPill(item.badge1Name!.trim())) {
@@ -681,14 +895,22 @@ Widget build(BuildContext context) {
         addPill(item.badge3Name!.trim(), item.badge3Url!.trim(), isYouTube: _isYouTubeUrl(item.badge3Url!));
       }
     }
-    if (pills.isNotEmpty) {
+    if (siteWebLibelleRow != null || pills.isNotEmpty) {
       return Padding(
-        padding: EdgeInsets.only(top: resultLineGap),
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 6,
-          runSpacing: 4,
-          children: pills,
+        padding: const EdgeInsets.only(top: resultLineGap),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (siteWebLibelleRow != null) siteWebLibelleRow,
+            if (pills.isNotEmpty)
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 6,
+                runSpacing: 4,
+                children: pills,
+              ),
+          ],
         ),
       );
     }
@@ -784,7 +1006,7 @@ Widget build(BuildContext context) {
     }
     if (cataloguePills.isNotEmpty) {
       return Padding(
-        padding: EdgeInsets.only(top: resultLineGap),
+        padding: const EdgeInsets.only(top: resultLineGap),
         child: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 6,
@@ -808,6 +1030,13 @@ Widget build(BuildContext context) {
     final hasBioref = item.isBioreferent == true;
 
     final line2Children = <Widget>[];
+    /// Fiches OMÉDIT (VOC) : affichées sur une dernière ligne dédiée pour ne pas empiéter sur le texte « mise à jour ».
+    final vocLineChildren = <Widget>[];
+
+    final showPlusInfosBdm = (statutsForCis != null && statutsForCis!.isNotEmpty) ||
+        (tauxRemboursement != null && tauxRemboursement!.trim().isNotEmpty) ||
+        (compositionLine != null && compositionLine!.trim().isNotEmpty) ||
+        (listes != null && listes!.isNotEmpty);
 
     // Badges S/AS, EXCEPTION, OTC, PIH, HOP : affichés uniquement en ligne 1 (ResultLine1), pas ici.
 
@@ -823,7 +1052,7 @@ Widget build(BuildContext context) {
         dateArret: arretInfo?.dateArret,
         url: arretInfo?.url,
         onOpenUrl: onOpenUrl,
-      ));
+      ),);
       line2Children.add(const SizedBox(width: 6));
     }
 
@@ -842,31 +1071,90 @@ Widget build(BuildContext context) {
       line2Children.add(_RappelDeLotBadge(
         url: rappelUrl,
         onOpenUrl: onOpenUrl,
-      ));
+      ),);
     }
 
     // Badge générique 2026 : "princeps : [nom princeps col. princeps A]" (rose), pas la DCI ; RCP et MEDDISPAR en HoverPill
     final generique2026Info = (generiques2026ByCis != null && cisKey.isNotEmpty)
         ? generiques2026ByCis![cisKey]
         : null;
-    if (generique2026Info != null) {
+        if (generique2026Info != null) {
       if (item.isGeneric == true) {
-        // Produits génériques (CIS en col D du CSV génériques 2026) : afficher "princeps : [nom court col. princeps A]" (ex. princeps : Stilnox), pas la DCI.
+        // Génériques : on n'affiche plus la DCI, mais uniquement le badge rose "princeps : [nom]".
+        // Au temps pour moi, tu as dit : "pour le  générique : à la place du badge DCi : princeps : le princeps"
         final princepsLabel = generique2026Info.princepsDisplay.trim();
         if (princepsLabel.isNotEmpty) {
           final shortName = shortPrincepsDisplayForBadge(princepsLabel);
+          
+          String tooltip = princepsLabel;
+          String dciToTap = '';
+          final col1Label = col1BeforeParentheses(generique2026Info.genericNameColA);
+          if (col1Label.isNotEmpty) {
+             final dci = dciFromGenericLabel(col1Label);
+             dciToTap = dci.trim().isNotEmpty ? dci : col1Label;
+             tooltip = 'DCI : $dciToTap\n\n(Princeps complet : $princepsLabel)';
+          }
+          
           line2Children.add(_GeneriqueEqualsBadge(
             princepsDisplayName: shortName,
-            tooltipFullPrinceps: princepsLabel,
-          ));
+            tooltipFullPrinceps: tooltip,
+            dciForTap: dciToTap,
+            onDciTap: onDciTap,
+          ),);
+          // On rajoute également le badge DCI classique (bleu) au clic car on veut garder le clic de la dci pour générique si possible
+          if (dciToTap.isNotEmpty) {
+            line2Children.add(const SizedBox(width: 6));
+            line2Children.add(_PrincepsLine2Widget(
+              dci: dciToTap,
+              onDciTap: onDciTap,
+            ),);
+          }
         }
       } else {
-        // Princeps : afficher le libellé col 1 (avant parenthèses) + badge "princeps".
+        // Princeps : on affiche la DCI (au clic), ET on affiche le premier générique connu (en rose) au lieu du badge DCI standard.
+        // On récupère le groupe générique (col A).
         final col1Label = col1BeforeParentheses(generique2026Info.genericNameColA);
         if (col1Label.isNotEmpty) {
-          line2Children.add(_PrincepsLine2Widget(
-            col1LabelBeforeParens: col1Label,
-          ));
+          final dci = dciFromGenericLabel(col1Label);
+          final dciStr = dci.trim().isNotEmpty ? dci : col1Label;
+          
+          // Récupérer le nom du générique (on l'affiche dans un badge rose)
+          final genericName = generiques2026PrincepsKeyToGenericName != null 
+              ? generiques2026PrincepsKeyToGenericName![normalizePrincepsKey(generique2026Info.princepsDisplay)] 
+              : null;
+              
+          if (genericName != null && genericName.isNotEmpty) {
+            line2Children.add(_PrincepsLine2Widget(
+              dci: dciStr,
+              onDciTap: onDciTap,
+            ),);
+            // On ajoute le common span DCI (bleu)
+            line2Children.add(const SizedBox(width: 6));
+            line2Children.add(_PrincepsEqualsGeneriqueBadge(
+              genericDisplayName: shortGenericDisplayForBadge(genericName),
+              tooltipFullGeneric: genericName,
+              dciForTap: dciStr,
+              onDciTap: onDciTap,
+            ),);
+          } else {
+            // S'il n'y a pas de générique connu (ou introuvable), on affiche le badge DCI classique
+            line2Children.add(_PrincepsLine2Widget(
+              dci: dciStr,
+              onDciTap: onDciTap,
+            ),);
+          }
+          
+          if (showPlusInfosBdm) {
+            line2Children.add(const SizedBox(width: 6));
+            final isDisabled = item.isInactive || item.hospitalOnly == true || item.isNsfpEffective == true;
+            line2Children.add(PlusInfosBadge(
+              statuts: statutsForCis ?? const [],
+              tauxRemboursement: tauxRemboursement,
+              compositionLine: compositionLine,
+              listes: listes ?? const [],
+              isDisabled: isDisabled,
+            ),);
+          }
         }
       }
       if (item.url != null && item.url!.trim().isNotEmpty) {
@@ -884,6 +1172,25 @@ Widget build(BuildContext context) {
           },
         ),);
       }
+
+      // Vidéo de démonstration (videos.csv) : afficher à droite de RCP quand injecté.
+      if (isInjected &&
+          onOpenTherapeuticVideo != null &&
+          videosByCip13 != null &&
+          item.cip13 != null) {
+        final cip = item.cip13!.replaceAll(RegExp(r'\D'), '').trim();
+        final vurl = cip.isNotEmpty ? videosByCip13![cip]?.trim() : null;
+        if (vurl != null && vurl.isNotEmpty) {
+          if (line2Children.isNotEmpty) line2Children.add(const SizedBox(width: 6));
+          line2Children.add(HoverPillButton(
+            label: 'vidéo de démonstration',
+            icon: Icons.video_library_outlined,
+            tooltip: "Outils d'aide à l'utilisation des thérapeutiques inhalées (SPLF)",
+            onTap: () => onOpenTherapeuticVideo!(vurl),
+            maxLabelWidth: 240,
+          ),);
+        }
+      }
       if (item.meddisparUrl != null && item.meddisparUrl!.trim().isNotEmpty) {
         if (line2Children.isNotEmpty) line2Children.add(const SizedBox(width: 6));
         line2Children.add(HoverPillButton(
@@ -899,8 +1206,48 @@ Widget build(BuildContext context) {
           },
         ),);
       }
+      // OMÉDIT (VOC) : fiches patient/pro sur une dernière ligne dédiée (voir plus bas, vocLineChildren).
+      if (isInjected) {
+        const maxLabelWidth = 380.0;
+        if (vocPatientUrl != null && vocPatientUrl!.trim().isNotEmpty) {
+          if (vocLineChildren.isNotEmpty) vocLineChildren.add(const SizedBox(width: 6));
+          final url = vocPatientUrl!.trim();
+          vocLineChildren.add(HoverPillButton(
+            label: 'fiche à destination des patients OMÉDIT',
+            icon: Icons.person_outline,
+            tooltip: url,
+            maxLabelWidth: maxLabelWidth,
+            trailingWidget: _pdfIconWidget(),
+            onTap: () {
+              if (onOpenUrl != null) {
+                onOpenUrl!(url);
+              } else {
+                openUrl(url);
+              }
+            },
+          ),);
+        }
+        if (vocProUrl != null && vocProUrl!.trim().isNotEmpty) {
+          if (vocLineChildren.isNotEmpty) vocLineChildren.add(const SizedBox(width: 6));
+          final url = vocProUrl!.trim();
+          vocLineChildren.add(HoverPillButton(
+            label: 'fiche à destination des professionnels de santé OMÉDIT',
+            icon: Icons.medical_services_outlined,
+            tooltip: url,
+            maxLabelWidth: maxLabelWidth,
+            trailingWidget: _pdfIconWidget(),
+            onTap: () {
+              if (onOpenUrl != null) {
+                onOpenUrl!(url);
+              } else {
+                openUrl(url);
+              }
+            },
+          ),);
+        }
+      }
       // Badges calendriers vaccinaux pour médicaments dont le libellé contient "vaccin".
-      final labelForVaccin = '${item.label} ${item.labelRaw ?? ''}'.toLowerCase();
+      final labelForVaccin = '${item.label} ${item.labelRaw}'.toLowerCase();
       if (item.source == SourceType.bdm && labelForVaccin.contains('vaccin')) {
         if (line2Children.isNotEmpty) line2Children.add(const SizedBox(width: 6));
         line2Children.add(HoverPillButton(
@@ -914,7 +1261,7 @@ Widget build(BuildContext context) {
               openUrl(kCalendrierVaccinal2025Url);
             }
           },
-        ));
+        ),);
         line2Children.add(const SizedBox(width: 6));
         line2Children.add(HoverPillButton(
           label: 'Calendrier simplifié',
@@ -927,7 +1274,7 @@ Widget build(BuildContext context) {
               openUrl(kCalendrierSimplifieUrl);
             }
           },
-        ));
+        ),);
       }
     }
     // Badge biosimilaire de [bioréférent]. RCP et MEDDISPAR restent en ligne 3 (hover pills).
@@ -986,7 +1333,7 @@ Widget build(BuildContext context) {
                     borderRadius: BorderRadius.circular(999),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 3),
+                          horizontal: 6, vertical: 3,),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(999),
@@ -1063,12 +1410,8 @@ Widget build(BuildContext context) {
         );
     }
 
-    // Badge « plus d'infos » en ligne 2 après tous les autres badges (médicaments BDM).
-    final showPlusInfosBdm = (statutsForCis != null && statutsForCis!.isNotEmpty) ||
-        (tauxRemboursement != null && tauxRemboursement!.trim().isNotEmpty) ||
-        (compositionLine != null && compositionLine!.trim().isNotEmpty) ||
-        (listes != null && listes!.isNotEmpty);
-    if (showPlusInfosBdm) {
+    // Badge « plus d'infos » en ligne 2 (après les autres badges). Déjà ajouté à droite du badge DCI pour les princeps.
+    if (showPlusInfosBdm && (generique2026Info == null || item.isGeneric == true)) {
       final isDisabled = item.isInactive || item.hospitalOnly == true || item.isNsfpEffective == true;
       if (line2Children.isNotEmpty) line2Children.add(SizedBox(width: spacingBetweenBadges));
       line2Children.add(PlusInfosBadge(
@@ -1077,7 +1420,7 @@ Widget build(BuildContext context) {
         compositionLine: compositionLine,
         listes: listes ?? const [],
         isDisabled: isDisabled,
-      ));
+      ),);
     }
 
     // Non génériques : RCP et MEDDISPAR sur la même ligne que + d'infos (ligne 2).
@@ -1095,7 +1438,26 @@ Widget build(BuildContext context) {
               openUrl(item.url!.trim());
             }
           },
-        ));
+        ),);
+      }
+
+      // Vidéo de démonstration (videos.csv) : afficher à droite de RCP quand injecté.
+      if (isInjected &&
+          onOpenTherapeuticVideo != null &&
+          videosByCip13 != null &&
+          item.cip13 != null) {
+        final cip = item.cip13!.replaceAll(RegExp(r'\D'), '').trim();
+        final vurl = cip.isNotEmpty ? videosByCip13![cip]?.trim() : null;
+        if (vurl != null && vurl.isNotEmpty) {
+          if (line2Children.isNotEmpty) line2Children.add(SizedBox(width: spacingBetweenBadges));
+          line2Children.add(HoverPillButton(
+            label: 'vidéo de démonstration',
+            icon: Icons.video_library_outlined,
+            tooltip: "Outils d'aide à l'utilisation des thérapeutiques inhalées (SPLF)",
+            onTap: () => onOpenTherapeuticVideo!(vurl),
+            maxLabelWidth: 240,
+          ),);
+        }
       }
       if (item.meddisparUrl != null && item.meddisparUrl!.trim().isNotEmpty) {
         if (line2Children.isNotEmpty) line2Children.add(SizedBox(width: spacingBetweenBadges));
@@ -1110,10 +1472,50 @@ Widget build(BuildContext context) {
               openUrl(item.meddisparUrl!.trim());
             }
           },
-        ));
+        ),);
+      }
+      // OMÉDIT (VOC) : fiches patient/pro sur une dernière ligne dédiée (voir plus bas, vocLineChildren).
+      if (isInjected) {
+        const maxLabelWidth = 380.0;
+        if (vocPatientUrl != null && vocPatientUrl!.trim().isNotEmpty) {
+          if (vocLineChildren.isNotEmpty) vocLineChildren.add(SizedBox(width: spacingBetweenBadges));
+          final url = vocPatientUrl!.trim();
+          vocLineChildren.add(HoverPillButton(
+            label: 'fiche à destination des patients OMÉDIT',
+            icon: Icons.person_outline,
+            tooltip: url,
+            maxLabelWidth: maxLabelWidth,
+            trailingWidget: _pdfIconWidget(),
+            onTap: () {
+              if (onOpenUrl != null) {
+                onOpenUrl!(url);
+              } else {
+                openUrl(url);
+              }
+            },
+          ),);
+        }
+        if (vocProUrl != null && vocProUrl!.trim().isNotEmpty) {
+          if (vocLineChildren.isNotEmpty) vocLineChildren.add(SizedBox(width: spacingBetweenBadges));
+          final url = vocProUrl!.trim();
+          vocLineChildren.add(HoverPillButton(
+            label: 'fiche à destination des professionnels de santé OMÉDIT',
+            icon: Icons.medical_services_outlined,
+            tooltip: url,
+            maxLabelWidth: maxLabelWidth,
+            trailingWidget: _pdfIconWidget(),
+            onTap: () {
+              if (onOpenUrl != null) {
+                onOpenUrl!(url);
+              } else {
+                openUrl(url);
+              }
+            },
+          ),);
+        }
       }
       // Badges calendriers vaccinaux pour médicaments BDM dont le libellé contient "vaccin".
-      final labelForVaccin = '${item.label} ${item.labelRaw ?? ''}'.toLowerCase();
+      final labelForVaccin = '${item.label} ${item.labelRaw}'.toLowerCase();
       if (item.source == SourceType.bdm && labelForVaccin.contains('vaccin')) {
         if (line2Children.isNotEmpty) line2Children.add(SizedBox(width: spacingBetweenBadges));
         line2Children.add(HoverPillButton(
@@ -1127,7 +1529,7 @@ Widget build(BuildContext context) {
               openUrl(kCalendrierVaccinal2025Url);
             }
           },
-        ));
+        ),);
         line2Children.add(SizedBox(width: spacingBetweenBadges));
         line2Children.add(HoverPillButton(
           label: 'Calendrier simplifié',
@@ -1140,20 +1542,48 @@ Widget build(BuildContext context) {
               openUrl(kCalendrierSimplifieUrl);
             }
           },
-        ));
+        ),);
       }
     }
 
     // Source : BDM affichée en ligne 3 après RCP et MEDDISPAR (voir result_line_3_actions.dart).
-    if (line2Children.isEmpty) return const SizedBox.shrink();
+    if (line2Children.isEmpty && vocLineChildren.isEmpty) return const SizedBox.shrink();
 
+    final runSpacing = hasBiosim ? 2.0 : 3.0;
+    final spacing = hasBiosim ? 2.0 : 4.0;
+    if (vocLineChildren.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: resultLineGap),
+        child: Wrap(
+          spacing: spacing,
+          runSpacing: runSpacing,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: line2Children,
+        ),
+      );
+    }
+    // Fiches OMÉDIT sur une dernière ligne dédiée pour ne pas empiéter sur le texte « mise à jour ».
     return Padding(
-      padding: EdgeInsets.only(top: resultLineGap),
-      child: Wrap(
-        spacing: hasBiosim ? 2 : 4,
-        runSpacing: hasBiosim ? 2 : 3,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: line2Children,
+      padding: const EdgeInsets.only(top: resultLineGap),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (line2Children.isNotEmpty)
+            Wrap(
+              spacing: spacing,
+              runSpacing: runSpacing,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: line2Children,
+            ),
+          if (line2Children.isNotEmpty) SizedBox(height: runSpacing),
+          Wrap(
+            spacing: spacing,
+            runSpacing: runSpacing,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: vocLineChildren,
+          ),
+        ],
       ),
     );
   }
@@ -1175,7 +1605,7 @@ Widget build(BuildContext context) {
     ];
     if (wrapChildren.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: EdgeInsets.only(top: resultLineGap),
+      padding: const EdgeInsets.only(top: resultLineGap),
       child: Wrap(
         spacing: 8,
         runSpacing: 4,
@@ -1309,7 +1739,7 @@ class _BiosimilaireBadge extends StatelessWidget {
   }
 }
 
-/// Badge « + » rose (même police/hauteur que « biosimilaire de ») : tooltip « infos dispensation », au clic ouvre la fenêtre avec le contenu colonne 5 (puces).
+/// Badge « dispensation biosimilaire » rose (même couleur que « biosimilaire de ») : tooltip « infos dispensation », au clic ouvre la fenêtre avec le contenu colonne 5 (puces).
 class _BiosimilaireInfosBadge extends StatelessWidget {
   const _BiosimilaireInfosBadge({required this.infoText});
 
@@ -1395,9 +1825,9 @@ class _BiosimilaireInfosBadge extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               border: Border.all(color: _rose, width: 1),
             ),
-            child: Text(
-              '+',
-              style: const TextStyle(
+            child: const Text(
+              'dispensation biosimilaire',
+              style: TextStyle(
                 fontSize: 11,
                 fontFamily: 'Spinnaker',
                 fontWeight: FontWeight.w600,
@@ -1501,31 +1931,44 @@ class _RappelDeLotBadge extends StatelessWidget {
 /// Badge rose "princeps : [nom]" pour les génériques (ex. princeps : Stilnox). Clic → répertoire ANSM génériques.
 class _GeneriqueEqualsBadge extends StatelessWidget {
   const _GeneriqueEqualsBadge({
+    super.key,
     required this.princepsDisplayName,
     this.tooltipFullPrinceps,
+    this.dciForTap = '',
+    this.onDciTap,
   });
 
   final String princepsDisplayName;
   /// Libellé princeps complet (col B - col C) pour le tooltip.
   final String? tooltipFullPrinceps;
+  final String dciForTap;
+  final void Function(String)? onDciTap;
 
   static const _urlGeneriques =
       'https://ansm.sante.fr/documents/reference/repertoire-des-medicaments-generiques';
   static const _rose = Color(0xFFE91E8C);
+  static const double _pillHeight = 30.8;
 
   @override
   Widget build(BuildContext context) {
     final tooltip = tooltipFullPrinceps != null && tooltipFullPrinceps!.trim().isNotEmpty
-        ? '${tooltipFullPrinceps!.trim()} — accès au répertoire des génériques'
+        ? '${tooltipFullPrinceps!.trim()}\n\nclic : rechercher la DCI (ou accès au répertoire)'
         : 'accès au répertoire des génériques';
     return OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 600),
       child: InkWell(
-        onTap: () => openUrl(_urlGeneriques),
+        onTap: () {
+          if (onDciTap != null && dciForTap.isNotEmpty) {
+            onDciTap!(dciForTap);
+          } else {
+            openUrl(_urlGeneriques);
+          }
+        },
         borderRadius: BorderRadius.circular(999),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          height: _pillHeight,
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 0),
           decoration: BoxDecoration(
             color: _rose,
             borderRadius: BorderRadius.circular(999),
@@ -1552,48 +1995,133 @@ class _GeneriqueEqualsBadge extends StatelessWidget {
   }
 }
 
-/// Ligne 2 princeps : libellé col 1 (avant parenthèses) + badge "princeps" (rose).
-class _PrincepsLine2Widget extends StatelessWidget {
-  const _PrincepsLine2Widget({required this.col1LabelBeforeParens});
+/// Badge rose "générique : [nom]" pour les princeps. Clic → recherche de la DCI (ou accès répertoire).
+class _PrincepsEqualsGeneriqueBadge extends StatelessWidget {
+  const _PrincepsEqualsGeneriqueBadge({
+    required this.genericDisplayName,
+    this.tooltipFullGeneric,
+    required this.dciForTap,
+    this.onDciTap,
+  });
 
-  final String col1LabelBeforeParens;
+  final String genericDisplayName;
+  final String? tooltipFullGeneric;
+  final String dciForTap;
+  final void Function(String)? onDciTap;
 
+  static const _urlGeneriques =
+      'https://ansm.sante.fr/documents/reference/repertoire-des-medicaments-generiques';
   static const _rose = Color(0xFFE91E8C);
+  static const double _pillHeight = 30.8;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: Text(
-            col1LabelBeforeParens,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-              fontFamily: 'Spinnaker',
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    final tooltip = tooltipFullGeneric != null && tooltipFullGeneric!.trim().isNotEmpty
+        ? 'DCI : $dciForTap\n\n(ex. de générique : ${tooltipFullGeneric!.trim()})'
+        : 'DCI : $dciForTap';
+    
+    return OffiboxTooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 600),
+      child: InkWell(
+        onTap: () {
+          if (onDciTap != null) {
+            onDciTap!(dciForTap);
+          } else {
+            openUrl(_urlGeneriques);
+          }
+        },
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          height: _pillHeight,
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 0),
           decoration: BoxDecoration(
             color: _rose,
             borderRadius: BorderRadius.circular(999),
             border: Border.all(color: _rose),
           ),
-          child: const Text(
-            'princeps',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.medication, size: 14, color: Colors.white),
+              const SizedBox(width: 4),
+              Text(
+                'générique : $genericDisplayName',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Renvoie le premier mot du libellé pour affichage dans le badge
+String shortGenericDisplayForBadge(String genericName) {
+  if (genericName.isEmpty) return '';
+  final parts = genericName.split(RegExp(r'\s+'));
+  return parts.isNotEmpty ? parts.first.toUpperCase() : genericName.toUpperCase();
+}
+
+/// Ligne 2 princeps : badge rose clair ": DCI : avec la composition [composition]" (même style que l’ancien badge princeps).
+class _PrincepsLine2Widget extends StatelessWidget {
+  const _PrincepsLine2Widget({
+    super.key,
+    required this.dci,
+    this.onDciTap,
+  });
+
+  /// DCI (ex. "ZOLPIDEM") pour le libellé "DCI : zolpidem ".
+  final String dci;
+  /// Au clic : lance une recherche avec la DCI pour afficher les génériques sous la barre.
+  final void Function(String dci)? onDciTap;
+
+  static const _teal = Color(0xFF5A9094);
+  static const double _pillHeight = 30.8;
+
+  @override
+  Widget build(BuildContext context) {
+    final dciLower = dci.trim().toLowerCase();
+    final badgeLabel = 'DCI : $dciLower ';
+    final pill = Container(
+      height: _pillHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 0),
+      decoration: BoxDecoration(
+        color: _teal.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: _teal.withValues(alpha: 0.4), width: 1),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        badgeLabel,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: _teal,
+        ),
+      ),
+    );
+    final wrapped = onDciTap != null
+        ? InkWell(
+            onTap: () => onDciTap!(dciLower),
+            borderRadius: BorderRadius.circular(999),
+            child: pill,
+          )
+        : pill;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        OffiboxTooltip(
+          message: onDciTap != null ? 'afficher la liste des génériques' : badgeLabel,
+          waitDuration: const Duration(milliseconds: 500),
+          child: wrapped,
         ),
       ],
     );

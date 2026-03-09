@@ -13,8 +13,8 @@ String _normalizeForHighlight(String s) {
       .replaceAll(RegExp(r'[éèêë]'), 'e')
       .replaceAll(RegExp(r'[àâ]'), 'a')
       .replaceAll(RegExp(r'[îï]'), 'i')
-      .replaceAll(RegExp(r'[ô]'), 'o')
-      .replaceAll(RegExp(r'[ùû]'), 'u')
+      .replaceAll(RegExp(r'[ôö]'), 'o')
+      .replaceAll(RegExp(r'[ùûü]'), 'u')
       .replaceAll('ç', 'c')
       .replaceAll(RegExp(r'[^a-z0-9]'), ' ');
 }
@@ -189,7 +189,7 @@ InlineSpan sourceIconSpan(
           width: 20,
           height: 20,
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => Icon(
+          errorBuilder: (_, __, ___) => const Icon(
             Icons.medical_services_outlined,
             size: 20,
             color: OffiboxColors.primary,

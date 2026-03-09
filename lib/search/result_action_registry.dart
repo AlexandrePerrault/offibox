@@ -78,7 +78,8 @@ final List<ResultAction> line3Actions = [
     isVisible: (item) =>
         (item.source == SourceType.pharmacovigilance ||
             item.source == SourceType.centresAntiPoison ||
-            item.source == SourceType.chu) &&
+            item.source == SourceType.chu ||
+            item.source == SourceType.ceipAddictovigilance) &&
         item.email != null &&
         item.email!.isNotEmpty,
     onTap: (item) => () {
@@ -121,6 +122,17 @@ final List<ResultAction> line3Actions = [
   ),
 
   // =========================
+  // 🟪 CEIP-A — + d'infos → addictovigilance.fr
+  // =========================
+  ResultAction(
+    label: "+ d'infos",
+    icon: Icons.info_outline,
+    tooltip: 'https://addictovigilance.fr/',
+    isVisible: (item) => item.source == SourceType.ceipAddictovigilance,
+    onTap: (_) => () => openUrl('https://addictovigilance.fr/'),
+  ),
+
+  // =========================
   // 🏥 CHU — Ouvrir la fiche (l'annuaire service-public)
   // =========================
   ResultAction(
@@ -131,7 +143,7 @@ final List<ResultAction> line3Actions = [
         item.source == SourceType.chu &&
         item.url != null &&
         item.url!.trim().isNotEmpty,
-    onTap: (item) => () => openUrl(item!.url!),
+    onTap: (item) => () => openUrl(item.url!),
   ),
 
   // =========================

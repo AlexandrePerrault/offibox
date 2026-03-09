@@ -33,12 +33,18 @@ import 'package:offibox/config/google_oauth_config.dart';
 import 'package:offibox/config/app_config.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/window/widgets/about_dialog.dart';
+import 'package:offibox/window/widgets/account_dialog.dart';
 import 'package:offibox/window/widgets/ideas_box_panel.dart';
 import 'package:offibox/ui/widgets/xls_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/word_panel_below_bar.dart';
+import 'package:offibox/ui/widgets/news_popup_card.dart';
 import 'package:offibox/ui/widgets/pdf_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/web_panel_below_bar.dart';
+import 'package:offibox/ui/widgets/image_panel_below_bar.dart';
+import 'package:offibox/ui/widgets/margin_calculator_panel.dart';
+import 'package:offibox/services/news_popup_service.dart';
 import 'dart:io' show exit, Platform, Process;
+import 'package:offibox/constants/catalogue_cart_config.dart';
 
 import 'package:offibox/data/espace_pro_credentials.dart';
 import 'package:offibox/ui/dialogs/espace_pro_login_dialog.dart';
@@ -77,6 +83,24 @@ String _lastRappelLabel(String fullLabel, String? dateStr) {
 class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
     with WidgetsBindingObserver {
   bool expanded = false;
+
+  /// Convenience accessor used by the results panel layout.
+  /// Using a getter avoids scope issues if the local variable is moved/refactored.
+  List<SearchResult> get effectiveResults => ref.watch(effectiveResultsProvider);
+
+  String? _lastAutoOpenedCerpEquipQuery;
+
+  static bool _isCerpEquipmentQuery(String q) {
+    final s = q
+        .toLowerCase()
+        .replaceAll('é', 'e')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (s.isEmpty) return false;
+    return s.contains('catalogue equipement') ||
+        s.contains('catalogue équipement') ||
+        s.contains('fournitures');
+  }
   bool _isGoogleConnected = false;
   bool _showIdeasPanel = false;
   /// Barre d’infos déroulante en haut : true = déployée, false = repliée
@@ -92,8 +116,12 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   bool _showPharmaradioFlashPanel = false;
   /// PDF ouvert sous la barre (clic « Télécharger PDF » / « Rechercher sur le catalogue » ou lien PDF).
   String? _pdfPanelUrl;
+  // Réservés pour usage futur (ex. titre panneau PDF, recherche initiale).
+  // ignore: unused_field
   String? _pdfPanelLab;
+  // ignore: unused_field
   String? _pdfPanelInitialQuery;
+  // ignore: unused_field
   bool _pdfPanelAutoSearch = false;
   /// Masquer le viewer PDF issu du résultat catalogue (isPdfHitResult) quand l'utilisateur ferme le panneau.
   bool _hidePdfHitPanel = false;
@@ -103,7 +131,38 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   String? _wordPanelUrl;
   /// URL d’une page web ouverte sous la barre (même zone que PDF/Word/XLS).
   String? _webPanelUrl;
+  /// Chemin asset d'une image ouverte sous la barre (ex. assets/images/xxx.png).
+  String? _imagePanelAssetPath;
+  /// Calculatrice de marge (mot-clé « calculatrice de marge ») ouverte sous la barre.
+  bool _showMarginCalculatorPanel = false;
   String _appVersion = '1.0.0';
+  /// Actualités (news.csv) : popup sous la barre, 48 h, 2×/jour (matin + après 14h).
+  NewsEntry? _newsPopupEntry;
+  bool _showNewsPopup = false;
+  bool _newsPopupCheckDone = false;
+  bool _newsPopupCheckInProgress = false;
+
+  Future<void> _maybeShowNewsPopup() async {
+    if (_newsPopupCheckDone || _newsPopupCheckInProgress) return;
+    _newsPopupCheckInProgress = true;
+    final entry = await fetchLatestNews();
+    final show = entry != null && await shouldShowNews(entry);
+    if (!mounted) {
+      _newsPopupCheckInProgress = false;
+      return;
+    }
+    if (show) {
+      await markNewsShown();
+      setState(() {
+        _newsPopupEntry = entry;
+        _showNewsPopup = true;
+      });
+    }
+    setState(() {
+      _newsPopupCheckDone = true;
+      _newsPopupCheckInProgress = false;
+    });
+  }
 
   final GlobalKey<HamburgerMenuState> _menuPopupKey =
       GlobalKey<HamburgerMenuState>();
@@ -111,6 +170,10 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   Timer? _debounce;
   Timer? _ansmRefreshTimer;
   bool _filterHovered = false;
+
+  /// Clé unique pour le placeholder "skeleton" (évite doublon dans l’AnimatedSwitcher lors des rebuilds).
+  Key? _skeletonKey;
+  bool _wasSkeleton = false;
 
   bool get _hasQuery => _searchController.text.trim().length >= 2;
 
@@ -171,11 +234,91 @@ Future<void> _registerDeviceIfNeeded() async {
     _searchFocus.unfocus();
   }
 
+  /// Efface tout le contenu affiché sous la barre (PDF, page web, XLS, Word, vidéos). N'appelle pas setState.
+  void _clearBelowBarPanels() {
+    _pdfPanelUrl = null;
+    _pdfPanelLab = null;
+    _pdfPanelInitialQuery = null;
+    _pdfPanelAutoSearch = false;
+    _webPanelUrl = null;
+    _xlsPanelUrl = null;
+    _wordPanelUrl = null;
+    _imagePanelAssetPath = null;
+    _showMarginCalculatorPanel = false;
+    _showYouTubePanel = false;
+    _youtubeVideoUrl = null;
+    _showTherapeuticVideoPanel = false;
+    _therapeuticVideoUrl = null;
+    _showPharmaradioFlashPanel = false;
+    _hidePdfHitPanel = true;
+  }
+
+  /// Ouvre une image asset (assets/images/...) dans le panneau sous la barre.
+  void _openAssetImageInBelowBar(String assetPath) {
+    final path = assetPath.trim().replaceAll(r'\', '/');
+    if (path.isEmpty || !path.toLowerCase().startsWith('assets/')) return;
+    setState(() {
+      _clearBelowBarPanels();
+      expanded = true;
+      _imagePanelAssetPath = path;
+    });
+  }
+
+  void _openHttpUrlInBelowBar(String url) {
+    final u = url.trim();
+    if (u.isEmpty) return;
+    final lower = u.toLowerCase();
+
+    if (lower.endsWith('.pdf')) {
+      setState(() {
+        _clearBelowBarPanels();
+        expanded = true;
+        _pdfPanelUrl = u;
+        _pdfPanelLab = 'Document';
+        _pdfPanelInitialQuery = null;
+        _pdfPanelAutoSearch = false;
+        _hidePdfHitPanel = true;
+      });
+      return;
+    }
+
+    if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || lower.endsWith('.ods')) {
+      setState(() {
+        _clearBelowBarPanels();
+        expanded = true;
+        _xlsPanelUrl = u;
+      });
+      return;
+    }
+
+    if (lower.endsWith('.doc') || lower.endsWith('.docx') || lower.endsWith('.odt')) {
+      setState(() {
+        _clearBelowBarPanels();
+        expanded = true;
+        _wordPanelUrl = u;
+      });
+      return;
+    }
+
+    if (u.startsWith('http://') || u.startsWith('https://')) {
+      setState(() {
+        _clearBelowBarPanels();
+        expanded = true;
+        _webPanelUrl = u;
+      });
+      return;
+    }
+  }
+
 @override
 void initState() {
   super.initState();
   WidgetsBinding.instance.addObserver(this);
   onBeforeOpenLink = _onLinkOpened;
+  onOpenHttpUrlInApp = _openHttpUrlInBelowBar;
+  onBeforeOpenExternalBrowser = () {
+    windowManager.minimize();
+  };
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
     if (!mounted) return;
@@ -247,6 +390,8 @@ void initState() {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     onBeforeOpenLink = null;
+    onOpenHttpUrlInApp = null;
+    onBeforeOpenExternalBrowser = null;
     _debounce?.cancel();
     _ansmRefreshTimer?.cancel();
     _windowFocus.dispose();
@@ -267,6 +412,9 @@ void initState() {
     final q = value.trim();
     _debounce?.cancel();
 
+    // Fermer la fenêtre précédente (web, PDF, doc, etc.) dès qu'on tape un nouveau mot-clé
+    setState(() => _clearBelowBarPanels());
+
     final controller = ref.read(offiboxControllerProvider);
     controller.cancelSearch();
 
@@ -276,8 +424,27 @@ void initState() {
       return;
     }
 
-    _debounce = Timer(const Duration(milliseconds: 200), () {
+    _debounce = Timer(const Duration(milliseconds: 280), () {
       controller.filter(q, searchFilter: ref.read(searchFilterProvider));
+
+      // Auto-ouverture du catalogue équipement (CERP) sous la barre — uniquement si CERP activé.
+      if (AppConfig.cerpFeaturesEnabled) {
+        final pdfUrl = CatalogueCartConfig.cerpEquipmentPdfUrl.trim();
+        if (pdfUrl.isNotEmpty && _isCerpEquipmentQuery(q) && _lastAutoOpenedCerpEquipQuery != q) {
+          _lastAutoOpenedCerpEquipQuery = q;
+          setState(() {
+            expanded = true;
+            _pdfPanelUrl = pdfUrl;
+            _pdfPanelLab = 'Catalogue équipement (CERP)';
+            _pdfPanelInitialQuery = null;
+            _pdfPanelAutoSearch = false;
+            // fermer les autres panneaux potentiellement ouverts
+            _webPanelUrl = null;
+            _xlsPanelUrl = null;
+            _wordPanelUrl = null;
+          });
+        }
+      }
     });
   }
 
@@ -286,6 +453,7 @@ void initState() {
       expanded = true;
       _searchController.clear();
     });
+    _maybeShowNewsPopup();
 
     _windowFocus.requestFocus();
     _searchFocus.requestFocus();
@@ -295,6 +463,9 @@ void initState() {
   void _close() {
     setState(() {
       expanded = false;
+      _showNewsPopup = false;
+      _newsPopupEntry = null;
+      _newsPopupCheckDone = false;
     });
 
     _searchFocus.unfocus();
@@ -327,17 +498,20 @@ void initState() {
                   alignment: PlaceholderAlignment.middle,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: Image.asset(
-                      'assets/icons/logo_offibox_installer.png',
+                    child: SizedBox(
+                      width: 32,
                       height: 32,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Text(
-                        AppConfig.appName,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontFamily: 'Spinnaker',
-                          color: OffiboxColors.primary,
-                          fontWeight: FontWeight.w700,
+                      child: Image.asset(
+                        'assets/icons/logo_offibox_installer.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Text(
+                          AppConfig.appName,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontFamily: 'Spinnaker',
+                            color: OffiboxColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
@@ -494,7 +668,7 @@ KeyEventResult _handleKey(
     return MediaQuery.of(context).size.width * 0.8;
   }
 
-  /// Hauteur de la barre déployée selon le nombre de lignes du résultat (médicaments : 2, 3 ou 4 lignes).
+  /// Hauteur de la barre déployée selon le nombre de lignes du résultat (médicaments : 2, 3 ou 4 ; annuaire RPPS : 4 pour voir la source).
   double? _effectiveExpandedBarHeight(SearchResult? item) {
     if (item == null) return null;
     final singleLine = item.source == SourceType.keyword ||
@@ -502,6 +676,7 @@ KeyEventResult _handleKey(
         item.source == SourceType.catalogue ||
         item.source == SourceType.dm;
     if (singleLine) return OffiboxWindowUI.barHeightExpandedSingleLine;
+    if (item.source == SourceType.annuaireSanteRpps) return OffiboxWindowUI.barHeightExpandedFourLines;
     final hasLine3 = (item.url != null && item.url!.trim().isNotEmpty) ||
         (item.meddisparUrl != null && item.meddisparUrl!.trim().isNotEmpty);
     final hasBiosimRelation = item.biosimilaireOf != null && item.biosimilaireOf!.trim().isNotEmpty;
@@ -521,7 +696,10 @@ KeyEventResult _handleKey(
 
 @override
 Widget build(BuildContext context) {
-  final controller = ref.watch(offiboxControllerProvider);
+  // Ne rebuilder que quand la sélection ou l’état searching change (pas à chaque frappe) pour limiter le lag.
+  final selectedResult = ref.watch(offiboxControllerProvider.select((c) => c.selectedResult));
+  final searching = ref.watch(offiboxControllerProvider.select((c) => c.searching));
+  final controller = ref.read(offiboxControllerProvider);
   ref.listen<OffiboxController>(offiboxControllerProvider, (prev, next) {
     if (prev?.selectedResult != next.selectedResult && mounted) {
       setState(() {
@@ -532,6 +710,24 @@ Widget build(BuildContext context) {
         _therapeuticVideoUrl = null;
         _hidePdfHitPanel = false;
       });
+      // Outils métier / Sites web : une seule URL sur la ligne → ouvrir dans la fenêtre sous la barre
+      final r = next.selectedResult;
+      if (r != null &&
+          (r.source == SourceType.keyword || r.source == SourceType.siteWeb) &&
+          (r.url?.trim().isNotEmpty ?? false)) {
+        final hasOtherBadges =
+            (r.badge2Url?.trim().isNotEmpty ?? false) ||
+            (r.badge3Url?.trim().isNotEmpty ?? false);
+        if (!hasOtherBadges && mounted) {
+          setState(() {
+            expanded = true;
+            _webPanelUrl = r.url!.trim();
+            _pdfPanelUrl = null;
+            _xlsPanelUrl = null;
+            _wordPanelUrl = null;
+          });
+        }
+      }
     }
   });
   ref.listen(cataloguePdfItemsProvider, (prev, next) {
@@ -542,7 +738,7 @@ Widget build(BuildContext context) {
     }
   });
   ref.listen(authStateProvider, (prev, next) {
-    if (prev?.valueOrNull != next?.valueOrNull && next?.valueOrNull != null && mounted) {
+    if (prev?.valueOrNull != next.valueOrNull && next.valueOrNull != null && mounted) {
       GoogleCalendarService.hasGoogleCalendarAccess().then((connected) {
         if (mounted) setState(() => _isGoogleConnected = connected);
       });
@@ -551,7 +747,6 @@ Widget build(BuildContext context) {
   final dgsUrgent = ref.watch(dgsUrgentProvider).valueOrNull;
   final ansmRappel = ref.watch(ansmLastRappelProvider).valueOrNull;
   final ansmStatut = ref.watch(ansmLastStatutProvider).valueOrNull;
-  final calendarEvents = ref.watch(calendarEventsProvider).valueOrNull ?? [];
   final todayCalendarEvents = ref.watch(todayCalendarEventsProvider).valueOrNull ?? [];
   final authUser = ref.watch(authStateProvider).valueOrNull;
   /// Sur desktop (OAuth configuré), tout le monde peut cliquer « Connecter l'agenda » même si refus à l'installation.
@@ -641,20 +836,22 @@ Widget build(BuildContext context) {
       OffiboxWindowUI.barHeight +
       OffiboxWindowUI.gapBelowBar;
   final maxPanelH = screenH - topY - 20;
-  final selectedResult = controller.selectedResult;
+  final isSkeleton = effectiveResults.isEmpty && !_searchSettledEmpty(controller);
+  if (isSkeleton && !_wasSkeleton) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() { _skeletonKey = UniqueKey(); _wasSkeleton = true; });
+    });
+  } else if (!isSkeleton && _wasSkeleton) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() { _wasSkeleton = false; _skeletonKey = null; });
+    });
+  }
   final medicamentRappels = ref.watch(ansmMedicamentRappelsProvider).valueOrNull ?? [];
   final rappelForLine3Badge = selectedResult != null && selectedResult.source == SourceType.bdm
       ? findMatchingRappel(selectedResult, medicamentRappels)
       : null;
   final effectiveExpandedBarHeight = _effectiveExpandedBarHeight(selectedResult);
   final expandedBarH = effectiveExpandedBarHeight ?? OffiboxWindowUI.barHeightExpanded;
-  final topYBelowExpandedBar = OffiboxWindowUI.topMargin +
-      (_infoBarExpanded
-          ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap
-          : 0) +
-      OffiboxWindowUI.barHeightExpanded +
-      OffiboxWindowUI.gapBelowBar +
-      8;
   /// PDF/Word/XLS/Web : sous la barre de résultats, sans empiéter (hauteur réelle barre + écart).
   final topYBelowExpandedBarXls = OffiboxWindowUI.topMargin +
       (_infoBarExpanded
@@ -666,9 +863,6 @@ Widget build(BuildContext context) {
       selectedResult.source == SourceType.catalogue &&
       selectedResult.catalogueUrl != null &&
       selectedResult.label.contains(' - trouvé dans le catalogue ');
-  final pdfHitQuery = isPdfHitResult
-      ? selectedResult.label.split(' - trouvé dans le catalogue ').first.trim()
-      : null;
   final shortcuts = <ShortcutActivator, Intent>{
     const SingleActivator(LogicalKeyboardKey.escape): const EscapeIntent(),
     const SingleActivator(LogicalKeyboardKey.keyQ, control: true): const QuitIntent(),
@@ -679,7 +873,7 @@ Widget build(BuildContext context) {
   };
 
   return Scaffold(
-    backgroundColor: Colors.transparent,
+    backgroundColor: const Color(0xFF1A1A1A),
     body: Shortcuts(
       shortcuts: shortcuts,
       child: Actions(
@@ -776,6 +970,7 @@ Widget build(BuildContext context) {
                     width: w,
                     child: OffiboxTopBar(
                     expanded: expanded,
+                    searching: searching,
       infoBarExpanded: _infoBarExpanded,
       onToggleInfoBar: () => setState(() => _infoBarExpanded = !_infoBarExpanded),
       onInfoBarUrlTap: (url) {
@@ -797,7 +992,7 @@ Widget build(BuildContext context) {
                                   '${ev.timeLabel}  ${ev.summary}',
                                   style: const TextStyle(fontSize: 14),
                                 ),
-                              ))
+                              ),)
                           .toList(),
                     ),
                   ),
@@ -828,7 +1023,7 @@ Widget build(BuildContext context) {
       searchController: _searchController,
       searchFocus: _searchFocus,
       onSearchChanged: _onSearchChanged,
-      onSearchSubmit: (value) {
+      onSearchSubmit: (value) async {
         final q = value.trim();
         if (q.isEmpty) return;
         final qLower = q.toLowerCase();
@@ -836,8 +1031,16 @@ Widget build(BuildContext context) {
           Process.start('calc.exe', []);
           return;
         }
+        if (qLower.startsWith('http://') || qLower.startsWith('https://')) {
+          final uri = Uri.parse(q);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+          return;
+        }
         if (q.length >= 2) {
           _debounce?.cancel();
+          setState(() => _clearBelowBarPanels());
           ref.read(offiboxControllerProvider).filterImmediate(
                 q,
                 searchFilter: ref.read(searchFilterProvider),
@@ -866,6 +1069,20 @@ Widget build(BuildContext context) {
       rappelForLine3Badge: rappelForLine3Badge,
       filterHovered: _filterHovered,
       onFilterHoverChange: (v) => setState(() => _filterHovered = v),
+      onSearchWithQuery: (query) {
+        // Clic sur le badge DCI (ex. zolpidem) : fermer modale éventuelle, effacer page/URL/PDF, afficher la liste des médicaments (génériques).
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+        setState(() => _clearBelowBarPanels());
+        ref.read(offiboxControllerProvider).clearSelection();
+        _searchController.text = query;
+        _searchFocus.requestFocus();
+        ref.read(offiboxControllerProvider).filterImmediate(
+              query,
+              searchFilter: ref.read(searchFilterProvider),
+            );
+      },
 
       onTapInside: () {
         ref.read(offiboxControllerProvider).clearSelection();
@@ -896,6 +1113,7 @@ Widget build(BuildContext context) {
 
       // 🔍 résultat sélectionné
       selectedResult: controller.selectedResult,
+      rppsStructureCountForSelected: controller.rppsStructureCountForSelected,
       statutsByCis: controller.statutsByCis,
       ansmStatutsByCis: controller.ansmStatutsByCis,
       generiques2026ByCis: controller.generiques2026ByCis,
@@ -914,46 +1132,32 @@ Widget build(BuildContext context) {
         return (f?.urlPatient, f?.urlPro);
       },
       onOpenUrl: (String url) {
-        final u = url.trim();
-        final lower = u.toLowerCase();
-        if (lower.endsWith('.pdf')) {
-          setState(() {
-            expanded = true;
-            _pdfPanelUrl = u;
-            _pdfPanelLab = 'Document';
-            _pdfPanelInitialQuery = null;
-            _pdfPanelAutoSearch = false;
-            _webPanelUrl = null;
-            _xlsPanelUrl = null;
-            _wordPanelUrl = null;
-          });
-        } else if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || lower.endsWith('.ods')) {
-          setState(() {
-            expanded = true;
-            _xlsPanelUrl = u;
-            _wordPanelUrl = null;
-            _webPanelUrl = null;
-            _pdfPanelUrl = null;
-          });
-        } else if (lower.endsWith('.doc') || lower.endsWith('.docx') || lower.endsWith('.odt')) {
-          setState(() {
-            expanded = true;
-            _wordPanelUrl = u;
-            _xlsPanelUrl = null;
-            _webPanelUrl = null;
-            _pdfPanelUrl = null;
-          });
-        } else if (u.startsWith('http://') || u.startsWith('https://')) {
-          setState(() {
-            expanded = true;
-            _webPanelUrl = u;
-            _pdfPanelUrl = null;
-            _xlsPanelUrl = null;
-            _wordPanelUrl = null;
-          });
-        } else {
-          openUrl(u);
+        // En passant d'un badge à un autre : fermer la modale « plus d'infos » si ouverte, puis effacer page/URL/PDF et afficher le nouveau contenu.
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
         }
+        final u = url.trim();
+        // Fichiers image (assets/) : ouvrir dans la fenêtre sous la barre, pas comme URL.
+        if (u.toLowerCase().startsWith('assets/')) {
+          _openAssetImageInBelowBar(u);
+          return;
+        }
+        final lower = u.toLowerCase();
+        // Tout ce qui est HTTP(S) / PDF / Word / XLS est forcé dans le panneau sous la barre.
+        if (lower.endsWith('.pdf') ||
+            lower.endsWith('.xls') ||
+            lower.endsWith('.xlsx') ||
+            lower.endsWith('.ods') ||
+            lower.endsWith('.doc') ||
+            lower.endsWith('.docx') ||
+            lower.endsWith('.odt') ||
+            u.startsWith('http://') ||
+            u.startsWith('https://')) {
+          _openHttpUrlInBelowBar(u);
+          return;
+        }
+        // mailto:, tel:, etc.
+        openUrl(u);
       },
 
       onOpenEspacePro: (BuildContext context, String url, String labName, String? iconUrl) async {
@@ -1065,6 +1269,13 @@ Widget build(BuildContext context) {
       },
       onMinimize: () => windowManager.minimize(),
       onClose: () => _showQuitConfirmationDialog(context),
+      onShowAccount: () {
+        showDialog<void>(
+          context: context,
+          barrierLabel: 'Fermer',
+          builder: (_) => const AccountDialog(),
+        );
+      },
       onShowAbout: () async {
         final controller = ref.read(offiboxControllerProvider);
         final packageInfo = await PackageInfo.fromPlatform();
@@ -1203,6 +1414,23 @@ Widget build(BuildContext context) {
           });
           return;
         }
+        // Outils métier / Sites web : une seule URL → ouvrir dans la fenêtre sous la barre
+        if ((result.source == SourceType.keyword || result.source == SourceType.siteWeb) &&
+            (result.url?.trim().isNotEmpty ?? false)) {
+          final hasOther =
+              (result.badge2Url?.trim().isNotEmpty ?? false) ||
+              (result.badge3Url?.trim().isNotEmpty ?? false);
+          if (!hasOther) {
+            setState(() {
+              expanded = true;
+              _webPanelUrl = result.url!.trim();
+              _pdfPanelUrl = null;
+              _xlsPanelUrl = null;
+              _wordPanelUrl = null;
+            });
+            return;
+          }
+        }
         ref.read(offiboxControllerProvider).openResult(result);
       },
                   ),
@@ -1222,6 +1450,22 @@ Widget build(BuildContext context) {
               child: IdeasBoxPanel(
                 barWidth: _barWidth(context),
                 onClose: () => setState(() => _showIdeasPanel = false),
+              ),
+            ),
+
+          // ───────────────────────────
+          // ACTUALITÉS (news.csv) : fenêtre avant déploiement de la barre, 48 h, 2×/jour
+          // ───────────────────────────
+          if (_showNewsPopup && _newsPopupEntry != null)
+            Positioned(
+              top: OffiboxWindowUI.topMargin + 8,
+              right: OffiboxWindowUI.rightMargin,
+              child: NewsPopupCard(
+                entry: _newsPopupEntry!,
+                onClose: () => setState(() {
+                  _showNewsPopup = false;
+                  _newsPopupEntry = null;
+                }),
               ),
             ),
 
@@ -1250,7 +1494,7 @@ Widget build(BuildContext context) {
                   child: effectiveResults.isEmpty
                       ? (_searchSettledEmpty(controller)
                           ? const NoResultsMessage(key: ValueKey('no-results'))
-                          : const FakeResults(key: ValueKey('skeleton')))
+                          : FakeResults(key: ValueKey(_skeletonKey ?? 'skeleton-pending')))
                       : ResultsPanel(
                           key: const ValueKey('results'),
                           results: effectiveResults,
@@ -1289,6 +1533,20 @@ Widget build(BuildContext context) {
                                 Platform.isWindows) {
                               Process.start('calc.exe', []);
                             }
+                            final labelLower = item.label.trim().toLowerCase();
+                            final labelRawLower = item.labelRaw.trim().toLowerCase();
+                            if (item.source == SourceType.keyword &&
+                                (labelLower == 'calculatrice de marge' || labelRawLower == 'calculatrice de marge')) {
+                              setState(() {
+                                _clearBelowBarPanels();
+                                expanded = true;
+                                _showMarginCalculatorPanel = true;
+                              });
+                              ref.read(offiboxControllerProvider).selectResult(item);
+                              _searchController.clear();
+                              _searchFocus.unfocus();
+                              return;
+                            }
                             ref
                                 .read(offiboxControllerProvider)
                                 .selectResult(item);
@@ -1305,6 +1563,23 @@ Widget build(BuildContext context) {
                                 _xlsPanelUrl = null;
                                 _wordPanelUrl = null;
                               });
+                              return;
+                            }
+                            // Outils métier / Sites web : une seule URL → ouvrir dans la fenêtre sous la barre
+                            if ((item.source == SourceType.keyword || item.source == SourceType.siteWeb) &&
+                                (item.url?.trim().isNotEmpty ?? false)) {
+                              final hasOther =
+                                  (item.badge2Url?.trim().isNotEmpty ?? false) ||
+                                  (item.badge3Url?.trim().isNotEmpty ?? false);
+                              if (!hasOther) {
+                                setState(() {
+                                  expanded = true;
+                                  _webPanelUrl = item.url!.trim();
+                                  _pdfPanelUrl = null;
+                                  _xlsPanelUrl = null;
+                                  _wordPanelUrl = null;
+                                });
+                              }
                             }
                           },
                           onOpenUrlFromTile: (item, url) {
@@ -1314,49 +1589,24 @@ Widget build(BuildContext context) {
                             _searchController.clear();
                             _searchFocus.unfocus();
                             final u = url.trim();
-                            final lower = u.toLowerCase();
-                            if (lower.endsWith('.pdf')) {
-                              setState(() {
-                                expanded = true;
-                                _pdfPanelUrl = u;
-                                _pdfPanelLab = 'Document';
-                                _pdfPanelInitialQuery = null;
-                                _pdfPanelAutoSearch = false;
-                                _webPanelUrl = null;
-                                _xlsPanelUrl = null;
-                                _wordPanelUrl = null;
-                              });
-                            } else if (lower.endsWith('.xls') ||
-                                lower.endsWith('.xlsx') ||
-                                lower.endsWith('.ods')) {
-                              setState(() {
-                                expanded = true;
-                                _xlsPanelUrl = u;
-                                _wordPanelUrl = null;
-                                _webPanelUrl = null;
-                                _pdfPanelUrl = null;
-                              });
-                            } else if (lower.endsWith('.doc') ||
-                                lower.endsWith('.docx') ||
-                                lower.endsWith('.odt')) {
-                              setState(() {
-                                expanded = true;
-                                _wordPanelUrl = u;
-                                _xlsPanelUrl = null;
-                                _webPanelUrl = null;
-                                _pdfPanelUrl = null;
-                              });
-                            } else if (u.startsWith('http://') || u.startsWith('https://')) {
-                              setState(() {
-                                expanded = true;
-                                _webPanelUrl = u;
-                                _pdfPanelUrl = null;
-                                _xlsPanelUrl = null;
-                                _wordPanelUrl = null;
-                              });
-                            } else {
-                              openUrl(u);
+                            if (u.toLowerCase().startsWith('assets/')) {
+                              _openAssetImageInBelowBar(u);
+                              return;
                             }
+                            final lower = u.toLowerCase();
+                            if (lower.endsWith('.pdf') ||
+                                lower.endsWith('.xls') ||
+                                lower.endsWith('.xlsx') ||
+                                lower.endsWith('.ods') ||
+                                lower.endsWith('.doc') ||
+                                lower.endsWith('.docx') ||
+                                lower.endsWith('.odt') ||
+                                u.startsWith('http://') ||
+                                u.startsWith('https://')) {
+                              _openHttpUrlInBelowBar(u);
+                              return;
+                            }
+                            openUrl(u);
                           },
 
                           // (laisser vide pour l’instant)
@@ -1402,6 +1652,27 @@ Widget build(BuildContext context) {
                 url: _webPanelUrl!,
                 barWidth: _barWidth(context),
                 onClose: () => setState(() => _webPanelUrl = null),
+              ),
+            ),
+          if (expanded && _imagePanelAssetPath != null)
+            Positioned(
+              top: topYBelowExpandedBarXls,
+              right: OffiboxWindowUI.rightMargin,
+              width: _barWidth(context),
+              child: ImagePanelBelowBar(
+                assetPath: _imagePanelAssetPath!,
+                barWidth: _barWidth(context),
+                onClose: () => setState(() => _imagePanelAssetPath = null),
+              ),
+            ),
+          if (expanded && _showMarginCalculatorPanel)
+            Positioned(
+              top: topYBelowExpandedBarXls,
+              right: OffiboxWindowUI.rightMargin,
+              width: _barWidth(context),
+              child: MarginCalculatorPanel(
+                barWidth: _barWidth(context),
+                onClose: () => setState(() => _showMarginCalculatorPanel = false),
               ),
             ),
           if (expanded && (_pdfPanelUrl != null || (isPdfHitResult && selectedResult.catalogueUrl != null && !_hidePdfHitPanel)))

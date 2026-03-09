@@ -68,15 +68,13 @@ class SearchEngine {
         _indexByFirst3.putIfAbsent(key, () => {}).add(r);
       }
 
-      // BDM : indexer aussi par les 3 premières lettres de chaque mot (ex. "EXCEPTION HULIO" → "hul" pour retrouver tous les HULIO)
-      if (r.source == SourceType.bdm) {
-        final words = r.label.split(RegExp(r'[\s,;]+'));
-        for (final w in words) {
-          final n = _normalize(w);
-          if (n.length >= 3) {
-            final wordKey = n.substring(0, 3);
-            _indexByFirst3.putIfAbsent(wordKey, () => {}).add(r);
-          }
+      // Indexation par les 3 premières lettres de chaque mot (pour BDM, LPP, DM, VETO, Keyword, SiteWeb, etc.)
+      final words = r.label.split(RegExp(r'[\s,;]+'));
+      for (final w in words) {
+        final n = _normalize(w);
+        if (n.length >= 3) {
+          final wordKey = n.substring(0, 3);
+          _indexByFirst3.putIfAbsent(wordKey, () => {}).add(r);
         }
       }
 
@@ -86,28 +84,7 @@ if (r.source == SourceType.lpp) {
     final key = lpp.substring(0,3);
     _indexByCip3.putIfAbsent(key, () => {}).add(r);
   }
-  // Recherche inversée par libellé : indexer par les 3 premières lettres de chaque mot du libellé
-  final words = r.label.split(RegExp(r'[\s,;]+'));
-  for (final w in words) {
-    final n = _normalize(w);
-    if (n.length >= 3) {
-      final wordKey = n.substring(0, 3);
-      _indexByFirst3.putIfAbsent(wordKey, () => {}).add(r);
-    }
-  }
 }
-
-      // DM / VETO : indexation par mot (nom) et par EAN/CIP pour recherche par nom ou code
-      if (r.source == SourceType.dm || r.source == SourceType.veto) {
-        final words = r.label.split(RegExp(r'[\s,;]+'));
-        for (final w in words) {
-          final n = _normalize(w);
-          if (n.length >= 3) {
-            final wordKey = n.substring(0, 3);
-            _indexByFirst3.putIfAbsent(wordKey, () => {}).add(r);
-          }
-        }
-      }
 
       if (cip.length >= 3) {
         final key = cip.substring(0, 3);
@@ -533,14 +510,27 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
       return a.label.compareTo(b.label);
     }
 
-    // 💊 BDM : dans un groupe (même molécule), tri par dosage croissant (5mg puis 10mg, 15mg, 20mg…)
+    // 🏷️ Outils métier / 🌐 Sites web : ordre alphabétique par libellé (col B / commentaire)
+    if (a.source == SourceType.keyword && b.source == SourceType.keyword) {
+      return _libelleForSort(a).compareTo(_libelleForSort(b));
+    }
+    if (a.source == SourceType.siteWeb && b.source == SourceType.siteWeb) {
+      return _libelleForSort(a).compareTo(_libelleForSort(b));
+    }
+
+    // 💊 BDM : quand la requête contient un dosage (ex. "rivarox 20"), mettre en premier les résultats avec ce dosage, puis ordre alphabétique
     if (a.source == SourceType.bdm && b.source == SourceType.bdm) {
+      final dma = _dosageMatchScore(a);
+      final dmb = _dosageMatchScore(b);
+      if (dma != dmb) return dmb.compareTo(dma); // dosage correspondant à la requête en premier
       final da = _extractDosageFromLabel(a.labelRaw);
       final db = _extractDosageFromLabel(b.labelRaw);
       if (da != null && db != null) {
         if (da < db) return -1;
         if (da > db) return 1;
       }
+      // Même dosage ou indéterminé : ordre alphabétique par libellé
+      return a.labelRaw.toLowerCase().compareTo(b.labelRaw.toLowerCase());
     }
 
     return a.label.compareTo(b.label);
@@ -557,6 +547,12 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     if (match == null) return null;
     final s = match.group(1)!.replaceAll(',', '.');
     return double.tryParse(s);
+  }
+
+  /// Libellé affiché (col B) pour le tri alphabétique outils métier / sites web.
+  static String _libelleForSort(SearchResult r) {
+    final lib = (r.commentaire ?? r.label).trim().toLowerCase();
+    return lib;
   }
 
   /// Pour le tri : enlève le préfixe "CPAM de/du/..." pour comparer.
@@ -578,38 +574,66 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     switch (r.source) {
       case SourceType.keyword:
         return -100; // 1. Outils métier
-      case SourceType.codesActes:
-        return -95;  // 2. Codes actes pharmacie
-      case SourceType.catalogue:
-        return -90;  // 3. Catalogues / laboratoires
       case SourceType.siteWeb:
-        return -80;  // 4. Sites web
+        return -95;  // 2. Sites web
+      case SourceType.codesActes:
+        return -90;  // 3. Codes actes pharmacie
+      case SourceType.catalogue:
+        return -80;  // 4. Catalogues / laboratoires
       case SourceType.amc:
-        return -70;  // 4. Mutuelles
+        return -70;  // 5. Mutuelles
       case SourceType.bdm:
-        return 0;    // 5. Médicaments
+        return 0;    // 6. Médicaments
       case SourceType.dm:
-        return 50;   // 6. Pansements (DM) avant LPP
+        return 50;   // 7. Pansements (DM) avant LPP
       case SourceType.lpp:
-        return 60;   // 7. LPP
+        return 60;   // 8. LPP
       case SourceType.veto:
-        return 70;   // 8. Veto
+        return 70;   // 9. Veto
       case SourceType.amo:
       case SourceType.cerp:
       case SourceType.pharmacovigilance:
       case SourceType.centresAntiPoison:
       case SourceType.chu:
+      case SourceType.ceipAddictovigilance:
+      case SourceType.annuaireSanteRpps:
         return 800;  // 9. En dernier
     }
   }
 
-  /// Nombre de tokens de la requête présents dans le résultat (label, cip, labo).
-  int _matchedTokensCount(SearchResult r) {
-    final tokens = _lastQuery
+  /// Tokens de la requête (normalisés, longueur >= 2 ou numériques).
+  List<String> _queryTokens() {
+    return _lastQuery
         .split(RegExp(r'\s+'))
         .map(_normalize)
-        .where((t) => t.length >= 2)
+        .where((t) => t.length >= 2 || RegExp(r'^\d+$').hasMatch(t))
         .toList();
+  }
+
+  /// Valeurs numériques présentes dans la requête (ex. "rivarox 20" → {20.0}).
+  Set<double> _queryNumericDosages() {
+    final tokens = _queryTokens();
+    final out = <double>{};
+    for (final t in tokens) {
+      if (RegExp(r'^\d+$').hasMatch(t)) {
+        final v = double.tryParse(t);
+        if (v != null) out.add(v);
+      }
+    }
+    return out;
+  }
+
+  /// 1 si le résultat BDM a un dosage égal à un nombre présent dans la requête (ex. "20" → 20 mg en premier).
+  int _dosageMatchScore(SearchResult r) {
+    if (r.source != SourceType.bdm) return 0;
+    final dosage = _extractDosageFromLabel(r.labelRaw);
+    if (dosage == null) return 0;
+    return _queryNumericDosages().contains(dosage) ? 1 : 0;
+  }
+
+  /// Nombre de tokens de la requête présents dans le résultat (label, cip, labo).
+  int _matchedTokensCount(SearchResult r) {
+    final tokens = _queryTokens();
     if (tokens.isEmpty) return 0;
 
     final label = _normalize(r.labelRaw);
@@ -621,6 +645,22 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     for (final t in tokens) {
       if (full.contains(t)) count++;
     }
+
+    // Bonus spécial pour sites web et mots clés s'ils contiennent la requête dans leur commentaire (colonne 1 visible)
+    if (r.source == SourceType.siteWeb || r.source == SourceType.keyword) {
+      final commentaireNorm = _normalize(r.commentaire ?? '');
+      if (commentaireNorm.isNotEmpty) {
+        bool allMatch = true;
+        for (final t in tokens) {
+          if (!commentaireNorm.contains(t)) {
+            allMatch = false;
+            break;
+          }
+        }
+        if (allMatch) count += 10; // gros bonus pour remonter ces résultats
+      }
+    }
+
     return count;
   }
 

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:offibox/config/app_config.dart';
+import 'package:offibox/constants/catalogue_cart_config.dart';
 import 'package:offibox/models/pansement_item.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
@@ -61,7 +63,7 @@ Future<List<SearchResult>> _loadAmcAmo() async {
 Future<List<SearchResult>> loadExtraData() async {
   final results = <SearchResult>[];
 
-  // Chargement en parallèle de toutes les URL (DM, Veto, Labos, CERP, Mutuelles, CRPV, Centres anti poison, CHU)
+  // Chargement en parallèle de toutes les URL (DM, Veto, Labos, CERP, Mutuelles, CRPV, Centres anti poison, CHU, CEIP-A)
   final extra = await Future.wait([
     parsePansements(PANSEMENTS_URL),
     parseVeto(VETO_URL),
@@ -71,6 +73,7 @@ Future<List<SearchResult>> loadExtraData() async {
     parsePharmacovigilance(PHARMACOVIGILANCE_URL),
     parseCentresAntiPoison(CENTRES_ANTI_POISON_URL),
     parseChu(CHU_URL),
+    parseCeipAddictovigilance(CEIP_ADDICTOVIGILANCE_URL),
   ]);
 
   try {
@@ -111,6 +114,34 @@ Future<List<SearchResult>> loadExtraData() async {
   try {
     results.addAll(extra[7] as List<SearchResult>);
   } catch (_) {}
+
+  try {
+    results.addAll(extra[8] as List<SearchResult>);
+  } catch (_) {}
+
+  // ─────────────────────────
+  // 📦 Catalogue équipement CERP (résultat "raccourci" + ouverture PDF) — désactivé si cerpFeaturesEnabled = false
+  // ─────────────────────────
+  if (AppConfig.cerpFeaturesEnabled) {
+    final equipPdfUrl = CatalogueCartConfig.cerpEquipmentPdfUrl.trim();
+    if (equipPdfUrl.isNotEmpty) {
+      results.add(
+        SearchResult(
+          source: SourceType.cerp,
+          label: 'Catalogue équipement',
+          labelRaw: 'CATALOGUE ÉQUIPEMENT CERP FOURNITURES',
+          laboratory: 'CERP',
+          iconUrl: CatalogueCartConfig.cerpLogoAssetPath,
+          url: equipPdfUrl,
+          catalogueUrl: equipPdfUrl,
+          badge1Name: 'PDF',
+          badge1Url: equipPdfUrl,
+          nsfp: false,
+          hospitalOnly: false,
+        ),
+      );
+    }
+  }
 
   // ─────────────────────────
   // 🧼 Nettoyage final

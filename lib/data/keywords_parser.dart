@@ -5,8 +5,9 @@ import 'package:offibox/models/source_type.dart';
 import 'package:offibox/utils/normalize.dart';
 
 /// CSV mots-clés (outils_metier.csv / sites_web.csv sur offiboxdata) :
-/// Col 0 = keyword tapé, Col 1 = mot affiché ligne 1, Col 2 = icône (ex. assets/icons/icone_BDNM.png),
-/// Col 3 = url ligne 1, Col 4-5 = nom/url badge 1, Col 6-7 = badge 2, Col 8-9 = badge 3.
+/// Col A(0) = keyword tapé, B(1) = libellé ligne 1, C(2) = date d'apparition (affichée "nouveau (date)"),
+/// D(3) = logo, E(4) = url principale, F(5) = nom badge 1 (hover pill), G(6) = url badge 1 (lien au clic),
+/// H(7)-I(8) = badge 2, J(9)-K(10) = badge 3.
 Future<List<SearchResult>> parseKeywords(String url, {SourceType sourceType = SourceType.keyword}) async {
   final response = await http.get(Uri.parse(url));
   if (response.statusCode != 200) return [];
@@ -34,18 +35,19 @@ Future<List<SearchResult>> parseKeywords(String url, {SourceType sourceType = So
 
     final colANormalized = normalizeText(colA);
     final libelleLigne1 = normalizeText(cellAt(row, 1));
-    // Col C : normaliser \ en / pour que Image.asset / SvgPicture.asset trouvent l'asset
-    final iconPathRaw = cellAt(row, 2);
+    final dateApparition = cellAt(row, 2);
+    // Col D : logo — normaliser \ en / pour Image.asset / SvgPicture.asset
+    final iconPathRaw = cellAt(row, 3);
     final iconPath = iconPathRaw.isNotEmpty
         ? iconPathRaw.replaceAll(r'\', '/')
         : '';
-    final urlLigne1 = cellAt(row, 3);
-    final nomBadge1 = cellAt(row, 4);
-    final urlBadge1 = cellAt(row, 5);
-    final nomBadge2 = cellAt(row, 6);
-    final urlBadge2 = cellAt(row, 7);
-    final nomBadge3 = cellAt(row, 8);
-    final urlBadge3 = cellAt(row, 9);
+    final urlPrincipale = cellAt(row, 4);
+    final nomBadge1 = cellAt(row, 5);
+    final urlBadge1 = cellAt(row, 6);
+    final nomBadge2 = cellAt(row, 7);
+    final urlBadge2 = cellAt(row, 8);
+    final nomBadge3 = cellAt(row, 9);
+    final urlBadge3 = cellAt(row, 10);
 
     String? badge1Name;
     String? badge1Url;
@@ -57,9 +59,9 @@ Future<List<SearchResult>> parseKeywords(String url, {SourceType sourceType = So
     if (nomBadge1.isNotEmpty && urlBadge1.isNotEmpty) {
       badge1Name = nomBadge1;
       badge1Url = urlBadge1;
-    } else if (urlLigne1.isNotEmpty && sourceType == SourceType.keyword) {
+    } else if (urlPrincipale.isNotEmpty && sourceType == SourceType.keyword) {
       badge1Name = 'Lien';
-      badge1Url = urlLigne1;
+      badge1Url = urlPrincipale;
     }
     if (nomBadge2.isNotEmpty && urlBadge2.isNotEmpty) {
       badge2Name = nomBadge2;
@@ -70,8 +72,8 @@ Future<List<SearchResult>> parseKeywords(String url, {SourceType sourceType = So
       badge3Url = urlBadge3;
     }
 
-    final url = urlLigne1.isNotEmpty
-        ? urlLigne1
+    final url = urlPrincipale.isNotEmpty
+        ? urlPrincipale
         : (badge1Url ?? badge2Url ?? badge3Url);
 
     final searchResult = SearchResult(
@@ -87,6 +89,7 @@ Future<List<SearchResult>> parseKeywords(String url, {SourceType sourceType = So
       laboratory: '',
       meddisparUrl: null,
       commentaire: libelleLigne1.isNotEmpty ? libelleLigne1 : null,
+      keywordAppearanceDate: dateApparition.isNotEmpty ? dateApparition : null,
       iconUrl: iconPath.isNotEmpty ? iconPath : null,
       badge1Name: badge1Name,
       badge1Url: badge1Url,

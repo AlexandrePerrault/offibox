@@ -53,7 +53,7 @@ Future<List<SearchResult>> parseCodesActesPharmacie(String url) async {
       url: null,
       nsfp: false,
       hospitalOnly: false,
-    ));
+    ),);
   }
 
   return results;

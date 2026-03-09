@@ -15,6 +15,11 @@ Le fichier `android/app/google-services.json` (cles Firebase) **ne doit pas etre
 2. Ne plus jamais pousser `google-services.json`. Utiliser `android/app/google-services.json.example` comme modele (sans vraie cle).
 3. (Optionnel) Retirer le fichier de l’historique Git avec `git filter-repo` ou BFG puis `git push --force`.
 
+## Build Windows / Linux
+
+- **Windows (MSI)** : après `flutter build windows`, lancer `.\build_msi.ps1`. Pour que l’installateur gère l’option « Lancer au démarrage », builder avec `--dart-define=FLUTTER_BUILD_WINDOWS=true`. Voir `installer\README.md`.
+- **Linux** : build possible uniquement sur une machine Linux. Voir [docs/BUILD_LINUX.md](docs/BUILD_LINUX.md).
+
 ## PDF (pdfrx)
 
 Le visualiseur de catalogues PDF utilise **pdfrx**. Sur **Windows**, le mode Développeur peut être requis pour que le build réussisse (pdfrx utilise des symlinks). Activer : Paramètres → Confidentialité et sécurité → Pour les développeurs → **Mode développeur**.

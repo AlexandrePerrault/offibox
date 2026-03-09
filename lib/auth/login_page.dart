@@ -1,18 +1,21 @@
-﻿import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:offibox/auth/google_sign_in_helper.dart';
+import 'package:offibox/config/app_config.dart';
 import 'package:offibox/constants/app_update_config.dart';
 import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/ui/widgets/offibox_logo_complete.dart';
 import 'package:offibox/services/cerp_client_service.dart';
+import 'package:offibox/services/firestore_user_cache.dart';
 
 /// Étape du flux de connexion / première connexion.
 enum _LoginStep {
@@ -35,6 +38,11 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController firstConnectionEmailController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController pharmacyNameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController faxController = TextEditingController();
   final TextEditingController cerpClientCodeController = TextEditingController();
 
   bool loading = false;
@@ -46,9 +54,8 @@ class _LoginPageState extends State<LoginPage> {
   _LoginStep _step = _LoginStep.mainLogin;
   String _firstConnectionEmail = '';
 
-  /// Page de téléchargement = releases GitHub (historique des versions + MSI).
-  static String get _downloadPageUrl =>
-      'https://github.com/${AppUpdateConfig.githubRepo}/releases';
+  /// Page de téléchargement affichée aux clients (offibox.fr/download, pas GitHub).
+  static String get _downloadPageUrl => AppUpdateConfig.publicDownloadPageUrl;
   static const String _keyRememberEmail = 'login_remember_email';
   static const String _keyRememberPassword = 'login_remember_password';
 
@@ -134,14 +141,41 @@ class _LoginPageState extends State<LoginPage> {
       _showError('Veuillez saisir votre adresse e-mail.');
       return;
     }
+    final firstName = firstNameController.text.trim();
+    final lastName = lastNameController.text.trim();
+    if (firstName.isEmpty || lastName.isEmpty) {
+      _showError('Veuillez saisir votre nom et votre prénom.');
+      return;
+    }
 
     setState(() => loading = true);
     try {
       final tempPassword = _randomPassword();
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final creds = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: tempPassword,
       );
+      final user = creds.user;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+          {
+            'email': email,
+            'firstName': firstName,
+            'lastName': lastName,
+            'pharmacyName': pharmacyNameController.text.trim(),
+            'phone': phoneController.text.trim(),
+            'fax': faxController.text.trim(),
+            'createdAt': FieldValue.serverTimestamp(),
+            'subscriptionStartedAt': FieldValue.serverTimestamp(),
+            'trialEndsAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 15))),
+            'plan': 'trial',
+            'maxDevices': 5,
+            'updatedAt': FieldValue.serverTimestamp(),
+          },
+          SetOptions(merge: true),
+        );
+        FirestoreUserCache.instance.invalidate(user.uid);
+      }
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       await FirebaseAuth.instance.signOut();
       if (mounted) {
@@ -318,6 +352,11 @@ class _LoginPageState extends State<LoginPage> {
     passwordController.dispose();
     confirmPasswordController.dispose();
     firstConnectionEmailController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    pharmacyNameController.dispose();
+    phoneController.dispose();
+    faxController.dispose();
     cerpClientCodeController.dispose();
     super.dispose();
   }
@@ -498,50 +537,53 @@ class _LoginPageState extends State<LoginPage> {
         ),
         const SizedBox(height: 12),
 
-        Row(
-          children: [
-            Checkbox(
-              value: _isCerpBaClient,
-              onChanged: loading ? null : (v) {
-                setState(() {
-                  _isCerpBaClient = v ?? false;
-                  if (!_isCerpBaClient) {
-                    cerpClientCodeController.clear();
-                  }
-                });
-              },
-              activeColor: OffiboxColors.primary,
-            ),
-            Flexible(
-              child: GestureDetector(
-                onTap: loading ? null : () {
+        if (AppConfig.cerpFeaturesEnabled) ...[
+          Row(
+            children: [
+              Checkbox(
+                value: _isCerpBaClient,
+                onChanged: loading ? null : (v) {
                   setState(() {
-                    _isCerpBaClient = !_isCerpBaClient;
+                    _isCerpBaClient = v ?? false;
                     if (!_isCerpBaClient) {
                       cerpClientCodeController.clear();
                     }
                   });
                 },
-                child: Text(
-                  'Je suis client CERP BA',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                    fontFamily: 'Spinnaker',
+                activeColor: OffiboxColors.primary,
+              ),
+              Flexible(
+                child: GestureDetector(
+                  onTap: loading ? null : () {
+                    setState(() {
+                      _isCerpBaClient = !_isCerpBaClient;
+                      if (!_isCerpBaClient) {
+                        cerpClientCodeController.clear();
+                      }
+                    });
+                  },
+                  child: Text(
+                    'Je suis client CERP BA',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                      fontFamily: 'Spinnaker',
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+            ],
+          ),
+          if (_isCerpBaClient) ...[
+            const SizedBox(height: 8),
+            TextField(
+              controller: cerpClientCodeController,
+              autocorrect: false,
+              decoration: _buildInputDecoration('Code client', hint: 'ex: 12345'),
             ),
           ],
-        ),
-        if (_isCerpBaClient) ...[
           const SizedBox(height: 8),
-          TextField(
-            controller: cerpClientCodeController,
-            autocorrect: false,
-            decoration: _buildInputDecoration('Code client', hint: 'ex: 12345'),
-          ),
         ],
 
         const SizedBox(height: 8),
@@ -649,7 +691,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
                     color: OffiboxColors.primary,
@@ -698,6 +740,38 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         const SizedBox(height: 24),
+        TextField(
+          controller: lastNameController,
+          autocorrect: false,
+          decoration: _buildInputDecoration('Nom', hint: 'Votre nom'),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: firstNameController,
+          autocorrect: false,
+          decoration: _buildInputDecoration('Prénom', hint: 'Votre prénom'),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: pharmacyNameController,
+          autocorrect: false,
+          decoration: _buildInputDecoration('Nom de la pharmacie (optionnel)', hint: 'Nom de votre pharmacie'),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: phoneController,
+          keyboardType: TextInputType.phone,
+          autocorrect: false,
+          decoration: _buildInputDecoration('Numéro de téléphone (optionnel)', hint: '06…'),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: faxController,
+          keyboardType: TextInputType.phone,
+          autocorrect: false,
+          decoration: _buildInputDecoration('Fax (optionnel)', hint: '02…'),
+        ),
+        const SizedBox(height: 12),
         TextField(
           controller: firstConnectionEmailController,
           keyboardType: TextInputType.emailAddress,
@@ -843,12 +917,12 @@ class _LoginPageState extends State<LoginPage> {
             child: InkWell(
               onTap: loading ? null : _confirmFirstConnectionAndRedirect,
               borderRadius: BorderRadius.circular(24),
-              child: Padding(
+              child: const Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                    EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 child: Text(
                   'Suivant',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Spinnaker',
@@ -869,7 +943,7 @@ class _LoginPageState extends State<LoginPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 24),
-        Icon(
+        const Icon(
           Icons.check_circle_outline,
           size: 64,
           color: OffiboxColors.primary,

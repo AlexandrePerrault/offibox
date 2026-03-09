@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:offibox/constants/ui_constants.dart';
+import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/utils/open_url.dart';
 
 /// Email affiché et destinataire des mails du formulaire contact.
@@ -24,6 +26,7 @@ class _ContactDialogState extends State<ContactDialog> {
   final _telephoneController = TextEditingController();
   final _subjectController = TextEditingController();
   final _bodyController = TextEditingController();
+  bool _sending = false;
 
   @override
   void dispose() {
@@ -37,7 +40,26 @@ class _ContactDialogState extends State<ContactDialog> {
     super.dispose();
   }
 
-  void _sendMail() {
+  InputDecoration _dec(String label, String hint) {
+    final radius = BorderRadius.circular(OffiboxWindowUI.borderRadius);
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      border: OutlineInputBorder(borderRadius: radius),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: const BorderSide(color: Color(0xFFD1D5DB), width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: OffiboxColors.primary.withValues(alpha: 0.85), width: 1.6),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    );
+  }
+
+  Future<void> _sendMessage() async {
+    if (_sending) return;
     final nom = _nomController.text.trim();
     final prenom = _prenomController.text.trim();
     final mail = _mailController.text.trim();
@@ -45,38 +67,51 @@ class _ContactDialogState extends State<ContactDialog> {
     final telephone = _telephoneController.text.trim();
     final subject = _subjectController.text.trim();
     final message = _bodyController.text.trim();
-    final bodyParts = <String>[];
-    if (nom.isNotEmpty) bodyParts.add('Nom : $nom');
-    if (prenom.isNotEmpty) bodyParts.add('Prénom : $prenom');
-    if (mail.isNotEmpty) bodyParts.add('Mail : $mail');
-    if (nomPharmacie.isNotEmpty) bodyParts.add('Nom de la pharmacie : $nomPharmacie');
-    if (telephone.isNotEmpty) bodyParts.add('Téléphone : $telephone');
-    if (message.isNotEmpty) bodyParts.add('\n$message');
-    final body = bodyParts.join('\n');
-    final uri = Uri(
-      scheme: 'mailto',
-      path: kContactMailtoRecipient,
-      query: _encodeMailtoQuery(subject: subject.isNotEmpty ? subject : 'Message depuis Offibox', body: body),
-    );
-    openUrl(uri.toString());
-    if (mounted) Navigator.of(context).pop();
-  }
 
-  String? _encodeMailtoQuery({String? subject, String? body}) {
-    final parts = <String>[];
-    if (subject != null && subject.isNotEmpty) {
-      parts.add('subject=${Uri.encodeComponent(subject)}');
+    if (message.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez saisir un message.')),
+      );
+      return;
     }
-    if (body != null && body.isNotEmpty) {
-      parts.add('body=${Uri.encodeComponent(body)}');
+
+    setState(() => _sending = true);
+    try {
+      final callable = FirebaseFunctions.instance.httpsCallable('sendContactEmail');
+      final res = await callable.call<Map<String, dynamic>>({
+        'nom': nom,
+        'prenom': prenom,
+        'email': mail,
+        'pharmacie': nomPharmacie,
+        'telephone': telephone,
+        'subject': subject,
+        'message': message,
+      });
+      final data = res.data;
+      final ok = data['success'] == true;
+      if (!ok) {
+        final err = data['error']?.toString();
+        throw Exception(err ?? 'Envoi impossible');
+      }
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Message envoyé à Offibox.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Envoi impossible : $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _sending = false);
     }
-    return parts.isEmpty ? null : parts.join('&');
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
         child: Padding(
@@ -97,7 +132,7 @@ class _ContactDialogState extends State<ContactDialog> {
                 ),
                 const SizedBox(height: 16),
                 // Téléphone, mail, adresse (gris + Offibox)
-                _ContactLine(
+                const _ContactLine(
                   icon: Icons.phone_outlined,
                   label: 'Téléphone',
                   value: '—',
@@ -155,80 +190,44 @@ class _ContactDialogState extends State<ContactDialog> {
                     children: [
                       TextFormField(
                         controller: _nomController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nom',
-                          hintText: 'Votre nom',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
+                        decoration: _dec('Nom', 'Votre nom'),
                         textCapitalization: TextCapitalization.words,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _prenomController,
-                        decoration: const InputDecoration(
-                          labelText: 'Prénom',
-                          hintText: 'Votre prénom',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
+                        decoration: _dec('Prénom', 'Votre prénom'),
                         textCapitalization: TextCapitalization.words,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _mailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Mail',
-                          hintText: 'votre@email.fr',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
+                        decoration: _dec('Mail', 'votre@email.fr'),
                         keyboardType: TextInputType.emailAddress,
                         autocorrect: false,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _nomPharmacieController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nom de la pharmacie (optionnel)',
-                          hintText: 'Nom de votre pharmacie',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
+                        decoration: _dec('Nom de la pharmacie (optionnel)', 'Nom de votre pharmacie'),
                         textCapitalization: TextCapitalization.words,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _telephoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Téléphone (optionnel)',
-                          hintText: 'Numéro de téléphone',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
+                        decoration: _dec('Téléphone (optionnel)', 'Numéro de téléphone'),
                         keyboardType: TextInputType.phone,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _subjectController,
-                        decoration: const InputDecoration(
-                          labelText: 'Objet',
-                          hintText: 'Objet du message',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
+                        decoration: _dec('Objet', 'Objet du message'),
                         textCapitalization: TextCapitalization.sentences,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _bodyController,
-                        decoration: const InputDecoration(
-                          labelText: 'Message',
-                          hintText: 'Votre message…',
-                          border: OutlineInputBorder(),
-                          alignLabelWithHint: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                        ),
+                        decoration: _dec('Message', 'Votre message…').copyWith(alignLabelWithHint: true),
                         maxLines: 5,
                         textCapitalization: TextCapitalization.sentences,
                       ),
@@ -242,12 +241,18 @@ class _ContactDialogState extends State<ContactDialog> {
                           ),
                           const SizedBox(width: 8),
                           FilledButton(
-                            onPressed: _sendMail,
+                            onPressed: _sending ? null : _sendMessage,
                             style: FilledButton.styleFrom(
                               backgroundColor: OffiboxColors.primary,
                               foregroundColor: Colors.white,
                             ),
-                            child: const Text('Envoyer'),
+                            child: _sending
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  )
+                                : const Text('Envoyer'),
                           ),
                         ],
                       ),

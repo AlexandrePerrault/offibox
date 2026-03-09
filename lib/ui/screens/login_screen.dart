@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:offibox/app/offibox_app.dart';
 import 'package:offibox/config/app_config.dart';
@@ -18,12 +19,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _error;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _pharmacyNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _faxController = TextEditingController();
   bool _isSignUp = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _pharmacyNameController.dispose();
+    _phoneController.dispose();
+    _faxController.dispose();
     super.dispose();
   }
 
@@ -57,13 +68,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       setState(() => _error = 'Saisissez email et mot de passe.');
       return;
     }
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    if (_isSignUp && (firstName.isEmpty || lastName.isEmpty)) {
+      setState(() => _error = 'Saisissez votre nom et votre prénom.');
+      return;
+    }
     setState(() { _loading = true; _error = null; });
     try {
       if (_isSignUp) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final creds = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+        final user = creds.user;
+        if (user != null) {
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+            {
+              'email': email,
+              'firstName': firstName,
+              'lastName': lastName,
+              'pharmacyName': _pharmacyNameController.text.trim(),
+              'phone': _phoneController.text.trim(),
+              'fax': _faxController.text.trim(),
+              'createdAt': FieldValue.serverTimestamp(),
+              'subscriptionStartedAt': FieldValue.serverTimestamp(),
+              'trialEndsAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 15))),
+              'plan': 'trial',
+              'maxDevices': 5,
+              'updatedAt': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+        }
       } else {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
@@ -114,16 +151,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     'assets/icons/logo_offibox.png',
                     height: 80,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Icon(
+                    errorBuilder: (_, __, ___) => const Icon(
                       Icons.medication,
                       size: 80,
                       color: OffiboxApp.offiboxTeal,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     AppConfig.appName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -146,7 +183,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade900?.withValues(alpha: 0.3),
+                        color: Colors.red.shade900.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -190,6 +227,105 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  if (_isSignUp) ...[
+                    TextField(
+                      controller: _lastNameController,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        hintText: 'Nom',
+                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        filled: true,
+                        fillColor: Colors.grey.shade900,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _firstNameController,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        hintText: 'Prénom',
+                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        filled: true,
+                        fillColor: Colors.grey.shade900,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _pharmacyNameController,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        hintText: 'Nom de la pharmacie (optionnel)',
+                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        filled: true,
+                        fillColor: Colors.grey.shade900,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        hintText: 'Numéro de téléphone (optionnel)',
+                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        filled: true,
+                        fillColor: Colors.grey.shade900,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _faxController,
+                      keyboardType: TextInputType.phone,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        hintText: 'Fax (optionnel)',
+                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        filled: true,
+                        fillColor: Colors.grey.shade900,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -244,7 +380,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           _isSignUp
                               ? 'Deja un compte ? Connexion'
                               : 'Creer un compte',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: OffiboxApp.offiboxTeal,
                             fontSize: 13,
                           ),

@@ -10,6 +10,8 @@ import 'package:offibox/search/search_engine.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/utils/scan_controller.dart';
 import 'package:offibox/utils/gs1_scan_payload.dart';
+import 'package:offibox/services/annuaire_sante_rpps_service.dart';
+import 'package:offibox/services/annuaire_sante_mssante_service.dart';
 import 'package:offibox/data/data_loader_core.dart' show buildBdmListFromPrefetched, BdmBuildArgs;
 import 'package:offibox/data/data_loader_extra.dart';
 import 'package:offibox/data/bdm_parser.dart';
@@ -37,6 +39,7 @@ import 'package:offibox/utils/normalize.dart';
 import 'package:offibox/utils/open_url.dart' as url_util;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:offibox/services/pdf_preloader.dart';
+import 'package:offibox/config/app_config.dart';
 import 'package:offibox/services/cerp_client_service.dart';
 import 'package:offibox/cache/search_warmup.dart';
 
@@ -116,8 +119,13 @@ class OffiboxController extends ChangeNotifier {
   DateTime? lastGithubUpdate;
 
   final ScanController scanController = ScanController();
+  final AnnuaireSanteRppsService _rppsService = AnnuaireSanteRppsService();
+  final AnnuaireSanteMssanteService _mssanteService = AnnuaireSanteMssanteService();
 
   SearchResult? selectedResult;
+
+  /// Pour l'annuaire RPPS : nombre de structures du professionnel au moment de la sélection (badge « Structures » affiché seulement si > 1).
+  int? rppsStructureCountForSelected;
 
   /// Payload du dernier scan GS1 (expiration, lot, n° série) — affiché en ligne 1 du résultat injecté.
   Gs1ScanPayload? lastScanPayload;
@@ -145,12 +153,42 @@ class OffiboxController extends ChangeNotifier {
   /// Les fiches patient/pro ne s'affichent que pour les libellés concernés (match sur le libellé complet du médicament).
   VocFicheEntry? getVocFicheForLabel(String? label, [String? query]) {
     if (fichesVocList.isEmpty) return null;
-    final labelNorm = (label ?? '').trim().toUpperCase().replaceAll(RegExp(r'\s+'), ' ');
+    // Normalisation "souple" : minuscules, accents retirés, ponctuation ignorée.
+    // Permet de matcher des entrées CSV avec accents (ex: "Abémaciclib") sur des labels BDM sans accents.
+    final labelNorm = normalizeLooseKeepSpaces(label ?? '');
     if (labelNorm.isEmpty) return null;
+
+    bool containsWord(String haystack, String word) {
+      if (word.isEmpty) return false;
+      // Match "mot entier" approximatif (on travaille sur une string normalisée avec espaces).
+      return haystack == word ||
+          haystack.startsWith('$word ') ||
+          haystack.endsWith(' $word') ||
+          haystack.contains(' $word ');
+    }
+
     for (final e in fichesVocList) {
-      final medNorm = e.medicament.trim().toUpperCase().replaceAll(RegExp(r'\s+'), ' ');
+      final medNorm = normalizeLooseKeepSpaces(e.medicament);
       if (medNorm.isEmpty) continue;
+      // 1) Match strict sur l'entrée complète (DCI + marque, ou "marque1, marque2", etc.)
       if (labelNorm.contains(medNorm)) return e;
+
+      // 2) Fallback marque: beaucoup de libellés BDM ne contiennent que la marque (ex: "ALECENSA")
+      // alors que le CSV contient "Alectinib ALECENSA". On extrait donc les tokens en MAJ (marques).
+      final tokens = e.medicament
+          .replaceAll(RegExp(r'[;,\t/()]+'), ' ')
+          .split(RegExp(r'\s+'))
+          .map((t) => t.trim())
+          .where((t) => t.length >= 5) // Ignorer les petits mots comme "de", "et"
+          .toList(growable: false);
+
+      const exclusions = {'sodium', 'potassium', 'calcium', 'chlorure', 'buvable', 'gelules', 'comprime', 'comprimes', 'solution', 'poudre'};
+
+      for (final t in tokens) {
+        final key = normalizeLooseKeepSpaces(t);
+        if (key.isEmpty || exclusions.contains(key)) continue;
+        if (containsWord(labelNorm, key)) return e;
+      }
     }
     return null;
   }
@@ -307,12 +345,16 @@ class OffiboxController extends ChangeNotifier {
 
     // Fusionner les données « extra » déjà préchargées en parallèle
     final extraResults = await extraDataFuture;
-    final cerpOk = await CerpClientService.isCurrentUserCerpBaValidated();
     final extraRaw = extraResults[0] as List<SearchResult>;
     // Toujours copier : loadExtraData() retourne List.unmodifiable (removeWhere échouerait sinon)
     final extra = List<SearchResult>.from(extraRaw);
-    if (!cerpOk) {
+    if (!AppConfig.cerpFeaturesEnabled) {
       extra.removeWhere((r) => r.source == SourceType.cerp);
+    } else {
+      final cerpOk = await CerpClientService.isCurrentUserCerpBaValidated();
+      if (!cerpOk) {
+        extra.removeWhere((r) => r.source == SourceType.cerp);
+      }
     }
     final videos = extraResults[1] as Map<String, String>;
     final vocList = extraResults[2] as List<VocFicheEntry>;
@@ -505,13 +547,13 @@ class OffiboxController extends ChangeNotifier {
     _scheduleSearchingIndicator(seq);
 
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 50), () {
+    _debounce = Timer(const Duration(milliseconds: 85), () {
       // Exécuter la recherche après le prochain frame pour éviter le lag à la saisie.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_engineReady) return;
         if (seq != _searchSeq) return;
         try {
-          _runFilter(query, searchFilter);
+          _runFilter(query, searchFilter, seq);
         } finally {
           _stopSearchingIndicator(seq);
         }
@@ -532,7 +574,7 @@ class OffiboxController extends ChangeNotifier {
       if (!_engineReady) return;
       if (seq != _searchSeq) return;
       try {
-        _runFilter(query, searchFilter);
+        _runFilter(query, searchFilter, seq);
       } finally {
         _stopSearchingIndicator(seq);
       }
@@ -554,6 +596,23 @@ class OffiboxController extends ChangeNotifier {
     return [mapper.fromLppCode(q, url)];
   }
 
+  /// Normalise une requête tapée avec le clavier AZERTY en « mode minuscule » sur la rangée chiffres :
+  /// &→1, é→2, "→3, '→4, (→5, -→6, è→7, _→8, ç→9, à→0 — pour chercher quand même un code (ex. RPPS, CIP, LPP).
+  static String _normalizeAzertyNumberRow(String raw) {
+    if (raw.isEmpty) return raw;
+    return raw
+        .replaceAll('&', '1')
+        .replaceAll('é', '2').replaceAll('É', '2')
+        .replaceAll('"', '3')
+        .replaceAll("'", '4')
+        .replaceAll('(', '5')
+        .replaceAll('-', '6')
+        .replaceAll('è', '7').replaceAll('È', '7')
+        .replaceAll('_', '8')
+        .replaceAll('ç', '9').replaceAll('Ç', '9')
+        .replaceAll('à', '0').replaceAll('À', '0');
+  }
+
   /// Pour une recherche précise (ex. "biatain 23 Tal") : si un seul médicament BDM contient tous les tokens du libellé, on n'affiche que celui-là.
   static List<SearchResult> _tryPreciseMatchOnly(String query, List<SearchResult> results) {
     final q = query.trim();
@@ -563,10 +622,13 @@ class OffiboxController extends ChangeNotifier {
         .map((s) => normalizeLoose(s))
         .where((t) => t.length >= 2 || RegExp(r'^\d+$').hasMatch(t))
         .toList();
-    if (tokens.length < 2) return results;
+    // Important: ne pas "écraser" les recherches courtes type "prava 20" qui doivent
+    // retourner plusieurs présentations / labos. On n'applique ce mode précis que
+    // lorsque la requête est vraiment descriptive (>= 3 tokens).
+    if (tokens.length < 3) return results;
     final bdm = results.where((r) => r.source == SourceType.bdm).toList();
     if (bdm.isEmpty) return results;
-    final labelNorm = (SearchResult r) => normalizeLoose(r.labelRaw);
+    String labelNorm(SearchResult r) => normalizeLoose(r.labelRaw);
     final matches = bdm.where((r) {
       final lab = labelNorm(r);
       for (final t in tokens) {
@@ -581,18 +643,210 @@ class OffiboxController extends ChangeNotifier {
     return [matches.first];
   }
 
-  void _runFilter(String query, SearchFilter? searchFilter) {
-    currentQuery = query;
+  /// Pour outils métier et sites web : un seul résultat par libellé (col B). Évite les doublons quand le même libellé existe dans les deux CSVs.
+  static List<SearchResult> _deduplicateKeywordSiteWebByLibelle(List<SearchResult> results) {
+    final seen = <String>{};
+    return results.where((r) {
+      if (r.source != SourceType.keyword && r.source != SourceType.siteWeb) return true;
+      final libelle = (r.commentaire ?? r.label).trim();
+      final key = normalizeLooseKeepSpaces(libelle);
+      if (key.isEmpty) return true;
+      if (seen.contains(key)) return false;
+      seen.add(key);
+      return true;
+    }).toList();
+  }
+
+  void _runFilter(String query, SearchFilter? searchFilter, int seq) {
+    final trimmed = query.trim();
+    final q = _normalizeAzertyNumberRow(trimmed);
+    currentQuery = q;
     lastScanPayload = null;
-    var results = _searchEngine.search(query);
-    results = _ensureLppFallback(query, results);
+    var results = _searchEngine.search(q);
+    results = _ensureLppFallback(q, results);
     if (searchFilter != null && searchFilter.hasActiveFilters) {
       results = searchFilter.applyTo(results, genericCipSet: genericCipSet, cisArretCommercialisation: cisArretCommercialisation);
     }
-    results = _tryPreciseMatchOnly(query, results);
-    if (identical(results, filteredResults)) return;
-    filteredResults = results;
-    notifyListeners();
+    results = _tryPreciseMatchOnly(q, results);
+    results = OffiboxController._deduplicateKeywordSiteWebByLibelle(results);
+    final sameLocal = identical(results, filteredResults);
+    if (!sameLocal) {
+      filteredResults = results;
+      notifyListeners();
+    }
+
+    // 🔎 Lookup RPPS (Annuaire Santé) en arrière-plan : ne bloque pas la recherche locale.
+    _kickRppsLookupIfNeeded(q, seq);
+  }
+
+  static String? _extractRppsFromQuery(String raw) {
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    // RPPS = 11 chiffres (ex. 10111946058)
+    if (digits.length == 11) return digits;
+    return null;
+  }
+
+  static ({String? nom, String? prenom})? _extractNameQuery(String raw) {
+    final cleaned = raw.trim();
+    if (cleaned.length < 2) return null;
+    final parts = cleaned
+        .split(RegExp(r'[\s,;]+'))
+        .where((p) => p.trim().isNotEmpty)
+        .toList();
+    if (parts.length < 2) return null;
+    // Heuristique simple: 2 premiers tokens = (nom, prenom) mais on testera aussi l'inverse.
+    return (nom: parts[0], prenom: parts[1]);
+  }
+
+  /// True si la requête ressemble à un nom de structure (ex. pharmacie, cabinet, centre) pour prioriser la recherche par structure.
+  static bool _looksLikeStructureQuery(String raw) {
+    final lower = raw.trim().toLowerCase();
+    if (lower.length < 2) return false;
+    final firstWord = lower.split(RegExp(r'[\s,;]+')).first;
+    const structureKeywords = [
+      'pharmacie', 'pharmacy', 'cabinet', 'centre', 'center', 'hopital', 'hôpital',
+      'clinique', 'clinique', 'laboratoire', 'labo', 'centre', 'maison', 'msp',
+      'selarl', 'sarl', 'scop', 'association', 'asso', 'dispensaire', 'officine',
+    ];
+    if (structureKeywords.any((k) => firstWord.startsWith(k) || firstWord == k)) return true;
+    if (lower.contains('pharmacie') || lower.contains('pharmacy')) return true;
+    return false;
+  }
+
+  void _kickRppsLookupIfNeeded(String query, int seq) {
+    final q = query.trim();
+    if (q.length < 2) return;
+
+    final rpps = _extractRppsFromQuery(q);
+    final bool preferStructure = rpps == null && _looksLikeStructureQuery(q);
+    final name = (rpps == null && !preferStructure) ? _extractNameQuery(q) : null;
+    final structureQuery = (rpps == null && name == null && q.length >= 2) ? q : null;
+    if (rpps == null && name == null && structureQuery == null) return;
+
+    unawaited(() async {
+      // RPPS exact: 1 call. Nom/prénom: 2 calls (ordre + inverse) puis merge. Structure (ex. pharmacie): 1 call.
+      List<SearchResult> hits = const [];
+      if (rpps != null) {
+        hits = await _rppsService.search(rpps: rpps, limit: 20);
+      } else if (structureQuery != null) {
+        hits = await _rppsService.search(structure: structureQuery, limit: 50);
+      } else if (name != null) {
+        // Plus large pour gérer les homonymes (tri par département ensuite).
+        final a = await _rppsService.search(nom: name.nom, prenom: name.prenom, limit: 50);
+        final b = await _rppsService.search(nom: name.prenom, prenom: name.nom, limit: 50);
+        // Déduplique par RPPS en gardant la "meilleure" structure (cabinet/libéral d'abord).
+        final bestById = <String, SearchResult>{};
+        for (final r in [...a, ...b]) {
+          final id = (r.cip13 ?? '').trim();
+          if (id.isEmpty) continue;
+          final prev = bestById[id];
+          if (prev == null) {
+            bestById[id] = r;
+            continue;
+          }
+          final sp = AnnuaireSanteRppsService.preferredStructureScore(prev);
+          final sr = AnnuaireSanteRppsService.preferredStructureScore(r);
+          if (sr < sp) {
+            bestById[id] = r;
+            continue;
+          }
+          if (sr == sp) {
+            final ap = (prev.groupLabel ?? '').toLowerCase();
+            final ar = (r.groupLabel ?? '').toLowerCase();
+            if (ar.compareTo(ap) < 0) bestById[id] = r;
+          }
+        }
+        hits = bestById.values.toList();
+      }
+
+      // Tri :
+      // - RPPS exact: libéral/cabinet d'abord, puis hôpital.
+      // - Nom/Prénom (homonymes): par département croissant (01→97), puis alphabétique.
+      if (hits.length > 1) {
+        int deptKey(String? d) {
+          final raw = (d ?? '').trim();
+          if (raw.isEmpty) return 9999;
+          final digits = raw.replaceAll(RegExp(r'\D'), '');
+          final v = int.tryParse(digits);
+          return v ?? 9999;
+        }
+
+        if (rpps != null) {
+          hits.sort((a, b) {
+            final sa = AnnuaireSanteRppsService.preferredStructureScore(a);
+            final sb = AnnuaireSanteRppsService.preferredStructureScore(b);
+            if (sa != sb) return sa.compareTo(sb);
+            final la = (a.groupLabel ?? '').toLowerCase();
+            final lb = (b.groupLabel ?? '').toLowerCase();
+            return la.compareTo(lb);
+          });
+        } else {
+          // Annuaire RPPS (nom/prénom ou structure) : tri par métier puis département puis libellé.
+          hits.sort((a, b) {
+            final orderA = AnnuaireSanteRppsService.professionDisplayOrder(a.label);
+            final orderB = AnnuaireSanteRppsService.professionDisplayOrder(b.label);
+            if (orderA != orderB) return orderA.compareTo(orderB);
+            final da = deptKey(a.departement);
+            final db = deptKey(b.departement);
+            if (da != db) return da.compareTo(db);
+            final la = a.labelRaw.toLowerCase();
+            final lb = b.labelRaw.toLowerCase();
+            return la.compareTo(lb);
+          });
+        }
+      }
+
+      // 📧 BAL MSSanté (personnelle) : enrichit les hits RPPS (1 requête __in max).
+      final rppsList = hits
+          .map((r) => (r.cip13 ?? '').replaceAll(RegExp(r'\\D'), ''))
+          .where((d) => d.length == 11)
+          .toList();
+      if (rppsList.isNotEmpty) {
+        final map = await _mssanteService.fetchPreferredPersonalByRppsList(rppsList);
+        if (map.isNotEmpty) {
+          hits = hits.map((r) {
+            final id = (r.cip13 ?? '').replaceAll(RegExp(r'\\D'), '');
+            final mail = id.length == 11 ? map[id] : null;
+            return (mail != null && mail.isNotEmpty)
+                ? r.copyWith(mssanteEmail: mail)
+                : r;
+          }).toList();
+        }
+      }
+
+      if (!_engineReady) return;
+      if (seq != _searchSeq) return;
+      if (currentQuery.trim() != q) return;
+      if (hits.isEmpty) return;
+
+      // Merge sans doublons (RPPS unique via cip13)
+      final existing = filteredResults;
+      final existingIds = existing
+          .where((r) => r.source == SourceType.annuaireSanteRpps)
+          .map((r) => (r.cip13 ?? '').trim())
+          .where((id) => id.isNotEmpty)
+          .toSet();
+
+      final toAdd = <SearchResult>[];
+      for (final r in hits) {
+        final id = (r.cip13 ?? '').trim();
+        if (id.isEmpty || existingIds.contains(id)) continue;
+        toAdd.add(r);
+      }
+      if (toAdd.isEmpty) return;
+
+      // RPPS exact ou requête nom/prénom : on place les résultats annuaire en tête (priorité au professionnel recherché).
+      // Requête par structure : on ajoute les résultats annuaire en bas.
+      final nameQuery = name != null;
+      final next = <SearchResult>[
+        if (rpps != null || nameQuery) ...toAdd,
+        ...existing,
+        if (rpps == null && !nameQuery) ...toAdd,
+      ];
+
+      filteredResults = next;
+      notifyListeners();
+    }());
   }
 
   /// Filtre immédiat (sans debounce) pour scan DataMatrix ou QR mutuelle.
@@ -684,6 +938,8 @@ class OffiboxController extends ChangeNotifier {
       case SourceType.pharmacovigilance: return 'Annuaires';
       case SourceType.centresAntiPoison: return 'Centres anti poison';
       case SourceType.chu: return 'CHU';
+      case SourceType.ceipAddictovigilance: return 'Addictovigilance (CEIP-A)';
+      case SourceType.annuaireSanteRpps: return 'Annuaire PS';
       default: return s.name;
     }
   }
@@ -855,6 +1111,12 @@ if (item.source == SourceType.lpp &&
   // ========================================================================
 
   void selectResult(SearchResult item) {
+    if (item.source == SourceType.annuaireSanteRpps && item.cip13 != null && item.cip13!.trim().isNotEmpty) {
+      final rpps = item.cip13!.trim();
+      rppsStructureCountForSelected = filteredResults.where((r) => r.cip13?.trim() == rpps).length;
+    } else {
+      rppsStructureCountForSelected = null;
+    }
     selectedResult = item;
     filteredResults = const [];
     currentQuery = item.label;
@@ -869,6 +1131,7 @@ if (item.source == SourceType.lpp &&
 
   void clearSelection() {
     selectedResult = null;
+    rppsStructureCountForSelected = null;
     notifyListeners();
   }
 
@@ -885,7 +1148,7 @@ if (item.source == SourceType.lpp &&
   void _scheduleSearchingIndicator(int seq) {
     _searchingDelayTimer?.cancel();
     // N’affiche l’animation qu’après un délai : évite le flicker.
-    _searchingDelayTimer = Timer(const Duration(milliseconds: 140), () {
+    _searchingDelayTimer = Timer(const Duration(milliseconds: 100), () {
       if (seq != _searchSeq) return;
       if (!searching) {
         searching = true;
@@ -908,6 +1171,8 @@ void dispose() {
   _debounce?.cancel();
   _searchingDelayTimer?.cancel();
   scanController.dispose();
+  _rppsService.dispose();
+  _mssanteService.dispose();
   super.dispose();
 }
 

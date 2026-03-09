@@ -1,19 +1,54 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:offibox/data/cis_dispo_loader.dart';
 import 'package:offibox/data/generiques.dart';
-import 'package:offibox/ui/results/selected_result_view.dart';
-import 'package:offibox/ui/widgets/search_bar_filter_button.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
-import 'package:offibox/utils/scan_controller.dart';
+import 'package:offibox/ui/results/selected_result_view.dart';
+import 'package:offibox/ui/widgets/search_bar_filter_button.dart';
 import 'package:offibox/utils/gs1_scan_payload.dart';
 import 'package:offibox/utils/open_url.dart';
+import 'package:offibox/utils/scan_controller.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/constants/ui_constants.dart';
+
+/// Rejette le collage d'un chemin de fichier (ex. capture d'écran, C:\Users\...\Downloads\...) dans la barre de recherche.
+class _RejectFilePathPasteFormatter extends TextInputFormatter {
+  /// Windows : C:\ ou D:\ suivi de chemin se terminant par une extension image/doc.
+  static final RegExp _filePathPattern = RegExp(
+    r'^[A-Za-z]:[\\/][\s\S]*\.(png|jpg|jpeg|gif|bmp|webp|pdf|docx?|xlsx?)$',
+    caseSensitive: false,
+  );
+  /// Contient "Capture" + "écran" ou "Downloads" + extension image (collage type capture d'écran).
+  static final RegExp _captureOrDownloadsPath = RegExp(
+    r"(Capture\s*d[\u0027\u2019]?\s*\u00e9cran|Downloads)[\s\S]*\.(png|jpg|jpeg|gif|bmp|webp)$",
+    caseSensitive: false,
+  );
+
+  static bool _looksLikeFilePath(String text) {
+    final t = text.trim();
+    if (t.isEmpty) return false;
+    if (_filePathPattern.hasMatch(t)) return true;
+    if (_captureOrDownloadsPath.hasMatch(t)) return true;
+    if (RegExp(r'^[A-Za-z]:[\\/]').hasMatch(t) && RegExp(r'\.(png|jpg|jpeg|gif|bmp|webp|pdf)$').hasMatch(t)) return true;
+    return false;
+  }
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text != oldValue.text && _looksLikeFilePath(newValue.text)) {
+      return oldValue;
+    }
+    return newValue;
+  }
+}
 
 class _SearchFieldWithOffiboxPlaceholder extends StatefulWidget {
   final bool expanded;
@@ -124,6 +159,7 @@ class _SearchFieldWithOffiboxPlaceholderState
             onTap: () {
               setState(() => _hidePlaceholder = true);
             },
+            inputFormatters: [_RejectFilePathPasteFormatter()],
             style: const TextStyle(
               fontSize: 14,
               fontFamily: 'Spinnaker',
@@ -157,7 +193,7 @@ class _SearchFieldWithOffiboxPlaceholderState
             const TextSpan(text: 'Rechercher sur '),
 
             /// 🟦 Logo Offibox — même couleur que l’aspect transparent de la barre
-            TextSpan(
+            const TextSpan(
               text: 'Offi',
               style: TextStyle(
                 fontSize: 14,
@@ -232,15 +268,78 @@ String? _tauxRemboursementForCis(Map<String, String>? map, String? cis) {
   return map[key];
 }
 
+/// Cinq points alignés horizontalement, animés en boucle (opacité en vague).
+class _LoadingDots extends StatefulWidget {
+  const _LoadingDots();
+
+  @override
+  State<_LoadingDots> createState() => _LoadingDotsState();
+}
+
+class _LoadingDotsState extends State<_LoadingDots> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const int count = 5;
+    const double size = 5.0;
+    const double spacing = 4.0;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(count, (i) {
+            // Décalage en phase pour effet de vague (chaque point à i/5 de cycle)
+            final phase = (_controller.value + i / count) % 1.0;
+            final t = phase <= 0.5 ? phase : 1.0 - phase;
+            final opacity = 0.3 + 0.7 * (2 * t).clamp(0.0, 1.0);
+            return Padding(
+              padding: EdgeInsets.only(right: i < count - 1 ? spacing : 0),
+              child: SizedBox(
+                width: size,
+                height: size,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade600.withValues(alpha: opacity),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
+
 class FloatingSearchBar extends ConsumerStatefulWidget {
   const FloatingSearchBar({
     super.key,
     required this.expanded,
+    this.searching = false,
     required this.textController,
     required this.focusNode,
     required this.onChanged,
     required this.onTapInside,
     required this.selectedResult,
+    this.rppsStructureCountForSelected,
     required this.onOpenSelected,
     this.scanController,
     this.onScanDataMatrix,
@@ -278,9 +377,12 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   this.tauxRemboursementByCis,
   this.getVocUrlsForItem,
   this.onOpenUrl,
+  this.onSearchWithQuery,
 });
 
   final bool expanded;
+  /// True pendant une recherche (annuaire, etc.) → affiche des points animés à côté du champ.
+  final bool searching;
   final TextEditingController textController;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
@@ -291,6 +393,8 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   final ValueChanged<bool>? onFilterHoverChange;
 
   final SearchResult? selectedResult;
+  /// Annuaire RPPS : nombre de structures (badge « Structures » affiché seulement si > 1).
+  final int? rppsStructureCountForSelected;
   final VoidCallback? onEscape;
   final VoidCallback? onOpenSelected;
   final ScanController? scanController;
@@ -344,17 +448,46 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   final (String?, String?)? Function(SearchResult)? getVocUrlsForItem;
   /// Ouverture d’une URL (ex. au clic sur un badge). Si non fourni, utilise openUrl. Permet d’ouvrir les PDF sous la barre.
   final void Function(String url)? onOpenUrl;
+  /// Au clic sur le badge DCI (princeps) : lance une recherche avec cette requête (DCI) pour afficher les génériques sous la barre.
+  final void Function(String query)? onSearchWithQuery;
 
   @override
   ConsumerState<FloatingSearchBar> createState() => _FloatingSearchBarState();
 }
 
 class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
-  static const double _barHeight = OffiboxWindowUI.barHeight;
   static const double _barHeightExpanded = OffiboxWindowUI.barHeightExpanded;
   static const double _borderRadius = OffiboxWindowUI.borderRadius;
 
   bool _filterHovered = false;
+  /// Indicateur de chargement affiché seulement après un délai (recherche lente).
+  bool _slowSearchActive = false;
+  Timer? _slowSearchTimer;
+
+  @override
+  void didUpdateWidget(covariant FloatingSearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searching != oldWidget.searching) {
+      if (widget.searching) {
+        _slowSearchTimer?.cancel();
+        _slowSearchTimer = Timer(const Duration(milliseconds: 400), () {
+          if (mounted && widget.searching) {
+            setState(() => _slowSearchActive = true);
+          }
+        });
+      } else {
+        _slowSearchTimer?.cancel();
+        _slowSearchTimer = null;
+        setState(() => _slowSearchActive = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _slowSearchTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -374,30 +507,34 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
                 selected.source == SourceType.catalogue ||
                 selected.source == SourceType.codesActes ||
                 selected.source == SourceType.dm);
-        // Hauteur selon le nombre de lignes (2, 3 ou 4) pour les médicaments.
+        // Hauteur selon le nombre de lignes (2, 3 ou 4) pour les médicaments ; annuaire RPPS = 4 lignes (source visible).
         double expandedHeight = _barHeightExpanded;
         if (selected != null && !isSingleLineSource) {
-          final hasLine3 = (selected.url != null && selected.url!.trim().isNotEmpty) ||
-              (selected.meddisparUrl != null && selected.meddisparUrl!.trim().isNotEmpty);
-          final hasBiosimRelation = selected.biosimilaireOf != null && selected.biosimilaireOf!.trim().isNotEmpty;
-          final hasGenericRelation = selected.isGeneric == true ||
-              (selected.princepsName != null && selected.princepsName!.trim().isNotEmpty) ||
-              (selected.genericName != null && selected.genericName!.trim().isNotEmpty) ||
-              selected.isBioreferent == true;
-          final showBiosimLine = selected.source == SourceType.bdm && (hasBiosimRelation || hasGenericRelation);
-          final lineCount = 2 + (hasLine3 ? 1 : 0) + (showBiosimLine ? 1 : 0);
-          switch (lineCount) {
-            case 2:
-              expandedHeight = OffiboxWindowUI.barHeightExpanded;
-              break;
-            case 3:
-              expandedHeight = OffiboxWindowUI.barHeightExpandedThreeLines;
-              break;
-            case 4:
-              expandedHeight = OffiboxWindowUI.barHeightExpandedFourLines;
-              break;
-            default:
-              expandedHeight = OffiboxWindowUI.barHeightExpanded;
+          if (selected.source == SourceType.annuaireSanteRpps) {
+            expandedHeight = OffiboxWindowUI.barHeightExpandedFourLines;
+          } else {
+            final hasLine3 = (selected.url != null && selected.url!.trim().isNotEmpty) ||
+                (selected.meddisparUrl != null && selected.meddisparUrl!.trim().isNotEmpty);
+            final hasBiosimRelation = selected.biosimilaireOf != null && selected.biosimilaireOf!.trim().isNotEmpty;
+            final hasGenericRelation = selected.isGeneric == true ||
+                (selected.princepsName != null && selected.princepsName!.trim().isNotEmpty) ||
+                (selected.genericName != null && selected.genericName!.trim().isNotEmpty) ||
+                selected.isBioreferent == true;
+            final showBiosimLine = selected.source == SourceType.bdm && (hasBiosimRelation || hasGenericRelation);
+            final lineCount = 2 + (hasLine3 ? 1 : 0) + (showBiosimLine ? 1 : 0);
+            switch (lineCount) {
+              case 2:
+                expandedHeight = OffiboxWindowUI.barHeightExpanded;
+                break;
+              case 3:
+                expandedHeight = OffiboxWindowUI.barHeightExpandedThreeLines;
+                break;
+              case 4:
+                expandedHeight = OffiboxWindowUI.barHeightExpandedFourLines;
+                break;
+              default:
+                expandedHeight = OffiboxWindowUI.barHeightExpanded;
+            }
           }
         }
         // Hauteur réduite (-20 %) quand la barre est déployée mais vide (aucun résultat sélectionné).
@@ -480,11 +617,15 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
           ),
           const SizedBox(width: 6),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 150),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: widget.selectedResult != null
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 150),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    child: widget.selectedResult != null
                     ? GestureDetector(
                         key: const ValueKey('selected'),
                         onTap: widget.onTapInside,
@@ -495,13 +636,17 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
                             return SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               physics: const ClampingScrollPhysics(),
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minWidth: constraints.maxWidth,
-                                  maxWidth: constraints.maxWidth,
-                                ),
-                                child: SelectedResultView(
+                              child: Padding(
+                                // Marge à droite pour que les badges n’empiètent pas sur le texte « mise à jour ».
+                                padding: const EdgeInsets.only(right: 8),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minWidth: constraints.maxWidth - 8,
+                                    maxWidth: constraints.maxWidth - 8,
+                                  ),
+                                  child: SelectedResultView(
                                   item: selected,
+                                  rppsStructureCountForSelected: widget.rppsStructureCountForSelected,
                                   onOpenSelected: widget.onOpenSelected,
                                   onClose: widget.onTapInside,
                                   statutsForCis: _statutsForCis(widget.statutsByCis, selected.cis),
@@ -542,6 +687,8 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
                                     final voc = widget.selectedResult != null ? widget.getVocUrlsForItem?.call(widget.selectedResult!) : null;
                                     return voc?.$2;
                                   }(),
+                                  onDciTap: widget.onSearchWithQuery,
+                                  ),
                                 ),
                               ),
                             );
@@ -581,6 +728,13 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
                         },
                       ),
             ),
+          ),
+          if (widget.searching && widget.selectedResult == null && _slowSearchActive) ...[
+            const SizedBox(width: 8),
+            const _LoadingDots(),
+          ],
+        ],
+      ),
           ),
 
           // Quand un résultat est injecté : petit espace avant le bloc hamburger + logo. Quand aucun résultat : collé à la barre.

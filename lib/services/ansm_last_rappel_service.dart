@@ -1,8 +1,5 @@
 import 'package:http/http.dart' as http;
 
-const String _ansmInformationsUrl =
-    'https://ansm.sante.fr/informations-de-securite/';
-
 /// URL filtrée : rappels de produit « Médicaments » uniquement (source pour le dernier rappel et la liste).
 const String ansmInformationsMedicamentsUrl =
     'https://ansm.sante.fr/informations-de-securite/?safety_news_filter%5BsafetyNewsModels%5D%5B%5D=5&safety_news_filter%5BhealthProducts%5D%5B%5D=20&safety_news_filter%5BhealthProducts%5D%5B%5D=22&safety_news_filter%5BhealthProducts%5D%5B%5D=25&safety_news_filter%5BstartDate%5D=&safety_news_filter%5BendDate%5D=';
@@ -28,6 +25,36 @@ class AnsmRappelItem {
 /// Récupère le dernier "RAPPEL DE PRODUIT" depuis la page Informations de sécurité ANSM.
 class AnsmLastRappelService {
   AnsmLastRappelService._();
+
+  /// Décode les entités HTML les plus courantes (ex: `&#039;`, `&amp;`, `&nbsp;`).
+  /// Suffisant pour normaliser les titres extraits de la page ANSM.
+  static String _decodeHtmlEntities(String input) {
+    if (input.isEmpty) return input;
+
+    var s = input;
+    // Named entities (subset)
+    s = s
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&apos;', "'")
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>');
+
+    // Numeric entities: decimal &#123; and hex &#x1F4A9;
+    s = s.replaceAllMapped(RegExp(r'&#(\d+);'), (m) {
+      final code = int.tryParse(m.group(1) ?? '');
+      return code == null ? m.group(0)! : String.fromCharCode(code);
+    });
+    s = s.replaceAllMapped(RegExp(r'&#x([0-9a-fA-F]+);'), (m) {
+      final code = int.tryParse(m.group(1) ?? '', radix: 16);
+      return code == null ? m.group(0)! : String.fromCharCode(code);
+    });
+
+    // Normalise whitespace
+    s = s.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return s;
+  }
 
   static Future<AnsmRappelItem?> fetchLast() async {
     try {
@@ -61,12 +88,13 @@ class AnsmLastRappelService {
           .replaceAll(RegExp(r'<[^>]+>'), ' ')
           .replaceAll(RegExp(r'\s+'), ' ')
           .trim();
+      final decodedTitle = _decodeHtmlEntities(rawTitle);
       String dateStr = '';
-      String libelle = rawTitle;
-      final dateMatch = RegExp(r'PUBLIÉ LE (\d{2}/\d{2}/\d{4})', caseSensitive: false).firstMatch(rawTitle);
+      String libelle = decodedTitle;
+      final dateMatch = RegExp(r'PUBLIÉ LE (\d{2}/\d{2}/\d{4})', caseSensitive: false).firstMatch(decodedTitle);
       if (dateMatch != null) {
         dateStr = dateMatch.group(1) ?? '';
-        libelle = rawTitle.substring(dateMatch.end).trim();
+        libelle = decodedTitle.substring(dateMatch.end).trim();
       }
       if (libelle.isEmpty) libelle = 'Rappel de produit ANSM';
       final label = dateStr.isNotEmpty
@@ -128,12 +156,13 @@ class AnsmLastRappelService {
           .replaceAll(RegExp(r'<[^>]+>'), ' ')
           .replaceAll(RegExp(r'\s+'), ' ')
           .trim();
+      final decodedTitle = _decodeHtmlEntities(rawTitle);
       String dateStr = '';
-      String libelle = rawTitle;
-      final dateMatch = RegExp(r'PUBLIÉ LE (\d{2}/\d{2}/\d{4})', caseSensitive: false).firstMatch(rawTitle);
+      String libelle = decodedTitle;
+      final dateMatch = RegExp(r'PUBLIÉ LE (\d{2}/\d{2}/\d{4})', caseSensitive: false).firstMatch(decodedTitle);
       if (dateMatch != null) {
         dateStr = dateMatch.group(1) ?? '';
-        libelle = rawTitle.substring(dateMatch.end).trim();
+        libelle = decodedTitle.substring(dateMatch.end).trim();
       }
       if (libelle.isEmpty) libelle = 'Rappel de produit ANSM';
       final label = dateStr.isNotEmpty
@@ -145,7 +174,7 @@ class AnsmLastRappelService {
         url: href,
         dateStr: dateStr.isNotEmpty ? dateStr : null,
         slug: slug.isNotEmpty ? slug : null,
-      ));
+      ),);
     }
     medicaments.sort((a, b) {
       final da = _parseDate(a.dateStr);

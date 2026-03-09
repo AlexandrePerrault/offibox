@@ -56,12 +56,14 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
   @override
   void initState() {
     super.initState();
-    if (Platform.isWindows) {
-      _splashStartTime = DateTime.now();
+    if (Platform.isWindows || Platform.isLinux) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(offiboxControllerProvider).init();
       });
+    }
+    if (Platform.isWindows) {
+      _splashStartTime = DateTime.now();
       _progressTimer = Timer.periodic(_kProgressStepInterval, (_) {
         if (!mounted) return;
         if (_timeBasedProgress >= 100) {
@@ -109,9 +111,7 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
       final doNotAsk = prefs.getBool(AppUpdateConfig.doNotAskKey) ?? false;
       AppUpdateInfo? info = _pendingUpdateInfo;
       _pendingUpdateInfo = null;
-      if (info == null) {
-        info = await AppUpdateService.checkForUpdate(force: doNotAsk);
-      }
+      info ??= await AppUpdateService.checkForUpdate(force: doNotAsk);
       if (!mounted) return;
       if (info == null) return;
       if (doNotAsk) {
@@ -150,13 +150,10 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _moveToCheckingUpdate();
         if (!mounted) return;
-        // Afficher "Recherche de mise à jour…" au moins 600 ms tout en lançant la vérification
+        // À chaque ouverture de l'app (cold start) : vérifier les mises à jour (force: true pour ne pas limiter à 1 fois/jour).
         final updateResult = await Future.wait([
           Future<void>.delayed(const Duration(milliseconds: 600)),
-          SharedPreferences.getInstance().then((prefs) async {
-            final doNotAsk = prefs.getBool(AppUpdateConfig.doNotAskKey) ?? false;
-            return AppUpdateService.checkForUpdate(force: doNotAsk);
-          }),
+          AppUpdateService.checkForUpdate(force: true),
         ]);
         final info = updateResult.length > 1 ? updateResult[1] as AppUpdateInfo? : null;
         if (mounted && info != null) _pendingUpdateInfo = info;
@@ -200,14 +197,17 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/icons/logo_offibox.png',
+            SizedBox(
+              width: 72,
               height: 72,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.medication,
-                size: 72,
-                color: OffiboxApp.offiboxTeal,
+              child: Image.asset(
+                'assets/icons/logo_offibox.png',
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.medication,
+                  size: 72,
+                  color: OffiboxApp.offiboxTeal,
+                ),
               ),
             ),
             const SizedBox(height: 20),

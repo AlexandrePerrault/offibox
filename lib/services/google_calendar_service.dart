@@ -82,7 +82,7 @@ class GoogleCalendarService {
           summary: summary,
           start: startDt,
           isAllDay: isAllDay,
-        ));
+        ),);
       }
 
       return events;

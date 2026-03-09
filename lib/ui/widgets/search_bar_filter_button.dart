@@ -268,20 +268,23 @@ class _FilterPanelState extends State<_FilterPanel> {
     SourceType.pharmacovigilance,
     SourceType.centresAntiPoison,
     SourceType.chu,
+    SourceType.ceipAddictovigilance,
+    SourceType.annuaireSanteRpps,
     SourceType.keyword,
     SourceType.siteWeb,
   ];
 
-  /// Une ligne du panneau = soit une source, soit le groupe « Annuaires » (pharmacovigilance + centres anti poison + CHU).
+  /// Une ligne du panneau = soit une source, soit le groupe « Annuaires » (CRPV + centres anti poison + CHU).
+  /// « Annuaire PS » (professionnels de santé) est une ligne séparée avec son propre compte.
   static List<({bool isAnnuaire, SourceType? source})> _displayRows() {
-    const annuaire = SearchFilterNotifier.annuaireSources;
+    const annuaireGroup = SearchFilterNotifier.annuaireSources;
     final rows = <({bool isAnnuaire, SourceType? source})>[];
-    var annuaireAdded = false;
+    var annuaireGroupAdded = false;
     for (final s in _filterableSources) {
-      if (annuaire.contains(s)) {
-        if (!annuaireAdded) {
+      if (annuaireGroup.contains(s)) {
+        if (!annuaireGroupAdded) {
           rows.add((isAnnuaire: true, source: null));
-          annuaireAdded = true;
+          annuaireGroupAdded = true;
         }
       } else {
         rows.add((isAnnuaire: false, source: s));
@@ -320,6 +323,10 @@ class _FilterPanelState extends State<_FilterPanel> {
         return 'centres anti poison';
       case SourceType.chu:
         return 'CHU';
+      case SourceType.ceipAddictovigilance:
+        return 'addictovigilance';
+      case SourceType.annuaireSanteRpps:
+        return 'annuaire santé';
       default:
         return null;
     }
@@ -347,6 +354,10 @@ class _FilterPanelState extends State<_FilterPanel> {
         return 'Centres anti poison';
       case SourceType.chu:
         return 'CHU';
+      case SourceType.ceipAddictovigilance:
+        return 'Addictovigilance (CEIP-A)';
+      case SourceType.annuaireSanteRpps:
+        return 'Annuaire PS';
       case SourceType.keyword:
         return 'Mots-clés';
       case SourceType.siteWeb:

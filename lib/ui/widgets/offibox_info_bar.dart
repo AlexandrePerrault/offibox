@@ -37,7 +37,7 @@ class _InfoBarOnOffBadgeState extends State<_InfoBarOnOffBadge> {
 
   double get _effectivePosition {
     if (_dragOffset != null) {
-      final range = _InfoBarOnOffBadge._trackWidth -
+      const range = _InfoBarOnOffBadge._trackWidth -
           2 * _InfoBarOnOffBadge._padding -
           _InfoBarOnOffBadge._knobSize;
       final raw = (widget.value ? range : 0) + _dragOffset!;
@@ -52,14 +52,14 @@ class _InfoBarOnOffBadgeState extends State<_InfoBarOnOffBadge> {
 
   @override
   Widget build(BuildContext context) {
-    final p = _InfoBarOnOffBadge._padding;
-    final range = _InfoBarOnOffBadge._trackWidth -
+    const p = _InfoBarOnOffBadge._padding;
+    const range = _InfoBarOnOffBadge._trackWidth -
         2 * p -
         _InfoBarOnOffBadge._knobSize;
     final isOn = _dragOffset == null
         ? widget.value
         : _effectivePosition >= range * 0.5;
-    final padding = p;
+    const padding = p;
     final isDragging = _dragOffset != null;
 
     return OffiboxTooltip(
@@ -236,7 +236,7 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
 
   /// Un segment = badge (hauteur moitié de la barre, centré sur la barre d'infos).
   Widget _buildBadge(TickerItem e, Color bgColor) {
-    final badgeHeight = OffiboxWindowUI.tickerBadgeHeight;
+    const badgeHeight = OffiboxWindowUI.tickerBadgeHeight;
     final content = Container(
       height: badgeHeight,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1.5),
@@ -363,7 +363,7 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
   Widget build(BuildContext context) {
     if (!widget.visible) return const IgnorePointer(child: SizedBox.shrink());
 
-    final barHeight = OffiboxWindowUI.tickerBarHeight;
+    const barHeight = OffiboxWindowUI.tickerBarHeight;
     return SizedBox(
       height: barHeight,
       width: widget.width,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# placeholder
-
+# -*- coding: utf-8 -*-
+"""
 Usage:
   pip install playwright pypdf pillow img2pdf
   playwright install chromium
@@ -8,10 +8,16 @@ Usage:
   python scripts/fliphtml5_to_pdf.py -o catalogue_cerp_2025.pdf
   python scripts/fliphtml5_to_pdf.py --url "https://online.fliphtml5.com/smbsp/khzv/"
   python scripts/fliphtml5_to_pdf.py --method screenshot   # Méthode par capture d'écran (recommandée pour canvas)
+  # Optionnel: OCR (rend le PDF "recherchable" si ocrmypdf+tesseract+ghostscript sont installés)
+  python scripts/fliphtml5_to_pdf.py -o catalogue_cerp_2025_ocr.pdf --ocr --ocr-lang fra
 """
 
 import argparse
 import asyncio
+import hashlib
+import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -23,9 +29,9 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from pypdf import PdfWriter, PdfReader, PdfMerger
+    from pypdf import PdfWriter, PdfReader
 except ImportError:
-    PdfWriter = PdfReader = PdfMerger = None
+    PdfWriter = PdfReader = None
 
 try:
     import img2pdf
@@ -76,6 +82,128 @@ def _images_to_pdf(image_paths: list, output_path: str) -> bool:
     return False
 
 
+async def _dismiss_cookiebot(page) -> None:
+    """
+    Cookiebot (Usercentrics) s'affiche parfois à chaque navigation (rechargement).
+    On tente de l'accepter/masquer pour éviter qu'il occulte les captures.
+    """
+    # 1) Essayer les IDs connus Cookiebot (rapide)
+    for selector in [
+        "#CybotCookiebotDialogBodyButtonAccept",
+        "#CybotCookiebotDialogBodyLevelButtonAccept",
+        "button#CybotCookiebotDialogBodyButtonAccept",
+        "button#CybotCookiebotDialogBodyLevelButtonAccept",
+    ]:
+        try:
+            loc = page.locator(selector)
+            if await loc.count():
+                await loc.first.click(timeout=1200)
+                await page.wait_for_timeout(250)
+                return
+        except Exception:
+            pass
+
+    # 2) Essayer via texte (FR/EN) sur la page et dans les frames
+    patterns = [
+        re.compile(r"allow all", re.I),
+        re.compile(r"accept all", re.I),
+        re.compile(r"tout accepter", re.I),
+        re.compile(r"accepter tout", re.I),
+        re.compile(r"accepter", re.I),
+    ]
+
+    async def _try_frame(frame) -> bool:
+        for pat in patterns:
+            try:
+                btn = frame.get_by_role("button", name=pat)
+                if await btn.count():
+                    await btn.first.click(timeout=1200)
+                    await page.wait_for_timeout(250)
+                    return True
+            except Exception:
+                pass
+        return False
+
+    try:
+        if await _try_frame(page):
+            return
+        for frame in page.frames:
+            if frame == page.main_frame:
+                continue
+            if await _try_frame(frame):
+                return
+    except Exception:
+        pass
+
+    # 3) Fallback: masquer par CSS (si click impossible)
+    try:
+        await page.add_style_tag(
+            content=(
+                """
+                #CybotCookiebotDialog,
+                #CybotCookiebotDialogBodyUnderlay,
+                #CybotCookiebotDialogBody,
+                [id*="cookie"][id*="bot"],
+                [class*="cookie"][class*="bot"],
+                [class*="cookie"][class*="consent"],
+                [id*="cookie"][id*="consent"] {
+                  display: none !important;
+                  visibility: hidden !important;
+                  opacity: 0 !important;
+                  pointer-events: none !important;
+                }
+                """
+            )
+        )
+    except Exception:
+        pass
+
+
+def _cleanup_temp_outputs(out_dir: Path) -> None:
+    for p in out_dir.glob("_page_*.png"):
+        p.unlink(missing_ok=True)
+    for p in out_dir.glob("_page_*.pdf"):
+        p.unlink(missing_ok=True)
+
+
+def _run_ocr_if_requested(pdf_path: str, ocr_enabled: bool, ocr_lang: str) -> str:
+    """
+    Si demandé et si disponible, lance ocrmypdf pour ajouter une couche texte (OCR).
+    Retourne le chemin du PDF final (peut être inchangé si OCR non effectué).
+    """
+    if not ocr_enabled:
+        return pdf_path
+
+    exe = shutil.which("ocrmypdf")
+    if not exe:
+        print(
+            "OCR demandé mais 'ocrmypdf' est introuvable dans le PATH.\n"
+            "Installez ocrmypdf (et ses dépendances: tesseract + ghostscript), puis relancez.",
+            file=sys.stderr,
+        )
+        return pdf_path
+
+    in_path = Path(pdf_path)
+    ocr_out = in_path.with_name(f"{in_path.stem}_ocr{in_path.suffix}")
+    cmd = [
+        exe,
+        "--skip-text",
+        "--optimize",
+        "1",
+        "--language",
+        ocr_lang,
+        str(in_path),
+        str(ocr_out),
+    ]
+    try:
+        print(f"\nOCR en cours ({ocr_lang})...")
+        subprocess.run(cmd, check=True)
+        return str(ocr_out)
+    except Exception as e:
+        print(f"OCR échoué: {e}", file=sys.stderr)
+        return pdf_path
+
+
 async def capture_flipbook_to_pdf(url: str, output_path: str, max_pages: int = 200, method: str = "screenshot") -> bool:
     """Ouvre le flipbook, navigue page par page et génère un PDF."""
     async with async_playwright() as p:
@@ -88,15 +216,42 @@ async def capture_flipbook_to_pdf(url: str, output_path: str, max_pages: int = 2
 
         try:
             print(f"Chargement de {url}...")
-            await page.goto(url, wait_until="networkidle", timeout=60000)
+            # Toujours commencer sur #p=1 pour stabiliser le rendu
+            base = url.split("#", 1)[0]
+            start_url = f"{base}#p=1"
+            await page.goto(start_url, wait_until="networkidle", timeout=60000)
             await asyncio.sleep(4)  # Laisser le flipbook s'initialiser
 
             out_dir = Path(output_path).parent
+            _cleanup_temp_outputs(out_dir)
             pdf_files = []
             img_files = []
-            seen_hashes = set()
+            last_hash = None
+            same_in_a_row = 0
+
+            # Une fois au début, accepter/masquer Cookiebot une bonne fois.
+            await _dismiss_cookiebot(page)
 
             for i in range(max_pages):
+                # Navigation: éviter les reloads (qui refont apparaître Cookiebot)
+                page_num = i + 1
+                if page_num > 1:
+                    # Tenter le changement de hash (sans recharger)
+                    try:
+                        await page.evaluate("p => { window.location.hash = 'p=' + p; }", page_num)
+                        await page.wait_for_timeout(1200)
+                    except Exception:
+                        # Fallback (moins bien): reload complet
+                        await page.goto(
+                            f"{base}#p={page_num}",
+                            wait_until="networkidle",
+                            timeout=60000,
+                        )
+                        await asyncio.sleep(2.0)
+
+                # Si une bannière cookies revient, la retirer avant capture.
+                await _dismiss_cookiebot(page)
+
                 # Capturer la page courante (PDF ou screenshot selon la méthode)
                 if method == "screenshot":
                     img_path = out_dir / f"_page_{i:04d}.png"
@@ -109,6 +264,22 @@ async def capture_flipbook_to_pdf(url: str, output_path: str, max_pages: int = 2
                     if img_path.stat().st_size < 1000:
                         img_path.unlink(missing_ok=True)
                         break
+                    try:
+                        page_bytes = img_path.read_bytes()
+                        h = hashlib.md5(page_bytes).hexdigest()
+                    except Exception:
+                        # fallback: taille + nom, moins fiable
+                        h = f"{img_path.stat().st_size}"
+                    if h == last_hash:
+                        same_in_a_row += 1
+                    else:
+                        same_in_a_row = 0
+                    last_hash = h
+                    # Si on voit trop de pages identiques d’affilée, on considère qu’on a dépassé la fin.
+                    if same_in_a_row >= 4:
+                        img_path.unlink(missing_ok=True)
+                        print(f"  Page {i}: trop de pages identiques, fin.")
+                        break
                     img_files.append(str(img_path))
                 else:
                     pdf_path = out_dir / f"_page_{i:04d}.pdf"
@@ -117,42 +288,23 @@ async def capture_flipbook_to_pdf(url: str, output_path: str, max_pages: int = 2
                     except Exception as e:
                         print(f"  Page {i}: erreur PDF - {e}")
                         break
+                    try:
+                        page_bytes = Path(pdf_path).read_bytes()
+                        h = hashlib.md5(page_bytes).hexdigest()
+                    except Exception:
+                        h = f"{Path(pdf_path).stat().st_size}"
+                    if h == last_hash:
+                        same_in_a_row += 1
+                    else:
+                        same_in_a_row = 0
+                    last_hash = h
+                    if same_in_a_row >= 4:
+                        Path(pdf_path).unlink(missing_ok=True)
+                        print(f"  Page {i}: trop de pages identiques, fin.")
+                        break
                     pdf_files.append(str(pdf_path))
 
-                # Vérifier si le contenu a changé (éviter boucle infinie)
-                content = await page.content()
-                h = hash(content[:8000])
-                if h in seen_hashes:
-                    if method == "screenshot" and img_files:
-                        Path(img_files[-1]).unlink(missing_ok=True)
-                        img_files.pop()
-                    elif pdf_files:
-                        Path(pdf_files[-1]).unlink(missing_ok=True)
-                        pdf_files.pop()
-                    print(f"  Page {i}: contenu identique, fin.")
-                    break
-                seen_hashes.add(h)
-
                 print(f"  Page {i + 1} capturée")
-
-                # Navigation vers la page suivante
-                # 1. Clic dans l'iframe pour le focus, puis flèche droite (FlipHTML5)
-                for frame in page.frames:
-                    if frame != page.main_frame:
-                        try:
-                            await frame.click("body", position={"x": 500, "y": 400})
-                            await asyncio.sleep(0.3)
-                            break
-                        except Exception:
-                            continue
-                await page.keyboard.press("ArrowRight")
-                await asyncio.sleep(1.5)
-
-                # 2. Clic à droite (zone "page suivante" des flipbooks)
-                box = page.viewport_size
-                if box:
-                    await page.mouse.click(box["width"] - 60, box["height"] // 2)
-                    await asyncio.sleep(1.2)
 
             if method == "screenshot":
                 if not img_files:
@@ -176,14 +328,18 @@ async def capture_flipbook_to_pdf(url: str, output_path: str, max_pages: int = 2
             # Fusionner les PDFs
             if len(pdf_files) == 1:
                 Path(pdf_files[0]).rename(output_path)
-            elif PdfMerger is not None:
-                merger = PdfMerger()
-                for f in pdf_files:
-                    merger.append(f)
-                merger.write(output_path)
-                merger.close()
-                for f in pdf_files:
-                    Path(f).unlink(missing_ok=True)
+            elif PdfWriter is not None and PdfReader is not None:
+                try:
+                    writer = PdfWriter()
+                    for f in pdf_files:
+                        reader = PdfReader(f)
+                        for page_obj in reader.pages:
+                            writer.add_page(page_obj)
+                    with open(output_path, "wb") as out_f:
+                        writer.write(out_f)
+                finally:
+                    for f in pdf_files:
+                        Path(f).unlink(missing_ok=True)
             else:
                 print("Installez pypdf pour fusionner: pip install pypdf")
                 Path(pdf_files[0]).rename(output_path)
@@ -208,9 +364,19 @@ def main():
         default="screenshot",
         help="screenshot = capture d'écran (recommandé pour canvas), pdf = pdf natif",
     )
+    parser.add_argument(
+        "--ocr",
+        action="store_true",
+        help="Ajoute une couche texte via OCR (nécessite ocrmypdf + tesseract + ghostscript)",
+    )
+    parser.add_argument("--ocr-lang", default="fra", help="Langue OCR (ex: fra, eng, deu...)")
     args = parser.parse_args()
 
     success = asyncio.run(capture_flipbook_to_pdf(args.url, args.output, args.max_pages, args.method))
+    if success:
+        final_path = _run_ocr_if_requested(args.output, args.ocr, args.ocr_lang)
+        if final_path != args.output:
+            print(f"PDF OCR généré: {final_path}")
     sys.exit(0 if success else 1)
 
 

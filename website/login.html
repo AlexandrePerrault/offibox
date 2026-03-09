@@ -208,6 +208,22 @@
       text-decoration: none;
     }
     .back-home:hover { color: var(--offi-teal); }
+    .auth-error {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .auth-error.visible { display: block; }
+    .auth-loading { opacity: 0.7; pointer-events: none; }
+    #inscription-section { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-light); }
+    #inscription-section.visible { display: block; }
+    .password-reset-form { display: none; margin-top: 1rem; }
+    .password-reset-form.visible { display: block; }
+    .btn-secondary { background: var(--gray-light); color: var(--gray); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
 
     @media (max-width: 900px) {
       body { flex-direction: column; }
@@ -243,6 +259,7 @@
     <h2>Connexion</h2>
     <p class="subtitle">Accédez à votre compte Offibox</p>
 
+    <div id="auth-error" class="auth-error" role="alert"></div>
     <form id="login-form" action="#" method="post">
       <button type="button" class="btn-google" id="btn-google" aria-label="Se connecter avec Google">
         <svg viewBox="0 0 24 24" width="20" height="20">
@@ -269,29 +286,196 @@
           <input type="checkbox" id="remember" name="remember" checked>
           <label for="remember">Se souvenir de moi</label>
         </div>
-        <a href="#" class="forgot">Mot de passe oublié ?</a>
+        <a href="#" class="forgot" id="forgot-link">Mot de passe oublié ?</a>
       </div>
-      <button type="submit" class="btn-submit">Se connecter</button>
+      <div id="password-reset-form" class="password-reset-form">
+        <div class="form-group">
+          <label for="reset-email">E-mail pour réinitialiser</label>
+          <input type="email" id="reset-email" placeholder="vous@exemple.fr">
+        </div>
+        <button type="button" class="btn-submit" id="btn-send-reset">Envoyer le lien</button>
+        <button type="button" class="btn-secondary" id="btn-cancel-reset" style="margin-top:0.5rem;">Annuler</button>
+      </div>
+      <button type="submit" class="btn-submit" id="btn-submit">Se connecter</button>
     </form>
 
+    <div id="inscription-section">
+      <h2 style="font-size:1.25rem;margin-bottom:1rem;">Créer un compte</h2>
+      <form id="signup-form" action="#" method="post">
+        <div class="form-group">
+          <label for="signup-email">Adresse e-mail</label>
+          <input type="email" id="signup-email" name="signup-email" placeholder="vous@exemple.fr" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Mot de passe (min. 6 caractères)</label>
+          <input type="password" id="signup-password" name="signup-password" placeholder="••••••••" autocomplete="new-password" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="signup-confirm">Confirmer le mot de passe</label>
+          <input type="password" id="signup-confirm" placeholder="••••••••" autocomplete="new-password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-submit">S'inscrire</button>
+      </form>
+    </div>
+
     <p class="signup-link">
-      Pas encore de compte ? <a href="login.html#inscription">S'inscrire</a>
+      Pas encore de compte ? <a href="#inscription" id="toggle-signup">S'inscrire</a>
     </p>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/firebase-auth.js"></script>
   <script>
-    const privateSpaceUrl = 'https://www.offibox.fr/espace-priv%C3%A9';
+    (function() {
+      var authError = document.getElementById('auth-error');
+      var loginForm = document.getElementById('login-form');
+      var btnGoogle = document.getElementById('btn-google');
+      var btnSubmit = document.getElementById('btn-submit');
+      var inscriptionSection = document.getElementById('inscription-section');
+      var toggleSignup = document.getElementById('toggle-signup');
+      var signupForm = document.getElementById('signup-form');
+      var forgotLink = document.getElementById('forgot-link');
+      var passwordResetForm = document.getElementById('password-reset-form');
+      var btnSendReset = document.getElementById('btn-send-reset');
+      var btnCancelReset = document.getElementById('btn-cancel-reset');
 
-    document.getElementById('login-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      // Ici on simule une connexion réussie, puis on envoie l'utilisateur vers l'espace privé.
-      window.location.href = privateSpaceUrl;
-    });
+      function showError(msg) {
+        if (authError) {
+          authError.textContent = msg || '';
+          authError.classList.toggle('visible', !!msg);
+        }
+      }
 
-    document.getElementById('btn-google').addEventListener('click', function () {
-      // Idem : clic sur Google = redirection vers l'espace privé.
-      window.location.href = privateSpaceUrl;
-    });
+      function setLoading(loading) {
+        loginForm.classList.toggle('auth-loading', loading);
+        if (btnGoogle) btnGoogle.disabled = loading;
+        if (btnSubmit) btnSubmit.disabled = loading;
+      }
+
+      function goToAgenda() {
+        window.location.href = 'autorisation-agenda.html';
+      }
+
+      // Déjà connecté (Firebase) -> autorisation agenda
+      if (window.OffiboxAuth) {
+        var user = OffiboxAuth.getCurrentUser();
+        if (user) {
+          goToAgenda();
+          return;
+        }
+        OffiboxAuth.onAuthStateChanged(function(u) {
+          if (u) goToAgenda();
+        });
+      }
+
+      if (btnGoogle) {
+        btnGoogle.addEventListener('click', function() {
+          if (!window.OffiboxAuth) { goToAgenda(); return; }
+          showError('');
+          setLoading(true);
+          OffiboxAuth.signInWithGoogle()
+            .then(goToAgenda)
+            .catch(function(err) {
+              setLoading(false);
+              var code = err && err.code;
+              var msg = 'Connexion Google impossible. Réessayez.';
+              if (code === 'auth/popup-closed-by-user') msg = 'Connexion annulée.';
+              else if (code === 'auth/popup-blocked') msg = 'Popup bloquée. Autorisez les popups pour ce site.';
+              else if (err && err.message) msg = err.message;
+              showError(msg);
+            });
+        });
+      }
+
+      if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (!window.OffiboxAuth) { goToAgenda(); return; }
+          var email = document.getElementById('email').value.trim();
+          var password = document.getElementById('password').value;
+          if (!email || !password) { showError('Veuillez remplir l\'email et le mot de passe.'); return; }
+          showError('');
+          setLoading(true);
+          OffiboxAuth.signInWithEmailPassword(email, password)
+            .then(goToAgenda)
+            .catch(function(err) {
+              setLoading(false);
+              var code = err && err.code;
+              var msg = 'Connexion impossible. Vérifiez vos identifiants.';
+              if (code === 'auth/user-not-found' || code === 'auth/wrong-password') msg = 'E-mail ou mot de passe incorrect.';
+              else if (code === 'auth/invalid-email') msg = 'Adresse e-mail invalide.';
+              else if (err && err.message) msg = err.message;
+              showError(msg);
+            });
+        });
+      }
+
+      if (toggleSignup) {
+        toggleSignup.addEventListener('click', function(e) {
+          e.preventDefault();
+          inscriptionSection.classList.toggle('visible');
+          loginForm.style.display = inscriptionSection.classList.contains('visible') ? 'none' : 'block';
+          toggleSignup.textContent = inscriptionSection.classList.contains('visible') ? 'Déjà un compte ? Se connecter' : 'S\'inscrire';
+          showError('');
+        });
+      }
+
+      if (signupForm) {
+        signupForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var email = document.getElementById('signup-email').value.trim();
+          var pwd = document.getElementById('signup-password').value;
+          var confirm = document.getElementById('signup-confirm').value;
+          if (pwd !== confirm) { showError('Les deux mots de passe ne correspondent pas.'); return; }
+          if (pwd.length < 6) { showError('Le mot de passe doit faire au moins 6 caractères.'); return; }
+          showError('');
+          setLoading(true);
+          OffiboxAuth.signUpWithEmailPassword(email, pwd)
+            .then(goToAgenda)
+            .catch(function(err) {
+              setLoading(false);
+              var code = err && err.code;
+              var msg = 'Inscription impossible. Réessayez.';
+              if (code === 'auth/email-already-in-use') msg = 'Un compte existe déjà avec cet e-mail.';
+              else if (code === 'auth/invalid-email') msg = 'Adresse e-mail invalide.';
+              else if (err && err.message) msg = err.message;
+              showError(msg);
+            });
+        });
+      }
+
+      if (forgotLink) {
+        forgotLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          passwordResetForm.classList.add('visible');
+        });
+      }
+      if (btnCancelReset) {
+        btnCancelReset.addEventListener('click', function() {
+          passwordResetForm.classList.remove('visible');
+          document.getElementById('reset-email').value = '';
+        });
+      }
+      if (btnSendReset) {
+        btnSendReset.addEventListener('click', function() {
+          var email = document.getElementById('reset-email').value.trim();
+          if (!email) { showError('Indiquez votre adresse e-mail.'); return; }
+          showError('');
+          OffiboxAuth.sendPasswordResetEmail(email)
+            .then(function() {
+              showError('Un lien de réinitialisation a été envoyé à votre adresse.');
+              passwordResetForm.classList.remove('visible');
+            })
+            .catch(function(err) {
+              var code = err && err.code;
+              if (code === 'auth/user-not-found') showError('Aucun compte avec cet e-mail.');
+              else showError(err && err.message ? err.message : 'Envoi impossible.');
+            });
+        });
+      }
+    })();
   </script>
 </body>
 </html>

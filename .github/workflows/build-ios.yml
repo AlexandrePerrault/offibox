@@ -34,6 +34,15 @@ jobs:
       - name: Restaurer les paquets
         run: flutter pub get
 
+      # Cache CocoaPods pour accélérer pod install (surtout après le 1er run)
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-ios-pods-${{ hashFiles('ios/Podfile.lock', 'ios/Podfile') }}
+          restore-keys: |
+            ${{ runner.os }}-ios-pods-
+
       # Forcer la cible iOS 15.0 (requise par cloud_firestore) dans le projet Xcode
       - name: Fixer deployment target iOS 15.0
         run: |

@@ -24,6 +24,8 @@ class SearchResult with _$SearchResult {
     // 🔥 AJOUTS
     String? cip7,
     String? groupLabel,
+    /// Département d'exercice (ex: "75", "33", "971") quand disponible.
+    String? departement,
 
     // 📄 CONTENU
     @Default(false) bool isPdf,
@@ -72,12 +74,17 @@ class SearchResult with _$SearchResult {
     String? phone,
     String? fax,
     String? email,
+    /// BAL MSSanté personnelle (si trouvée via dataset Annuaire Santé).
+    String? mssanteEmail,
     String? catalogueUrl,
     String? commentaire,
 
     // 🆕 AMC
     String? address,
     String? website,
+
+    /// Date d'apparition outil (outils métier, col C) — affiche "nouveau (date)" à droite du libellé.
+    String? keywordAppearanceDate,
 
     // 🏷️ BADGES
     String? badge1Name,

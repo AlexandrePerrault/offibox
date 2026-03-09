@@ -152,6 +152,9 @@ String _normalizeLibelle(String s) {
       .replaceAll(RegExp(r'Remise\s*\uFFFD?\s*disposition', caseSensitive: false),
           'Remise à disposition',)
       .replaceAll(RegExp(r'Arrt\s+de'), 'Arrêt de')
+      .replaceAll(RegExp(r"s['\u2019\u02BC\u0060\u00B4]+\s*écurisée", caseSensitive: false), 'sécurisée')
+      .replaceAll(RegExp(r"s['\u2019\u02BC\u0060\u00B4]+\s*écurisé\b", caseSensitive: false), 'sécurisé')
+      .replaceAll("s'écurisée", 'sécurisée')
       .replaceAll('\uFFFD', ' ')
       .trim();
 }

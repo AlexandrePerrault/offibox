@@ -20,6 +20,7 @@ class PdfTextIndexService {
     final file = await PdfCacheService.getCachedPdf(
       pdfUrl: pdfUrl,
       laboratory: laboratory,
+      allowLarge: true,
     );
     final indexFile = File(_indexPathFor(file));
     if (indexFile.existsSync()) {
@@ -76,6 +77,7 @@ class PdfTextIndexService {
       final file = await PdfCacheService.getCachedPdf(
         pdfUrl: pdfUrl,
         laboratory: laboratory,
+        allowLarge: true,
       );
       return File(_indexPathFor(file)).existsSync();
     } catch (_) {

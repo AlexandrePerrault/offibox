@@ -1,4 +1,4 @@
-// Export des feuilles "outils métier", "sites web", "Commandes", "catalogue", "news", "videos", "CHU", "Centres anti poison", "Pharmacovigilance" vers GitHub (9 CSV).
+// Export des feuilles "outils métier", "sites web", "Commandes", "catalogue", "news", "videos" vers GitHub (6 CSV).
 // À copier dans Apps Script du Google Sheet concerné.
 // Propriétés du script : GITHUB_TOKEN
 // Constantes dans un objet pour éviter conflit avec d'autres scripts (GITHUB_OWNER, etc.).
@@ -73,32 +73,50 @@ function pushSheetToGitHub(spreadsheetId, sheetName, githubPath) {
   const apiUrl =
     'https://api.github.com/repos/' + OUTILS_METIER_CONFIG.owner + '/' + OUTILS_METIER_CONFIG.repo + '/contents/' + githubPath;
 
-  var sha = null;
-  const res = UrlFetchApp.fetch(apiUrl, {
-    headers: { Authorization: 'token ' + token },
-    muteHttpExceptions: true,
-  });
+  var maxAttempts = 3;
+  var lastError = null;
 
-  if (res.getResponseCode() === 200) {
-    sha = JSON.parse(res.getContentText()).sha;
+  while (maxAttempts-- > 0) {
+    var sha = null;
+    var res = UrlFetchApp.fetch(apiUrl, {
+      headers: { Authorization: 'token ' + token },
+      muteHttpExceptions: true,
+    });
+
+    if (res.getResponseCode() === 200) {
+      sha = JSON.parse(res.getContentText()).sha;
+    }
+
+    var payload = {
+      message: '🔄 MAJ ' + sheetName + ' – ' + new Date().toLocaleString('fr-FR'),
+      content: contentBase64,
+      branch: OUTILS_METIER_CONFIG.branch,
+    };
+    if (sha) payload.sha = sha;
+
+    res = UrlFetchApp.fetch(apiUrl, {
+      method: 'put',
+      contentType: 'application/json',
+      headers: { Authorization: 'token ' + token },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true,
+    });
+
+    var code = res.getResponseCode();
+    if (code === 200 || code === 201) {
+      Logger.log('✅ ' + sheetName + ' → ' + githubPath);
+      return;
+    }
+    if (code === 409) {
+      // Référence ou fichier modifié entre GET et PUT (autre push ou export précédent) → refaire un GET puis PUT.
+      lastError = res.getContentText();
+      Logger.log('⚠️ 409 sur ' + githubPath + ', nouvel essai… (' + maxAttempts + ' restants)');
+      continue;
+    }
+    throw new Error('Erreur GitHub ' + code + ' pour ' + githubPath + ': ' + res.getContentText());
   }
 
-  const payload = {
-    message: '🔄 MAJ ' + sheetName + ' – ' + new Date().toLocaleString('fr-FR'),
-    content: contentBase64,
-    branch: OUTILS_METIER_CONFIG.branch,
-  };
-
-  if (sha) payload.sha = sha;
-
-  UrlFetchApp.fetch(apiUrl, {
-    method: 'put',
-    contentType: 'application/json',
-    headers: { Authorization: 'token ' + token },
-    payload: JSON.stringify(payload),
-  });
-
-  Logger.log('✅ ' + sheetName + ' → ' + githubPath);
+  throw new Error('Échec après 3 essais (409 conflit) pour ' + githubPath + ': ' + lastError);
 }
 
 /** Exporte la feuille "outils métier" vers outils_metier.csv sur GitHub. */
@@ -155,34 +173,7 @@ function exportVideos() {
   );
 }
 
-/** Exporte la feuille "CHU" vers chu.csv sur GitHub. */
-function exportCHU() {
-  pushSheetToGitHub(
-    OUTILS_METIER_CONFIG.spreadsheetId,
-    'CHU',
-    'chu.csv'
-  );
-}
-
-/** Exporte la feuille "Centres anti poison" vers centres_anti_poison.csv sur GitHub. */
-function exportCentresAntiPoison() {
-  pushSheetToGitHub(
-    OUTILS_METIER_CONFIG.spreadsheetId,
-    'Centres anti poison',
-    'centres_anti_poison.csv'
-  );
-}
-
-/** Exporte la feuille "Pharmacovigilance" vers pharmacovigilance.csv sur GitHub. */
-function exportPharmacovigilance() {
-  pushSheetToGitHub(
-    OUTILS_METIER_CONFIG.spreadsheetId,
-    'Pharmacovigilance',
-    'pharmacovigilance.csv'
-  );
-}
-
-/** Lance l'export des neuf feuilles (outils métier, sites web, Commandes, catalogue, news, videos, CHU, Centres anti poison, Pharmacovigilance) → 9 CSV. */
+/** Lance l'export des six feuilles (outils métier, sites web, Commandes, catalogue, news, videos) → 6 CSV. */
 function exportAllSheets() {
   exportOutilsMetier();
   exportSitesWeb();
@@ -190,9 +181,6 @@ function exportAllSheets() {
   exportCatalogue();
   exportNews();
   exportVideos();
-  exportCHU();
-  exportCentresAntiPoison();
-  exportPharmacovigilance();
 }
 
 /** Alias pour compatibilité : lance l'export de toutes les feuilles. */

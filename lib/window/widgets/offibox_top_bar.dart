@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/ui/widgets/offibox_info_bar.dart';
 import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/ui/widgets/window/floating_search_bar.dart';
@@ -78,6 +77,7 @@ class OffiboxTopBar extends StatelessWidget {
   const OffiboxTopBar({
     super.key,
     required this.expanded,
+    this.searching = false,
     this.infoBarExpanded = true,
     this.onToggleInfoBar,
     this.onInfoBarUrlTap,
@@ -91,6 +91,7 @@ class OffiboxTopBar extends StatelessWidget {
     this.filterHovered = false,
     this.onFilterHoverChange,
     this.selectedResult,
+    this.rppsStructureCountForSelected,
     this.onOpenSelected,
     this.statutsByCis,
     this.ansmStatutsByCis,
@@ -107,6 +108,7 @@ class OffiboxTopBar extends StatelessWidget {
     this.onOpenOffibox,
     this.onMinimize,
     this.onClose,
+    this.onShowAccount,
     this.onShowAbout,
     this.onShowShortcuts,
     this.onShowContact,
@@ -155,6 +157,8 @@ class OffiboxTopBar extends StatelessWidget {
     this.rightMargin,
     /// Date de MAJ des données (dernier commit GitHub offiboxdata). Si null, affiche [kVersionDate].
     this.dataUpdateDate,
+    /// Au clic sur le badge DCI (princeps) : lance une recherche avec cette requête (DCI) pour afficher les génériques sous la barre.
+    this.onSearchWithQuery,
   });
 
   /// Au clic sur "Espace pro" (catalogue) : affiche la fenêtre de connexion (lab + identifiants).
@@ -221,9 +225,13 @@ class OffiboxTopBar extends StatelessWidget {
   final double? rightMargin;
   /// Date de MAJ des données (ex. dernier commit GitHub). Format JJ/MM/AAAA. Si null, utilise [kVersionDate].
   final String? dataUpdateDate;
+  /// Au clic sur le badge DCI (princeps) : lance une recherche avec cette requête (DCI) pour afficher les génériques sous la barre.
+  final void Function(String query)? onSearchWithQuery;
 
   final bool expanded;
   /// Barre d’infos (DGS-Urgent, ANSM, etc.) : true = déployée, false = repliée
+  /// true pendant une recherche → gélule en rotation.
+  final bool searching;
   final bool infoBarExpanded;
   final VoidCallback? onToggleInfoBar;
   /// Au clic sur une URL de la barre d’infos (rappel, alerte ANSM, DGS-Urgent, etc.) : ouvrir dans le panneau sous la barre. Si null, ouverture dans le navigateur (comportement par défaut du widget).
@@ -243,6 +251,8 @@ class OffiboxTopBar extends StatelessWidget {
   final ValueChanged<bool>? onFilterHoverChange;
 
   final SearchResult? selectedResult;
+  /// Annuaire RPPS : nombre de structures du pro (badge « Structures » affiché seulement si > 1).
+  final int? rppsStructureCountForSelected;
   final VoidCallback? onOpenSelected;
   final Map<String, List<String>>? statutsByCis;
   final Map<String, AnsmStatutInfo>? ansmStatutsByCis;
@@ -263,6 +273,7 @@ class OffiboxTopBar extends StatelessWidget {
   final VoidCallback? onOpenOffibox;
   final VoidCallback? onMinimize;
   final VoidCallback? onClose;
+  final VoidCallback? onShowAccount;
   final VoidCallback? onShowAbout;
   final VoidCallback? onShowShortcuts;
   final VoidCallback? onShowContact;
@@ -288,8 +299,8 @@ class OffiboxTopBar extends StatelessWidget {
 
   static const List<TickerItem> _defaultInfoBarItems = [
     (label: 'DGS-Urgent', url: 'https://sante.gouv.fr/professionnels/article/dgs-urgent', tooltip: 'Cliquer pour plus d\'infos', icon: TickerItemIcon.danger, isAnsm: false, isDgs: true, colorOverride: null),
-    (label: 'Info médicament (ANSM)', url: 'https://ansm.sante.fr/', tooltip: 'Cliquer pour plus d\'infos', icon: TickerItemIcon.none, isAnsm: true, isDgs: false, colorOverride: const Color(0xFF42A5F5)),
-    (label: 'Actualités', url: 'https://www.who.int/fr/campaigns', tooltip: null, icon: TickerItemIcon.none, isAnsm: false, isDgs: false, colorOverride: const Color(0xFF37474F)),
+    (label: 'Info médicament (ANSM)', url: 'https://ansm.sante.fr/', tooltip: 'Cliquer pour plus d\'infos', icon: TickerItemIcon.none, isAnsm: true, isDgs: false, colorOverride: Color(0xFF42A5F5)),
+    (label: 'Actualités', url: 'https://www.who.int/fr/campaigns', tooltip: null, icon: TickerItemIcon.none, isAnsm: false, isDgs: false, colorOverride: Color(0xFF37474F)),
   ];
 
   static const double _gapLogoMenu = 4;
@@ -374,6 +385,7 @@ class OffiboxTopBar extends StatelessWidget {
                 width: barWidth,
                 child: FloatingSearchBar(
               expanded: expanded,
+              searching: searching,
               textController: searchController,
               focusNode: searchFocus,
               onChanged: onSearchChanged,
@@ -382,6 +394,7 @@ class OffiboxTopBar extends StatelessWidget {
               onEscape: onEscape,
               onFilterHoverChange: onFilterHoverChange,
               selectedResult: selectedResult,
+              rppsStructureCountForSelected: rppsStructureCountForSelected,
               onOpenSelected: onOpenSelected,
               statutsByCis: statutsByCis,
               ansmStatutsByCis: ansmStatutsByCis,
@@ -413,6 +426,7 @@ class OffiboxTopBar extends StatelessWidget {
               tauxRemboursementByCis: tauxRemboursementByCis,
               getVocUrlsForItem: getVocUrlsForItem,
               onOpenUrl: onOpenUrl,
+              onSearchWithQuery: onSearchWithQuery,
             ),
             ),
             Positioned(
@@ -447,8 +461,8 @@ class OffiboxTopBar extends StatelessWidget {
                         Theme(
                           data: Theme.of(context).copyWith(
                             textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Spinnaker'),
-                            popupMenuTheme: PopupMenuThemeData(
-                              textStyle: const TextStyle(fontFamily: 'Spinnaker', fontSize: 13),
+                            popupMenuTheme: const PopupMenuThemeData(
+                              textStyle: TextStyle(fontFamily: 'Spinnaker', fontSize: 13),
                             ),
                           ),
                           child: HamburgerMenu(
@@ -456,6 +470,7 @@ class OffiboxTopBar extends StatelessWidget {
                             onOpenOffibox: onOpenOffibox!,
                             onMinimize: onMinimize!,
                             onClose: onClose!,
+                            onShowAccount: onShowAccount,
                             onShowAbout: onShowAbout,
                             onShowShortcuts: onShowShortcuts,
                             onShowContact: onShowContact,
@@ -479,6 +494,7 @@ class OffiboxTopBar extends StatelessWidget {
                         message: 'Version $appVersion',
                         child: OffiboxPill(
                           expanded: expanded,
+                          searching: searching,
                           onTap: onToggleWindow,
                           onSecondaryTap: onProposeQuit ??
                               ((expanded &&

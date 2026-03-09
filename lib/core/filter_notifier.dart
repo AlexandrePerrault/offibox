@@ -14,11 +14,13 @@ class SearchFilterNotifier extends StateNotifier<SearchFilter> {
     state = state.toggleSourceDisabled(source);
   }
 
-  /// Annuaires = pharmacovigilance + centres anti poison + CHU. Toggle les trois ensemble.
+  /// Groupe « Annuaires » = pharmacovigilance + centres anti poison + CHU + CEIP-A (toggle ensemble).
+  /// Annuaire PS (professionnels de santé RPPS) est une ligne de filtre séparée.
   static const List<SourceType> annuaireSources = [
     SourceType.pharmacovigilance,
     SourceType.centresAntiPoison,
     SourceType.chu,
+    SourceType.ceipAddictovigilance,
   ];
 
   void toggleAnnuaireGroup() {

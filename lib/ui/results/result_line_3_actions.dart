@@ -6,6 +6,8 @@ import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/ui/widgets/hover_pill_button.dart';
 import 'package:offibox/search/result_action_registry.dart';
 import 'package:offibox/ui/results/result_line_1.dart';
+import 'package:offibox/ui/results/result_line_2_code.dart';
+import 'package:offibox/ui/dialogs/rpps_structures_dialog.dart';
 import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
@@ -14,7 +16,6 @@ import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 /// Taille d'affichage pour les logos "Source :". Véto = 52 ; LPP = 52 × 0,7 (−30 %) ; e-pansement = 52 * 1.5 (plus lisible).
 const double _sourceLogoSize = 52;
 const double _sourceLogoSizeLpp = 52 * 0.7; // −30 % par rapport à la taille standard
-const double _sourceLogoSizeDm = 52;
 const double _sourceLogoSizeDmEpansement = 52 * 1.5; // 78
 const String _externalLinkAsset = 'assets/icons/link-external.svg';
 const String _dmSourceTooltip = 'Fiche produit';
@@ -23,15 +24,24 @@ const String _dmSourceTooltip = 'Fiche produit';
 const String _bdmSourceUrl = 'https://base-donnees-publique.medicaments.gouv.fr/';
 const String _bdmSourceLabel = 'Base de Données Publique des Médicaments, ANSM';
 const String _bdmSourceTooltip = 'Base de données publique des médicaments';
+/// Source OMÉDIT pour les fiches VOC (voie orale cancer) affichées sur certains médicaments.
+const String _omeditVocSourceUrl = 'https://www.omedit-fiches-cancer.fr/';
+const String _omeditVocSourceTooltip = 'OMÉDIT – fiches VOC (voie orale cancer)';
 const String _vetoSourceUrl = 'https://www.anses.fr/fr/content/lagence-nationale-du-medicament-veterinaire-missions-et-actions';
 const String _vetoSourceAsset = 'assets/icons/anses-small.svg';
 const String _dmSourceUrl = 'https://www.e-pansement.fr/';
 const String _dmSourceAsset = 'assets/icons/e_pansement.png';
 const String _lppSourceUrl = 'http://www.codage.ext.cnamts.fr/codif/tips/index.php?p_site=AMELI';
 const String _lppSourceAsset = 'assets/icons/entete_ameli_gdr.gif';
+const String _rppsSourceUrl =
+    'https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante-rpps';
+const String _rppsSourceAsset = 'assets/icons/Datagouv.png';
+const String _rppsSourceTooltip = 'Annuaire Santé (data.gouv.fr)';
 
 class ResultLine3Actions extends StatelessWidget {
   final SearchResult item;
+  /// Annuaire RPPS : nombre de structures (badge « Structures » affiché seulement si > 1).
+  final int? rppsStructureCountForSelected;
   /// CIS présents dans génériques 2026 : RCP et MEDDISPAR sont affichés en ligne 2, pas ici.
   final Set<String>? generiques2026CisSet;
   /// Quand true (résultat injecté dans la barre), affiche "Source :" + logo en italique (police plus petite).
@@ -52,6 +62,7 @@ class ResultLine3Actions extends StatelessWidget {
   const ResultLine3Actions({
     super.key,
     required this.item,
+    this.rppsStructureCountForSelected,
     this.generiques2026CisSet,
     this.isInjected = false,
     this.onOpenUrl,
@@ -91,8 +102,11 @@ Widget build(BuildContext context) {
 
   final hasCommentaire =
       item.commentaire != null && item.commentaire!.trim().isNotEmpty;
-  // Ne pas afficher le bloc commentaire pour les mots-clés / sites web / codes actes (déjà en ligne 1)
-  final showCommentaire = hasCommentaire && item.source != SourceType.keyword && item.source != SourceType.siteWeb && item.source != SourceType.codesActes;
+  final showCommentaire = hasCommentaire &&
+      item.source != SourceType.keyword &&
+      item.source != SourceType.siteWeb &&
+      item.source != SourceType.codesActes &&
+      item.source != SourceType.annuaireSanteRpps;
 
   // Source : + logo. BDM/véto = dans le Wrap ; LPP/DM (pansements) injectés = une ligne "Source :" + logo sous les résultats (comme médicaments).
   final bool isDm = item.source == SourceType.dm;
@@ -100,7 +114,7 @@ Widget build(BuildContext context) {
   final sourceRow = (item.source == SourceType.bdm || isVeto)
       ? null
       : _buildSourceRowWhenInjected();
-  final Widget? _vetoSourceWidget = isVeto
+  final Widget? vetoSourceWidget = isVeto
       ? ResultLine3Actions.buildSourceRow(item, true, onOpenUrl)
       : null;
   final openUrlFn = onOpenUrl ?? openUrl;
@@ -113,26 +127,29 @@ Widget build(BuildContext context) {
           item.isGeneric == true);
   final bool hasVocFiches = item.source == SourceType.bdm &&
       (vocPatientUrl != null && vocPatientUrl!.trim().isNotEmpty || vocProUrl != null && vocProUrl!.trim().isNotEmpty);
-  final Widget? _bdmSourceWidget = (item.source == SourceType.bdm)
+  final Widget? bdmSourceWidget = (item.source == SourceType.bdm)
       ? (useAnsmLogoForBdm
           ? ResultLine3Actions.buildBdmSourceRowWithAnsmLogo(onOpenUrl)
           : ResultLine3Actions.buildBdmSourceRow(onOpenUrl, showOmeditLogo: hasVocFiches))
       : null;
   final vocPills = <Widget>[];
-  if (item.source == SourceType.bdm &&
+  // OMÉDIT (VOC) : en vue injectée, on les affiche en ligne 2 à côté de RCP/MEDDISPAR.
+  // On garde la ligne 3 uniquement hors injection.
+  if (!isInjected &&
+      item.source == SourceType.bdm &&
       (vocPatientUrl != null && vocPatientUrl!.isNotEmpty || vocProUrl != null && vocProUrl!.isNotEmpty)) {
-    const String _pdfRedLogoAsset = 'assets/icons/pdf_red.svg';
+    const String pdfRedLogoAsset = 'assets/icons/pdf_red.svg';
     if (vocPatientUrl != null && vocPatientUrl!.trim().isNotEmpty) {
       final url = vocPatientUrl!.trim();
       vocPills.add(
         HoverPillButton(
-          label: 'fiche à destination des patients',
+          label: 'fiche à destination des patients OMÉDIT',
           icon: Icons.person_outline,
           tooltip: url,
           onTap: () => openUrlFn(url),
           maxLabelWidth: 380,
           trailingWidget: SvgPicture.asset(
-            _pdfRedLogoAsset,
+            pdfRedLogoAsset,
             width: 16,
             height: 16,
             fit: BoxFit.contain,
@@ -145,13 +162,13 @@ Widget build(BuildContext context) {
       if (vocPills.isNotEmpty) vocPills.add(const SizedBox(width: 6));
       vocPills.add(
         HoverPillButton(
-          label: 'fiche à destination des professionnels de santé',
+          label: 'fiche à destination des professionnels de santé OMÉDIT',
           icon: Icons.medical_services_outlined,
           tooltip: url,
           onTap: () => openUrlFn(url),
           maxLabelWidth: 380,
           trailingWidget: SvgPicture.asset(
-            _pdfRedLogoAsset,
+            pdfRedLogoAsset,
             width: 16,
             height: 16,
             fit: BoxFit.contain,
@@ -168,8 +185,9 @@ Widget build(BuildContext context) {
           onOpenTherapeuticVideo != null)
       ? videosByCip13![cip13Key]?.trim()
       : null;
+  // La vidéo est affichée en ligne 2 quand injecté (à droite de RCP).
   final bool hasVideoPill =
-      therapeuticVideoUrl != null && therapeuticVideoUrl.isNotEmpty;
+      !isInjected && therapeuticVideoUrl != null && therapeuticVideoUrl.isNotEmpty;
 
   // Ligne « biosimilaires » (répertoire + bonnes pratiques) en dessous des RCP / MEDDISPAR,
   // uniquement pour les médicaments princeps / génériques / biosimilaires / bioréférents.
@@ -187,8 +205,8 @@ Widget build(BuildContext context) {
       sourceRow == null &&
       dmSourceNextToFiche == null &&
       vocPills.isEmpty &&
-      _bdmSourceWidget == null &&
-      _vetoSourceWidget == null &&
+      bdmSourceWidget == null &&
+      vetoSourceWidget == null &&
       !hasVideoPill) {
     return const SizedBox.shrink();
   }
@@ -231,9 +249,130 @@ Widget build(BuildContext context) {
     );
   }).toList(growable: false);
 
+  // Annuaire RPPS : ligne 3 = RPPS, MSS (clic → Mailiz), Tél, Fax (même style que RPPS/MSS), Structures (si plusieurs)
+  final isAnnuaireRpps = item.source == SourceType.annuaireSanteRpps;
+  final rppsDigits = item.cip13?.replaceAll(RegExp(r'\D'), '') ?? '';
+  final mssEmail = item.mssanteEmail?.replaceAll('"', '').replaceAll("'", '').trim() ?? '';
+  final phoneRaw = (item.phone ?? '').replaceAll('"', '').replaceAll("'", '').trim();
+  final faxRaw = (item.fax ?? '').replaceAll('"', '').replaceAll("'", '').trim();
+  final showStructuresBadge = isAnnuaireRpps &&
+      rppsDigits.length == 11 &&
+      (rppsStructureCountForSelected == null || rppsStructureCountForSelected! > 1);
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      if (isAnnuaireRpps && rppsDigits.length == 11)
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            CodeBadgeWithCopy(
+              label: 'RPPS',
+              value: rppsDigits,
+              tooltip: 'Copier le RPPS',
+              leadingIcon: Icons.badge_outlined,
+            ),
+            if (mssEmail.isNotEmpty) ...[
+              const SizedBox(width: 6),
+              OffiboxTooltip(
+                message: 'Envoyer un message via la messagerie sécurisée',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () {
+                    if (onOpenHttpUrlInApp != null) {
+                      onOpenHttpUrlInApp!(mssantePortalUrl);
+                    } else if (onOpenUrl != null) {
+                      onOpenUrl!(mssantePortalUrl);
+                    } else {
+                      openMssantePortal();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: const Color(0xFFCBD5E1)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.verified_user, size: 11, color: Colors.black54),
+                        const SizedBox(width: 4),
+                        Text(
+                          'MSS : $mssEmail',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (phoneRaw.isNotEmpty) ...[
+              const SizedBox(width: 6),
+              CodeBadgeWithCopy(
+                label: 'Tél',
+                value: phoneRaw,
+                tooltip: 'Copier le numéro',
+                leadingIcon: Icons.phone,
+              ),
+            ],
+            if (faxRaw.isNotEmpty && faxRaw != phoneRaw) ...[
+              const SizedBox(width: 6),
+              CodeBadgeWithCopy(
+                label: 'Fax',
+                value: faxRaw,
+                tooltip: 'Copier le fax',
+                leadingIcon: Icons.fax,
+              ),
+            ],
+            if (showStructuresBadge) ...[
+              const SizedBox(width: 6),
+              OffiboxTooltip(
+                message: 'Voir toutes les structures',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => RppsStructuresDialog(
+                        rpps: rppsDigits,
+                        displayName: item.labelRaw,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Colors.black12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.apartment, size: 16, color: Colors.black54),
+                        SizedBox(width: 6),
+                        Text(
+                          'Structures',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black87),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      if (isAnnuaireRpps && rppsDigits.length == 11) const SizedBox(height: 6),
       if (vocPills.isNotEmpty ||
           actionWidgets.isNotEmpty ||
           dmSourceNextToFiche != null ||
@@ -332,10 +471,10 @@ Widget build(BuildContext context) {
       ],
 
       // Source : toujours en dernière ligne (en bas) pour BDM, véto, DM/LPP injecté.
-      if (_bdmSourceWidget != null || _vetoSourceWidget != null || sourceRow != null) ...[
+      if (bdmSourceWidget != null || vetoSourceWidget != null || sourceRow != null) ...[
         const SizedBox(height: 6),
-        if (_bdmSourceWidget != null) _bdmSourceWidget,
-        if (_vetoSourceWidget != null) _vetoSourceWidget,
+        if (bdmSourceWidget != null) bdmSourceWidget,
+        if (vetoSourceWidget != null) vetoSourceWidget,
         if (sourceRow != null) sourceRow,
       ],
     ],
@@ -357,7 +496,7 @@ Widget build(BuildContext context) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
+          const Text(
             'Source : ',
             style: TextStyle(
               fontSize: fontSize,
@@ -418,6 +557,15 @@ Widget build(BuildContext context) {
           logoSize: _sourceLogoSizeLpp,
           preserveAspectRatio: true,
         );
+      case SourceType.annuaireSanteRpps:
+        return _buildSourceRowWithAsset(
+          url: _rppsSourceUrl,
+          asset: _rppsSourceAsset,
+          onOpenUrl: onOpenUrl,
+          tooltip: _rppsSourceTooltip,
+          logoSize: _sourceLogoSize,
+          preserveAspectRatio: true,
+        );
       default:
         return null;
     }
@@ -442,21 +590,39 @@ Widget build(BuildContext context) {
       fontStyle: FontStyle.italic,
       color: Colors.black54,
     );
+    final openUrlFn = onOpenUrl ?? openUrl;
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         textRow,
-        Text(', ', style: commaStyle),
-        SizedBox(
-          width: logoSize,
-          height: logoSize,
-          child: Image.asset(
-            omeditAsset,
-            width: logoSize,
-            height: logoSize,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const SizedBox(width: logoSize, height: logoSize),
+        const Text(', ', style: commaStyle),
+        OffiboxTooltip(
+          message: _omeditVocSourceTooltip,
+          child: InkWell(
+            onTap: () => openUrlFn(_omeditVocSourceUrl),
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: logoSize,
+                    height: logoSize,
+                    child: Image.asset(
+                      omeditAsset,
+                      width: logoSize,
+                      height: logoSize,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const SizedBox(width: logoSize, height: logoSize),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('OMÉDIT', style: commaStyle),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -495,7 +661,7 @@ Widget build(BuildContext context) {
             children: [
               Text(
                 prefix,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: fontSize,
                   fontFamily: 'Spinnaker',
                   fontStyle: FontStyle.italic,
@@ -504,7 +670,7 @@ Widget build(BuildContext context) {
               ),
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: fontSize,
                   fontFamily: 'Spinnaker',
                   fontStyle: FontStyle.italic,
@@ -519,6 +685,7 @@ Widget build(BuildContext context) {
   }
 
   /// DM (pansements) : "Source :" + logo e-pansement (×1,5) avec tooltip "Fiche produit" + icône external link (couleur Offibox).
+  // ignore: unused_element
   static Widget _buildDmSourceRowWithExternalLink(SearchResult item, void Function(String url)? onOpenUrl) {
     const double fontSize = 11;
     final openUrlFn = onOpenUrl ?? openUrl;
@@ -529,7 +696,7 @@ Widget build(BuildContext context) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
+          const Text(
             'Source : ',
             style: TextStyle(
               fontSize: fontSize,
@@ -587,7 +754,7 @@ Widget build(BuildContext context) {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Source : ',
                 style: TextStyle(
                   fontSize: fontSize,

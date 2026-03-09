@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:offibox/utils/normalize.dart';
 
 /// CSV biosimilaires 2026 — chargé depuis [offiboxdata](https://github.com/AlexandrePerrault/offiboxdata).
 ///
@@ -137,7 +138,7 @@ Future<Map<String, String>> loadBiosimilairesInfoByCip() async {
 
     if (cip13.length != 13 || col5.isEmpty) continue;
 
-    map[cip13] = col5;
+    map[cip13] = normalizeText(col5);
   }
 
   return map;

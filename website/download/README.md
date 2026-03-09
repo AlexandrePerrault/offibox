@@ -1,8 +1,9 @@
 # Dossier de téléchargement
 
-Déposez ici le fichier MSI généré par votre build (ex. `Offibox-Setup-1.1.18.msi`) pour que le bouton **Téléchargement** de la page d’accueil propose le bon installateur.
+**Recommandation :** le site pointe désormais vers **GitHub Releases** pour le téléchargement du MSI (`https://github.com/AlexandrePerrault/offibox/releases/latest`). Aucun fichier à déposer ici pour le bouton « Télécharger ».
 
-- Le lien sur le site pointe vers `download/Offibox-Setup-1.1.18.msi`.
-- Après chaque nouvelle version, mettez à jour le nom du fichier dans `index.html` (et le numéro dans ce README si besoin).
+Si vous préférez héberger le MSI sur votre propre serveur :
+- Déposez ici le fichier MSI généré par votre build (ex. `Offibox-Setup-1.1.24.msi`).
+- Dans `index.html` et `telecharger.html`, remplacez l’URL du bouton par `download/Offibox-Setup-X.Y.Z.msi` (en mettant à jour le numéro à chaque release).
 
-Si vous hébergez le MSI ailleurs (GitHub Releases, CDN), remplacez l’attribut `href` du bouton par l’URL complète du fichier.
+Voir [docs/HEBERGEMENT_MSI.md](../../docs/HEBERGEMENT_MSI.md) pour les options d’hébergement (GitHub Releases, même serveur, CDN).

@@ -54,6 +54,7 @@ class _CataloguePdfViewerState extends State<CataloguePdfViewer> {
     _pdfFileFuture = PdfCacheService.getCachedPdf(
       pdfUrl: widget.pdfUrl,
       laboratory: widget.laboratory,
+      allowLarge: true,
     );
   }
 
@@ -307,7 +308,7 @@ class _CataloguePdfViewerState extends State<CataloguePdfViewer> {
                           const SizedBox(height: 12),
                           Text(
                             isTooLarge
-                                ? 'Document volumineux (${(err as PdfTooLargeException).sizeMo.toStringAsFixed(1)} Mo)'
+                                ? 'Document volumineux (${(err).sizeMo.toStringAsFixed(1)} Mo)'
                                 : isTimeout
                                     ? 'Le chargement est trop long'
                                     : 'Erreur chargement PDF',

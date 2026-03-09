@@ -12,11 +12,14 @@ class OffiboxLogoComplete extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/icons/logo_offibox_installer.png',
+    return SizedBox(
       height: height,
-      fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => _buildFallbackLogo(),
+      width: height * 2,
+      child: Image.asset(
+        'assets/icons/logo_offibox_installer.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => _buildFallbackLogo(),
+      ),
     );
   }
 

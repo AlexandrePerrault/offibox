@@ -70,7 +70,6 @@ class ResultLine1 extends StatelessWidget {
     final cisKeyBdm = item.source == SourceType.bdm && item.cis != null
         ? item.cis!.replaceAll(RegExp(r'\D'), '').trim()
         : '';
-    final labelRawBdm = item.labelRaw.trim();
     /// Statut fic03spe (R = Princeps, G = Générique) pour ce BDM ; prioritaire sur génériques 2026 pour les badges.
     final fic03Status = item.source == SourceType.bdm
         ? getFic03StatusForItem(item.cis, item.cip13, cip13ToFic03Status)
@@ -85,7 +84,7 @@ class ResultLine1 extends StatelessWidget {
 
     final cacheKey = useBdmFastPath
         ? 'bdm-fast-$cip13Clean-$cisKeyBdm-F$fic03Status-S${statutsForCis?.length ?? 0}-${tauxRemboursement ?? ''}-${compositionLine ?? ''}-${listes?.join('|') ?? ''}-H${hospitalCip13Set?.length ?? 0}-$isDisabled-$hasNsfpDate'
-        : '${item.source}-${item.source == SourceType.lpp ? item.cip13 : item.cip13 ?? item.label}::${query.toLowerCase()}::${statutsForCis?.join('|') ?? ''}::${tauxRemboursement ?? ''}::${compositionLine ?? ''}::${listes?.join('|') ?? ''}::H${hospitalCip13Set?.length ?? 0}::S${item.isStupefiant}::E${item.isException}::O${item.isOtc}::P${item.isPih}::H${item.hospitalOnly}::F$fic03Status${item.source == SourceType.dm ? '::${item.url ?? ''}' : ''}';
+        : '${item.source}-${item.source == SourceType.lpp ? item.cip13 : item.cip13 ?? item.label}::${query.toLowerCase()}::${item.commentaire}::${statutsForCis?.join('|') ?? ''}::${tauxRemboursement ?? ''}::${compositionLine ?? ''}::${listes?.join('|') ?? ''}::H${hospitalCip13Set?.length ?? 0}::S${item.isStupefiant}::E${item.isException}::O${item.isOtc}::P${item.isPih}::H${item.hospitalOnly}::F$fic03Status${item.source == SourceType.dm ? '::${item.url ?? ''}' : ''}::scale$scaleDownToFitLine1';
 
     final cachedSpans = SearchResultSpanCache.get(cacheKey, () {
       final spans = <InlineSpan>[];
@@ -105,6 +104,8 @@ class ResultLine1 extends StatelessWidget {
           hospitalCip13Set: hospitalCip13Set,
           hasNsfpDate: hasNsfpDate,
           context: context,
+          generiques2026ByCis: generiques2026ByCis,
+          cisKeyBdm: cisKeyBdm,
         );
         return spans;
       }
@@ -154,7 +155,7 @@ class ResultLine1 extends StatelessWidget {
                 width: 20,
                 height: 20,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Icon(
+                errorBuilder: (_, __, ___) => const Icon(
                   Icons.medical_services_outlined,
                   size: 20,
                   color: OffiboxColors.primary,
@@ -165,14 +166,21 @@ class ResultLine1 extends StatelessWidget {
         );
       }
 
-      // 💊 BDM — badge Princeps (R) ou Gé vert (G) selon fic03spe ; sinon pas de badge métier
       if (item.source == SourceType.bdm) {
         if (fic03Status == 'R') {
           spans.add(princepsSquareSpan());
           spans.add(const TextSpan(text: ' '));
-        } else if (fic03Status == 'G') {
+        } else if (fic03Status == 'G' || item.isGeneric == true) {
           spans.add(geSquareSpanGreen());
           spans.add(const TextSpan(text: ' '));
+        } else {
+          final generique2026Info = (generiques2026ByCis != null && cisKeyBdm.isNotEmpty)
+              ? generiques2026ByCis[cisKeyBdm]
+              : null;
+          if (generique2026Info != null && item.isGeneric != true) {
+            spans.add(princepsSquareSpan());
+            spans.add(const TextSpan(text: ' '));
+          }
         }
       }
 
@@ -225,7 +233,7 @@ class ResultLine1 extends StatelessWidget {
                 useLabIconStyle: true,
               ),
             ),
-          ));
+          ),);
         }
         // Ligne 1 laboratoires : Tél (col C), Fax (col D), Mail (col E) — même taille icônes + contour 3D
         if (item.phone != null && item.phone!.trim().isNotEmpty) {
@@ -295,7 +303,7 @@ class ResultLine1 extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.email_outlined, size: _labLine1IconInnerSize, color: Colors.black54),
+                          const Icon(Icons.email_outlined, size: _labLine1IconInnerSize, color: Colors.black54),
                           const SizedBox(width: 6),
                           Text('Mail : $email', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
                           const SizedBox(width: 6),
@@ -304,7 +312,7 @@ class ResultLine1 extends StatelessWidget {
                               Clipboard.setData(ClipboardData(text: email));
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mail copié'), duration: Duration(milliseconds: 900), behavior: SnackBarBehavior.floating));
                             },
-                            child: Icon(Icons.copy, size: _labLine1IconInnerSize, color: Colors.black54),
+                            child: const Icon(Icons.copy, size: _labLine1IconInnerSize, color: Colors.black54),
                           ),
                         ],
                       ),
@@ -391,8 +399,90 @@ class ResultLine1 extends StatelessWidget {
         spans.add(const TextSpan(text: ' '));
       }
 
-      // 🏷️ Mots-clés — ordre : badge "outils métier" → texte col B → logo col C → icône external link
+      // 📦 CERP — Catalogue / produits : texte + logo (si asset) + ouverture URL (si fournie)
+      if (item.source == SourceType.cerp) {
+        final url = item.catalogueUrl?.trim().isNotEmpty == true
+            ? item.catalogueUrl!.trim()
+            : item.url?.trim();
+        final libelle = (item.label.isNotEmpty ? item.label : item.labelRaw).trim().toUpperCase();
+
+        spans.add(const TextSpan(text: '📦 '));
+        if (libelle.isNotEmpty) {
+          final highlightSpans = highlightText(
+            context: context,
+            text: libelle,
+            searchQuery: query,
+            italic: isDisabled,
+            forceGrey: isDisabled,
+            disableBold: false,
+          );
+          if (url != null && url.isNotEmpty) {
+            spans.add(WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: InkWell(
+                onTap: () => onOpenUrl(url),
+                borderRadius: BorderRadius.circular(4),
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontFamily: 'Spinnaker',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDisabled ? Colors.grey.shade600 : Colors.black87,
+                    ),
+                    children: highlightSpans,
+                  ),
+                ),
+              ),
+            ),);
+          } else {
+            spans.addAll(highlightSpans);
+          }
+        }
+
+        final iconPath = item.iconUrl?.trim();
+        if (iconPath != null && iconPath.isNotEmpty) {
+          spans.add(const TextSpan(text: ' '));
+          spans.add(WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: logoWithTooltipZoom(
+                tooltip: 'CERP',
+                child: Container(
+                  width: _labLine1IconBoxSize,
+                  height: _labLine1IconBoxSize,
+                  padding: const EdgeInsets.all((_labLine1IconBoxSize - _labLine1IconInnerSize) / 2),
+                  decoration: _labLine1IconDecoration(),
+                  child: Center(
+                    child: _labIconWidget(iconPath, _labLine1IconInnerSize),
+                  ),
+                ),
+              ),
+            ),
+          ),);
+        }
+
+        if (url != null && url.isNotEmpty) {
+          spans.add(const TextSpan(text: ' '));
+          spans.add(WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: _SiteWebLinkExternalBadge(
+              url: url,
+              onOpenUrl: onOpenUrl,
+              useLabIconStyle: true,
+            ),
+          ),);
+        }
+        return spans;
+      }
+
+      // 🏷️ Mots-clés — en liste : uniquement common span ; en barre : badge + libellé + logo + lien
       if (item.source == SourceType.keyword) {
+        if (!scaleDownToFitLine1) {
+          spans.add(keywordPlusAndOutilsMetierSpan());
+          return spans;
+        }
         final hasKeywordIcon = item.iconUrl != null && item.iconUrl!.trim().isNotEmpty;
         final urlColC = item.url?.trim();
         final libelleColB = (item.commentaire ?? item.label).trim().toUpperCase();
@@ -431,6 +521,32 @@ class ResultLine1 extends StatelessWidget {
             spans.addAll(highlightSpans);
           }
         }
+        if (item.keywordAppearanceDate != null && item.keywordAppearanceDate!.trim().isNotEmpty) {
+          final date = item.keywordAppearanceDate!.trim();
+          spans.add(const TextSpan(text: ' '));
+          spans.add(WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Tooltip(
+              message: date,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade700,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'nouveau',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Spinnaker',
+                  ),
+                ),
+              ),
+            ),
+          ),);
+        }
         if (hasKeywordIcon) {
           spans.add(const TextSpan(text: ' '));
           spans.add(keywordLogoWrappedSpan(
@@ -446,7 +562,7 @@ class ResultLine1 extends StatelessWidget {
               url: urlColC,
               onOpenUrl: onOpenUrl,
             ),
-          ));
+          ),);
         }
       }
 
@@ -468,8 +584,12 @@ class ResultLine1 extends StatelessWidget {
         }
       }
 
-      // 🌐 Sites web — ligne 1 : badge "site internet" #ED1566 + nom col B (surbrillance) + [icône PDF] + logo col C ; clic nom/logo → url col D
+      // 🌐 Sites web — en liste : uniquement common span ; en barre : badge + nom col B + logo + lien
       if (item.source == SourceType.siteWeb) {
+        if (!scaleDownToFitLine1) {
+          spans.add(siteInternetBadgeSpan());
+          return spans;
+        }
         spans.add(siteInternetBadgeSpan());
         spans.add(const TextSpan(text: ' '));
         final nomColB = ((item.commentaire ?? item.label).trim()).toUpperCase();
@@ -541,14 +661,16 @@ class ResultLine1 extends StatelessWidget {
               url: urlColD,
               onOpenUrl: onOpenUrl,
             ),
-          ));
+          ),);
         }
       }
 
       // 🟪 Annuaires (CRPV, Centres anti poison, CHU) — logo annuaire + span + libellé + tél, fax (ligne 1)
       if (item.source == SourceType.pharmacovigilance ||
           item.source == SourceType.centresAntiPoison ||
-          item.source == SourceType.chu) {
+          item.source == SourceType.chu ||
+          item.source == SourceType.ceipAddictovigilance ||
+          item.source == SourceType.annuaireSanteRpps) {
         spans.add(WidgetSpan(
           alignment: PlaceholderAlignment.middle,
           child: Padding(
@@ -561,7 +683,7 @@ class ResultLine1 extends StatelessWidget {
               errorBuilder: (_, __, ___) => const SizedBox(width: 20, height: 20),
             ),
           ),
-        ));
+        ),);
         spans.add(annuaireSquareSpan());
         spans.add(const TextSpan(text: ' '));
         spans.addAll(
@@ -574,42 +696,41 @@ class ResultLine1 extends StatelessWidget {
             disableBold: false,
           ),
         );
-        if (item.phone != null && item.phone!.trim().isNotEmpty) {
+
+        // Ligne 1 annuaire RPPS : Docteur X, médecin (spé) uniquement. Tél/Fax → ligne 2 ; RPPS, MSS, Structures → ligne 3.
+        // MSS badge en ligne 3 (ResultLine3Actions)
+        // ignore: dead_code
+        if (false) {
+          final mss = item.mssanteEmail?.replaceAll('"', '').replaceAll("'", '').trim();
+          if (mss != null && mss.isNotEmpty) {
           spans.add(const TextSpan(text: ' '));
-          spans.add(WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: _wrapBadgeIfDisabled(
-                CodeBadgeWithCopy(
-                  label: 'Tél',
-                  value: item.phone!.replaceAll('"', '').replaceAll("'", ''),
-                  tooltip: 'Copier le numéro',
-                  leadingIcon: Icons.phone,
+          spans.add(
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: _wrapBadgeIfDisabled(
+                  OffiboxTooltip(
+                    message: 'MSSanté (cliquer pour écrire)',
+                    child: InkWell(
+                      onTap: () => openUrl('mailto:$mss'),
+                      borderRadius: BorderRadius.circular(8),
+                      child: CodeBadgeWithCopy(
+                        label: 'MSS',
+                        value: mss,
+                        tooltip: 'Copier l’adresse MSSanté',
+                        leadingIcon: Icons.verified_user,
+                      ),
+                    ),
+                  ),
+                  isDisabled,
                 ),
-                isDisabled,
               ),
             ),
-          ),);
+          );
+          }
         }
-        if (item.fax != null && item.fax!.trim().isNotEmpty) {
-          spans.add(const TextSpan(text: ' '));
-          spans.add(WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: _wrapBadgeIfDisabled(
-                CodeBadgeWithCopy(
-                  label: 'Fax',
-                  value: item.fax!.replaceAll('"', '').replaceAll("'", ''),
-                  tooltip: 'Copier le fax',
-                  leadingIcon: Icons.fax,
-                ),
-                isDisabled,
-              ),
-            ),
-          ),);
-        }
+
       }
 
       // 📘 LPP — ligne 1 : badge LPP + "CODE LPP: " + code + badge copier + libellé (source en ligne 2 uniquement)
@@ -671,7 +792,7 @@ class ResultLine1 extends StatelessWidget {
             ),
           );
         }
-      } else if (item.source != SourceType.keyword && item.source != SourceType.catalogue && item.source != SourceType.siteWeb && item.source != SourceType.codesActes && item.source != SourceType.pharmacovigilance && item.source != SourceType.centresAntiPoison && item.source != SourceType.chu) {
+      } else if (item.source != SourceType.keyword && item.source != SourceType.catalogue && item.source != SourceType.siteWeb && item.source != SourceType.codesActes && item.source != SourceType.pharmacovigilance && item.source != SourceType.centresAntiPoison && item.source != SourceType.chu && item.source != SourceType.ceipAddictovigilance && item.source != SourceType.annuaireSanteRpps) {
         String cleanLabel = cleanLabelLine1(label);
         if (item.source == SourceType.amc) {
           cleanLabel = cleanLabel.replaceFirst(
@@ -708,7 +829,7 @@ class ResultLine1 extends StatelessWidget {
           spans.add(TextSpan(
             recognizer: recognizer,
             children: labelSpans,
-          ));
+          ),);
         } else {
           spans.addAll(labelSpans);
         }
@@ -909,22 +1030,32 @@ void _buildBdmFastPathSpans({
   required Set<String>? hospitalCip13Set,
   required bool hasNsfpDate,
   required BuildContext context,
+  Map<String, Generique2026Info>? generiques2026ByCis,
+  String cisKeyBdm = '',
 }) {
   spans.add(
-    WidgetSpan(
+    const WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
-        padding: const EdgeInsets.only(right: 6),
-        child: Text('💊', style: const TextStyle(fontSize: 20)),
+        padding: EdgeInsets.only(right: 6),
+        child: Text('💊', style: TextStyle(fontSize: 20)),
       ),
     ),
   );
   if (fic03Status == 'R') {
     spans.add(princepsSquareSpan());
     spans.add(const TextSpan(text: ' '));
-  } else if (fic03Status == 'G') {
+  } else if (fic03Status == 'G' || item.isGeneric == true) {
     spans.add(geSquareSpanGreen());
     spans.add(const TextSpan(text: ' '));
+  } else {
+    final generique2026Info = (generiques2026ByCis != null && cisKeyBdm.isNotEmpty)
+        ? generiques2026ByCis[cisKeyBdm]
+        : null;
+    if (generique2026Info != null && item.isGeneric != true) {
+      spans.add(princepsSquareSpan());
+      spans.add(const TextSpan(text: ' '));
+    }
   }
   // BDM : badges STUPS / EXCEPTION / SURV / OTC / PIH / HOP après la gélule, avant le libellé (ligne 1).
   if (item.source == SourceType.bdm &&
@@ -977,7 +1108,7 @@ void _buildBdmFastPathSpans({
   final showPlusInfos = (statutsForCis != null && statutsForCis.isNotEmpty) ||
       (tauxRemboursement != null && tauxRemboursement.trim().isNotEmpty) ||
       (compositionLine != null && compositionLine.trim().isNotEmpty) ||
-      (listes != null && listes.isNotEmpty);
+      (listes.isNotEmpty);
   if (showPlusInfos && item.source != SourceType.bdm) {
     spans.add(const TextSpan(text: ' '));
     spans.add(
@@ -1204,7 +1335,7 @@ Widget _siteWebLogoWidget(String iconPath) {
             fit: BoxFit.contain,
           );
         }
-        return SizedBox(width: keywordLogoInnerSize, height: keywordLogoInnerSize);
+        return const SizedBox(width: keywordLogoInnerSize, height: keywordLogoInnerSize);
       },
     );
   } else {
@@ -1213,7 +1344,7 @@ Widget _siteWebLogoWidget(String iconPath) {
       width: keywordLogoInnerSize,
       height: keywordLogoInnerSize,
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => SizedBox(width: keywordLogoInnerSize, height: keywordLogoInnerSize),
+      errorBuilder: (_, __, ___) => const SizedBox(width: keywordLogoInnerSize, height: keywordLogoInnerSize),
     );
   }
   return Container(

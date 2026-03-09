@@ -8,6 +8,7 @@ class OffiboxLogo extends StatelessWidget {
     return Image.asset(
       'assets/icons/logo_offibox.png',
       height: 64,
+      fit: BoxFit.contain,
     );
   }
 }

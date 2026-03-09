@@ -6,9 +6,20 @@ class AppUpdateConfig {
   /// Repo GitHub pour les releases (format: owner/repo)
   static const String githubRepo = 'AlexandrePerrault/offibox';
 
-  /// URL de l'API GitHub Releases
+  /// URL de l'API GitHub Releases (appel interne uniquement, pas visible par le client).
   static String get latestReleaseUrl =>
       'https://api.github.com/repos/$githubRepo/releases/latest';
+
+  /// Page de téléchargement affichée aux clients (bouton « Télécharger », liens).
+  /// Les utilisateurs n’arrivent pas sur GitHub.
+  static const String publicDownloadPageUrl = 'https://offibox.fr/download';
+
+  /// Base URL pour l’installer Windows. Si défini, téléchargement depuis
+  /// [publicDownloadBaseUrl]/[windowsInstallerName]-[version].msi au lieu de GitHub.
+  static const String publicDownloadBaseUrl = 'https://offibox.fr/download';
+
+  /// Nom du fichier installer Windows (sans extension) pour l’URL publique.
+  static const String windowsInstallerName = 'Offibox';
 
   /// Clé SharedPreferences pour la date de dernière vérification
   static const String lastCheckKey = 'app_update_last_check';
@@ -19,8 +30,6 @@ class AppUpdateConfig {
   /// Extension de l'installer Windows recherchée (MSI généré par WiX)
   static const String windowsAssetExtension = '.msi';
 
-  /// URL affichée sur iOS quand une mise à jour est disponible (TestFlight, page de téléchargement, etc.).
-  /// Si null, utilise la page GitHub Releases latest.
-  static String get iosUpdateUrl =>
-      'https://github.com/$githubRepo/releases/latest';
+  /// URL affichée sur iOS quand une mise à jour est disponible.
+  static String get iosUpdateUrl => publicDownloadPageUrl;
 }

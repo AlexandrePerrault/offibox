@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:offibox/app/offibox_app.dart';
-import 'package:offibox/config/app_config.dart';
-import 'package:offibox/controllers/offibox_controller.dart';
 import 'package:offibox/core/filter_notifier.dart';
-import 'package:offibox/core/search_filter.dart';
-import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/providers/offibox_providers.dart';
+import 'package:offibox/ui/screens/scanner_screen.dart';
+import 'package:offibox/utils/scan_controller.dart';
 import 'package:offibox/services/app_update_service.dart';
 import 'package:offibox/window/widgets/update_available_dialog.dart';
 
 /// Full-screen message asking the user to rotate to landscape.
 class RotateToLandscapeMessage extends StatelessWidget {
-  const RotateToLandscapeMessage({super.key});
+  const RotateToLandscapeMessage({
+    super.key,
+    this.onScanPressed,
+  });
+
+  final VoidCallback? onScanPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +46,25 @@ class RotateToLandscapeMessage extends StatelessWidget {
                     height: 1.35,
                   ),
                 ),
+                if (onScanPressed != null) ...[
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: onScanPressed,
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('Scanner un code'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: OffiboxApp.offiboxTeal,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -61,6 +84,55 @@ class IosOffiboxShell extends ConsumerStatefulWidget {
 
 class _IosOffiboxShellState extends ConsumerState<IosOffiboxShell> {
   final TextEditingController _searchController = TextEditingController();
+
+  Future<void> _openScanner() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => ScannerScreen(
+          onScanned: (raw) {
+            final trimmed = raw.trim();
+            final lower = trimmed.toLowerCase();
+            if (lower.startsWith('http://') || lower.startsWith('https://')) {
+              launchUrl(
+                Uri.parse(trimmed),
+                mode: LaunchMode.externalApplication,
+              );
+              return;
+            }
+
+            final scan = ScanController();
+            scan.handle(
+              raw: raw,
+              onSearch: (q) {
+                ref.read(offiboxControllerProvider).filter(
+                      q,
+                      searchFilter: ref.read(searchFilterProvider),
+                    );
+                setState(() {});
+              },
+              onScanDataMatrix: (cip13, payload) {
+                ref.read(offiboxControllerProvider).filterFromScan(
+                      cip13,
+                      searchFilter: ref.read(searchFilterProvider),
+                      payload: payload,
+                    );
+                setState(() {});
+              },
+              onScanMutuelleQr: (codePref) {
+                ref.read(offiboxControllerProvider).filterFromScan(
+                      codePref,
+                      searchFilter: ref.read(searchFilterProvider),
+                      restrictToSource: SourceType.amc,
+                    );
+                setState(() {});
+              },
+            );
+          },
+        ),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
 
   @override
   void initState() {
@@ -90,7 +162,7 @@ class _IosOffiboxShellState extends ConsumerState<IosOffiboxShell> {
   Widget build(BuildContext context) {
     final orientation = MediaQuery.of(context).orientation;
     if (orientation == Orientation.portrait) {
-      return const RotateToLandscapeMessage();
+      return RotateToLandscapeMessage(onScanPressed: _openScanner);
     }
 
     final controller = ref.watch(offiboxControllerProvider);
@@ -143,6 +215,13 @@ class _IosOffiboxShellState extends ConsumerState<IosOffiboxShell> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
+                    icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                    tooltip: 'Scanner DataMatrix / QR',
+                    onPressed: () async {
+                      await _openScanner();
+                    },
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.menu, color: Colors.white),
                     onPressed: () {},
                   ),
@@ -171,7 +250,7 @@ class _IosOffiboxShellState extends ConsumerState<IosOffiboxShell> {
                           : ListView.builder(
                               itemCount: results.length,
                               itemBuilder: (context, index) {
-                                final result = results[index] as SearchResult;
+                                final result = results[index];
                                 return ListTile(
                                   title: Text(
                                     result.label,

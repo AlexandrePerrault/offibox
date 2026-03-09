@@ -111,6 +111,63 @@ SearchResult fromPharmacovigilanceRow(List<dynamic> row) {
   );
 }
 
+/// CEIP-A (centres addictovigilance) — même format CSV : nom (0), adresse_complete (1), tel (2), fax (3), mail (4).
+/// Affichage : "centre d'addictovigilance de/d' + ville" ; url = addictovigilance.fr pour le badge "site internet".
+SearchResult fromCeipAddictovigilanceRow(List<dynamic> row) {
+  final nom = normalizeText(_getCol(row, 0));
+  final adresse = normalizeAddressForStorage(_getCol(row, 1));
+  final tel = _getCol(row, 2);
+  final fax = _getCol(row, 3);
+  final mail = _getCol(row, 4);
+
+  if (nom.isEmpty) throw StateError('Ligne CEIP-A sans nom');
+
+  final ville = extractVilleFromNom(nom);
+  final displayLabelRaw = ville.isNotEmpty
+      ? (_villeStartsWithVowel(ville)
+          ? "centre d'addictovigilance d'${ville.toUpperCase()}"
+          : "centre d'addictovigilance de ${ville.toUpperCase()}")
+      : nom;
+  final displayLabel = displayLabelRaw.toUpperCase();
+
+  return SearchResult(
+    source: SourceType.ceipAddictovigilance,
+    label: displayLabel,
+    labelRaw: nom,
+    laboratory: '',
+    phone: tel.isNotEmpty ? tel : null,
+    fax: fax.isNotEmpty ? fax : null,
+    email: mail.isNotEmpty ? mail : null,
+    groupLabel: adresse.isNotEmpty ? adresse : null,
+    url: 'https://addictovigilance.fr/',
+  );
+}
+
+Future<List<SearchResult>> parseCeipAddictovigilance(String url) async {
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode != 200) throw Exception('Erreur HTTP CEIP-A');
+
+  var text = utf8.decode(response.bodyBytes, allowMalformed: true);
+  if (text.contains('\uFFFD') || (text.contains('?') && text.contains('H?'))) {
+    text = latin1.decode(response.bodyBytes);
+  }
+  text = text.replaceAll('\uFEFF', '').trim();
+  final rows = const CsvToListConverter(
+    fieldDelimiter: ',',
+    textDelimiter: '"',
+    eol: '\n',
+    shouldParseNumbers: false,
+  ).convert(text);
+
+  final results = <SearchResult>[];
+  for (var i = 1; i < rows.length; i++) {
+    try {
+      results.add(fromCeipAddictovigilanceRow(rows[i]));
+    } catch (_) {}
+  }
+  return results;
+}
+
 /// Charge le CSV depuis l'URL (virgule, guillemets).
 /// Tente UTF-8 puis Latin-1 si le texte contient des caractères de remplacement (mojibake).
 Future<List<SearchResult>> parsePharmacovigilance(String url) async {

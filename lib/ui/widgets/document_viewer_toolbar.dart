@@ -90,13 +90,15 @@ String shortUrlForDisplay(String url, {int maxLength = 50}) {
 }
 
 /// Chip "Source : [label]" pour la barre document. Si [url] est fourni, clic ouvre l'URL.
+/// [textColor] : si la barre a un fond blanc, passer Colors.black87 pour la lisibilité.
 Widget documentViewerSourceLabel({
   required String label,
   String? url,
+  Color? textColor,
 }) {
   final text = 'Source : $label';
-  const style = TextStyle(
-    color: Colors.white70,
+  final style = TextStyle(
+    color: textColor ?? Colors.white70,
     fontSize: 12,
     fontFamily: 'Spinnaker',
   );
@@ -120,12 +122,15 @@ Widget documentViewerSourceLabel({
   );
 }
 
+/// Couleur de fond par défaut de la barre document (teal).
+const Color _defaultToolbarBackground = Color(0xFF5A9094);
+
 /// Barre d'outils commune pour les panneaux PDF, Word, XLS, Web.
 /// Éléments : Imprimer, Télécharger, Élargir la fenêtre, Rechercher (loupe), Source, fermer.
 class DocumentViewerToolbar extends StatelessWidget {
   const DocumentViewerToolbar({
     super.key,
-    required this.onDownload,
+    this.onDownload,
     required this.onExpandFullscreen,
     required this.onClose,
     this.onPrint,
@@ -136,9 +141,14 @@ class DocumentViewerToolbar extends StatelessWidget {
     this.sourceWidget,
     this.trailingActionWidget,
     this.barHeight = 52,
+    this.downloadLabel = 'Télécharger ce fichier',
+    this.downloadTooltip = 'Télécharger ce fichier',
+    this.downloadIcon = Icons.download,
+    this.backgroundColor,
   });
 
-  final VoidCallback onDownload;
+  /// Si non null, affiche le pill d'action "Télécharger..." (ou custom via [downloadLabel]).
+  final VoidCallback? onDownload;
   final VoidCallback onExpandFullscreen;
   final VoidCallback onClose;
 
@@ -158,13 +168,22 @@ class DocumentViewerToolbar extends StatelessWidget {
   final Widget? trailingActionWidget;
 
   final double barHeight;
+  final String downloadLabel;
+  final String downloadTooltip;
+  final IconData downloadIcon;
+  /// Fond de la barre ; par défaut teal. Passer Colors.white pour un panneau tout blanc.
+  final Color? backgroundColor;
+
+  Color get _barColor => backgroundColor ?? _defaultToolbarBackground;
+  bool get _isLightBar => _barColor.computeLuminance() > 0.5;
 
   @override
   Widget build(BuildContext context) {
     final hasSearch = onSearchTap != null;
+    final hasDownload = onDownload != null;
 
     return Material(
-      color: const Color(0xFF5A9094),
+      color: _barColor,
       child: SizedBox(
         height: barHeight,
         child: Row(
@@ -181,14 +200,16 @@ class DocumentViewerToolbar extends StatelessWidget {
               ),
               const SizedBox(width: 10),
             ],
-            HoverPillButton(
-              icon: Icons.download,
-              label: 'Télécharger ce fichier',
-              tooltip: 'Télécharger ce fichier',
-              onTap: onDownload,
-              height: 34,
-            ),
-            const SizedBox(width: 10),
+            if (hasDownload) ...[
+              HoverPillButton(
+                icon: downloadIcon,
+                label: downloadLabel,
+                tooltip: downloadTooltip,
+                onTap: onDownload!,
+                height: 34,
+              ),
+              const SizedBox(width: 10),
+            ],
             HoverPillButton(
               icon: Icons.open_in_full,
               label: 'Élargir la fenêtre',
@@ -246,7 +267,8 @@ class DocumentViewerToolbar extends StatelessWidget {
               const SizedBox(width: 8),
             ],
             Material(
-              color: Colors.transparent,
+              color: _isLightBar ? _defaultToolbarBackground : _defaultToolbarBackground,
+              borderRadius: BorderRadius.circular(20),
               child: InkWell(
                 onTap: onClose,
                 borderRadius: BorderRadius.circular(20),

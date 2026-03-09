@@ -1,15 +1,21 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:offibox/config/app_config.dart';
 import 'package:offibox/constants/catalogue_cart_config.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
+import 'package:offibox/services/offibox_ocr_service.dart';
 import 'package:offibox/ui/widgets/catalogue_cart_panel.dart';
 import 'package:offibox/ui/widgets/document_viewer_toolbar.dart';
+import 'package:offibox/services/catalogue_price_catalog_service.dart';
 import 'package:offibox/services/pdf_cache.dart' show PdfCacheService, PdfTooLargeException;
 import 'package:offibox/utils/open_url.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:printing/printing.dart';
 
 /// Panneau PDF sous la barre. Format 16:9, largeur = largeur barre. Chargement via cache + pdfrx (recherche et surbrillance).
 class PdfPanelBelowBar extends StatefulWidget {
@@ -34,6 +40,7 @@ class PdfPanelBelowBar extends StatefulWidget {
 class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
   final PdfViewerController _controller = PdfViewerController();
   PdfTextSearcher? _textSearcher;
+  final GlobalKey _pdfRepaintKey = GlobalKey();
 
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -50,6 +57,8 @@ class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
   /// Panier catalogue (uniquement si URL dans CatalogueCartConfig).
   CatalogueCartNotifier? _cartNotifier;
   bool get _cartEnabled => CatalogueCartConfig.isCartEnabledForPdf(widget.pdfUrl);
+  bool _pricesLoaded = false;
+  bool _ocrRunning = false;
 
   /// Hauteur 16:9 par rapport à la largeur barre (sans le bandeau logo).
   double get _panelHeight => widget.barWidth * 9 / 16;
@@ -80,20 +89,51 @@ class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
     _pdfFileFuture = PdfCacheService.getCachedPdf(
       pdfUrl: widget.pdfUrl,
       laboratory: widget.laboratory.isEmpty ? 'document' : widget.laboratory,
+      allowLarge: _cartEnabled,
     );
+    if (_cartEnabled &&
+        AppConfig.cerpFeaturesEnabled &&
+        CatalogueCartConfig.cerpEquipmentPricesCsvUrl.trim().isNotEmpty) {
+      _loadPrices();
+    } else {
+      _pricesLoaded = false;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_closing) setState(() => _opacity = 1);
     });
   }
 
-  void _downloadFile() {
-    if (_closing) return;
-    openUrl(widget.pdfUrl);
+  Future<void> _loadPrices() async {
+    final url = CatalogueCartConfig.cerpEquipmentPricesCsvUrl.trim();
+    if (url.isEmpty) return;
+    final map = await CataloguePriceCatalogService.loadFromCsvUrl(url);
+    if (!mounted || _closing) return;
+    _cartNotifier?.setUnitPrices(map);
+    setState(() => _pricesLoaded = map.isNotEmpty);
   }
 
-  void _printFile() {
+  void _downloadFile() {
     if (_closing) return;
-    openUrl(widget.pdfUrl);
+    openUrlExternal(widget.pdfUrl);
+  }
+
+  Future<void> _printFile() async {
+    if (_closing) return;
+    final fileFuture = _pdfFileFuture;
+    if (fileFuture == null) return;
+    try {
+      final file = await fileFuture;
+      if (!mounted || _closing) return;
+      final bytes = await file.readAsBytes();
+      if (!mounted || _closing) return;
+      await Printing.layoutPdf(
+        name: 'Document',
+        onLayout: (_) async => bytes,
+      );
+    } catch (_) {
+      if (!mounted || _closing) return;
+      openUrlExternal(widget.pdfUrl);
+    }
   }
 
   void _clearSearch({bool clearText = false}) {
@@ -153,6 +193,9 @@ class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
         builder: (_, __) => CatalogueCartDialog(
           cart: _cartNotifier!,
           onClose: () => Navigator.of(context).pop(),
+          francoThresholdEur: CatalogueCartConfig.francoThresholdEur,
+          orderRecipientEmail: CatalogueCartConfig.orderRecipientEmail,
+          faxNumber: CatalogueCartConfig.faxNumber,
         ),
       ),
     );
@@ -212,6 +255,127 @@ class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
               child: const Text('Ajouter'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _runOcrOnVisiblePdf() async {
+    if (_closing || !_cartEnabled || _cartNotifier == null || _ocrRunning || !mounted) return;
+
+    final boundary =
+        _pdfRepaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('OCR indisponible (zone PDF non prête).'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _ocrRunning = true);
+    try {
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      final pngBytes = byteData?.buffer.asUint8List();
+      if (pngBytes == null || pngBytes.isEmpty) {
+        throw StateError('capture vide');
+      }
+
+      final codes = await OffiboxOcrService.extractCode7FromPngBytes(pngBytes);
+      if (!mounted) return;
+
+      if (codes.isEmpty) {
+        final msg = Platform.isWindows
+            ? 'Aucun code détecté. Sur Windows, installez Tesseract pour l’OCR (tesseract.exe dans le PATH).'
+            : 'Aucun code détecté sur la zone visible.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
+
+      await showDialog<void>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Codes détectés (OCR)'),
+          content: SizedBox(
+            width: 360,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: codes.length,
+              itemBuilder: (context, i) {
+                final code = codes[i];
+                return ListTile(
+                  dense: true,
+                  title: Text(
+                    code,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.add_shopping_cart),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showAddToCartDialog(code);
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fermer'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('OCR impossible: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _ocrRunning = false);
+    }
+  }
+
+  Widget _buildOcrButton() {
+    final enabled = _cartEnabled && _cartNotifier != null && !_closing;
+    return Tooltip(
+      message: Platform.isWindows
+          ? 'OCR codes (Windows: nécessite Tesseract)'
+          : 'OCR codes (détecte les codes 7 chiffres)',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? _runOcrOnVisiblePdf : null,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: _ocrRunning
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.text_snippet_outlined, size: 22, color: Colors.white),
+          ),
         ),
       ),
     );
@@ -416,6 +580,7 @@ class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
                   children: [
                     DocumentViewerToolbar(
                       barHeight: 52,
+                      backgroundColor: Colors.white,
                       onPrint: _printFile,
                       onDownload: _downloadFile,
                       onExpandFullscreen: _openFullscreen,
@@ -427,111 +592,140 @@ class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
                       sourceWidget: documentViewerSourceLabel(
                         label: widget.laboratory.isNotEmpty ? widget.laboratory : shortUrlForDisplay(widget.pdfUrl),
                         url: widget.pdfUrl,
+                        textColor: Colors.black87,
                       ),
                       trailingActionWidget: _cartEnabled && _cartNotifier != null
                           ? ListenableBuilder(
                               listenable: _cartNotifier!,
-                              builder: (_, __) => CatalogueCartIcon(
-                                itemCount: _cartNotifier!.totalItems,
-                                onTap: _openCartDialog,
+                              builder: (_, __) => Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildOcrButton(),
+                                  CatalogueCartIcon(
+                                    itemCount: _cartNotifier!.totalItems,
+                                    totalAmountEur: _pricesLoaded && !_cartNotifier!.hasUnknownPrices
+                                        ? _cartNotifier!.totalAmountEur
+                                        : null,
+                                    onTap: _openCartDialog,
+                                  ),
+                                ],
                               ),
                             )
                           : null,
                     ),
-                    // Zone PDF (16:9)
+                    // Zone PDF (16:9) avec fond gris clair + carte blanche pour mieux détacher le document.
                     Expanded(
-                      child: FutureBuilder<File>(
-                        future: _pdfFileFuture,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            final err = snapshot.error;
-                            final isTooLarge = err is PdfTooLargeException;
-                            final isTimeout = err is TimeoutException;
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      isTooLarge ? Icons.picture_as_pdf : Icons.error_outline,
-                                      size: 48,
-                                      color: isTooLarge ? Colors.orange.shade700 : Colors.red.shade300,
+                      child: Container(
+                        color: const Color(0xFFF3F4F6),
+                        padding: const EdgeInsets.all(8),
+                        child: RepaintBoundary(
+                          key: _pdfRepaintKey,
+                          child: FutureBuilder<File>(
+                            future: _pdfFileFuture,
+                            builder: (context, snapshot) {
+                              Widget child;
+                              if (snapshot.hasError) {
+                                final err = snapshot.error;
+                                final isTooLarge = err is PdfTooLargeException;
+                                final isTimeout = err is TimeoutException;
+                                child = Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          isTooLarge ? Icons.picture_as_pdf : Icons.error_outline,
+                                          size: 48,
+                                          color: isTooLarge ? Colors.orange.shade700 : Colors.red.shade300,
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          isTooLarge
+                                              ? 'Document volumineux (${(err).sizeMo.toStringAsFixed(1)} Mo)'
+                                              : isTimeout
+                                                  ? 'Le chargement est trop long'
+                                                  : 'Erreur chargement PDF',
+                                          style: TextStyle(
+                                            color: isTooLarge ? Colors.orange.shade900 : Colors.red.shade700,
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          isTooLarge
+                                              ? 'Pour un affichage plus rapide, ouvrez-le dans le navigateur.'
+                                              : 'Ouvrir dans le navigateur pour essayer ?',
+                                          style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        FilledButton.icon(
+                                          onPressed: () => openUrlExternal(widget.pdfUrl),
+                                          icon: const Icon(Icons.open_in_browser, size: 18),
+                                          label: const Text('Ouvrir dans le navigateur'),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      isTooLarge
-                                          ? 'Document volumineux (${(err as PdfTooLargeException).sizeMo.toStringAsFixed(1)} Mo)'
-                                          : isTimeout
-                                              ? 'Le chargement est trop long'
-                                              : 'Erreur chargement PDF',
-                                      style: TextStyle(
-                                        color: isTooLarge ? Colors.orange.shade900 : Colors.red.shade700,
-                                        fontSize: 14,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      isTooLarge
-                                          ? 'Pour un affichage plus rapide, ouvrez-le dans le navigateur.'
-                                          : 'Ouvrir dans le navigateur pour essayer ?',
-                                      style: const TextStyle(fontSize: 12, color: Colors.black54),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    FilledButton.icon(
-                                      onPressed: () => openUrl(widget.pdfUrl),
-                                      icon: const Icon(Icons.open_in_browser, size: 18),
-                                      label: const Text('Ouvrir dans le navigateur'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }
-                          final file = snapshot.data;
-                          if (file == null || !snapshot.hasData) {
-                            return const Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(color: Colors.teal),
-                                  SizedBox(height: 12),
-                                  Text(
-                                    'Chargement du PDF…',
-                                    style: TextStyle(fontSize: 13, color: Colors.black54),
                                   ),
-                                ],
-                              ),
-                            );
-                          }
-                          return PdfViewer.file(
-                            file.path,
-                            controller: _controller,
-                            params: PdfViewerParams(
-                              pagePaintCallbacks: _textSearcher != null
-                                  ? [
-                                      (Canvas canvas, Rect pageRect, PdfPage page) {
-                                        try {
-                                          final s = _textSearcher;
-                                          if (s == null || !s.hasMatches || s.matches.isEmpty) return;
-                                          s.pageTextMatchPaintCallback(canvas, pageRect, page);
-                                        } catch (_) {}
+                                );
+                              } else {
+                                final file = snapshot.data;
+                                if (file == null || !snapshot.hasData) {
+                                  child = const Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        CircularProgressIndicator(color: Colors.teal),
+                                        SizedBox(height: 12),
+                                        Text(
+                                          'Chargement du PDF…',
+                                          style: TextStyle(fontSize: 13, color: Colors.black54),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  child = PdfViewer.file(
+                                    file.path,
+                                    controller: _controller,
+                                    params: PdfViewerParams(
+                                      pagePaintCallbacks: _textSearcher != null
+                                          ? [
+                                              (Canvas canvas, Rect pageRect, PdfPage page) {
+                                                try {
+                                                  final s = _textSearcher;
+                                                  if (s == null || !s.hasMatches || s.matches.isEmpty) return;
+                                                  s.pageTextMatchPaintCallback(canvas, pageRect, page);
+                                                } catch (_) {}
+                                              },
+                                            ]
+                                          : null,
+                                      textSelectionParams: PdfTextSelectionParams(
+                                        onTextSelectionChange: _cartEnabled ? _onTextSelectionChange : null,
+                                      ),
+                                      onViewerReady: (_, __) {
+                                        if (_textSearcher != null) return;
+                                        _textSearcher = PdfTextSearcher(_controller)..addListener(_onSearchUpdate);
+                                        setState(() {});
                                       },
-                                    ]
-                                  : null,
-                              textSelectionParams: PdfTextSelectionParams(
-                                onTextSelectionChange: _cartEnabled ? _onTextSelectionChange : null,
-                              ),
-                              onViewerReady: (_, __) {
-                                if (_textSearcher != null) return;
-                                _textSearcher = PdfTextSearcher(_controller)..addListener(_onSearchUpdate);
-                                setState(() {});
-                              },
-                            ),
-                          );
-                        },
+                                    ),
+                                  );
+                                }
+                              }
+
+                              // Carte blanche avec léger rayon pour bien distinguer le document du fond.
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  color: Colors.white,
+                                  child: child,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   ],

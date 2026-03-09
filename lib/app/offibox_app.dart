@@ -1,10 +1,13 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:offibox/auth/auth_gate.dart';
 import 'package:offibox/auth/auth_state_provider.dart';
 import 'package:offibox/auth/offibox_protocol_listener_wrapper.dart';
+import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/ui/screens/ios_offibox_shell.dart';
 import 'package:offibox/ui/screens/login_screen.dart';
 import 'package:offibox/window/offibox_window.dart';
@@ -20,6 +23,16 @@ class OffiboxApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: const Locale('fr', 'FR'),
+      supportedLocales: const [
+        Locale('fr', 'FR'),
+        Locale('en'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
 
       theme: ThemeData(
         useMaterial3: false,
@@ -30,6 +43,13 @@ class OffiboxApp extends StatelessWidget {
         primaryTextTheme: GoogleFonts.spinnakerTextTheme(),
 
         scaffoldBackgroundColor: Colors.transparent,
+
+        /// Bords arrondis pour toutes les fenêtres modales (AlertDialog, Dialog, etc.).
+        dialogTheme: DialogThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
+          ),
+        ),
 
         popupMenuTheme: PopupMenuThemeData(
           color: offiboxTeal.withValues(alpha: 0.92),
@@ -82,16 +102,21 @@ class OffiboxApp extends StatelessWidget {
   }
 }
 
-/// Sous Windows, préchargeur puis fenêtre principale. Sous iOS, login ou shell selon auth.
+/// Sous Windows/Linux : première connexion = fenêtre de connexion (Google ou mail/mot de passe) ; sinon fenêtre principale.
+/// Sous iOS/Android : login ou shell selon auth.
 class _InitialRoute extends ConsumerWidget {
   const _InitialRoute();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux) {
+      final user = ref.watch(authStateProvider).valueOrNull;
+      if (user == null) {
+        return const AuthGate();
+      }
       return const WindowsPreloadWrapper(child: OffiboxWindow());
     }
-    if (Platform.isIOS) {
+    if (Platform.isIOS || Platform.isAndroid) {
       final user = ref.watch(authStateProvider).valueOrNull;
       if (user == null) {
         return const LoginScreen();

@@ -1,4 +1,4 @@
-// Export des feuilles Pharmacovigilance, Centres anti poison et CHU vers GitHub (CSV).
+// Export des feuilles Pharmacovigilance, Centres anti poison, CHU et Addictovigilance (CEIP-A) vers GitHub (CSV).
 // À utiliser dans un Google Sheet (Extensions → Apps Script). Propriété : GITHUB_TOKEN.
 
 var OUTILS_METIER_CONFIG = {
@@ -8,8 +8,11 @@ var OUTILS_METIER_CONFIG = {
 };
 
 function pushSheetToGitHub(sheetName, fileName) {
-  if (!sheetName) throw new Error('Nom de feuille manquant');
-  if (!fileName) throw new Error('Nom de fichier manquant');
+  // Si appelée sans arguments (menu ou exécution directe), lancer l'export complet
+  if (!sheetName || !fileName) {
+    exportKeywords();
+    return;
+  }
 
   var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   if (!token) throw new Error('Token GitHub non configuré.');
@@ -17,6 +20,7 @@ function pushSheetToGitHub(sheetName, fileName) {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet) throw new Error('Ce script doit être lié au Google Sheet (Extensions → Apps Script).');
 
+  // Recherche exacte (plus simple, plus fiable)
   var sheet = spreadsheet.getSheetByName(sheetName);
   if (!sheet) {
     var noms = spreadsheet.getSheets().map(function(s) { return s.getName(); }).join(', ');
@@ -75,9 +79,28 @@ function pushSheetToGitHub(sheetName, fileName) {
   }
 }
 
-/** Exporte Pharmacovigilance, Centres anti poison et CHU vers GitHub. */
+/** Exporte Pharmacovigilance, Centres anti poison, CHU et Addictovigilance (CEIP-A) vers GitHub. */
 function exportKeywords() {
   pushSheetToGitHub('pharmacovigilance', 'pharmacovigilance.csv');
   pushSheetToGitHub('Centres anti poison', 'centres_anti_poison.csv');
   pushSheetToGitHub('CHU', 'chu.csv');
+  // Addictovigilance : essayer plusieurs noms de feuille (Addictovigilance, addictovigilance, CEIP-A)
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var addictoSheet = spreadsheet.getSheetByName('Addictovigilance')
+    || spreadsheet.getSheetByName('addictovigilance')
+    || spreadsheet.getSheetByName('CEIP-A');
+  if (addictoSheet) {
+    pushSheetToGitHub(addictoSheet.getName(), 'ceip_addictovigilance.csv');
+  } else {
+    var noms = spreadsheet.getSheets().map(function(s) { return s.getName(); }).join(', ');
+    Logger.log('⚠️ Feuille Addictovigilance introuvable (noms essayés : Addictovigilance, addictovigilance, CEIP-A). Feuilles disponibles : ' + noms);
+  }
+}
+
+/** Ajoute un menu "Export GitHub" au classeur (Exporter vers GitHub). */
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Export GitHub')
+    .addItem('Exporter vers GitHub (pharmacovigilance, centres anti poison, CHU, addictovigilance)', 'exportKeywords')
+    .addToUi();
 }

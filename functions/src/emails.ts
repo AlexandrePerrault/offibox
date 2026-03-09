@@ -210,3 +210,51 @@ export const sendIdeasEmailHttp = onRequest(runOpts, async (req, res) => {
     });
   }
 });
+
+/** Formulaire "Contact" (sans ouvrir Outlook / mailto) → envoie à contact@offibox.fr */
+export const sendContactEmail = onCall(runOpts, async (request) => {
+  const data = request.data as
+    | {
+        nom?: string;
+        prenom?: string;
+        email?: string;
+        pharmacie?: string;
+        telephone?: string;
+        subject?: string;
+        message?: string;
+      }
+    | undefined;
+
+  const nom = typeof data?.nom === "string" ? data.nom.trim() : "";
+  const prenom = typeof data?.prenom === "string" ? data.prenom.trim() : "";
+  const email = typeof data?.email === "string" ? data.email.trim() : "";
+  const pharmacie = typeof data?.pharmacie === "string" ? data.pharmacie.trim() : "";
+  const telephone = typeof data?.telephone === "string" ? data.telephone.trim() : "";
+  const subjectRaw = typeof data?.subject === "string" ? data.subject.trim() : "";
+  const message = typeof data?.message === "string" ? data.message.trim() : "";
+
+  if (!message) {
+    return { success: false, error: "Message vide" };
+  }
+
+  const subject = subjectRaw ? `Contact Offibox — ${subjectRaw}` : "Contact Offibox";
+  const text = [
+    "Message reçu depuis le formulaire Contact (app Offibox).",
+    "",
+    nom ? `Nom : ${nom}` : "",
+    prenom ? `Prénom : ${prenom}` : "",
+    email ? `Mail : ${email}` : "",
+    pharmacie ? `Pharmacie : ${pharmacie}` : "",
+    telephone ? `Téléphone : ${telephone}` : "",
+    request.auth?.uid ? `UID : ${request.auth.uid}` : "",
+    request.auth?.token?.email ? `Compte : ${String(request.auth.token.email)}` : "",
+    "",
+    "—",
+    message,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const delivery = await sendEmail(IDEAS_RECIPIENT, subject, text);
+  return { success: true, to: IDEAS_RECIPIENT, delivery };
+});

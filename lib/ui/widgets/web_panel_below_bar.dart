@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FilterQuality;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +31,7 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   Timer? _searchDebounce;
+  StreamSubscription<LoadingState>? _loadingSubscription;
 
   double _opacity = 0;
   bool _closing = false;
@@ -76,11 +78,29 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
     }
   }
 
+  Future<void> _injectBlackTextStyle() async {
+    if (!_webViewController.value.isInitialized || _closing) return;
+    try {
+      await _webViewController.executeScript('''
+        (function() {
+          var s = document.createElement('style');
+          s.id = 'offibox-webview-text-black';
+          s.textContent = 'body, body *, p, span, div, a, li, td, th, h1, h2, h3, h4, [class] { color: #000 !important; }';
+          (document.head || document.documentElement).appendChild(s);
+          return 'ok';
+        })();
+      ''');
+    } catch (_) {}
+  }
+
   Future<void> _initWebView() async {
     try {
       await _webViewController.initialize();
       await _webViewController.setBackgroundColor(Colors.white);
       await _webViewController.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+      _loadingSubscription = _webViewController.loadingState.listen((LoadingState state) {
+        if (state == LoadingState.navigationCompleted) _injectBlackTextStyle();
+      });
       await _webViewController.loadUrl(widget.url.trim());
       if (!mounted) return;
       setState(() {});
@@ -127,7 +147,7 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
 
   void _printPage() {
     if (_closing) return;
-    openUrl(widget.url);
+    openUrlExternal(widget.url);
   }
 
   Widget _buildSearchBarContent() {
@@ -136,10 +156,10 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
       focusNode: _searchFocusNode,
       decoration: InputDecoration(
         hintText: 'Rechercher...',
-        hintStyle: TextStyle(color: Colors.white70, fontSize: 13),
-        prefixIcon: Icon(Icons.search, size: 20, color: Colors.white70),
+        hintStyle: const TextStyle(color: Colors.white70, fontSize: 13),
+        prefixIcon: const Icon(Icons.search, size: 20, color: Colors.white70),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.2),
+        fillColor: Colors.white.withValues(alpha: 0.35),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide.none),
         isDense: true,
       ),
@@ -159,7 +179,7 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: Colors.white.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(6),
           ),
           child: const Text('Résultat', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
@@ -212,7 +232,7 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
           const SizedBox(height: 12),
           TextButton.icon(
             onPressed: () {
-              openUrl(widget.url);
+              openUrlExternal(widget.url);
               _closeWithFade();
             },
             icon: const Icon(Icons.open_in_browser, size: 18),
@@ -225,10 +245,13 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
 
   @override
   void dispose() {
+    _loadingSubscription?.cancel();
     _searchDebounce?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();
-    _webViewController.dispose();
+    if (_webViewController.value.isInitialized) {
+      _webViewController.dispose();
+    }
     super.dispose();
   }
 
@@ -239,7 +262,7 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
       child: Material(
-        color: Colors.transparent,
+        color: Colors.white,
         child: Container(
           width: double.infinity,
           height: _panelHeight,
@@ -261,8 +284,12 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
               children: [
                 DocumentViewerToolbar(
                   barHeight: 44,
-                  onPrint: _printPage,
-                  onDownload: () => openUrl(widget.url),
+                  backgroundColor: Colors.white,
+                  onPrint: null,
+                  onDownload: () => openUrlExternal(widget.url),
+                  downloadLabel: 'Ouvrir dans navigateur',
+                  downloadTooltip: 'Ouvrir dans le navigateur',
+                  downloadIcon: Icons.open_in_browser,
                   onExpandFullscreen: _openFullscreen,
                   onClose: _closeWithFade,
                   onSearchTap: isWindows && !_initError && _webViewController.value.isInitialized
@@ -276,26 +303,48 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
                   sourceWidget: documentViewerSourceLabel(
                     label: shortUrlForDisplay(widget.url),
                     url: widget.url,
+                    textColor: Colors.black87,
                   ),
                 ),
                 Expanded(
-                  child: isWindows
-                      ? (_initError
-                          ? _buildFallback()
-                          : _webViewController.value.isInitialized
-                              ? Webview(
-                                  _webViewController,
-                                  permissionRequested: (
-                                    String url,
-                                    WebviewPermissionKind kind,
-                                    bool isUserInitiated,
-                                  ) async =>
-                                      WebviewPermissionDecision.allow,
-                                )
-                              : const Center(
-                                  child: CircularProgressIndicator(color: Colors.teal),
-                                ))
-                      : _buildFallback(),
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: ColoredBox(
+                        color: Colors.white,
+                        child: isWindows
+                            ? (_initError
+                                ? _buildFallback()
+                                : _webViewController.value.isInitialized
+                                    ? LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          final dpr = MediaQuery.devicePixelRatioOf(context);
+                                          final w = (constraints.maxWidth * dpr).floorToDouble() / dpr;
+                                          final h = (constraints.maxHeight * dpr).floorToDouble() / dpr;
+                                          return Webview(
+                                            _webViewController,
+                                            width: w,
+                                            height: h,
+                                            scaleFactor: dpr,
+                                            filterQuality: FilterQuality.none,
+                                            permissionRequested: (
+                                              String url,
+                                              WebviewPermissionKind kind,
+                                              bool isUserInitiated,
+                                            ) async =>
+                                                WebviewPermissionDecision.allow,
+                                          );
+                                        },
+                                      )
+                                    : const Center(
+                                        child: CircularProgressIndicator(color: Colors.teal),
+                                      ))
+                            : _buildFallback(),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -318,6 +367,7 @@ class _WebFullscreenContent extends StatefulWidget {
 
 class _WebFullscreenContentState extends State<_WebFullscreenContent> {
   final WebviewController _controller = WebviewController();
+  StreamSubscription<LoadingState>? _loadingSubscription;
   bool _initialized = false;
 
   @override
@@ -326,10 +376,28 @@ class _WebFullscreenContentState extends State<_WebFullscreenContent> {
     _init();
   }
 
+  Future<void> _injectBlackTextStyle() async {
+    if (!_controller.value.isInitialized) return;
+    try {
+      await _controller.executeScript('''
+        (function() {
+          var s = document.createElement('style');
+          s.id = 'offibox-webview-text-black';
+          s.textContent = 'body, body *, p, span, div, a, li, td, th, h1, h2, h3, h4, [class] { color: #000 !important; }';
+          (document.head || document.documentElement).appendChild(s);
+          return 'ok';
+        })();
+      ''');
+    } catch (_) {}
+  }
+
   Future<void> _init() async {
     try {
       await _controller.initialize();
       await _controller.setBackgroundColor(Colors.white);
+      _loadingSubscription = _controller.loadingState.listen((LoadingState state) {
+        if (state == LoadingState.navigationCompleted) _injectBlackTextStyle();
+      });
       await _controller.loadUrl(widget.url.trim());
       if (mounted) setState(() => _initialized = true);
     } catch (_) {
@@ -339,7 +407,10 @@ class _WebFullscreenContentState extends State<_WebFullscreenContent> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _loadingSubscription?.cancel();
+    if (_controller.value.isInitialized) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -350,14 +421,25 @@ class _WebFullscreenContentState extends State<_WebFullscreenContent> {
         child: CircularProgressIndicator(color: Colors.white),
       );
     }
-    return Webview(
-      _controller,
-      permissionRequested: (
-        String url,
-        WebviewPermissionKind kind,
-        bool isUserInitiated,
-      ) async =>
-          WebviewPermissionDecision.allow,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final dpr = MediaQuery.devicePixelRatioOf(context);
+        final w = (constraints.maxWidth * dpr).floorToDouble() / dpr;
+        final h = (constraints.maxHeight * dpr).floorToDouble() / dpr;
+        return Webview(
+          _controller,
+          width: w,
+          height: h,
+          scaleFactor: dpr,
+          filterQuality: FilterQuality.none,
+          permissionRequested: (
+            String url,
+            WebviewPermissionKind kind,
+            bool isUserInitiated,
+          ) async =>
+              WebviewPermissionDecision.allow,
+        );
+      },
     );
   }
 }

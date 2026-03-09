@@ -61,12 +61,18 @@ class AppUpdateService {
       }
 
       String? downloadUrl;
-      for (final a in assets) {
-        final map = a as Map<String, dynamic>;
-        final name = map['browser_download_url'] as String? ?? '';
-        if (name.toLowerCase().endsWith(AppUpdateConfig.windowsAssetExtension)) {
-          downloadUrl = name;
-          break;
+      final baseUrl = AppUpdateConfig.publicDownloadBaseUrl.trim();
+      if (baseUrl.isNotEmpty) {
+        final base = baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';
+        downloadUrl = '${base}${AppUpdateConfig.windowsInstallerName}-$versionStr${AppUpdateConfig.windowsAssetExtension}';
+      } else {
+        for (final a in assets) {
+          final map = a as Map<String, dynamic>;
+          final url = map['browser_download_url'] as String? ?? '';
+          if (url.toLowerCase().endsWith(AppUpdateConfig.windowsAssetExtension)) {
+            downloadUrl = url;
+            break;
+          }
         }
       }
       if (downloadUrl != null) {

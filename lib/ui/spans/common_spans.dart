@@ -666,7 +666,7 @@ Widget logoWithTooltipZoom({
   required Widget child,
   required String tooltip,
 }) {
-  return _LogoTooltipZoom(child: child, tooltip: tooltip);
+  return _LogoTooltipZoom(tooltip: tooltip, child: child);
 }
 
 class _LogoTooltipZoom extends StatefulWidget {
@@ -844,12 +844,56 @@ const double keywordLogoInnerSize = injectedLogoInnerSize;
 /// Normalise un chemin d'asset (antislashs → slashes) pour le bundle Flutter.
 String _normalizeAssetPath(String path) => path.trim().replaceAll(r'\', '/');
 
+/// Chemin avec extension remplacée par .webp (fallback pour assets/images).
+String _assetPathToWebp(String path) {
+  final lower = path.toLowerCase();
+  if (lower.endsWith('.png')) return path.substring(0, path.length - 4) + '.webp';
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return path.substring(0, path.length - (lower.endsWith('.jpeg') ? 5 : 4)) + '.webp';
+  return path;
+}
+
+/// 🟢 Mots-clés / Sites web — logo (asset col C) dans un widget blanc à bords arrondis. Gère .svg, .png et .webp.
+Widget _keywordLogoImageWidget(String path) {
+  final lower = path.toLowerCase();
+  final isSvg = lower.endsWith('.svg');
+  if (isSvg) {
+    return FutureBuilder<bool>(
+      future: rootBundle.load(path).then((_) => true, onError: (_, __) => false),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data == true) {
+          return SvgPicture.asset(
+            path,
+            width: injectedLogoInnerSize,
+            height: injectedLogoInnerSize,
+            fit: BoxFit.contain,
+          );
+        }
+        return const SizedBox(width: injectedLogoInnerSize, height: injectedLogoInnerSize);
+      },
+    );
+  }
+  return Image.asset(
+    path,
+    width: injectedLogoInnerSize,
+    height: injectedLogoInnerSize,
+    fit: BoxFit.contain,
+    errorBuilder: (_, __, ___) => Image.asset(
+      _assetPathToWebp(path),
+      width: injectedLogoInnerSize,
+      height: injectedLogoInnerSize,
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) => const SizedBox(width: injectedLogoInnerSize, height: injectedLogoInnerSize),
+    ),
+  );
+}
+
 /// 🟢 Mots-clés — logo (asset) dans un widget blanc à bords arrondis et légère ombre, taille uniforme avec sites web. Zoom x1.5 au tooltip.
 WidgetSpan keywordLogoWrappedSpan({
   required String iconAssetPath,
   String? tooltip,
 }) {
   final path = _normalizeAssetPath(iconAssetPath);
+  if (path.isEmpty) return const WidgetSpan(alignment: PlaceholderAlignment.middle, child: SizedBox.shrink());
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
     child: Padding(
@@ -873,13 +917,7 @@ WidgetSpan keywordLogoWrappedSpan({
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: Image.asset(
-              path,
-              width: injectedLogoInnerSize,
-              height: injectedLogoInnerSize,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            ),
+            child: _keywordLogoImageWidget(path),
           ),
         ),
       ),
@@ -887,7 +925,7 @@ WidgetSpan keywordLogoWrappedSpan({
   );
 }
 
-/// 🟢 Mots-clés — icône personnalisée (ex. BDNM) dans la barre, même emplacement fixe que le bloc +
+/// 🟢 Mots-clés — icône personnalisée (ex. BDNM) dans la barre. Gère .png, .webp, .jpg.
 WidgetSpan keywordCustomIconSpan({required String iconAssetPath}) {
   final path = _normalizeAssetPath(iconAssetPath);
   return WidgetSpan(
@@ -898,7 +936,11 @@ WidgetSpan keywordCustomIconSpan({required String iconAssetPath}) {
       child: Image.asset(
         path,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        errorBuilder: (_, __, ___) => Image.asset(
+          _assetPathToWebp(path),
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        ),
       ),
     ),
   );

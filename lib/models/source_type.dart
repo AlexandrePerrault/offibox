@@ -17,6 +17,8 @@ enum SourceType {
   pharmacovigilance,
   centresAntiPoison,
   chu,
+  ceipAddictovigilance,
+  annuaireSanteRpps,
   codesActes,
 }
 
@@ -45,6 +47,8 @@ extension SourceTypePriority on SourceType {
       case SourceType.pharmacovigilance:
       case SourceType.centresAntiPoison:
       case SourceType.chu:
+      case SourceType.ceipAddictovigilance:
+      case SourceType.annuaireSanteRpps:
         return 5;
     }
   }

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +19,7 @@ import 'package:offibox/services/google_calendar_desktop_auth.dart';
 import 'package:offibox/ui/widgets/debug_banner.dart';
 import 'package:offibox/window/widgets/about_dialog.dart';
 import 'package:offibox/ui/widgets/hamburger_menu.dart';
+import 'package:offibox/window/widgets/account_dialog.dart';
 import 'package:offibox/window/widgets/offibox_top_bar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -69,9 +70,10 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     );
     try {
       final info = await AppUpdateService.checkForUpdate(force: true);
-      if (info != null && mounted) {
+      if (!context.mounted) return;
+      if (info != null) {
         Navigator.of(context).pop();
-        if (!mounted) return;
+        if (!context.mounted) return;
         showDialog<void>(
           context: context,
           barrierDismissible: false,
@@ -96,17 +98,19 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           ),
         );
         await AppUpdateService.downloadAndOpen(info);
-        if (mounted) Navigator.of(context).pop();
-      } else if (mounted) {
+        if (!context.mounted) return;
+        Navigator.of(context).pop();
+      } else {
         Navigator.of(context).pop();
       }
     } catch (_) {
-      if (mounted) Navigator.of(context).pop();
+      if (context.mounted) Navigator.of(context).pop();
     }
     try {
-      if (mounted && GoogleCalendarDesktopAuth.isNeeded) {
+      if (!context.mounted) return;
+      if (GoogleCalendarDesktopAuth.isNeeded) {
         await GoogleCalendarDesktopAuth.signIn();
-        if (mounted) ref.invalidate(calendarEventsProvider);
+        if (context.mounted) ref.invalidate(calendarEventsProvider);
       }
     } catch (_) {}
   }
@@ -266,6 +270,14 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                   },
                   onMinimize: () {},
                   onClose: () => SystemNavigator.pop(),
+                  onShowAccount: authAsync.valueOrNull == null
+                      ? null
+                      : () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (_) => const AccountDialog(),
+                          );
+                        },
                   onShowAbout: () async {
                     final packageInfo = await PackageInfo.fromPlatform();
                     if (!context.mounted) return;

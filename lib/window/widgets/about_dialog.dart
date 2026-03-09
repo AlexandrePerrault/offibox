@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:offibox/generated/annuaire_ps_count.dart';
+import 'package:offibox/generated/build_info.dart';
 import 'package:offibox/models/search_result.dart';
+
+export 'package:offibox/generated/build_info.dart' show kVersionDate;
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/utils/open_url.dart';
-
-/// Date de version au format JJ/MM/AAAA (à mettre à jour à chaque release / build).
-const String kVersionDate = '27/02/2026';
 
 /// URL officielle de la base de données publique des médicaments.
 const String kBdpmBaseUrl = 'http://base-donnees-publique.medicaments.gouv.fr';
@@ -29,20 +30,18 @@ Format de données et lien entre les différents fichiers :
 Le lien suivant vous permet d'accéder à un fichier décrivant le contenu, le format et les liens existants entre les fichiers mis à disposition : $kBdpmBaseUrl
 ''';
 
-/// Familles affichées dans l'ordre (label, source). Dernière ligne = GIE sesame vitale (AMO).
-const List<({String label, SourceType source})> _aboutFamilies = [
+/// Familles affichées dans l'ordre (label, source).
+/// Une seule ligne « Annuaire » (pharmacovigilance + RPPS). Centres anti poison et CHU exclus. AMO = Organismes obligatoires (ex‑GIE Sésame Vitale).
+const List<({String label, SourceType? source})> _aboutFamilies = [
   (label: 'Médicaments (BDM)', source: SourceType.bdm),
   (label: 'Dispositifs médicaux', source: SourceType.dm),
   (label: 'Médicaments vétérinaires', source: SourceType.veto),
   (label: 'codes LPP', source: SourceType.lpp),
   (label: 'Mutuelles (AMC)', source: SourceType.amc),
-  (label: 'Annuaire', source: SourceType.pharmacovigilance),
-  (label: 'Centres anti poison', source: SourceType.centresAntiPoison),
-  (label: 'CHU', source: SourceType.chu),
+  (label: 'Organismes obligatoires (AMO)', source: SourceType.amo),
   (label: 'Mots-clés', source: SourceType.keyword),
   (label: 'Sites web', source: SourceType.siteWeb),
   (label: 'Catalogues laboratoires', source: SourceType.catalogue),
-  (label: 'GIE sesame vitale', source: SourceType.amo),
 ];
 
 /// Nombre de codes actes (référentiel Pharmaprat, fichier data/codes_actes_pharmacie.csv).
@@ -55,32 +54,54 @@ bool _isPdfUrl(String? url) {
 }
 
 /// Nombre de résultats dont l’URL (ou catalogueUrl) pointe vers un PDF.
-int countPdfDocumentUrls(List<SearchResult> allResults) {
-  return allResults
-      .where((r) =>
-          r.isPdf == true ||
-          _isPdfUrl(r.url) ||
-          _isPdfUrl(r.catalogueUrl))
-      .length;
+/// True si le résultat a au moins un lien PDF (url, catalogueUrl, meddispar, badges, rcpVeto) ou isPdf.
+bool _resultHasPdf(SearchResult r) {
+  if (r.isPdf == true) return true;
+  if (_isPdfUrl(r.url)) return true;
+  if (_isPdfUrl(r.catalogueUrl)) return true;
+  if (_isPdfUrl(r.meddisparUrl)) return true;
+  if (_isPdfUrl(r.rcpVetoUrl)) return true;
+  if (_isPdfUrl(r.badge1Url)) return true;
+  if (_isPdfUrl(r.badge2Url)) return true;
+  if (_isPdfUrl(r.badge3Url)) return true;
+  if (_isPdfUrl(r.badge4Url)) return true;
+  return false;
 }
 
-/// Compte les résultats par famille pour l'À propos.
-List<({String label, int count})> countByFamilyForAbout(List<SearchResult> allResults) {
+int countPdfUrls(List<SearchResult> allResults) {
+  return allResults.where(_resultHasPdf).length;
+}
+
+int countPdfDocuments(List<SearchResult> allResults) {
+  return allResults.where((r) => r.isPdf == true).length;
+}
+
+/// Compte les résultats par famille pour l'À propos. Un seul passage sur [allResults] pour limiter le coût.
+List<({String label, int count, String? countDisplay})> countByFamilyForAbout(List<SearchResult> allResults) {
+  final counts = <SourceType, int>{};
+  int pdfCount = 0;
+  for (final r in allResults) {
+    counts[r.source] = (counts[r.source] ?? 0) + 1;
+    if (_resultHasPdf(r)) pdfCount++;
+  }
   final fromSources = _aboutFamilies
+      .where((e) => e.source != null)
       .map((e) => (
             label: e.label,
-            count: allResults.where((r) => r.source == e.source).length,
+            count: counts[e.source] ?? 0,
+            countDisplay: null,
           ),)
       .toList();
-  final pdfCount = countPdfDocumentUrls(allResults);
   return [
     ...fromSources,
-    (label: 'Codes actes', count: kCodesActesCount),
-    (label: 'Documents PDF', count: pdfCount),
+    (label: 'Annuaire PS', count: kAnnuairePsTotalHorsAppli, countDisplay: null),
+    (label: 'Codes actes', count: kCodesActesCount, countDisplay: null),
+    (label: 'PDF', count: pdfCount, countDisplay: null),
   ];
 }
 
 /// Dialogue À propos : logo à gauche, version + date, liste des produits indexés par famille.
+/// Pour « Annuaire PS », le total est récupéré via l’API data.gouv.fr). Pas d'appel API à l'ouverture.
 class OffiboxAboutDialog extends StatelessWidget {
   const OffiboxAboutDialog({
     super.key,
@@ -91,15 +112,17 @@ class OffiboxAboutDialog extends StatelessWidget {
 
   final String version;
   final String versionDate;
-  final List<({String label, int count})> countsByFamily;
+  final List<({String label, int count, String? countDisplay})> countsByFamily;
+
+  static const Color _labelColor = Color(0xFF1A1A1A);
+  static const double _rowFontSize = 14;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Couleur texte pleine opacité pour éviter un rendu pâle selon le thème
-    final textColor = theme.colorScheme.onSurface.withValues(alpha: 1.0);
+    final countsByFamily = this.countsByFamily;
     return AlertDialog(
-      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
       content: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,19 +144,20 @@ class OffiboxAboutDialog extends StatelessWidget {
                 version,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: textColor,
+                  color: _labelColor,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 versionDate,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: textColor,
+                  fontSize: _rowFontSize - 1,
+                  color: _labelColor,
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 24),
+          const SizedBox(width: 28),
           // Titre + liste des familles à droite
           Expanded(
             child: Column(
@@ -144,42 +168,52 @@ class OffiboxAboutDialog extends StatelessWidget {
                   'À propos',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: textColor,
+                    color: _labelColor,
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 Text(
                   'Produits indexés par famille',
-                  style: theme.textTheme.labelLarge?.copyWith(
+                  style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: textColor,
+                    color: _labelColor,
+                    height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 8),
-                ...countsByFamily.map((e) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              e.label,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: textColor,
-                              ),
+                const SizedBox(height: 10),
+                ...countsByFamily.map((e) {
+                  final displayCount = e.countDisplay ?? '${e.count}';
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            e.label,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontSize: _rowFontSize,
+                              fontWeight: FontWeight.w500,
+                              color: _labelColor,
+                              height: 1.35,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            '${e.count}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.primary,
-                            ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          displayCount,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: _rowFontSize,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.primary,
                           ),
-                        ],
-                      ),
-                    ),),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ],
             ),
           ),

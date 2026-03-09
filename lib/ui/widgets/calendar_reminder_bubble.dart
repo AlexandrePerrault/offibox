@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/services/google_calendar_service.dart';
 
@@ -84,7 +83,7 @@ class _CalendarReminderBubbleState extends State<CalendarReminderBubble> {
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.event_available, color: OffiboxColors.primary, size: 24),
+            const Icon(Icons.event_available, color: OffiboxColors.primary, size: 24),
             const SizedBox(width: 8),
             Text('RDV $inMinLabel'),
           ],

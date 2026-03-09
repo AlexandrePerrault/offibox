@@ -57,3 +57,6 @@ firebase-export/serviceAccountKey.json
 
 # WiX v3 : Harvest.wxs est généré par build_msi.ps1 (Heat). Ne pas committer pour éviter que le build v4 en CI le compile (namespace v3).
 installer/wix/Harvest.wxs
+
+# NuGet local (Windows build helper)
+tools/nuget.exe

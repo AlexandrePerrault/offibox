@@ -91,6 +91,13 @@ class ResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compositionLine = item.source == SourceType.bdm && item.cis != null && compositionBdpmByCis != null
+        ? compositionBdpmByCis![item.cis!.replaceAll(RegExp(r'\D'), '').trim()]
+        : null;
+    final listes = <String>[
+      if (item.liste1) 'Liste 1',
+      if (item.liste2) 'Liste 2',
+    ];
     final content = MouseRegion(
       cursor: SystemMouseCursors.click,
       child: _HoverableResult(
@@ -100,7 +107,7 @@ class ResultTile extends StatelessWidget {
           visualDensity: isSingleResult
               ? VisualDensity.standard
               : const VisualDensity(vertical: -3),
-          contentPadding: EdgeInsets.symmetric(
+          contentPadding: const EdgeInsets.symmetric(
             horizontal: resultTileHorizontalPadding,
             vertical: resultTileVerticalPadding / 2,
           ),
@@ -119,19 +126,14 @@ class ResultTile extends StatelessWidget {
                     onOpenUrl: onOpenUrl,
                     statutsForCis: statutsForCis,
                     tauxRemboursement: tauxRemboursement,
-                    compositionLine: item.source == SourceType.bdm && item.cis != null && compositionBdpmByCis != null
-                        ? compositionBdpmByCis![item.cis!.replaceAll(RegExp(r'\D'), '').trim()]
-                        : null,
-                    listes: [
-                      if (item.liste1) 'Liste 1',
-                      if (item.liste2) 'Liste 2',
-                    ],
+                    compositionLine: compositionLine,
+                    listes: listes,
                     hospitalCip13Set: hospitalCip13Set,
                     generiques2026ByCis: generiques2026ByCis,
                     generiques2026PrincepsKeyToGenericName: generiques2026PrincepsKeyToGenericName,
                     cip13ToFic03Status: cip13ToFic03Status,
                   ),
-                  SizedBox(height: resultLineGap),
+                  const SizedBox(height: resultLineGap),
                   ResultLine2Code(
                     item: item,
                     onOpenUrl: onOpenUrl,
@@ -146,13 +148,8 @@ class ResultTile extends StatelessWidget {
                     arretCommercialisationByCis: arretCommercialisationByCis,
                     statutsForCis: statutsForCis,
                     tauxRemboursement: tauxRemboursement,
-                    compositionLine: item.source == SourceType.bdm && item.cis != null && compositionBdpmByCis != null
-                        ? compositionBdpmByCis![item.cis!.replaceAll(RegExp(r'\D'), '').trim()]
-                        : null,
-                    listes: [
-                      if (item.liste1) 'Liste 1',
-                      if (item.liste2) 'Liste 2',
-                    ],
+                    compositionLine: compositionLine,
+                    listes: listes,
                   ),
                   // Panneau de résultats : uniquement lignes 1 et 2 pour plus de clarté.
                   // Lignes 3 et 4 (Sources, biosimilaires, rappel) affichées dans la barre une fois le produit injecté (SelectedResultView).
@@ -257,6 +254,11 @@ class _HoverableResultState extends State<_HoverableResult> {
 /// Pour BDM : nom et dosage (format "nom dosage forme, conditionnement"), affiché en MAJUSCULES avec Spinnaker.
 class ResultLabelHelper {
   static String displayLabel(SearchResult item) {
+    // Outils métier et sites web : afficher le libellé col B (commentaire), pas le mot-clé col A.
+    if (item.source == SourceType.keyword || item.source == SourceType.siteWeb) {
+      final colB = (item.commentaire ?? item.label).trim();
+      if (colB.isNotEmpty) return stripGuillemets(colB);
+    }
     String displayLabel = item.label;
     if (item.source == SourceType.bdm) {
       final cip13 = item.cip13?.replaceAll(RegExp(r'\D'), '');

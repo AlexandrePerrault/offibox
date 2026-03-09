@@ -73,6 +73,10 @@ const String CENTRES_ANTI_POISON_URL =
 const String CHU_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/chu.csv';
 
+/// Centres CEIP-A (addictovigilance) — annuaire. CSV : nom, adresse_complete, tel, fax, mail.
+const String CEIP_ADDICTOVIGILANCE_URL =
+  'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/ceip_addictovigilance.csv';
+
 const String CIP_HOSPITALIERS_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CIP%20hospitaliers.csv';
 
@@ -143,6 +147,10 @@ const String ANSM_RAPPELS_CSV_URL = '';
 /// Fiches VOC (voie orale cancer) OMÉDIT : col A = médicament, col B = URL fiche patient, col C = URL fiche pro.
 const String FICHES_VOC_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/fiches_voc.csv';
+
+/// Actualités (popup barre) : col 1 = date, col 2 = Affichage, col 3 = URL, col 4 = CIP 13.
+const String NEWS_CSV_URL =
+    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/news.csv';
 
 /// Spécialités ANSM (fic03spe) : col 1 = code_spe, col 2 = CIP8, col 3 = G|R (Générique|Princeps). Permet d’afficher le badge Princeps (R) ou Gé vert (G) en ligne 1 BDM.
 const String FIC03SPE_TXT_URL =

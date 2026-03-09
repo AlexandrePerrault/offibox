@@ -1,30 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:offibox/constants/ui_constants.dart';
 
 class FakeResults extends StatelessWidget {
   const FakeResults({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      itemCount: 3,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
-          ),
-          child: Container(
-            height: 56,
-            decoration: BoxDecoration(
-              color: OffiboxColors.tealLight,
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      },
-    );
+    return const Center(child: SizedBox.shrink());
   }
 }
 

@@ -111,7 +111,7 @@ class CompositionLinesForPlusInfos extends StatelessWidget {
         ...displayParts.map((p) => Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text('– $p', style: _style),
-        )),
+        ),),
       ],
     );
   }
@@ -243,7 +243,7 @@ class PlusInfosBadge extends StatelessWidget {
                             ],
                           ),
                         ),
-                      )),
+                      ),),
                     ],
                   ),
                 ),
@@ -261,8 +261,8 @@ class PlusInfosBadge extends StatelessWidget {
     );
   }
 
-  /// Hauteur du badge (taille initiale, alignée visuellement avec RCP / MEDDISPAR).
-  static const double _badgeHeight = 36;
+  /// Hauteur alignée sur les `HoverPillButton` (ex. RCP / MEDDISPAR).
+  static const double _badgeHeight = 30.8;
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +274,7 @@ class PlusInfosBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           child: Container(
             height: _badgeHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 0),
             decoration: BoxDecoration(
               color: _teal.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(999),
@@ -285,14 +285,14 @@ class PlusInfosBadge extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.info_outline, size: 14, color: _teal),
+                const Icon(Icons.info_outline, size: 16, color: _teal),
                 const SizedBox(width: 6),
                 Text(
                   'plus d\'infos',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontFamily: 'Spinnaker',
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: isDisabled ? Colors.grey : _teal,
                   ),
                 ),

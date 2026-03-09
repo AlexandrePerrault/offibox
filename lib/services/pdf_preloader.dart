@@ -35,6 +35,7 @@ class PdfPreloader {
         await PdfCacheService.getCachedPdf(
           pdfUrl: url,
           laboratory: item.label,
+          allowLarge: true,
         );
         preloaded++;
         if (preloaded < maxPreload) {

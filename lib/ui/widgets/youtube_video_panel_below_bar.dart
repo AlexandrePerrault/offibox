@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FilterQuality;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -84,7 +85,7 @@ class _YouTubeVideoPanelBelowBarState extends State<YouTubeVideoPanelBelowBar> {
   void _openInBrowserThenClose() {
     if (_openingInBrowser || _closing) return;
     _openingInBrowser = true;
-    openUrl(widget.youtubeUrl);
+    openUrlExternal(widget.youtubeUrl);
     _closeWithFade();
   }
 
@@ -264,7 +265,9 @@ class _YouTubeVideoPanelBelowBarState extends State<YouTubeVideoPanelBelowBar> {
   @override
   void dispose() {
     _loadingSubscription?.cancel();
-    _webViewController.dispose();
+    if (_webViewController.value.isInitialized) {
+      _webViewController.dispose();
+    }
     _ytController?.close();
     super.dispose();
   }
@@ -299,9 +302,13 @@ class _YouTubeVideoPanelBelowBarState extends State<YouTubeVideoPanelBelowBar> {
                 children: [
                   DocumentViewerToolbar(
                     barHeight: 44,
+                    backgroundColor: Colors.white,
                     onDownload: () {
-                      if (!_closing) openUrl(widget.youtubeUrl);
+                      if (!_closing) openUrlExternal(widget.youtubeUrl);
                     },
+                    downloadLabel: 'Ouvrir dans navigateur',
+                    downloadTooltip: 'Ouvrir dans le navigateur',
+                    downloadIcon: Icons.open_in_browser,
                     onExpandFullscreen: _openFullscreen,
                     onClose: _closeWithFade,
                   ),
@@ -319,10 +326,21 @@ class _YouTubeVideoPanelBelowBarState extends State<YouTubeVideoPanelBelowBar> {
                                 : const Center(child: CircularProgressIndicator(color: Colors.white70)))
                             : (!_webViewController.value.isInitialized
                                 ? const Center(child: CircularProgressIndicator(color: Colors.white70))
-                                : Webview(
-                                    _webViewController,
-                                    permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
-                                        WebviewPermissionDecision.allow,
+                                : LayoutBuilder(
+                                    builder: (context, c) {
+                                      final dpr = MediaQuery.devicePixelRatioOf(context);
+                                      final w = (c.maxWidth * dpr).floorToDouble() / dpr;
+                                      final h = (c.maxHeight * dpr).floorToDouble() / dpr;
+                                      return Webview(
+                                        _webViewController,
+                                        width: w,
+                                        height: h,
+                                        scaleFactor: dpr,
+                                        filterQuality: FilterQuality.none,
+                                        permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
+                                            WebviewPermissionDecision.allow,
+                                      );
+                                    },
                                   )),
                   ),
                 ],
@@ -388,7 +406,9 @@ class _YoutubeFullscreenContentState extends State<_YoutubeFullscreenContent> {
 
   @override
   void dispose() {
-    _webViewController.dispose();
+    if (_webViewController.value.isInitialized) {
+      _webViewController.dispose();
+    }
     _ytController?.close();
     super.dispose();
   }
@@ -402,10 +422,21 @@ class _YoutubeFullscreenContentState extends State<_YoutubeFullscreenContent> {
       if (!_webViewInitialized) {
         return const Center(child: CircularProgressIndicator(color: Colors.white));
       }
-      return Webview(
-        _webViewController,
-        permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
-            WebviewPermissionDecision.allow,
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final dpr = MediaQuery.devicePixelRatioOf(context);
+          final w = (constraints.maxWidth * dpr).floorToDouble() / dpr;
+          final h = (constraints.maxHeight * dpr).floorToDouble() / dpr;
+          return Webview(
+            _webViewController,
+            width: w,
+            height: h,
+            scaleFactor: dpr,
+            filterQuality: FilterQuality.none,
+            permissionRequested: (String url, WebviewPermissionKind kind, bool isUserInitiated) async =>
+                WebviewPermissionDecision.allow,
+          );
+        },
       );
     }
     if (_ytController == null) {

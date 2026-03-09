@@ -76,6 +76,7 @@ class PdfCacheService {
   static Future<File> getCachedPdf({
     required String pdfUrl,
     required String laboratory,
+    bool allowLarge = false,
   }) async {
     final root = await _cacheRoot();
     final labDir = Directory(
@@ -99,7 +100,9 @@ class PdfCacheService {
       final headResponse = await http.head(Uri.parse(pdfUrl)).timeout(headTimeout);
       if (headResponse.statusCode == 200) {
         final contentLength = headResponse.contentLength;
-        if (contentLength != null && contentLength > maxPdfSizeBytes) {
+        if (!allowLarge &&
+            contentLength != null &&
+            contentLength > maxPdfSizeBytes) {
           throw PdfTooLargeException(contentLength, pdfUrl);
         }
       }

@@ -1,8 +1,9 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offibox/controllers/offibox_controller.dart';
+import 'package:offibox/utils/firestore_desktop_safe.dart';
 import 'package:offibox/config/google_oauth_config.dart';
 import 'package:offibox/services/firestore_user_cache.dart';
 import 'package:offibox/data/catalogue_pdf_search.dart';
@@ -76,13 +77,14 @@ final trialEndsAtProvider = FutureProvider.autoDispose<DateTime?>((ref) async {
 
 /// Fiche client (appVariant, groupement) depuis Firestore users/{uid}.
 /// Utiliser pour adapter l'app selon Offibox classique vs Offibox-CERP.
+/// Sur Windows, on évite .snapshots() (bug thread plateforme) en utilisant un stream par polling.
 final clientProfileProvider = StreamProvider.autoDispose<ClientProfile?>((ref) {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value(null);
-  return FirebaseFirestore.instance
+  final docRef = FirebaseFirestore.instance
       .collection('users')
-      .doc(user.uid)
-      .snapshots()
+      .doc(user.uid) as DocumentReference<Map<String, dynamic>>;
+  return documentSnapshotStream(docRef)
       .map((snap) => ClientProfile.fromUserDoc(user.uid, snap.data()));
 });
 

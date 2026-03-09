@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FilterQuality;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,18 +91,18 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
 
   void _openInBrowserThenClose() {
     if (_closing) return;
-    openUrl(widget.xlsUrl);
+    openUrlExternal(widget.xlsUrl);
     _closeWithFade();
   }
 
   void _downloadFile() {
     if (_closing) return;
-    openUrl(widget.xlsUrl);
+    openUrlExternal(widget.xlsUrl);
   }
 
   void _printFile() {
     if (_closing) return;
-    openUrl(widget.xlsUrl);
+    openUrlExternal(widget.xlsUrl);
   }
 
   /// Lance la recherche : va au premier résultat et affiche la surbrillance (window.find avec searchInFrames).
@@ -306,7 +307,9 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
     _loadingSubscription?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();
-    _webViewController.dispose();
+    if (_webViewController.value.isInitialized) {
+      _webViewController.dispose();
+    }
     super.dispose();
   }
 
@@ -352,6 +355,7 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
                 children: [
                   DocumentViewerToolbar(
                     barHeight: 44,
+                    backgroundColor: Colors.white,
                     onPrint: _printFile,
                     onDownload: _downloadFile,
                     onExpandFullscreen: _openFullscreen,
@@ -370,27 +374,49 @@ class _XlsPanelBelowBarState extends State<XlsPanelBelowBar> {
                     sourceWidget: documentViewerSourceLabel(
                       label: shortUrlForDisplay(widget.xlsUrl),
                       url: widget.xlsUrl,
+                      textColor: Colors.black87,
                     ),
                   ),
-                  // Zone 16:9 pour le lecteur
+                  // Zone 16:9 pour le lecteur (fond gris clair + carte blanche pour meilleure lisibilité)
                   Expanded(
-                    child: isWindows
-                        ? (_initError
-                            ? _buildFallback()
-                            : _webViewController.value.isInitialized
-                                ? Webview(
-                                    _webViewController,
-                                    permissionRequested: (
-                                      String url,
-                                      WebviewPermissionKind kind,
-                                      bool isUserInitiated,
-                                    ) async =>
-                                        WebviewPermissionDecision.allow,
-                                  )
-                                : const Center(
-                                    child: CircularProgressIndicator(color: Colors.teal),
-                                  ))
-                        : _buildFallback(),
+                    child: Container(
+                      color: const Color(0xFFF3F4F6),
+                      padding: const EdgeInsets.all(8),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          color: Colors.white,
+                          child: isWindows
+                              ? (_initError
+                                  ? _buildFallback()
+                                  : _webViewController.value.isInitialized
+                                      ? LayoutBuilder(
+                                          builder: (context, c) {
+                                            final dpr = MediaQuery.devicePixelRatioOf(context);
+                                            final w = (c.maxWidth * dpr).floorToDouble() / dpr;
+                                            final h = (c.maxHeight * dpr).floorToDouble() / dpr;
+                                            return Webview(
+                                              _webViewController,
+                                              width: w,
+                                              height: h,
+                                              scaleFactor: dpr,
+                                              filterQuality: FilterQuality.none,
+                                              permissionRequested: (
+                                                String url,
+                                                WebviewPermissionKind kind,
+                                                bool isUserInitiated,
+                                              ) async =>
+                                                  WebviewPermissionDecision.allow,
+                                            );
+                                          },
+                                        )
+                                      : const Center(
+                                          child: CircularProgressIndicator(color: Colors.teal),
+                                        ))
+                              : _buildFallback(),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -440,7 +466,9 @@ class _XlsFullscreenContentState extends State<_XlsFullscreenContent> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_controller.value.isInitialized) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -451,14 +479,25 @@ class _XlsFullscreenContentState extends State<_XlsFullscreenContent> {
         child: CircularProgressIndicator(color: Colors.white),
       );
     }
-    return Webview(
-      _controller,
-      permissionRequested: (
-        String url,
-        WebviewPermissionKind kind,
-        bool isUserInitiated,
-      ) async =>
-          WebviewPermissionDecision.allow,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final dpr = MediaQuery.devicePixelRatioOf(context);
+        final w = (constraints.maxWidth * dpr).floorToDouble() / dpr;
+        final h = (constraints.maxHeight * dpr).floorToDouble() / dpr;
+        return Webview(
+          _controller,
+          width: w,
+          height: h,
+          scaleFactor: dpr,
+          filterQuality: FilterQuality.none,
+          permissionRequested: (
+            String url,
+            WebviewPermissionKind kind,
+            bool isUserInitiated,
+          ) async =>
+              WebviewPermissionDecision.allow,
+        );
+      },
     );
   }
 }

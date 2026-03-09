@@ -69,7 +69,7 @@ class _VersionHistoryDialogState extends State<VersionHistoryDialog> {
           name: name.trim().isEmpty ? tag : name,
           body: body.trim(),
           publishedAt: published,
-        ));
+        ),);
       }
       if (mounted) {
         setState(() {

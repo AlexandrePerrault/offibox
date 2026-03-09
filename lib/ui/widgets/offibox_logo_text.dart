@@ -7,10 +7,10 @@ class OffiboxLogoText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
+    return const Text(
       AppConfig.appName,
       textAlign: TextAlign.center,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 26,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.4,

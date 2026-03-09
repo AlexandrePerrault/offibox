@@ -8,6 +8,7 @@
 ///   dart run --enable-experiment=non-nullable script scripts/check_bdpm_sources.dart
 ///
 /// À planifier (cron / Task Scheduler) pour une vérification quotidienne.
+library;
 
 import 'package:http/http.dart' as http;
 

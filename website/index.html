@@ -129,17 +129,17 @@
     .hero-pills {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 0.6rem;
       margin-bottom: 2rem;
     }
     .hero-pills span {
       display: inline-block;
-      padding: 0.4rem 0.9rem;
-      font-size: 0.85rem;
+      padding: 0.48rem 1.08rem;
+      font-size: 1.02rem;
       font-weight: 500;
-      color: var(--accent-soft);
-      background: rgba(56, 189, 248, 0.12);
-      border-radius: 9999px;
+      color: var(--gray);
+      background: var(--white);
+      border-radius: 6px;
     }
     .btn-download {
       display: inline-flex;
@@ -257,6 +257,70 @@
       --delay: 3.2s;
       background-image: url('../assets/icons/e_pansement.png');
     }
+
+    /* ----- Barre défilante sources officielles (effet roue 3D) ----- */
+    .sources-wheel-section {
+      background: var(--offi-teal);
+      padding: 1.25rem 0;
+      overflow: hidden;
+      margin: 0 1.5rem;
+      border-radius: 9999px;
+    }
+    .sources-wheel-wrap {
+      perspective: 1200px;
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+    }
+    .sources-wheel-track {
+      display: flex;
+      gap: 2rem;
+      width: max-content;
+      padding: 0 2rem;
+      animation: sources-wheel-scroll 24s linear infinite;
+    }
+    .sources-wheel-track:hover {
+      animation-play-state: paused;
+    }
+    @keyframes sources-wheel-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .sources-wheel-item {
+      flex-shrink: 0;
+      width: 160px;
+      height: 100px;
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      background-size: 85%;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.2s;
+    }
+    .sources-wheel-item:hover {
+      transform: scale(1.15);
+    }
+    a.sources-wheel-item {
+      display: block;
+      text-decoration: none;
+    }
+    .sources-wheel-item:focus {
+      outline: 2px solid var(--white);
+      outline-offset: 2px;
+    }
+    .sources-wheel-item[data-source="bdm"] { background-image: url('../assets/icons/BDPM.jpeg'); }
+    .sources-wheel-item[data-source="ameli"] { background-image: url('../assets/icons/assurance%20maladie.svg'); }
+    .sources-wheel-item[data-source="has"] { background-image: url('../assets/icons/logo-has.png'); }
+    .sources-wheel-item[data-source="ansm"] { background-image: url('../assets/icons/logo-ansm%20(1).jpg'); }
+    .sources-wheel-item[data-source="anses"] { background-image: url('../assets/icons/anses-small.svg'); }
+    .sources-wheel-item[data-source="meddispar"] { background-image: url('../assets/icons/meddispar.png'); }
+    .sources-wheel-item[data-source="epansement"] { background-image: url('../assets/icons/e_pansement.png'); }
+    .sources-wheel-item[data-source="omedit"] { background-image: url('../assets/icons/omedit.png'); }
+    .sources-wheel-item[data-source="spf"] { background-image: url('../assets/icons/SPF.png'); }
+    .sources-wheel-item[data-source="hcsp"] { background-image: url('../assets/icons/logo_hcsp_rouge.jpg'); }
+    .sources-wheel-item[data-source="ars"] { background-image: url('../assets/icons/logo-ars.svg'); }
+    .sources-wheel-item[data-source="dqo"] { background-image: url('../assets/icons/LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg'); }
 
     /* ----- Sections (fond clair) ----- */
     section {
@@ -400,6 +464,39 @@
               <div class="hero-icon icon-epansement"></div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Barre défilante : sources officielles (effet roue 3D) -->
+    <section class="sources-wheel-section" aria-label="Sources officielles">
+      <div class="sources-wheel-wrap">
+        <div class="sources-wheel-track" id="sources-wheel-track">
+          <a class="sources-wheel-item" data-source="bdm" href="https://base-donnees-publique.medicaments.gouv.fr/" target="_blank" rel="noopener noreferrer" title="Base de données sur le médicament"></a>
+          <a class="sources-wheel-item" data-source="ameli" href="https://www.ameli.fr/" target="_blank" rel="noopener noreferrer" title="Ameli"></a>
+          <a class="sources-wheel-item" data-source="has" href="https://www.has-sante.fr/" target="_blank" rel="noopener noreferrer" title="HAS"></a>
+          <a class="sources-wheel-item" data-source="ansm" href="https://www.ansm.sante.fr/" target="_blank" rel="noopener noreferrer" title="ANSM"></a>
+          <a class="sources-wheel-item" data-source="anses" href="https://www.anses.fr/" target="_blank" rel="noopener noreferrer" title="ANSES"></a>
+          <a class="sources-wheel-item" data-source="meddispar" href="https://www.meddispar.fr/" target="_blank" rel="noopener noreferrer" title="Meddispar"></a>
+          <a class="sources-wheel-item" data-source="epansement" href="https://www.e-pansement.fr/" target="_blank" rel="noopener noreferrer" title="E-pansement"></a>
+          <a class="sources-wheel-item" data-source="omedit" href="https://www.omedit-idf.fr/" target="_blank" rel="noopener noreferrer" title="OMédit"></a>
+          <a class="sources-wheel-item" data-source="spf" href="https://www.santepubliquefrance.fr/" target="_blank" rel="noopener noreferrer" title="Santé publique France"></a>
+          <a class="sources-wheel-item" data-source="hcsp" href="https://www.hcsp.fr/" target="_blank" rel="noopener noreferrer" title="Haut Conseil de la santé publique"></a>
+          <a class="sources-wheel-item" data-source="ars" href="https://www.ars.sante.fr/" target="_blank" rel="noopener noreferrer" title="Agences régionales de santé"></a>
+          <a class="sources-wheel-item" data-source="dqo" href="https://www.demarche-qualite-officine.fr/" target="_blank" rel="noopener noreferrer" title="Démarche qualité en officine"></a>
+          <!-- Dupliqué pour défilement infini -->
+          <a class="sources-wheel-item" data-source="bdm" href="https://base-donnees-publique.medicaments.gouv.fr/" target="_blank" rel="noopener noreferrer" title="Base de données sur le médicament"></a>
+          <a class="sources-wheel-item" data-source="ameli" href="https://www.ameli.fr/" target="_blank" rel="noopener noreferrer" title="Ameli"></a>
+          <a class="sources-wheel-item" data-source="has" href="https://www.has-sante.fr/" target="_blank" rel="noopener noreferrer" title="HAS"></a>
+          <a class="sources-wheel-item" data-source="ansm" href="https://www.ansm.sante.fr/" target="_blank" rel="noopener noreferrer" title="ANSM"></a>
+          <a class="sources-wheel-item" data-source="anses" href="https://www.anses.fr/" target="_blank" rel="noopener noreferrer" title="ANSES"></a>
+          <a class="sources-wheel-item" data-source="meddispar" href="https://www.meddispar.fr/" target="_blank" rel="noopener noreferrer" title="Meddispar"></a>
+          <a class="sources-wheel-item" data-source="epansement" href="https://www.e-pansement.fr/" target="_blank" rel="noopener noreferrer" title="E-pansement"></a>
+          <a class="sources-wheel-item" data-source="omedit" href="https://www.omedit-idf.fr/" target="_blank" rel="noopener noreferrer" title="OMédit"></a>
+          <a class="sources-wheel-item" data-source="spf" href="https://www.santepubliquefrance.fr/" target="_blank" rel="noopener noreferrer" title="Santé publique France"></a>
+          <a class="sources-wheel-item" data-source="hcsp" href="https://www.hcsp.fr/" target="_blank" rel="noopener noreferrer" title="Haut Conseil de la santé publique"></a>
+          <a class="sources-wheel-item" data-source="ars" href="https://www.ars.sante.fr/" target="_blank" rel="noopener noreferrer" title="Agences régionales de santé"></a>
+          <a class="sources-wheel-item" data-source="dqo" href="https://www.demarche-qualite-officine.fr/" target="_blank" rel="noopener noreferrer" title="Démarche qualité en officine"></a>
         </div>
       </div>
     </section>

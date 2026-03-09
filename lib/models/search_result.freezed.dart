@@ -28,7 +28,10 @@ mixin _$SearchResult {
   String? get cip13 => throw _privateConstructorUsedError;
   String? get cis => throw _privateConstructorUsedError; // 🔥 AJOUTS
   String? get cip7 => throw _privateConstructorUsedError;
-  String? get groupLabel => throw _privateConstructorUsedError; // 📄 CONTENU
+  String? get groupLabel => throw _privateConstructorUsedError;
+
+  /// Département d'exercice (ex: "75", "33", "971") quand disponible.
+  String? get departement => throw _privateConstructorUsedError; // 📄 CONTENU
   bool get isPdf => throw _privateConstructorUsedError; // 🟢 NSFP
   bool get nsfp => throw _privateConstructorUsedError;
   String? get nsfpDate => throw _privateConstructorUsedError; // 🔗 LIENS
@@ -62,10 +65,17 @@ mixin _$SearchResult {
   String? get phone => throw _privateConstructorUsedError;
   String? get fax => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
+
+  /// BAL MSSanté personnelle (si trouvée via dataset Annuaire Santé).
+  String? get mssanteEmail => throw _privateConstructorUsedError;
   String? get catalogueUrl => throw _privateConstructorUsedError;
   String? get commentaire => throw _privateConstructorUsedError; // 🆕 AMC
   String? get address => throw _privateConstructorUsedError;
-  String? get website => throw _privateConstructorUsedError; // 🏷️ BADGES
+  String? get website => throw _privateConstructorUsedError;
+
+  /// Date d'apparition outil (outils métier, col C) — affiche "nouveau (date)" à droite du libellé.
+  String? get keywordAppearanceDate =>
+      throw _privateConstructorUsedError; // 🏷️ BADGES
   String? get badge1Name => throw _privateConstructorUsedError;
   String? get badge1Url => throw _privateConstructorUsedError;
   String? get badge2Name => throw _privateConstructorUsedError;
@@ -99,6 +109,7 @@ abstract class $SearchResultCopyWith<$Res> {
       String? cis,
       String? cip7,
       String? groupLabel,
+      String? departement,
       bool isPdf,
       bool nsfp,
       String? nsfpDate,
@@ -128,10 +139,12 @@ abstract class $SearchResultCopyWith<$Res> {
       String? phone,
       String? fax,
       String? email,
+      String? mssanteEmail,
       String? catalogueUrl,
       String? commentaire,
       String? address,
       String? website,
+      String? keywordAppearanceDate,
       String? badge1Name,
       String? badge1Url,
       String? badge2Name,
@@ -166,6 +179,7 @@ class _$SearchResultCopyWithImpl<$Res, $Val extends SearchResult>
     Object? cis = freezed,
     Object? cip7 = freezed,
     Object? groupLabel = freezed,
+    Object? departement = freezed,
     Object? isPdf = null,
     Object? nsfp = null,
     Object? nsfpDate = freezed,
@@ -195,10 +209,12 @@ class _$SearchResultCopyWithImpl<$Res, $Val extends SearchResult>
     Object? phone = freezed,
     Object? fax = freezed,
     Object? email = freezed,
+    Object? mssanteEmail = freezed,
     Object? catalogueUrl = freezed,
     Object? commentaire = freezed,
     Object? address = freezed,
     Object? website = freezed,
+    Object? keywordAppearanceDate = freezed,
     Object? badge1Name = freezed,
     Object? badge1Url = freezed,
     Object? badge2Name = freezed,
@@ -243,6 +259,10 @@ class _$SearchResultCopyWithImpl<$Res, $Val extends SearchResult>
       groupLabel: freezed == groupLabel
           ? _value.groupLabel
           : groupLabel // ignore: cast_nullable_to_non_nullable
+              as String?,
+      departement: freezed == departement
+          ? _value.departement
+          : departement // ignore: cast_nullable_to_non_nullable
               as String?,
       isPdf: null == isPdf
           ? _value.isPdf
@@ -360,6 +380,10 @@ class _$SearchResultCopyWithImpl<$Res, $Val extends SearchResult>
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String?,
+      mssanteEmail: freezed == mssanteEmail
+          ? _value.mssanteEmail
+          : mssanteEmail // ignore: cast_nullable_to_non_nullable
+              as String?,
       catalogueUrl: freezed == catalogueUrl
           ? _value.catalogueUrl
           : catalogueUrl // ignore: cast_nullable_to_non_nullable
@@ -375,6 +399,10 @@ class _$SearchResultCopyWithImpl<$Res, $Val extends SearchResult>
       website: freezed == website
           ? _value.website
           : website // ignore: cast_nullable_to_non_nullable
+              as String?,
+      keywordAppearanceDate: freezed == keywordAppearanceDate
+          ? _value.keywordAppearanceDate
+          : keywordAppearanceDate // ignore: cast_nullable_to_non_nullable
               as String?,
       badge1Name: freezed == badge1Name
           ? _value.badge1Name
@@ -441,6 +469,7 @@ abstract class _$$SearchResultImplCopyWith<$Res>
       String? cis,
       String? cip7,
       String? groupLabel,
+      String? departement,
       bool isPdf,
       bool nsfp,
       String? nsfpDate,
@@ -470,10 +499,12 @@ abstract class _$$SearchResultImplCopyWith<$Res>
       String? phone,
       String? fax,
       String? email,
+      String? mssanteEmail,
       String? catalogueUrl,
       String? commentaire,
       String? address,
       String? website,
+      String? keywordAppearanceDate,
       String? badge1Name,
       String? badge1Url,
       String? badge2Name,
@@ -506,6 +537,7 @@ class __$$SearchResultImplCopyWithImpl<$Res>
     Object? cis = freezed,
     Object? cip7 = freezed,
     Object? groupLabel = freezed,
+    Object? departement = freezed,
     Object? isPdf = null,
     Object? nsfp = null,
     Object? nsfpDate = freezed,
@@ -535,10 +567,12 @@ class __$$SearchResultImplCopyWithImpl<$Res>
     Object? phone = freezed,
     Object? fax = freezed,
     Object? email = freezed,
+    Object? mssanteEmail = freezed,
     Object? catalogueUrl = freezed,
     Object? commentaire = freezed,
     Object? address = freezed,
     Object? website = freezed,
+    Object? keywordAppearanceDate = freezed,
     Object? badge1Name = freezed,
     Object? badge1Url = freezed,
     Object? badge2Name = freezed,
@@ -583,6 +617,10 @@ class __$$SearchResultImplCopyWithImpl<$Res>
       groupLabel: freezed == groupLabel
           ? _value.groupLabel
           : groupLabel // ignore: cast_nullable_to_non_nullable
+              as String?,
+      departement: freezed == departement
+          ? _value.departement
+          : departement // ignore: cast_nullable_to_non_nullable
               as String?,
       isPdf: null == isPdf
           ? _value.isPdf
@@ -700,6 +738,10 @@ class __$$SearchResultImplCopyWithImpl<$Res>
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String?,
+      mssanteEmail: freezed == mssanteEmail
+          ? _value.mssanteEmail
+          : mssanteEmail // ignore: cast_nullable_to_non_nullable
+              as String?,
       catalogueUrl: freezed == catalogueUrl
           ? _value.catalogueUrl
           : catalogueUrl // ignore: cast_nullable_to_non_nullable
@@ -715,6 +757,10 @@ class __$$SearchResultImplCopyWithImpl<$Res>
       website: freezed == website
           ? _value.website
           : website // ignore: cast_nullable_to_non_nullable
+              as String?,
+      keywordAppearanceDate: freezed == keywordAppearanceDate
+          ? _value.keywordAppearanceDate
+          : keywordAppearanceDate // ignore: cast_nullable_to_non_nullable
               as String?,
       badge1Name: freezed == badge1Name
           ? _value.badge1Name
@@ -776,6 +822,7 @@ class _$SearchResultImpl extends _SearchResult {
       this.cis,
       this.cip7,
       this.groupLabel,
+      this.departement,
       this.isPdf = false,
       this.nsfp = false,
       this.nsfpDate,
@@ -805,10 +852,12 @@ class _$SearchResultImpl extends _SearchResult {
       this.phone,
       this.fax,
       this.email,
+      this.mssanteEmail,
       this.catalogueUrl,
       this.commentaire,
       this.address,
       this.website,
+      this.keywordAppearanceDate,
       this.badge1Name,
       this.badge1Url,
       this.badge2Name,
@@ -843,6 +892,10 @@ class _$SearchResultImpl extends _SearchResult {
   final String? cip7;
   @override
   final String? groupLabel;
+
+  /// Département d'exercice (ex: "75", "33", "971") quand disponible.
+  @override
+  final String? departement;
 // 📄 CONTENU
   @override
   @JsonKey()
@@ -922,6 +975,10 @@ class _$SearchResultImpl extends _SearchResult {
   final String? fax;
   @override
   final String? email;
+
+  /// BAL MSSanté personnelle (si trouvée via dataset Annuaire Santé).
+  @override
+  final String? mssanteEmail;
   @override
   final String? catalogueUrl;
   @override
@@ -931,6 +988,10 @@ class _$SearchResultImpl extends _SearchResult {
   final String? address;
   @override
   final String? website;
+
+  /// Date d'apparition outil (outils métier, col C) — affiche "nouveau (date)" à droite du libellé.
+  @override
+  final String? keywordAppearanceDate;
 // 🏷️ BADGES
   @override
   final String? badge1Name;
@@ -958,7 +1019,7 @@ class _$SearchResultImpl extends _SearchResult {
 
   @override
   String toString() {
-    return 'SearchResult(label: $label, labelRaw: $labelRaw, source: $source, laboratory: $laboratory, cip13: $cip13, cis: $cis, cip7: $cip7, groupLabel: $groupLabel, isPdf: $isPdf, nsfp: $nsfp, nsfpDate: $nsfpDate, url: $url, rcpVetoUrl: $rcpVetoUrl, meddisparUrl: $meddisparUrl, lppCode: $lppCode, lppLibelle: $lppLibelle, lppTarif: $lppTarif, lppPrixUnitaireReglemente: $lppPrixUnitaireReglemente, lppMontantMaxRemboursement: $lppMontantMaxRemboursement, liste1: $liste1, liste2: $liste2, isStupefiant: $isStupefiant, isException: $isException, isOtc: $isOtc, hospitalOnly: $hospitalOnly, isPih: $isPih, isSurveillanceParticuliere: $isSurveillanceParticuliere, isMds: $isMds, biosimilaireOf: $biosimilaireOf, isBioreferent: $isBioreferent, isGeneric: $isGeneric, princepsName: $princepsName, genericName: $genericName, iconUrl: $iconUrl, phone: $phone, fax: $fax, email: $email, catalogueUrl: $catalogueUrl, commentaire: $commentaire, address: $address, website: $website, badge1Name: $badge1Name, badge1Url: $badge1Url, badge2Name: $badge2Name, badge2Url: $badge2Url, badge3Name: $badge3Name, badge3Url: $badge3Url, badge4Name: $badge4Name, badge4Url: $badge4Url, ansmStatut: $ansmStatut, ansmDate: $ansmDate, ansmUrl: $ansmUrl)';
+    return 'SearchResult(label: $label, labelRaw: $labelRaw, source: $source, laboratory: $laboratory, cip13: $cip13, cis: $cis, cip7: $cip7, groupLabel: $groupLabel, departement: $departement, isPdf: $isPdf, nsfp: $nsfp, nsfpDate: $nsfpDate, url: $url, rcpVetoUrl: $rcpVetoUrl, meddisparUrl: $meddisparUrl, lppCode: $lppCode, lppLibelle: $lppLibelle, lppTarif: $lppTarif, lppPrixUnitaireReglemente: $lppPrixUnitaireReglemente, lppMontantMaxRemboursement: $lppMontantMaxRemboursement, liste1: $liste1, liste2: $liste2, isStupefiant: $isStupefiant, isException: $isException, isOtc: $isOtc, hospitalOnly: $hospitalOnly, isPih: $isPih, isSurveillanceParticuliere: $isSurveillanceParticuliere, isMds: $isMds, biosimilaireOf: $biosimilaireOf, isBioreferent: $isBioreferent, isGeneric: $isGeneric, princepsName: $princepsName, genericName: $genericName, iconUrl: $iconUrl, phone: $phone, fax: $fax, email: $email, mssanteEmail: $mssanteEmail, catalogueUrl: $catalogueUrl, commentaire: $commentaire, address: $address, website: $website, keywordAppearanceDate: $keywordAppearanceDate, badge1Name: $badge1Name, badge1Url: $badge1Url, badge2Name: $badge2Name, badge2Url: $badge2Url, badge3Name: $badge3Name, badge3Url: $badge3Url, badge4Name: $badge4Name, badge4Url: $badge4Url, ansmStatut: $ansmStatut, ansmDate: $ansmDate, ansmUrl: $ansmUrl)';
   }
 
   @override
@@ -977,6 +1038,8 @@ class _$SearchResultImpl extends _SearchResult {
             (identical(other.cip7, cip7) || other.cip7 == cip7) &&
             (identical(other.groupLabel, groupLabel) ||
                 other.groupLabel == groupLabel) &&
+            (identical(other.departement, departement) ||
+                other.departement == departement) &&
             (identical(other.isPdf, isPdf) || other.isPdf == isPdf) &&
             (identical(other.nsfp, nsfp) || other.nsfp == nsfp) &&
             (identical(other.nsfpDate, nsfpDate) ||
@@ -1024,12 +1087,16 @@ class _$SearchResultImpl extends _SearchResult {
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.fax, fax) || other.fax == fax) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.mssanteEmail, mssanteEmail) ||
+                other.mssanteEmail == mssanteEmail) &&
             (identical(other.catalogueUrl, catalogueUrl) ||
                 other.catalogueUrl == catalogueUrl) &&
             (identical(other.commentaire, commentaire) ||
                 other.commentaire == commentaire) &&
             (identical(other.address, address) || other.address == address) &&
             (identical(other.website, website) || other.website == website) &&
+            (identical(other.keywordAppearanceDate, keywordAppearanceDate) ||
+                other.keywordAppearanceDate == keywordAppearanceDate) &&
             (identical(other.badge1Name, badge1Name) ||
                 other.badge1Name == badge1Name) &&
             (identical(other.badge1Url, badge1Url) ||
@@ -1040,10 +1107,8 @@ class _$SearchResultImpl extends _SearchResult {
                 other.badge2Url == badge2Url) &&
             (identical(other.badge3Name, badge3Name) ||
                 other.badge3Name == badge3Name) &&
-            (identical(other.badge3Url, badge3Url) ||
-                other.badge3Url == badge3Url) &&
-            (identical(other.badge4Name, badge4Name) ||
-                other.badge4Name == badge4Name) &&
+            (identical(other.badge3Url, badge3Url) || other.badge3Url == badge3Url) &&
+            (identical(other.badge4Name, badge4Name) || other.badge4Name == badge4Name) &&
             (identical(other.badge4Url, badge4Url) || other.badge4Url == badge4Url) &&
             (identical(other.ansmStatut, ansmStatut) || other.ansmStatut == ansmStatut) &&
             (identical(other.ansmDate, ansmDate) || other.ansmDate == ansmDate) &&
@@ -1062,6 +1127,7 @@ class _$SearchResultImpl extends _SearchResult {
         cis,
         cip7,
         groupLabel,
+        departement,
         isPdf,
         nsfp,
         nsfpDate,
@@ -1091,10 +1157,12 @@ class _$SearchResultImpl extends _SearchResult {
         phone,
         fax,
         email,
+        mssanteEmail,
         catalogueUrl,
         commentaire,
         address,
         website,
+        keywordAppearanceDate,
         badge1Name,
         badge1Url,
         badge2Name,
@@ -1132,6 +1200,7 @@ abstract class _SearchResult extends SearchResult {
       final String? cis,
       final String? cip7,
       final String? groupLabel,
+      final String? departement,
       final bool isPdf,
       final bool nsfp,
       final String? nsfpDate,
@@ -1161,10 +1230,12 @@ abstract class _SearchResult extends SearchResult {
       final String? phone,
       final String? fax,
       final String? email,
+      final String? mssanteEmail,
       final String? catalogueUrl,
       final String? commentaire,
       final String? address,
       final String? website,
+      final String? keywordAppearanceDate,
       final String? badge1Name,
       final String? badge1Url,
       final String? badge2Name,
@@ -1197,6 +1268,10 @@ abstract class _SearchResult extends SearchResult {
   String? get cip7;
   @override
   String? get groupLabel;
+  @override
+
+  /// Département d'exercice (ex: "75", "33", "971") quand disponible.
+  String? get departement;
   @override // 📄 CONTENU
   bool get isPdf;
   @override // 🟢 NSFP
@@ -1256,6 +1331,10 @@ abstract class _SearchResult extends SearchResult {
   @override
   String? get email;
   @override
+
+  /// BAL MSSanté personnelle (si trouvée via dataset Annuaire Santé).
+  String? get mssanteEmail;
+  @override
   String? get catalogueUrl;
   @override
   String? get commentaire;
@@ -1263,6 +1342,10 @@ abstract class _SearchResult extends SearchResult {
   String? get address;
   @override
   String? get website;
+  @override
+
+  /// Date d'apparition outil (outils métier, col C) — affiche "nouveau (date)" à droite du libellé.
+  String? get keywordAppearanceDate;
   @override // 🏷️ BADGES
   String? get badge1Name;
   @override

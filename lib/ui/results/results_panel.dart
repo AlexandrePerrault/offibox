@@ -4,6 +4,7 @@ import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/data/cis_dispo_loader.dart';
 import 'package:offibox/data/generiques.dart';
 import 'package:offibox/models/search_result.dart';
+import 'package:offibox/models/source_type.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/ui/results/result_tile.dart';
 import 'package:offibox/utils/open_url.dart';
@@ -26,7 +27,71 @@ Future<void> openUrlSafe(String url) async {
 /// Couleur Offibox légère
 const _offiboxTealLight = Color(0xFF5A9094);
 const _kMaxInitialResults = 12;
-const double _kCacheExtent = 800.0;
+const double _kCacheExtent = 1200.0;
+
+/// Ligne compacte style Google pour un résultat Outils métier ou Site web (icône + libellé, premier élément mis en avant).
+class _CompactToolsWebTile extends StatelessWidget {
+  const _CompactToolsWebTile({
+    required this.item,
+    required this.label,
+    required this.isFirst,
+    required this.onTap,
+  });
+
+  final SearchResult item;
+  final String label;
+  final bool isFirst;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: isFirst ? const Color(0xFFF1F3F4) : Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                child: isFirst
+                    ? Center(
+                        child: Container(
+                          width: 4,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4285F4),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+              Icon(
+                Icons.search,
+                size: 20,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class ResultsPanel extends StatefulWidget {
   const ResultsPanel({
@@ -109,13 +174,30 @@ class ResultsPanel extends StatefulWidget {
 
 class _ResultsPanelState extends State<ResultsPanel> {
   bool _showAll = false;
+  List<SearchResult>? _cachedResults;
+  List<SearchResult>? _cachedToolsWeb;
+  List<SearchResult>? _cachedOthers;
 
   @override
   void didUpdateWidget(ResultsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.results.length != widget.results.length) {
-      _showAll = false; // reset quand la recherche change
+      _showAll = false;
+      _cachedResults = null;
+      _cachedToolsWeb = null;
+      _cachedOthers = null;
     }
+  }
+
+  void _ensureSplit(List<SearchResult> results) {
+    if (identical(results, _cachedResults) && _cachedToolsWeb != null) return;
+    _cachedResults = results;
+    _cachedToolsWeb = results
+        .where((r) => r.source == SourceType.keyword || r.source == SourceType.siteWeb)
+        .toList();
+    _cachedOthers = results
+        .where((r) => r.source != SourceType.keyword && r.source != SourceType.siteWeb)
+        .toList();
   }
 
   static List<String> _statutsForCis(
@@ -135,11 +217,19 @@ class _ResultsPanelState extends State<ResultsPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final isSingleResult = widget.results.length == 1;
-    final totalCount = widget.results.length;
+    final results = widget.results;
+    _ensureSplit(results);
+    final toolsWeb = _cachedToolsWeb!;
+    final others = _cachedOthers!;
+    final isSingleResult = results.length == 1;
+    final totalCount = results.length;
     final displayCount = _showAll ? totalCount : totalCount.clamp(0, _kMaxInitialResults);
     final hasMore = totalCount > _kMaxInitialResults && !_showAll;
-    final itemCount = displayCount + (hasMore ? 1 : 0);
+
+    final displayedToolsWebCount = toolsWeb.length;
+    final displayedOthersCount = (displayCount - displayedToolsWebCount).clamp(0, others.length);
+    final displayedCount = displayedToolsWebCount + displayedOthersCount;
+    final itemCount = displayedCount + (hasMore ? 1 : 0);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
@@ -178,7 +268,7 @@ class _ResultsPanelState extends State<ResultsPanel> {
               addRepaintBoundaries: true,
               itemCount: itemCount,
               itemBuilder: (context, index) {
-                if (hasMore && index == displayCount) {
+                if (hasMore && index == displayedCount) {
                   return Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFFF7F8F9),
@@ -190,7 +280,7 @@ class _ResultsPanelState extends State<ResultsPanel> {
                       ),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         vertical: resultTileVerticalPadding,
                         horizontal: resultTileHorizontalPadding,
                       ),
@@ -214,11 +304,29 @@ class _ResultsPanelState extends State<ResultsPanel> {
                     ),
                   );
                 }
-                final item = widget.results[index];
+                if (index < displayedToolsWebCount) {
+                  final item = toolsWeb[index];
+                  return RepaintBoundary(
+                    child: _CompactToolsWebTile(
+                      item: item,
+                      label: ResultLabelHelper.displayLabel(item),
+                      isFirst: index == 0,
+                      onTap: () {
+                        if (isSingleResult && widget.onOpenSingle != null) {
+                          widget.onOpenSingle!(item);
+                        } else {
+                          widget.onOpen(item);
+                        }
+                      },
+                    ),
+                  );
+                }
+                final otherIndex = index - displayedToolsWebCount;
+                final item = others[otherIndex];
                 final vocUrls = widget.getVocUrlsForItem?.call(item);
                 final statutsForCis = _statutsForCis(widget.statutsByCis, item.cis);
                 final tauxRemboursement = _tauxRemboursementForCis(widget.tauxRemboursementByCis, item.cis);
-                final isAlternate = index.isOdd;
+                final isAlternate = otherIndex.isOdd;
                 final tileKey = ValueKey<String>(
                   '${item.source.name}_${item.cip13 ?? ""}_${item.cis ?? ""}_${item.labelRaw}',
                 );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:offibox/data/codes_actes_image_assets.dart';
 import 'package:offibox/data/cis_dispo_loader.dart';
 import 'package:offibox/data/generiques.dart';
 import 'package:offibox/models/search_result.dart';
@@ -14,6 +15,8 @@ import 'package:offibox/utils/gs1_scan_payload.dart';
 
 class SelectedResultView extends StatelessWidget {
   final SearchResult item;
+  /// Annuaire RPPS : nombre de structures (badge « Structures » affiché seulement si > 1).
+  final int? rppsStructureCountForSelected;
   final VoidCallback? onOpenSelected;
   final VoidCallback? onClose;
   final List<String>? statutsForCis;
@@ -62,10 +65,13 @@ class SelectedResultView extends StatelessWidget {
   final Set<String>? hospitalCip13Set;
   /// fic03spe ANSM (CIS_CIP8 → "R"|"G") pour badge Princeps (R) ou Gé vert (G) en ligne 1 BDM.
   final Map<String, String>? cip13ToFic03Status;
+  /// Au clic sur le badge DCI (princeps) : lance une recherche avec la DCI pour afficher les génériques sous la barre.
+  final void Function(String dci)? onDciTap;
 
   const SelectedResultView({
     super.key,
     required this.item,
+    this.rppsStructureCountForSelected,
     this.onOpenSelected,
     this.onClose,
     this.statutsForCis,
@@ -96,6 +102,7 @@ class SelectedResultView extends StatelessWidget {
     this.vocProUrl,
     this.hospitalCip13Set,
     this.cip13ToFic03Status,
+    this.onDciTap,
   });
 
   @override
@@ -166,6 +173,8 @@ class SelectedResultView extends StatelessWidget {
             onOpenEspacePro: onOpenEspacePro,
             onOpenCataloguePanel: onOpenCataloguePanel,
             onOpenYouTubeVideo: onOpenYouTubeVideo,
+            videosByCip13: videosByCip13,
+            onOpenTherapeuticVideo: onOpenTherapeuticVideo,
             onOpenPharmaradioFlash: onOpenPharmaradioFlash,
             isInjected: true,
             recalledProductNames: recalledProductNames,
@@ -176,10 +185,14 @@ class SelectedResultView extends StatelessWidget {
             tauxRemboursement: tauxRemboursement,
             compositionLine: compositionLine,
             listes: listes,
+            vocPatientUrl: vocPatientUrl,
+            vocProUrl: vocProUrl,
+            onDciTap: onDciTap,
           ),
           SizedBox(height: line2ToLine3Height),
           ResultLine3Actions(
             item: item,
+            rppsStructureCountForSelected: rppsStructureCountForSelected,
             generiques2026CisSet: generiques2026CisSet,
             isInjected: true,
             onOpenUrl: onOpenUrl,
@@ -194,7 +207,54 @@ class SelectedResultView extends StatelessWidget {
             ansmLastRappel: ansmLastRappel,
             onOpenUrl: onOpenUrl,
           ),
+          // Codes actes : image thématique (honoraires ordonnance, entretiens, dépistage, etc.)
+          if (item.source == SourceType.codesActes) ...[
+            _CodesActesImageSection(label: item.label),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// Retourne le chemin avec l'extension remplacée par .webp (pour fallback depuis .png / .jpg).
+String _assetPathToWebp(String path) {
+  final lower = path.toLowerCase();
+  if (lower.endsWith('.png')) return path.substring(0, path.length - 4) + '.webp';
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return path.substring(0, path.length - (lower.endsWith('.jpeg') ? 5 : 4)) + '.webp';
+  return path;
+}
+
+/// Affiche l'image asset associée au code acte sélectionné (sous la barre de recherche).
+/// Gère .png, .webp (et .jpg) dans assets/images.
+class _CodesActesImageSection extends StatelessWidget {
+  final String label;
+
+  const _CodesActesImageSection({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final assetPath = codesActesImageAssetForLabel(label);
+    if (assetPath == null || assetPath.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 320),
+          child: Image.asset(
+            assetPath,
+            fit: BoxFit.contain,
+            width: double.infinity,
+            errorBuilder: (_, __, ___) => Image.asset(
+              _assetPathToWebp(assetPath),
+              fit: BoxFit.contain,
+              width: double.infinity,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+        ),
       ),
     );
   }

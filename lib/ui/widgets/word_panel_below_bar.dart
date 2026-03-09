@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FilterQuality;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -66,18 +67,18 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
 
   void _openInBrowserThenClose() {
     if (_closing) return;
-    openUrl(widget.wordUrl);
+    openUrlExternal(widget.wordUrl);
     _closeWithFade();
   }
 
   void _downloadFile() {
     if (_closing) return;
-    openUrl(widget.wordUrl);
+    openUrlExternal(widget.wordUrl);
   }
 
   void _printFile() {
     if (_closing) return;
-    openUrl(widget.wordUrl);
+    openUrlExternal(widget.wordUrl);
   }
 
   /// Lance window.find() : 1re fois = 1re occurrence, rappels = occurrence suivante. À partir de 3 caractères.
@@ -222,7 +223,9 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
     _loadingSubscription?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();
-    _webViewController.dispose();
+    if (_webViewController.value.isInitialized) {
+      _webViewController.dispose();
+    }
     super.dispose();
   }
 
@@ -268,6 +271,7 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
                   children: [
                     DocumentViewerToolbar(
                       barHeight: 44,
+                      backgroundColor: Colors.white,
                       onPrint: _printFile,
                       onDownload: _downloadFile,
                       onExpandFullscreen: _openFullscreen,
@@ -280,27 +284,49 @@ class _WordPanelBelowBarState extends State<WordPanelBelowBar> {
                       sourceWidget: documentViewerSourceLabel(
                         label: shortUrlForDisplay(widget.wordUrl),
                         url: widget.wordUrl,
+                        textColor: Colors.black87,
                       ),
                     ),
-                    // Zone 16:9 pour le lecteur Word
+                    // Zone 16:9 pour le lecteur Word (fond gris clair + carte blanche pour meilleure lisibilité)
                     Expanded(
-                      child: isWindows
-                          ? (_initError
-                              ? _buildFallback()
-                              : _webViewController.value.isInitialized
-                                  ? Webview(
-                                      _webViewController,
-                                      permissionRequested: (
-                                        String url,
-                                        WebviewPermissionKind kind,
-                                        bool isUserInitiated,
-                                      ) async =>
-                                          WebviewPermissionDecision.allow,
-                                    )
-                                  : const Center(
-                                      child: CircularProgressIndicator(color: Colors.teal),
-                                    ))
-                          : _buildFallback(),
+                      child: Container(
+                        color: const Color(0xFFF3F4F6),
+                        padding: const EdgeInsets.all(8),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            color: Colors.white,
+                            child: isWindows
+                                ? (_initError
+                                    ? _buildFallback()
+                                    : _webViewController.value.isInitialized
+                                        ? LayoutBuilder(
+                                            builder: (context, c) {
+                                              final dpr = MediaQuery.devicePixelRatioOf(context);
+                                              final w = (c.maxWidth * dpr).floorToDouble() / dpr;
+                                              final h = (c.maxHeight * dpr).floorToDouble() / dpr;
+                                              return Webview(
+                                                _webViewController,
+                                                width: w,
+                                                height: h,
+                                                scaleFactor: dpr,
+                                                filterQuality: FilterQuality.none,
+                                                permissionRequested: (
+                                                  String url,
+                                                  WebviewPermissionKind kind,
+                                                  bool isUserInitiated,
+                                                ) async =>
+                                                    WebviewPermissionDecision.allow,
+                                              );
+                                            },
+                                          )
+                                        : const Center(
+                                            child: CircularProgressIndicator(color: Colors.teal),
+                                          ))
+                                : _buildFallback(),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -350,7 +376,9 @@ class _WordFullscreenContentState extends State<_WordFullscreenContent> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_controller.value.isInitialized) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -361,14 +389,25 @@ class _WordFullscreenContentState extends State<_WordFullscreenContent> {
         child: CircularProgressIndicator(color: Colors.white),
       );
     }
-    return Webview(
-      _controller,
-      permissionRequested: (
-        String url,
-        WebviewPermissionKind kind,
-        bool isUserInitiated,
-      ) async =>
-          WebviewPermissionDecision.allow,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final dpr = MediaQuery.devicePixelRatioOf(context);
+        final w = (constraints.maxWidth * dpr).floorToDouble() / dpr;
+        final h = (constraints.maxHeight * dpr).floorToDouble() / dpr;
+        return Webview(
+          _controller,
+          width: w,
+          height: h,
+          scaleFactor: dpr,
+          filterQuality: FilterQuality.none,
+          permissionRequested: (
+            String url,
+            WebviewPermissionKind kind,
+            bool isUserInitiated,
+          ) async =>
+              WebviewPermissionDecision.allow,
+        );
+      },
     );
   }
 }

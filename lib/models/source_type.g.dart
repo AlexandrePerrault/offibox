@@ -20,5 +20,7 @@ const _$SourceTypeEnumMap = {
   SourceType.pharmacovigilance: 'pharmacovigilance',
   SourceType.centresAntiPoison: 'centresAntiPoison',
   SourceType.chu: 'chu',
+  SourceType.ceipAddictovigilance: 'ceipAddictovigilance',
+  SourceType.annuaireSanteRpps: 'annuaireSanteRpps',
   SourceType.codesActes: 'codesActes',
 };
