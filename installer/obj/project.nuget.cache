@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "tXQ8OKaAc1Y=",
+  "dgSpecHash": "mcmiH0x4OxE=",
   "success": true,
   "projectFilePath": "C:\\Users\\perra\\Documents\\projets_flutter\\offibox\\installer\\Offibox.wixproj",
   "expectedPackageFiles": [
-    "C:\\Users\\perra\\.nuget\\packages\\wixtoolset.heat\\6.0.0\\wixtoolset.heat.6.0.0.nupkg.sha512"
+    "C:\\Users\\perra\\.nuget\\packages\\wixtoolset.heat\\6.0.0\\wixtoolset.heat.6.0.0.nupkg.sha512",
+    "C:\\Users\\perra\\.nuget\\packages\\wixtoolset.ui.wixext\\6.0.0\\wixtoolset.ui.wixext.6.0.0.nupkg.sha512"
   ],
   "logs": []
 }

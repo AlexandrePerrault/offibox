@@ -1,0 +1,7 @@
+C:\Users\perra\Documents\projets_flutter\offibox\website\download\Offibox.msi
+C:\Users\perra\Documents\projets_flutter\offibox\website\download\Offibox.wixpdb
+C:\Users\perra\Documents\projets_flutter\offibox\installer\obj\Release\Offibox.wixproj.CoreCompileInputs.cache
+C:\Users\perra\Documents\projets_flutter\offibox\installer\obj\Release\_ReleaseFiles_dir.wxs
+C:\Users\perra\Documents\projets_flutter\offibox\installer\obj\Release\Offibox.msi
+C:\Users\perra\Documents\projets_flutter\offibox\installer\obj\Release\Offibox.wixpdb
+C:\Users\perra\Documents\projets_flutter\offibox\installer\obj\Release\Offibox.wixproj.BindTracking-neutral.txt

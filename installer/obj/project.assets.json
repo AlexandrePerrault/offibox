@@ -7,6 +7,12 @@
         "build": {
           "build/WixToolset.Heat.targets": {}
         }
+      },
+      "WixToolset.UI.wixext/6.0.0": {
+        "type": "package",
+        "build": {
+          "build/WixToolset.UI.wixext.targets": {}
+        }
       }
     }
   },
@@ -91,11 +97,28 @@
         "wixtoolset.heat.6.0.0.nupkg.sha512",
         "wixtoolset.heat.nuspec"
       ]
+    },
+    "WixToolset.UI.wixext/6.0.0": {
+      "sha512": "+pOLifam0b7urBxACAMc+ynCrLVrjZPEID4QeRHwQoLekFfybDxN3PGvAvIyHeqHBcOAH+6Ghu4ZBXmgg+IYYQ==",
+      "type": "package",
+      "path": "wixtoolset.ui.wixext/6.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "OSMFEULA.txt",
+        "README.md",
+        "build/WixToolset.UI.wixext.targets",
+        "icon.png",
+        "wixext6/WixToolset.UI.wixext.dll",
+        "wixtoolset.ui.wixext.6.0.0.nupkg.sha512",
+        "wixtoolset.ui.wixext.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     "native,Version=v0.0": [
-      "WixToolset.Heat >= 6.0.0"
+      "WixToolset.Heat >= 6.0.0",
+      "WixToolset.UI.wixext >= 6.0.0"
     ]
   },
   "packageFolders": {
@@ -144,6 +167,10 @@
         "targetAlias": "native",
         "dependencies": {
           "WixToolset.Heat": {
+            "target": "Package",
+            "version": "[6.0.0, )"
+          },
+          "WixToolset.UI.wixext": {
             "target": "Package",
             "version": "[6.0.0, )"
           }

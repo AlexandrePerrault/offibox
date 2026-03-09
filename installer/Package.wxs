@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <!-- Language="1036" = français : interface de l'installateur en français -->
   <Package Id="Offibox.Msi"
            Name="Offibox"
@@ -10,7 +11,33 @@
     <MajorUpgrade DowngradeErrorMessage="Une version plus récente d'Offibox est déjà installée." />
     <MediaTemplate EmbedCab="yes" />
 
-    <!-- Répertoire d'installation : AppData\Local\Offibox (sans admin) -->
+    <!-- Options proposées à l'utilisateur (1 = coché par défaut) -->
+    <Property Id="CREATEDESKTOPSHORTCUT" Value="1" />
+    <Property Id="LAUNCHATSTARTUP" Value="1" />
+
+    <!-- UI : choix du dossier d'installation (WixUI_InstallDir) -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLDIR" />
+
+    <!-- Dialogue personnalisé : icône bureau + lancer au démarrage (après InstallDirDlg) -->
+    <UI>
+      <Dialog Id="OptionsDlg" Width="370" Height="270" Title="[ProductName] - Options">
+        <Control Id="OptionsTitle" Type="Text" X="15" Y="6" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="Choisissez les options d'installation." />
+        <Control Id="CheckboxDesktop" Type="CheckBox" X="20" Y="40" Width="330" Height="30" Property="CREATEDESKTOPSHORTCUT" CheckBoxValue="1" Text="Créer une icône sur le bureau" />
+        <Control Id="CheckboxStartup" Type="CheckBox" X="20" Y="75" Width="330" Height="30" Property="LAUNCHATSTARTUP" CheckBoxValue="1" Text="Lancer Offibox au démarrage de Windows" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Retour">
+          <Publish Event="NewDialog" Value="InstallDirDlg" Order="2" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Suivant">
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" Order="2" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Annuler">
+          <Publish Event="SpawnDialog" Value="CancelDlg" Order="2" />
+        </Control>
+      </Dialog>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="OptionsDlg" Order="2" />
+    </UI>
+
+    <!-- Répertoire d'installation : par défaut AppData\Local\Offibox (l'utilisateur peut le changer dans le dialogue) -->
     <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="INSTALLDIR" Name="Offibox" />
     </StandardDirectory>
@@ -25,6 +52,7 @@
       <ComponentGroupRef Id="ReleaseFiles" />
       <ComponentRef Id="StartMenuShortcut" />
       <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="RegistryLaunchAtStartup" />
     </Feature>
   </Package>
 
@@ -38,13 +66,18 @@
       <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
       <RegistryValue Root="HKCU" Key="Software\Offibox" Name="installed" Type="integer" Value="1" KeyPath="yes" />
     </Component>
-    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901">
+    <!-- Icône bureau : installée seulement si l'utilisateur a coché l'option -->
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901" Condition="CREATEDESKTOPSHORTCUT">
       <Shortcut Id="DesktopShortcut"
                 Name="Offibox"
                 Description="La Boîte à Outils de l'Officine"
                 Target="[INSTALLDIR]offibox.exe"
                 WorkingDirectory="INSTALLDIR" />
       <RegistryValue Root="HKCU" Key="Software\Offibox" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <!-- Lancer au démarrage : clé lue par l'app au premier lancement -->
+    <Component Id="RegistryLaunchAtStartup" Directory="INSTALLDIR" Guid="C3D4E5F6-A7B8-9012-CDEF-123456789012" Condition="LAUNCHATSTARTUP">
+      <RegistryValue Root="HKCU" Key="Software\Offibox" Name="LaunchAtStartup" Type="integer" Value="1" KeyPath="yes" />
     </Component>
   </Fragment>
 </Wix>
