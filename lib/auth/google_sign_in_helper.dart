@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'package:offibox/firebase_options.dart';
+
 /// Données d'authentification Google (unifiées pour Firebase et Calendar).
 class GoogleAuthCredentialData {
   const GoogleAuthCredentialData({
@@ -24,6 +26,7 @@ class GoogleAuthCredentialData {
 class OffiboxGoogleSignIn {
   OffiboxGoogleSignIn._();
 
+  /// Scopes demandés à la connexion : e-mail + accès lecture à l'agenda Google (pour connecter l'agenda à l'app).
   static const _scopes = [
     'email',
     'https://www.googleapis.com/auth/calendar.readonly',
@@ -31,7 +34,15 @@ class OffiboxGoogleSignIn {
 
   static GoogleSignIn? _instance;
 
-  static GoogleSignIn get _gs => _instance ??= GoogleSignIn(scopes: _scopes);
+  static GoogleSignIn get _gs => _instance ??= () {
+        if (kIsWeb && DefaultFirebaseOptions.webGoogleClientId != null) {
+          return GoogleSignIn(
+            scopes: _scopes,
+            clientId: DefaultFirebaseOptions.webGoogleClientId,
+          );
+        }
+        return GoogleSignIn(scopes: _scopes);
+      }();
 
   /// Connexion Google.
   static Future<GoogleAuthCredentialData?> signIn() async {

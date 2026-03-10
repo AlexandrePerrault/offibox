@@ -174,114 +174,118 @@ class HamburgerMenuState extends State<HamburgerMenu> {
   }
 
   List<PopupMenuEntry<_HamburgerAction>> _buildMenuItems() {
+    int idx = 0;
+    Widget wrapFade(Widget child) {
+      final i = idx++;
+      return _FadeInMenuItem(index: i, child: child);
+    }
     return [
           if (widget.onShowAccount != null)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.account,
               height: _itemHeight,
-              child: _MenuItemRow(
+              child: wrapFade(const _MenuItemRow(
                 icon: Icons.account_circle_outlined,
                 label: 'Mon compte',
-              ),
+              )),
             ),
           if (widget.onShowAccount != null) const PopupMenuDivider(height: 2.4),
           if (widget.onShowShortcuts != null)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.shortcuts,
               height: _itemHeight,
-              child: _MenuItemRow(
+              child: wrapFade(const _MenuItemRow(
                 icon: Icons.keyboard,
                 label: 'Raccourcis clavier',
-              ),
+              )),
             ),
           if (widget.onShowShortcuts != null) const PopupMenuDivider(height: 2.4),
-          const PopupMenuItem<_HamburgerAction>(
+          PopupMenuItem<_HamburgerAction>(
             value: _HamburgerAction.openOffibox,
             height: _itemHeight,
-            child: _MenuItemRow(
+            child: wrapFade(const _MenuItemRow(
               label: 'Ouvrir offibox.fr',
               isOffiboxFrLabel: true,
               useExternalLink: true,
               iconAssetPath: 'assets/icons/logo_offibox2.png',
-            ),
+            )),
           ),
-          // Toujours afficher une entrée Agenda : grisée si déjà connecté, sinon « Connecter » (activé seulement si Gmail).
           if (widget.isGoogleConnected)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.googleAgenda,
               height: _itemHeight,
               enabled: false,
-              child: _MenuItemRow(
+              child: wrapFade(const _MenuItemRow(
                 icon: Icons.event_note_outlined,
                 label: 'Agenda Google (connecté)',
                 isGreyed: true,
-              ),
+              )),
             ),
           if (!widget.isGoogleConnected && widget.onConnectGoogleAgenda != null)
             PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.connectGoogleAgenda,
               height: _itemHeight,
               enabled: widget.canConnectGoogleAgenda,
-              child: _MenuItemRow(
+              child: wrapFade(_MenuItemRow(
                 icon: Icons.event_note_outlined,
                 label: widget.canConnectGoogleAgenda
                     ? 'Connecter l\'agenda Google'
                     : 'Connecter l\'agenda Google (compte Gmail requis)',
-              ),
+              )),
             ),
           if (widget.onOpenIdBox != null)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.idBox,
               height: _itemHeight,
-              child: _MenuItemRow(
+              child: wrapFade(const _MenuItemRow(
                 label: 'Id Box',
                 isIdBoxLabel: true,
                 iconAssetPath: 'assets/icons/ampoule_idees.jpg',
-              ),
+              )),
             ),
           if (widget.onShowContact != null)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.contact,
               height: _itemHeight,
-              child: _MenuItemRow(
+              child: wrapFade(const _MenuItemRow(
                 icon: Icons.alternate_email,
-                label: 'Contact',
-              ),
+                label: 'Formulaire de contact',
+              )),
             ),
           if (widget.onShowVersionHistory != null)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.versionHistory,
               height: _itemHeight,
-              child: _MenuItemRow(
+              child: wrapFade(const _MenuItemRow(
                 icon: Icons.history,
                 label: 'Historique des versions',
-              ),
+              )),
             ),
           if (widget.onShowAbout != null)
-            const PopupMenuItem<_HamburgerAction>(
+            PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.about,
               height: _itemHeight,
-              child: _MenuItemRow(
+              child: wrapFade(const _MenuItemRow(
                 icon: Icons.info_outline,
                 label: 'À propos',
-              ),
+              )),
             ),
-          const PopupMenuItem<_HamburgerAction>(
+          PopupMenuItem<_HamburgerAction>(
             value: _HamburgerAction.minimize,
             height: _itemHeight,
-            child: _MenuItemRow(
+            child: wrapFade(const _MenuItemRow(
               icon: Icons.minimize,
               label: 'Réduire',
               rotateMinimize: true,
-            ),
+            )),
           ),
-          const PopupMenuItem<_HamburgerAction>(
+          PopupMenuItem<_HamburgerAction>(
             value: _HamburgerAction.close,
             height: _itemHeight,
-            child: _MenuItemRow(
+            child: wrapFade(const _MenuItemRow(
               icon: Icons.close,
               label: 'Quitter',
-            ),
+            )),
           ),
     ];
   }
@@ -320,6 +324,53 @@ class HamburgerMenuState extends State<HamburgerMenu> {
         ),
       ),
     );
+  }
+}
+
+/// Enveloppe un enfant du menu hamburger avec une apparition en fondu (délai échelonné par index).
+class _FadeInMenuItem extends StatefulWidget {
+  const _FadeInMenuItem({required this.index, required this.child});
+  final int index;
+  final Widget child;
+
+  @override
+  State<_FadeInMenuItem> createState() => _FadeInMenuItemState();
+}
+
+class _FadeInMenuItemState extends State<_FadeInMenuItem>
+    with SingleTickerProviderStateMixin {
+  static const _duration = Duration(milliseconds: 180);
+  static const _delayPerItem = 32;
+
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: _duration);
+    _animation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    final delay = widget.index * _delayPerItem;
+    if (delay > 0) {
+      Future.delayed(Duration(milliseconds: delay), () {
+        if (mounted) _controller.forward();
+      });
+    } else {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(opacity: _animation, child: widget.child);
   }
 }
 

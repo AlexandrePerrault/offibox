@@ -1,5 +1,6 @@
-import 'dart:io' show Platform;
+import 'package:offibox/io_platform_stub.dart' if (dart.library.io) 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -109,8 +110,16 @@ class _InitialRoute extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authStateProvider).valueOrNull;
+    if (kIsWeb) {
+      if (user == null) return const AuthGate();
+      return const Scaffold(
+        body: Center(
+          child: Text('Vous êtes connecté à Offibox (version web).'),
+        ),
+      );
+    }
     if (Platform.isWindows || Platform.isLinux) {
-      final user = ref.watch(authStateProvider).valueOrNull;
       if (user == null) {
         return const AuthGate();
       }

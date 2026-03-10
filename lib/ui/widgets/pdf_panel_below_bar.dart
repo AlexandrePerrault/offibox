@@ -103,6 +103,22 @@ class _PdfPanelBelowBarState extends State<PdfPanelBelowBar> {
     });
   }
 
+  @override
+  void didUpdateWidget(covariant PdfPanelBelowBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pdfUrl != widget.pdfUrl) {
+      _pdfFileFuture = PdfCacheService.getCachedPdf(
+        pdfUrl: widget.pdfUrl,
+        laboratory: widget.laboratory.isEmpty ? 'document' : widget.laboratory,
+        allowLarge: _cartEnabled,
+      );
+      _textSearcher = null;
+      _activeQuery = '';
+      _searchSeq++;
+      if (mounted) setState(() {});
+    }
+  }
+
   Future<void> _loadPrices() async {
     final url = CatalogueCartConfig.cerpEquipmentPricesCsvUrl.trim();
     if (url.isEmpty) return;

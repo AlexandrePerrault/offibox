@@ -323,10 +323,11 @@ PHARMACIES_CSV_HEADER = [
 def build_pharmacies_output_rows(
     rows: list[list[str]],
     col_indices: dict[str, int | None],
+    deduplicate: bool = True,
 ) -> list[list[str]]:
-    """Construit les lignes du CSV pharmacies : nom de la pharmacie, adresse, code postal, ville, téléphone (une ligne par lieu)."""
+    """Construit les lignes du CSV pharmacies : nom, adresse, code postal, ville, téléphone.
+    Si deduplicate=True (défaut), une seule ligne par établissement (clé : nom + adresse + CP + ville)."""
     out = [PHARMACIES_CSV_HEADER]
-    # Mapping champ sortie pharmacies -> champ commun (source)
     field_map = {
         "Nom_pharmacie": "Nom_structure",
         "Adresse": "Adresse",
@@ -334,6 +335,7 @@ def build_pharmacies_output_rows(
         "Ville": "Ville",
         "Telephone": "Telephone",
     }
+    seen: set[tuple[str, str, str, str]] = set()
     for row in rows[1:]:
         out_row = []
         for field in PHARMACIES_CSV_HEADER:
@@ -343,6 +345,11 @@ def build_pharmacies_output_rows(
                 out_row.append("")
                 continue
             out_row.append((row[idx] or "").strip())
+        if deduplicate:
+            key = (out_row[0], out_row[1], out_row[2], out_row[3])  # Nom, Adresse, CP, Ville
+            if key in seen:
+                continue
+            seen.add(key)
         out.append(out_row)
     return out
 
@@ -683,6 +690,11 @@ def main() -> None:
         help="Ne pas filtrer par profession (garder tous les PS)",
     )
     parser.add_argument(
+        "--pharmacies-only",
+        action="store_true",
+        help="Extraire uniquement les établissements pharmacie (CSV dédoublonné, ~20 000 lignes). Équivalent à filtrer pharmaciens puis dédupliquer par (nom, adresse, CP, ville).",
+    )
+    parser.add_argument(
         "--profession-col",
         type=int,
         default=None,
@@ -726,7 +738,19 @@ def main() -> None:
     rows = normalize_row_length(rows)
 
     profession_col: int | None = args.profession_col
-    if not args.no_profession_filter:
+    if args.pharmacies_only:
+        before = len(rows)
+        rows = filter_by_professions(
+            rows,
+            ["Pharmacien", "Pharmacienne", "Pharmaciens"],
+            profession_col=profession_col,
+        )
+        print(
+            f"Mode pharmacies uniquement : {len(rows) - 1} lignes pharmaciens (sur {before - 1} données).",
+            file=sys.stderr,
+            flush=True,
+        )
+    elif not args.no_profession_filter:
         before = len(rows)
         rows = filter_by_professions(
             rows,
@@ -753,6 +777,7 @@ def main() -> None:
 
     DEFAULT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     rows_for_sheets: list[list[str]] = []  # Données combinées (hors pharmacies) pour la feuille Sheets
+    files_pushed: list[tuple[str, Path]] = []
     github_token = None if args.no_github else os.environ.get("GITHUB_TOKEN")
     if not args.no_github and not github_token:
         print("GITHUB_TOKEN non défini : export GitHub ignoré.", file=sys.stderr)

@@ -6,7 +6,7 @@
   <title>Offibox - La Boîte à Outils de l'Officine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-dark: #0f172a;
@@ -25,7 +25,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Spinnaker', sans-serif;
       font-size: 17px;
       line-height: 1.6;
       color: var(--gray);
@@ -91,6 +91,12 @@
       border-color: var(--accent);
       color: var(--accent);
     }
+    #nav-connected { display: none; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    #nav-connected.visible { display: flex; }
+    #nav-guest.visible { display: flex; }
+    #nav-guest { display: flex; align-items: center; gap: 1.5rem; }
+    #nav-guest.hidden { display: none !important; }
+    .nav-user-email { color: var(--text-muted); font-size: 0.9rem; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ----- Hero (2 colonnes, type Apple / Posos) ----- */
     .hero {
@@ -274,6 +280,7 @@
     }
     .sources-wheel-track {
       display: flex;
+      align-items: center;
       gap: 2rem;
       width: max-content;
       padding: 0 2rem;
@@ -291,11 +298,11 @@
       width: 160px;
       height: 100px;
       border-radius: 8px;
-      background: var(--white);
+      background-color: var(--white);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      background-size: 85%;
+      background-size: contain;
       background-repeat: no-repeat;
-      background-position: center;
+      background-position: center center;
       transition: transform 0.2s;
     }
     .sources-wheel-item:hover {
@@ -304,6 +311,7 @@
     a.sources-wheel-item {
       display: block;
       text-decoration: none;
+      cursor: pointer;
     }
     .sources-wheel-item:focus {
       outline: 2px solid var(--white);
@@ -427,9 +435,17 @@
       <div class="nav-links">
         <a href="#accueil">Accueil</a>
         <a href="#fonctionnalites">Fonctionnalités</a>
-        <a href="login.html" class="btn-outline">Se connecter</a>
-        <a href="login.html" class="btn-primary">S'inscrire</a>
-        <a href="https://github.com/AlexandrePerrault/offibox/releases/latest" class="btn-primary" target="_blank" rel="noopener">Télécharger</a>
+        <div id="nav-guest" class="visible">
+          <a href="login-wix.html" class="btn-outline">Se connecter</a>
+          <a href="login-wix.html" class="btn-primary">S'inscrire</a>
+          <a href="https://github.com/AlexandrePerrault/offibox/releases/latest" class="btn-primary" target="_blank" rel="noopener">Télécharger</a>
+        </div>
+        <div id="nav-connected">
+          <span class="nav-user-email" id="nav-user-email" aria-hidden="true"></span>
+          <a href="validation.html" class="btn-outline">Mon compte</a>
+          <a href="https://github.com/AlexandrePerrault/offibox/releases/latest" class="btn-primary" target="_blank" rel="noopener">Télécharger</a>
+          <a href="#" id="nav-signout" class="btn-outline">Se déconnecter</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -559,7 +575,48 @@
     <p><a href="https://www.offibox.fr/">Mentions légales</a> · <a href="#">Contact</a></p>
   </footer>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/firebase-auth.js"></script>
   <script>
+    (function() {
+      var navGuest = document.getElementById('nav-guest');
+      var navConnected = document.getElementById('nav-connected');
+      var navUserEmail = document.getElementById('nav-user-email');
+      var navSignout = document.getElementById('nav-signout');
+      function setConnected(user) {
+        if (!navGuest || !navConnected) return;
+        if (user && user.email) {
+          navGuest.classList.add('hidden');
+          navGuest.classList.remove('visible');
+          navConnected.classList.add('visible');
+          if (navUserEmail) navUserEmail.textContent = user.email;
+        } else {
+          navGuest.classList.remove('hidden');
+          navGuest.classList.add('visible');
+          navConnected.classList.remove('visible');
+        }
+      }
+      function initAuthBar() {
+        if (!window.OffiboxAuth) return;
+        var user = OffiboxAuth.getCurrentUser && OffiboxAuth.getCurrentUser();
+        if (user) { setConnected(user); return; }
+        if (OffiboxAuth.onAuthStateChanged) {
+          OffiboxAuth.onAuthStateChanged(function(u) { setConnected(u || null); });
+        }
+      }
+      if (navSignout) {
+        navSignout.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (window.OffiboxAuth && typeof OffiboxAuth.signOut === 'function') {
+            OffiboxAuth.signOut().then(function() { setConnected(null); }).catch(function() { setConnected(null); });
+          } else { setConnected(null); }
+        });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAuthBar);
+      else initAuthBar();
+    })();
     document.querySelectorAll('.faq-question').forEach(btn => {
       btn.addEventListener('click', () => {
         const item = btn.parentElement;

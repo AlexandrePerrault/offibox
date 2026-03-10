@@ -1,0 +1,351 @@
+<!-- Partie formulaire de connexion / inscription - à inclure dans la version mobile -->
+<style>
+  .login-form-part :root,
+  .login-form-part { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+  .login-form-part * { margin: 0; padding: 0; box-sizing: border-box; }
+  .login-form-part {
+    font-family: 'Spinnaker', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--gray);
+  }
+  .login-form-part .login-card {
+    background: var(--white);
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    border: 1px solid var(--gray-light);
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .login-form-part .login-card h2 { font-size: 1.1rem; font-weight: 700; color: var(--gray); margin-bottom: 0.35rem; }
+  .login-form-part .login-card .subtitle { color: #64748b; font-size: 1.1rem; margin-bottom: 2rem; }
+  .login-form-part .login-card .subtitle .offi { color: var(--offi-teal); font-weight: 600; }
+  .login-form-part .btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    width: 100%; padding: 0.875rem 1.25rem; font-size: 1rem; font-weight: 600; color: var(--gray);
+    background: var(--white); border: 1px solid var(--gray-light); border-radius: 10px;
+    cursor: pointer; transition: background 0.2s, border-color 0.2s;
+  }
+  .login-form-part .btn-google:hover { background: #f8fafc; border-color: #cbd5e1; }
+  .login-form-part .btn-google svg { width: 20px; height: 20px; }
+  .login-form-part .divider { display: flex; align-items: center; margin: 1.5rem 0; color: #94a3b8; font-size: 0.875rem; }
+  .login-form-part .divider::before, .login-form-part .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-light); }
+  .login-form-part .divider span { padding: 0 1rem; }
+  .login-form-part .form-group { margin-bottom: 1.25rem; }
+  .login-form-part .form-group label { display: block; font-weight: 500; color: var(--gray); margin-bottom: 0.4rem; font-size: 0.9rem; }
+  .login-form-part .form-group input {
+    width: 100%; padding: 0.75rem 1rem; font-size: 1rem;
+    border: 1px solid var(--gray-light); border-radius: 8px;
+    transition: border-color 0.2s;
+  }
+  .login-form-part .form-group input:focus { outline: none; border-color: var(--offi-teal); box-shadow: 0 0 0 3px rgba(90, 144, 148, 0.15); }
+  .login-form-part .form-group.email-typewriter-wrap .email-input-wrap { position: relative; }
+  .login-form-part .form-group.email-typewriter-wrap .typewriter-placeholder { position: absolute; left: 1rem; top: 0; bottom: 0; display: flex; align-items: center; font-size: 1rem; color: #94a3b8; pointer-events: none; font-family: inherit; }
+  .login-form-part .form-group.email-typewriter-wrap .typewriter-placeholder .cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--offi-teal); margin-left: 2px; vertical-align: text-bottom; animation: typewriter-blink 0.8s step-end infinite; }
+  @keyframes typewriter-blink { 50% { opacity: 0; } }
+  .login-form-part .form-group.email-typewriter-wrap input.email-with-typewriter { background: transparent; }
+  .login-form-part .form-group.email-typewriter-wrap .typewriter-placeholder.hidden { display: none !important; }
+  .login-form-part .form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .login-form-part .checkbox-wrap { display: flex; align-items: center; gap: 0.5rem; }
+  .login-form-part .checkbox-wrap input { width: auto; }
+  .login-form-part .checkbox-wrap label { margin: 0; font-size: 0.9rem; color: var(--gray); cursor: pointer; }
+  .login-form-part .forgot { font-size: 0.9rem; color: var(--offi-teal); text-decoration: none; }
+  .login-form-part .forgot:hover { text-decoration: underline; }
+  .login-form-part .btn-submit {
+    width: 100%; padding: 0.875rem; font-size: 1rem; font-weight: 600; color: var(--white);
+    background: var(--offi-teal); border: none; border-radius: 10px;
+    cursor: pointer; transition: background 0.2s, transform 0.2s;
+  }
+  .login-form-part .btn-submit:hover { background: #4a7a7e; transform: translateY(-1px); }
+  .login-form-part .signup-link { text-align: center; margin-top: 1.5rem; font-size: 0.95rem; color: #64748b; }
+  .login-form-part .signup-link a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+  .login-form-part .signup-link a:hover { text-decoration: underline; }
+  .login-form-part .auth-error { margin-bottom: 1rem; padding: 0.75rem 1rem; background: #fef2f2; color: #b91c1c; font-size: 0.9rem; border-radius: 8px; display: none; }
+  .login-form-part .auth-error.visible { display: block; }
+  .login-form-part .auth-loading { opacity: 0.7; pointer-events: none; }
+  .login-form-part #inscription-section { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-light); text-align: center; }
+  .login-form-part #inscription-section.visible { display: block; }
+  .login-form-part #inscription-section .inscription-panel { max-width: 420px; margin: 0 auto; text-align: left; }
+  .login-form-part .form-row-inline { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+  .login-form-part .form-row-inline .form-group { margin-bottom: 0; }
+  .login-form-part .password-reset-form { display: none; margin-top: 1rem; }
+  .login-form-part .password-reset-form.visible { display: block; }
+  .login-form-part .btn-secondary { background: var(--gray-light); color: var(--gray); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
+  .login-form-part .address-autocomplete-wrap { position: relative; }
+  .login-form-part .address-suggestions {
+    display: none;
+    position: absolute; left: 0; right: 0; top: 100%; z-index: 10;
+    margin-top: 2px; padding: 0;
+    background: var(--white); border: 1px solid var(--gray-light);
+    border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    max-height: 220px; overflow-y: auto; list-style: none;
+  }
+  .login-form-part .address-suggestions.visible { display: block; }
+  .login-form-part .address-suggestions li {
+    padding: 0.6rem 1rem; font-size: 0.9rem; color: var(--gray); cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .login-form-part .address-suggestions li:last-child { border-bottom: none; }
+  .login-form-part .address-suggestions li:hover { background: rgba(90, 144, 148, 0.08); color: var(--offi-teal); }
+</style>
+
+<div class="login-form-part">
+  <div class="login-card">
+    <h2>Connexion</h2>
+    <p class="subtitle">Accédez à votre compte <span class="offi">Offi</span>box</p>
+    <div id="auth-error" class="auth-error" role="alert"></div>
+    <form id="login-form" action="#" method="post">
+      <button type="button" class="btn-google" id="btn-google" aria-label="Se connecter avec Google">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Se connecter avec Google
+      </button>
+      <div class="divider"><span>ou</span></div>
+      <div class="form-group email-typewriter-wrap">
+        <label for="email">Adresse e-mail</label>
+        <div class="email-input-wrap">
+          <span class="typewriter-placeholder" id="email-typewriter-wrap" aria-hidden="true"><span id="email-typewriter"></span><span class="cursor"></span></span>
+          <input type="email" id="email" name="email" class="email-with-typewriter" placeholder=" " autocomplete="email" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <div class="form-row">
+        <div class="checkbox-wrap">
+          <input type="checkbox" id="remember" name="remember" checked>
+          <label for="remember">Se souvenir de moi</label>
+        </div>
+        <a href="#" class="forgot" id="forgot-link">Mot de passe oublié ?</a>
+      </div>
+      <div id="password-reset-form" class="password-reset-form">
+        <div class="form-group">
+          <label for="reset-email">E-mail pour réinitialiser</label>
+          <input type="email" id="reset-email" placeholder="vous@exemple.fr">
+        </div>
+        <button type="button" class="btn-submit" id="btn-send-reset">Envoyer le lien</button>
+        <button type="button" class="btn-secondary" id="btn-cancel-reset" style="margin-top:0.5rem;">Annuler</button>
+      </div>
+      <button type="submit" class="btn-submit" id="btn-submit">Se connecter</button>
+    </form>
+    <div id="inscription-section">
+      <div class="inscription-panel">
+        <h2 style="font-size:1.25rem;margin-bottom:1rem;">Créer un compte</h2>
+        <form id="signup-form" action="#" method="post">
+          <div class="form-group">
+            <label for="signup-pharmacy">Nom de la pharmacie</label>
+            <input type="text" id="signup-pharmacy" name="signup-pharmacy" placeholder="Nom de l'officine" autocomplete="organization">
+          </div>
+          <div class="form-group address-autocomplete-wrap">
+            <label for="signup-address">Adresse</label>
+            <input type="text" id="signup-address" name="signup-address" placeholder="Commencez à taper une adresse…" autocomplete="off">
+            <ul class="address-suggestions" id="address-suggestions" aria-hidden="true"></ul>
+          </div>
+          <div class="form-row form-row-inline">
+            <div class="form-group" style="flex:1;">
+              <label for="signup-zip">Code postal</label>
+              <input type="text" id="signup-zip" name="signup-zip" placeholder="CP" autocomplete="postal-code" maxlength="10">
+            </div>
+            <div class="form-group" style="flex:2;">
+              <label for="signup-city">Ville</label>
+              <input type="text" id="signup-city" name="signup-city" placeholder="Ville" autocomplete="address-level2">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="signup-groupement">Groupement</label>
+            <input type="text" id="signup-groupement" name="signup-groupement" placeholder="Groupement">
+          </div>
+          <div class="form-group">
+            <label for="signup-email">Adresse e-mail</label>
+            <input type="email" id="signup-email" name="signup-email" placeholder="vous@exemple.fr" autocomplete="email" required>
+          </div>
+          <p class="signup-email-info" style="font-size:0.9rem;color:#64748b;margin-bottom:1rem;">
+            Un email vous sera envoyé à l'adresse indiquée pour définir votre mot de passe et finaliser votre inscription.
+          </p>
+          <button type="submit" class="btn-submit">S'inscrire</button>
+        </form>
+      </div>
+    </div>
+    <p class="signup-link">Première connexion ? <a href="#inscription" id="toggle-signup">Inscrivez-vous</a></p>
+  </div>
+</div>
+
+<script>
+(function() {
+  var authError = document.getElementById('auth-error');
+  var loginForm = document.getElementById('login-form');
+  var btnGoogle = document.getElementById('btn-google');
+  var btnSubmit = document.getElementById('btn-submit');
+  var inscriptionSection = document.getElementById('inscription-section');
+  var toggleSignup = document.getElementById('toggle-signup');
+  var signupForm = document.getElementById('signup-form');
+  var forgotLink = document.getElementById('forgot-link');
+  var passwordResetForm = document.getElementById('password-reset-form');
+  var btnSendReset = document.getElementById('btn-send-reset');
+  var btnCancelReset = document.getElementById('btn-cancel-reset');
+  function showError(msg) { if (authError) { authError.textContent = msg || ''; authError.classList.toggle('visible', !!msg); } }
+  function setLoading(loading) { if (loginForm) loginForm.classList.toggle('auth-loading', loading); if (btnGoogle) btnGoogle.disabled = loading; if (btnSubmit) btnSubmit.disabled = loading; }
+  function goToValidation() { window.location.href = 'validation.html'; }
+  if (window.OffiboxAuth) {
+    var user = OffiboxAuth.getCurrentUser();
+    if (user) { goToValidation(); return; }
+    OffiboxAuth.onAuthStateChanged(function(u) { if (u) goToValidation(); });
+  }
+  if (btnGoogle) btnGoogle.addEventListener('click', function() {
+    if (!window.OffiboxAuth) { goToValidation(); return; }
+    showError(''); setLoading(true);
+    OffiboxAuth.signInWithGoogle().then(goToValidation).catch(function(err) {
+      setLoading(false);
+      var msg = 'Connexion Google impossible. Réessayez.';
+      if (err && err.code === 'auth/popup-closed-by-user') msg = 'Connexion annulée.';
+      else if (err && err.code === 'auth/popup-blocked') msg = 'Popup bloquée.';
+      else if (err && err.message) msg = err.message;
+      showError(msg);
+    });
+  });
+  if (loginForm) loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!window.OffiboxAuth) { goToValidation(); return; }
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
+    if (!email || !password) { showError('Veuillez remplir l\'email et le mot de passe.'); return; }
+    showError(''); setLoading(true);
+    OffiboxAuth.signInWithEmailPassword(email, password).then(goToValidation).catch(function(err) {
+      setLoading(false);
+      var msg = 'Connexion impossible. Vérifiez vos identifiants.';
+      if (err && (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password')) msg = 'E-mail ou mot de passe incorrect.';
+      else if (err && err.code === 'auth/invalid-email') msg = 'Adresse e-mail invalide.';
+      else if (err && err.message) msg = err.message;
+      showError(msg);
+    });
+  });
+  if (toggleSignup) toggleSignup.addEventListener('click', function(e) {
+    e.preventDefault();
+    inscriptionSection.classList.toggle('visible');
+    loginForm.style.display = inscriptionSection.classList.contains('visible') ? 'none' : 'block';
+    toggleSignup.textContent = inscriptionSection.classList.contains('visible') ? 'Déjà un compte ? Se connecter' : 'Inscrivez-vous';
+    showError('');
+  });
+  function randomPassword(len) {
+    var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var pwd = '';
+    for (var i = 0; i < (len || 12); i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    return pwd;
+  }
+  if (signupForm) signupForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = document.getElementById('signup-email').value.trim();
+    if (!email) { showError('Veuillez indiquer votre adresse e-mail.'); return; }
+    showError(''); setLoading(true);
+    var generatedPwd = randomPassword(12);
+    OffiboxAuth.signUpWithEmailPassword(email, generatedPwd).then(function() {
+      return OffiboxAuth.sendPasswordResetEmail ? OffiboxAuth.sendPasswordResetEmail(email) : Promise.resolve();
+    }).then(function() {
+      window.location.href = 'validation.html?inscription=1&email=' + encodeURIComponent(email);
+    }).catch(function(err) {
+      setLoading(false);
+      var msg = 'Inscription impossible. Réessayez.';
+      if (err && err.code === 'auth/email-already-in-use') msg = 'Un compte existe déjà avec cet e-mail.';
+      else if (err && err.message) msg = err.message;
+      showError(msg);
+    });
+  });
+  if (forgotLink) forgotLink.addEventListener('click', function(e) { e.preventDefault(); passwordResetForm.classList.add('visible'); });
+  if (btnCancelReset) btnCancelReset.addEventListener('click', function() { passwordResetForm.classList.remove('visible'); document.getElementById('reset-email').value = ''; });
+  if (btnSendReset) btnSendReset.addEventListener('click', function() {
+    var email = document.getElementById('reset-email').value.trim();
+    if (!email) { showError('Indiquez votre adresse e-mail.'); return; }
+    showError('');
+    OffiboxAuth.sendPasswordResetEmail(email).then(function() { showError('Un lien de réinitialisation a été envoyé à votre adresse.'); passwordResetForm.classList.remove('visible'); }).catch(function(err) {
+      if (err && err.code === 'auth/user-not-found') showError('Aucun compte avec cet e-mail.'); else showError(err && err.message ? err.message : 'Envoi impossible.');
+    });
+  });
+})();
+(function typewriterEmail() {
+  var wrap = document.getElementById('email-typewriter-wrap');
+  var textEl = document.getElementById('email-typewriter');
+  var input = document.getElementById('email');
+  if (!wrap || !textEl || !input) return;
+  var text = 'mon email@exemple.fr';
+  var speed = 90;
+  var pauseStart = 600;
+  function run() {
+    textEl.textContent = '';
+    var i = 0;
+    function type() {
+      if (i < text.length) {
+        textEl.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      }
+    }
+    setTimeout(type, pauseStart);
+  }
+  run();
+  input.addEventListener('focus', function() { wrap.classList.add('hidden'); if (!input.value || input.value === text) input.value = ''; });
+  input.addEventListener('blur', function() { if (!input.value.trim()) { wrap.classList.remove('hidden'); run(); } });
+})();
+(function addressAutocomplete() {
+  var input = document.getElementById('signup-address');
+  var list = document.getElementById('address-suggestions');
+  var zip = document.getElementById('signup-zip');
+  var city = document.getElementById('signup-city');
+  if (!input || !list || !zip || !city) return;
+  var debounceTimer;
+  var lastAbort = null;
+  function showSuggestions(features) {
+    list.innerHTML = '';
+    list.setAttribute('aria-hidden', 'false');
+    if (!features || features.length === 0) { list.classList.remove('visible'); return; }
+    features.forEach(function(f) {
+      var p = (f && f.properties) || {};
+      var label = p.label || (p.housenumber || '') + ' ' + (p.street || '') + ', ' + (p.postcode || '') + ' ' + (p.city || '');
+      var streetLine = [p.housenumber, p.street].filter(Boolean).join(' ') || label.split(',')[0] || label;
+      var li = document.createElement('li');
+      li.textContent = label;
+      li.setAttribute('data-postcode', p.postcode || '');
+      li.setAttribute('data-city', p.city || '');
+      li.setAttribute('data-street', streetLine);
+      li.tabIndex = 0;
+      li.addEventListener('click', function() {
+        input.value = this.getAttribute('data-street');
+        zip.value = this.getAttribute('data-postcode');
+        city.value = this.getAttribute('data-city');
+        list.innerHTML = '';
+        list.setAttribute('aria-hidden', 'true');
+        list.classList.remove('visible');
+      });
+      list.appendChild(li);
+    });
+    list.classList.add('visible');
+  }
+  function hideSuggestions() {
+    list.innerHTML = '';
+    list.setAttribute('aria-hidden', 'true');
+    list.classList.remove('visible');
+  }
+  input.addEventListener('input', function() {
+    var q = input.value.trim();
+    clearTimeout(debounceTimer);
+    if (lastAbort) lastAbort.abort();
+    if (q.length < 3) { hideSuggestions(); return; }
+    debounceTimer = setTimeout(function() {
+      lastAbort = new AbortController();
+      fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=6', { signal: lastAbort.signal })
+        .then(function(r) { return r.json(); })
+        .then(function(data) { showSuggestions(data.features || []); })
+        .catch(function() { hideSuggestions(); });
+    }, 300);
+  });
+  input.addEventListener('blur', function() { setTimeout(hideSuggestions, 200); });
+  input.addEventListener('focus', function() { if (list.children.length) list.classList.add('visible'); });
+})();
+</script>

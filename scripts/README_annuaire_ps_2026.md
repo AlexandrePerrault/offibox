@@ -37,7 +37,14 @@ Options utiles :
 - `--url URL` : URL du fichier source (si data.gouv change l’URL des extractions).
 - `--no-sheets` : ne pas envoyer vers Google Sheets.
 - `--no-github` : ne pas pousser vers GitHub.
+- `--pharmacies-only` : extraire **uniquement les établissements pharmacie** (une ligne par pharmacie, ~20 000) : CSV dédoublonné `annuaire_ps_2026_output/annuaire_pharmacies_2026.csv` (Nom_pharmacie, Adresse, Code_postal, Ville, Telephone). À combiner avec `--no-sheets --no-github` pour n’obtenir que ce fichier.
 - `--max-rows N` : limiter à N lignes de données (pour test).
+
+**Exemple — uniquement le CSV des pharmacies (établissements) :**
+```bash
+python scripts/annuaire_ps_2026_pipeline.py --pharmacies-only --no-sheets --no-github
+```
+→ Fichier produit : `scripts/annuaire_ps_2026_output/annuaire_pharmacies_2026.csv`
 
 ## Exécution quotidienne
 

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:offibox/app/offibox_app.dart';
 import 'package:offibox/config/app_config.dart';
+import 'package:offibox/services/trial_guard.dart';
 
 /// Page de connexion au démarrage (iOS) : Google et Email.
 class LoginScreen extends ConsumerStatefulWidget {
@@ -50,6 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         idToken: auth.idToken,
       );
       await FirebaseAuth.instance.signInWithCredential(credential);
+      await TrialGuard.ensureTrialStartedOnFirstConnection();
       if (!mounted) return;
       setState(() => _loading = false);
     } catch (e) {
@@ -107,6 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           password: password,
         );
       }
+      await TrialGuard.ensureTrialStartedOnFirstConnection();
       if (!mounted) return;
       setState(() => _loading = false);
     } on FirebaseAuthException catch (e) {

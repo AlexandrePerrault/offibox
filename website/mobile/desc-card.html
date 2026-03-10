@@ -1,0 +1,58 @@
+<!-- Carte description Offibox – version mobile : même texte et animations que PC, pas de débordement, retour à la ligne. -->
+<style>
+.mob-desc{--w:#fff;--g:#334155;--l:#e2e8f0;--t:#5A9094;margin:0 auto;padding:0 1.25rem;box-sizing:border-box;font-family:'Spinnaker',sans-serif;font-size:14px;color:var(--g);width:100%;max-width:360px;overflow-x:hidden}
+.mob-desc .card{width:100%;max-width:100%;min-width:0;min-height:340px;padding:1.1rem 1.25rem;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12);border:1px solid var(--l);background:var(--w);display:flex;flex-direction:column;justify-content:space-between}
+.mob-desc .badge-wrap{margin-bottom:1rem;perspective:800px;min-width:0}
+.mob-desc .badge{display:inline-block;padding:.5rem .75rem;background:var(--t);border:2px solid var(--t);border-radius:12px;box-shadow:0 3px 0 #4a7a7e,0 5px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .2s,box-shadow .2s,background .2s,border-color .2s,color .2s;cursor:default;max-width:100%;box-sizing:border-box}
+.mob-desc .badge:hover{transform:translateY(1px);box-shadow:0 2px 0 #4a7a7e,0 4px 12px rgba(0,0,0,.18);background:var(--w);border-color:var(--t)}
+.mob-desc .badge .title{font-size:clamp(0.85rem,2.8vw,1rem);font-weight:700;color:var(--w);line-height:1.35;transition:color .2s;margin:0;word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
+.mob-desc .badge .offi,.mob-desc .pill .offi{display:inline-block;margin-right:-.06em}
+.mob-desc .badge .offi{color:rgba(255,255,255,.95);transition:color .2s}
+.mob-desc .badge:hover .title{color:var(--g)}
+.mob-desc .badge:hover .offi{color:var(--t)}
+.mob-desc .list{list-style:none;padding:0;margin:0 0 1.25rem;font-size:0.85rem;line-height:1.5;opacity:0;animation:mf 0.8s ease-out .15s forwards;min-width:0}
+@keyframes mf{to{opacity:1}}
+.mob-desc .list li{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.45rem;opacity:0;transform:translateY(6px);animation:ml .7s ease-out forwards;letter-spacing:.03em;min-width:0}
+.mob-desc .list li:nth-child(1){animation-delay:.35s}
+.mob-desc .list li:nth-child(2){animation-delay:.55s}
+.mob-desc .list li:nth-child(3){animation-delay:.75s}
+.mob-desc .list li:nth-child(4){animation-delay:.95s}
+.mob-desc .list li:nth-child(5){animation-delay:1.15s}
+.mob-desc .list li:last-child{margin-bottom:0}
+@keyframes ml{to{opacity:1;transform:translateY(0)}}
+.mob-desc .list .ic{flex-shrink:0;width:20px;height:20px;margin-top:.2em;color:var(--t);transition:transform .25s ease}
+.mob-desc .list li:hover .ic{transform:scale(1.18)}
+.mob-desc .list .ic svg{width:100%;height:100%;display:block}
+.mob-desc .list .ic.z{color:#f59e0b}
+.mob-desc .list .ic.c{color:#0d9488}
+.mob-desc .list .ic.b{color:#eab308}
+.mob-desc .list .ic.b svg{animation:mb 1.6s ease-in-out infinite}
+@keyframes mb{0%,100%{opacity:1;filter:brightness(1.2)}45%,55%{opacity:.5;filter:brightness(.7)}}
+.mob-desc .list .ic.s{color:#2563eb}
+.mob-desc .list .ic.d{color:#5A9094}
+.mob-desc .list .txt{min-width:0;flex:1;word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
+.mob-desc .pill{display:inline-flex;align-items:center;flex-wrap:wrap;gap:.35rem;padding:.5rem .75rem;background:var(--w);border:2px solid var(--t);border-radius:12px;color:var(--g);font-size:0.85rem;font-weight:600;text-decoration:none;box-shadow:0 4px 12px rgba(90,144,148,.15);max-width:100%;transition:transform .2s,box-shadow .2s,background .2s,color .2s}
+.mob-desc .pill:hover{transform:translateX(4px);box-shadow:0 6px 20px rgba(0,0,0,.2);background:var(--t);border-color:var(--t);color:var(--w)}
+.mob-desc .pill .offi{color:var(--t)}
+.mob-desc .pill:hover .offi,.mob-desc .pill:hover .arr{color:var(--w)}
+.mob-desc .pill .arr{display:inline-block;margin-left:.1rem;color:var(--t);font-weight:800;font-size:1.1em;transition:transform .2s;flex-shrink:0}
+.mob-desc .pill:hover .arr{animation:ma .5s ease}
+@keyframes ma{0%{transform:translateX(0) scale(1)}40%{transform:translateX(8px) scale(1.15)}70%{transform:translateX(3px) scale(1.05)}100%{transform:translateX(0) scale(1)}}
+</style>
+<div class="mob-desc">
+  <div class="card">
+    <div class="badge-wrap">
+      <div class="badge" title="Offibox, la boîte à outils de l'officine">
+        <p class="title"><span class="offi">Offi</span>box, la boîte à outils de l'<span class="offi">offi</span>cine</p>
+      </div>
+    </div>
+    <ul class="list">
+      <li><span class="ic z" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span><span class="txt"><strong>accès rapide</strong> aux informations du quotidien de l'équipe officinale</span></li>
+      <li><span class="ic c" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span class="txt">informations mises à jour <strong>en temps réel</strong></span></li>
+      <li><span class="ic b" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 4.93-1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg></span><span class="txt">application en <strong>constante évolution</strong>&nbsp;: actualités, nouvelles missions, nouveaux outils</span></li>
+      <li><span class="ic s" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="txt">basée sur des <strong>sources</strong> <strong>officielles</strong></span></li>
+      <li><span class="ic d" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span class="txt"><span class="offi">Offi</span>box est <strong>sans engagement</strong> de durée&nbsp;– essai gratuit de 15&nbsp;jours</span></li>
+    </ul>
+    <a href="https://offibox.fr/fonctionnalités" class="pill" target="_blank" rel="noopener noreferrer">Découvrez les fonctionnalités d'<span class="offi">Offi</span>box <span class="arr">➜</span></a>
+  </div>
+</div>

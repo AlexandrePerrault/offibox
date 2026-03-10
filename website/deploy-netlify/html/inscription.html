@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer un compte – Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      background: var(--white);
+      padding: 1.5rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+    .inscription-banner {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 1.5rem;
+      padding: 1.25rem 1.5rem;
+      background: linear-gradient(135deg, #5A9094 0%, #4a7a7e 100%);
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(90, 144, 148, 0.25);
+      text-align: center;
+      color: var(--white);
+      animation: banner-fade 0.6s ease-out;
+    }
+    @keyframes banner-fade {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .inscription-banner .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .inscription-banner .logo-word {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .inscription-banner .logo-word .offi { color: rgba(255,255,255,0.98); }
+    .inscription-banner .logo-word .box { color: var(--white); }
+    .inscription-banner .tagline {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      line-height: 1.35;
+      animation: tagline-in 0.8s ease-out 0.2s both;
+    }
+    .inscription-banner .accroche { animation: tagline-in 0.8s ease-out 0.4s both; }
+    @keyframes tagline-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .inscription-banner .accroche {
+      font-size: 0.9rem;
+      opacity: 0.95;
+      line-height: 1.45;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .inscription-banner .accroche strong { font-weight: 700; }
+    @media (max-width: 480px) {
+      .inscription-banner { padding: 1rem 1.25rem; }
+      .inscription-banner .logo-word { font-size: 1.5rem; }
+      .inscription-banner .tagline { font-size: 1rem; }
+      .inscription-banner .accroche { font-size: 0.85rem; }
+    }
+    .signup-page { width: 100%; max-width: 460px; margin: 0 auto; }
+    .signup-card {
+      background: var(--white);
+      padding: 2rem 2.25rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      border: 1px solid var(--gray-light);
+    }
+    .signup-card h2 { font-size: 1.25rem; font-weight: 700; color: var(--gray); margin-bottom: 1rem; }
+    .auth-error { margin-bottom: 1rem; padding: 0.75rem 1rem; background: #fef2f2; color: #b91c1c; font-size: 0.9rem; border-radius: 8px; display: none; }
+    .auth-error.visible { display: block; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 500; color: var(--gray); margin-bottom: 0.4rem; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 0.75rem 1rem; font-size: 1rem;
+      border: 1px solid var(--gray-light); border-radius: 8px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { outline: none; border-color: var(--offi-teal); box-shadow: 0 0 0 3px rgba(90, 144, 148, 0.15); }
+    .form-row-inline { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+    .form-row-inline .form-group { margin-bottom: 0; }
+    .btn-submit {
+      width: 100%; padding: 0.875rem; font-size: 1rem; font-weight: 600; color: var(--white);
+      background: var(--offi-teal); border: none; border-radius: 10px;
+      cursor: pointer; transition: background 0.2s, transform 0.2s;
+    }
+    .btn-submit:hover { background: #4a7a7e; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .signup-link { text-align: center; margin-top: 1.5rem; font-size: 0.95rem; color: #64748b; }
+    .signup-link a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+    .signup-link a:hover { text-decoration: underline; }
+    .address-autocomplete-wrap { position: relative; }
+    .address-suggestions {
+      display: none;
+      position: absolute; left: 0; right: 0; top: 100%; z-index: 10;
+      margin-top: 2px; padding: 0;
+      background: var(--white); border: 1px solid var(--gray-light);
+      border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      max-height: 220px; overflow-y: auto; list-style: none;
+    }
+    .address-suggestions.visible { display: block; }
+    .address-suggestions li {
+      padding: 0.6rem 1rem; font-size: 0.9rem; color: var(--gray); cursor: pointer;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .address-suggestions li:last-child { border-bottom: none; }
+    .address-suggestions li:hover { background: rgba(90, 144, 148, 0.08); color: var(--offi-teal); }
+    .back-accueil {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-bottom: 1rem; padding: 0.5rem 0;
+      font-size: 0.9rem; color: var(--offi-teal); font-weight: 600; text-decoration: none;
+    }
+    .back-accueil:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <nav style="width:100%;max-width:520px;margin:0 auto 0;text-align:left;">
+    <a href="login-wix.html" class="back-accueil">← Retour à l'accueil</a>
+  </nav>
+  <header class="inscription-banner" role="banner">
+    <div class="logo-wrap">
+      <span class="logo-word"><span class="offi">Offi</span><span class="box">box</span></span>
+    </div>
+    <p class="tagline">Inscrivez-vous pour essayer Offibox</p>
+    <p class="accroche"><strong>15 jours d'essai gratuit.</strong> Toute l'info officielle de l'officine, en un clic — sans engagement.</p>
+  </header>
+  <div class="signup-page">
+    <div class="signup-card">
+      <h2 id="signup-title">Créer un compte</h2>
+      <p id="signup-google-intro" class="signup-email-info" style="display:none;margin-bottom:1rem;">Vous êtes connecté avec Google. Complétez vos coordonnées pour finaliser votre accès.</p>
+      <div id="signup-auth-error" class="auth-error" role="alert"></div>
+      <form id="signup-form" action="#" method="post">
+        <div class="form-group">
+          <label for="signup-pharmacy">Nom de la pharmacie</label>
+          <input type="text" id="signup-pharmacy" name="signup-pharmacy" placeholder="Nom de l'officine" autocomplete="organization">
+        </div>
+        <div class="form-group address-autocomplete-wrap">
+          <label for="signup-address">Adresse</label>
+          <input type="text" id="signup-address" name="signup-address" placeholder="Commencez à taper une adresse (ex. 12 rue de la Paix Paris)…" autocomplete="off">
+          <ul class="address-suggestions" id="address-suggestions" aria-hidden="true"></ul>
+        </div>
+        <div class="form-row form-row-inline">
+          <div class="form-group" style="flex:1;">
+            <label for="signup-zip">Code postal</label>
+            <input type="text" id="signup-zip" name="signup-zip" placeholder="CP" autocomplete="postal-code" maxlength="10">
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label for="signup-city">Ville</label>
+            <input type="text" id="signup-city" name="signup-city" placeholder="Ville" autocomplete="address-level2">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="signup-groupement">Groupement</label>
+          <input type="text" id="signup-groupement" name="signup-groupement" placeholder="Groupement">
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Adresse e-mail</label>
+          <input type="email" id="signup-email" name="signup-email" placeholder="vous@exemple.fr" autocomplete="email" required>
+        </div>
+        <p id="signup-email-info" class="signup-email-info" style="font-size:0.9rem;color:#64748b;margin-bottom:1rem;">
+          Un email vous sera envoyé à l'adresse indiquée pour définir votre mot de passe et finaliser votre inscription.
+        </p>
+        <button type="submit" class="btn-submit" id="btn-signup-submit">S'inscrire</button>
+      </form>
+      <p class="signup-link">Déjà un compte ? <a href="login-wix.html">Se connecter</a></p>
+      <p style="margin-top:1rem;text-align:center;"><a href="login-wix.html" class="back-accueil">← Retour à l'accueil</a></p>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var form = document.getElementById('signup-form');
+    var errEl = document.getElementById('signup-auth-error');
+    if (!form) return;
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!errEl) return;
+      if (!window.OffiboxAuth || typeof window.OffiboxAuth.signUpWithEmailPassword !== 'function') {
+        errEl.textContent = 'Inscription temporairement indisponible. Rechargez la page ou réessayez plus tard.';
+        errEl.classList.add('visible');
+        errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+    });
+  })();
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-functions-compat.js"></script>
+  <script>
+  (function(){if(typeof firebase==='undefined')return;var c={apiKey:'AIzaSyA3eizSKEwkUnH1Y5Xcum3fVgczGgPAFkk',authDomain:'offibox-prod.firebaseapp.com',projectId:'offibox-prod',storageBucket:'offibox-prod.firebasestorage.app',messagingSenderId:'264737328165',appId:'1:264737328165:web:d8744f8fc1c188d9ddc3cc',measurementId:'G-E1FP98K8WE'};if(!firebase.apps.length)firebase.initializeApp(c);})();
+  (function(){if(typeof firebase==='undefined'){window.OffiboxAuth=null;return;}var a=firebase.auth();window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);},signInWithGoogle:function(){return a.signInWithPopup(new firebase.auth.GoogleAuthProvider());},signInWithEmailPassword:function(e,p){return a.signInWithEmailAndPassword(e,p);},signUpWithEmailPassword:function(e,p){return a.createUserWithEmailAndPassword(e,p);},sendPasswordResetEmail:function(e){return a.sendPasswordResetEmail(e);},signOut:function(){return a.signOut();}};})();
+  </script>
+  <script>
+    (function() {
+      var signupAuthError = document.getElementById('signup-auth-error');
+      var signupForm = document.getElementById('signup-form');
+      var btnSubmit = document.getElementById('btn-signup-submit');
+      function showSignupError(msg) {
+        if (signupAuthError) { signupAuthError.textContent = msg || ''; signupAuthError.classList.toggle('visible', !!msg); if (msg) signupAuthError.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      }
+      function setLoading(loading) { if (btnSubmit) btnSubmit.disabled = loading; }
+      var OFFIBOX_WEB_APP_URL = 'https://alexandreperrault.github.io/offibox/';
+      function goToConnected() { var target = OFFIBOX_WEB_APP_URL; try { if (window.top && window.top !== window) window.top.location.href = target; else window.location.href = target; } catch (e) { window.location.href = target; } }
+      function goToValidation() { try { var v = 'validation.html'; if (window.top && window.top !== window) window.top.location.href = v; else window.location.href = v; } catch (e) { window.location.href = 'validation.html'; } }
+      var fromGoogle = (function() { var p = window.location.search || ''; return p.indexOf('from=google') !== -1; })();
+      function applyGoogleMode(user) {
+        if (!fromGoogle || !user) return;
+        var title = document.getElementById('signup-title');
+        var intro = document.getElementById('signup-google-intro');
+        var emailInfo = document.getElementById('signup-email-info');
+        var emailInput = document.getElementById('signup-email');
+        var btn = document.getElementById('btn-signup-submit');
+        if (title) title.textContent = 'Complétez vos coordonnées';
+        if (intro) intro.style.display = 'block';
+        if (emailInfo) emailInfo.style.display = 'none';
+        if (emailInput) { emailInput.value = user.email || ''; emailInput.readOnly = true; emailInput.setAttribute('readonly', 'readonly'); }
+        if (btn) btn.textContent = 'Valider et accéder à Offibox';
+      }
+      if (window.OffiboxAuth) {
+        var user = OffiboxAuth.getCurrentUser();
+        if (user && fromGoogle) { applyGoogleMode(user); }
+        /* Ne pas rediriger automatiquement si deja connecte : afficher le formulaire inscription. Redirection uniquement apres soumission (bouton Valider). */
+        OffiboxAuth.onAuthStateChanged(function(u) {
+          if (u && fromGoogle) applyGoogleMode(u);
+        });
+      }
+      if (fromGoogle && (!window.OffiboxAuth || !OffiboxAuth.getCurrentUser())) {
+        setTimeout(function() { window.location.href = 'login-wix.html'; }, 100);
+      }
+      if (fromGoogle && window.OffiboxAuth) {
+        var loginUrl = 'login-wix.html';
+        [].forEach.call(document.querySelectorAll('a[href="' + loginUrl + '"]'), function(link) {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            OffiboxAuth.signOut().then(function() { window.location.href = loginUrl; }).catch(function() { window.location.href = loginUrl; });
+          });
+        });
+      }
+      function randomPassword(len) {
+        var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var pwd = '';
+        for (var i = 0; i < (len || 12); i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        return pwd;
+      }
+      if (signupForm) signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (fromGoogle) {
+          var u = window.OffiboxAuth && OffiboxAuth.getCurrentUser && OffiboxAuth.getCurrentUser();
+          if (u && u.uid) { try { localStorage.setItem('offibox_coord_done_' + u.uid, '1'); } catch (err) {} }
+          goToConnected();
+          return;
+        }
+        if (!window.OffiboxAuth || typeof window.OffiboxAuth.signUpWithEmailPassword !== 'function') {
+          showSignupError('Inscription temporairement indisponible. Rechargez la page ou réessayez plus tard.');
+          return;
+        }
+        var email = document.getElementById('signup-email').value.trim();
+        if (!email) { showSignupError('Veuillez indiquer votre adresse e-mail.'); return; }
+        showSignupError(''); setLoading(true);
+        var generatedPwd = randomPassword(12);
+        window.OffiboxAuth.signUpWithEmailPassword(email, generatedPwd).then(function() {
+          var fn = typeof firebase !== 'undefined' && firebase.functions ? firebase.functions().httpsCallable('sendPasswordResetEmailFr') : null;
+          return fn ? fn({ email: email }) : (OffiboxAuth.sendPasswordResetEmail ? OffiboxAuth.sendPasswordResetEmail(email) : Promise.resolve());
+        }).then(function() {
+          var samePage = (window.location.pathname || '').split('/').pop() || 'inscription.html';
+          window.location.href = samePage + '?inscription=1&email=' + encodeURIComponent(email);
+        }).catch(function(err) {
+          setLoading(false);
+          var msg = 'Inscription impossible. Réessayez.';
+          if (err && err.code === 'auth/email-already-in-use') msg = 'Un compte existe déjà avec cet e-mail.';
+          else if (err && err.message) msg = err.message;
+          showSignupError(msg);
+        });
+      });
+    })();
+    (function addressAutocomplete() {
+      var input = document.getElementById('signup-address');
+      var list = document.getElementById('address-suggestions');
+      var zip = document.getElementById('signup-zip');
+      var city = document.getElementById('signup-city');
+      if (!input || !list || !zip || !city) return;
+      var debounceTimer;
+      var lastAbort = null;
+      function showSuggestions(features) {
+        list.innerHTML = '';
+        list.setAttribute('aria-hidden', 'false');
+        if (!features || features.length === 0) { list.classList.remove('visible'); return; }
+        features.forEach(function(f) {
+          var p = (f && f.properties) || {};
+          var label = p.label || (p.housenumber || '') + ' ' + (p.street || '') + ', ' + (p.postcode || '') + ' ' + (p.city || '');
+          var streetLine = [p.housenumber, p.street].filter(Boolean).join(' ') || label.split(',')[0] || label;
+          var li = document.createElement('li');
+          li.textContent = label;
+          li.setAttribute('data-postcode', p.postcode || '');
+          li.setAttribute('data-city', p.city || '');
+          li.setAttribute('data-street', streetLine);
+          li.tabIndex = 0;
+          li.addEventListener('click', function() {
+            input.value = this.getAttribute('data-street');
+            zip.value = this.getAttribute('data-postcode');
+            city.value = this.getAttribute('data-city');
+            list.innerHTML = '';
+            list.setAttribute('aria-hidden', 'true');
+            list.classList.remove('visible');
+          });
+          list.appendChild(li);
+        });
+        list.classList.add('visible');
+      }
+      function hideSuggestions() {
+        list.innerHTML = '';
+        list.setAttribute('aria-hidden', 'true');
+        list.classList.remove('visible');
+      }
+      input.addEventListener('input', function() {
+        var q = input.value.trim();
+        clearTimeout(debounceTimer);
+        if (lastAbort) lastAbort.abort();
+        if (q.length < 3) { hideSuggestions(); return; }
+        debounceTimer = setTimeout(function() {
+          lastAbort = new AbortController();
+          fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=6', { signal: lastAbort.signal })
+            .then(function(r) { return r.json(); })
+            .then(function(data) { showSuggestions(data.features || []); })
+            .catch(function() { hideSuggestions(); });
+        }, 300);
+      });
+      input.addEventListener('blur', function() { setTimeout(hideSuggestions, 200); });
+      input.addEventListener('focus', function() { if (list.children.length) list.classList.add('visible'); });
+    })();
+  </script>
+</body>
+</html>

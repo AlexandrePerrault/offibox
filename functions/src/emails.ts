@@ -10,7 +10,7 @@
  */
 
 import * as admin from "firebase-admin";
-import { onCall, onRequest } from "firebase-functions/v2/https";
+import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as nodemailer from "nodemailer";
@@ -43,7 +43,8 @@ function createMailDoc(
 async function sendWithNodemailer(
   to: string,
   subject: string,
-  text: string
+  text: string,
+  html?: string
 ): Promise<boolean> {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
@@ -64,6 +65,7 @@ async function sendWithNodemailer(
     to,
     subject,
     text,
+    html: html || undefined,
   });
   return true;
 }
@@ -71,13 +73,18 @@ async function sendWithNodemailer(
 /** Envoi : Nodemailer (immédiat) ou Firestore "mail" (extension Trigger Email, délai possible 10s–1 min).
  *  Si SMTP non configuré et extension non installée → aucun mail ne part.
  */
-async function sendEmail(to: string, subject: string, text: string): Promise<"smtp" | "firestore"> {
-  const sent = await sendWithNodemailer(to, subject, text);
+async function sendEmail(
+  to: string,
+  subject: string,
+  text: string,
+  html?: string
+): Promise<"smtp" | "firestore"> {
+  const sent = await sendWithNodemailer(to, subject, text, html);
   if (sent) {
     console.log(`[sendEmail] Envoyé via SMTP vers ${to}`);
     return "smtp";
   }
-  await createMailDoc(to, subject, text);
+  await createMailDoc(to, subject, text, html);
   console.log(`[sendEmail] Doc créé dans mail/ vers ${to} (envoi par extension Trigger Email si configurée)`);
   return "firestore";
 }
@@ -258,3 +265,124 @@ export const sendContactEmail = onCall(runOpts, async (request) => {
   const delivery = await sendEmail(IDEAS_RECIPIENT, subject, text);
   return { success: true, to: IDEAS_RECIPIENT, delivery };
 });
+
+/** URL vers laquelle rediriger l'utilisateur après avoir cliqué sur le lien (vérification ou réinitialisation). */
+const AUTH_CONTINUE_URL = "https://www.offibox.fr/";
+
+/**
+ * Envoie un e-mail de vérification d'adresse en français (remplace le modèle Firebase en anglais).
+ * À appeler après l'inscription au lieu de sendEmailVerification() côté client.
+ * L'utilisateur doit être connecté (auth).
+ */
+export const sendVerificationEmailFr = onCall(runOpts, async (request) => {
+  const auth = request.auth;
+  if (!auth) {
+    throw new HttpsError("unauthenticated", "Utilisateur non connecté");
+  }
+
+  const email = auth.token?.email;
+  if (!email || typeof email !== "string") {
+    throw new HttpsError("invalid-argument", "Adresse e-mail non disponible");
+  }
+
+  const displayName = auth.token?.name ?? (auth.token?.email ?? "").split("@")[0];
+
+  let link: string;
+  try {
+    link = await admin.auth().generateEmailVerificationLink(email, {
+      url: AUTH_CONTINUE_URL,
+      handleCodeInApp: false,
+    });
+  } catch (err) {
+    console.error("generateEmailVerificationLink error:", err);
+    throw new HttpsError("internal", "Impossible de générer le lien de vérification");
+  }
+
+  const subject = "Validez votre adresse e-mail pour Offibox";
+  const text = `Bonjour ${displayName},
+
+Cliquez sur le lien ci-dessous pour valider votre adresse e-mail et activer votre compte Offibox :
+
+${link}
+
+Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.
+
+À bientôt,
+L'équipe Offibox`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: sans-serif; line-height: 1.5; color: #334155;">
+  <p>Bonjour ${escapeHtml(displayName)},</p>
+  <p>Cliquez sur le lien ci-dessous pour valider votre adresse e-mail et activer votre compte Offibox :</p>
+  <p><a href="${escapeHtml(link)}" style="color: #5A9094;">Valider mon adresse e-mail</a></p>
+  <p style="font-size: 0.9em; color: #64748b;">Si le lien ne s'ouvre pas, copiez-collez cette adresse dans votre navigateur :<br><span style="word-break: break-all;">${escapeHtml(link)}</span></p>
+  <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.</p>
+  <p>À bientôt,<br>L'équipe Offibox</p>
+</body>
+</html>`;
+
+  const delivery = await sendEmail(email, subject, text, html);
+  return { success: true, delivery };
+});
+
+/**
+ * Envoie un e-mail de réinitialisation de mot de passe en français (lien « Définir le mot de passe »).
+ * Utilisable après inscription ou pour « Mot de passe oublié ». Appelable sans être connecté en passant { email }.
+ */
+export const sendPasswordResetEmailFr = onCall(runOpts, async (request) => {
+  const auth = request.auth;
+  const data = (request.data as { email?: string } | undefined) ?? {};
+  const email = (auth?.token?.email ?? data.email ?? "").toString().trim().toLowerCase();
+  if (!email) {
+    throw new HttpsError("invalid-argument", "Adresse e-mail requise");
+  }
+
+  let link: string;
+  try {
+    link = await admin.auth().generatePasswordResetLink(email, {
+      url: AUTH_CONTINUE_URL,
+      handleCodeInApp: false,
+    });
+  } catch (err) {
+    console.error("generatePasswordResetLink error:", err);
+    throw new HttpsError("internal", "Impossible de générer le lien");
+  }
+
+  const subject = "Définir votre mot de passe Offibox";
+  const text = `Bonjour,
+
+Vous avez demandé à définir ou réinitialiser votre mot de passe Offibox. Cliquez sur le lien ci-dessous :
+
+${link}
+
+Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail. Le lien expirera sous 1 heure.
+
+À bientôt,
+L'équipe Offibox`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: sans-serif; line-height: 1.5; color: #334155;">
+  <p>Bonjour,</p>
+  <p>Vous avez demandé à définir ou réinitialiser votre mot de passe Offibox. Cliquez sur le lien ci-dessous :</p>
+  <p><a href="${escapeHtml(link)}" style="color: #5A9094;">Définir mon mot de passe</a></p>
+  <p style="font-size: 0.9em; color: #64748b;">Si le lien ne s'ouvre pas, copiez-collez cette adresse dans votre navigateur :<br><span style="word-break: break-all;">${escapeHtml(link)}</span></p>
+  <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail. Le lien expirera sous 1 heure.</p>
+  <p>À bientôt,<br>L'équipe Offibox</p>
+</body>
+</html>`;
+
+  const delivery = await sendEmail(email, subject, text, html);
+  return { success: true, delivery };
+});
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}

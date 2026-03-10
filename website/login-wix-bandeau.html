@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offibox - Bandeau sources officielles</title>
+  <!-- Quand vous copiez/collez ce code ailleurs (Wix, autre page), changez l'URL ci-dessous : mettez l’URL de base de votre site (ex. https://www.offibox.fr) où les dossiers assets/icons sont accessibles. Laissez vide '' pour ouvrir en fichier local. -->
+  <script>
+    window.OFFIBOX_BANDEAU_BASE = 'https://raw.githubusercontent.com/AlexandrePerrault/offibox/refactor/search-engine';
+  </script>
+  <style>
+    :root { --white: #ffffff; --offi-teal: #5A9094; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e5f5f2;
+    }
+    .sources-wheel-section {
+      width: 100%;
+      max-width: 900px;
+      padding: 0.75rem 0;
+      overflow: hidden;
+    }
+    .sources-wheel-wrap {
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    }
+    .sources-wheel-track {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      width: max-content;
+      padding: 0 1rem;
+      animation: sources-wheel-scroll 24s linear infinite;
+    }
+    .sources-wheel-track:hover { animation-play-state: paused; }
+    @keyframes sources-wheel-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .sources-wheel-item {
+      flex-shrink: 0;
+      width: 100px;
+      height: 56px;
+      border-radius: 8px;
+      background: #f0f9f9;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+      padding: 0;
+      position: relative;
+    }
+    .sources-wheel-item img {
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 80%;
+      max-height: 80%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      object-position: center center;
+    }
+    .sources-wheel-item:hover { transform: scale(1.1); }
+    a.sources-wheel-item { display: block; text-decoration: none; cursor: pointer; }
+    .sources-wheel-item:focus { outline: 2px solid var(--offi-teal); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <section class="sources-wheel-section" aria-label="Sources officielles">
+    <div class="sources-wheel-wrap">
+      <div class="sources-wheel-track">
+        <a class="sources-wheel-item" data-source="bdm" data-icon="BDPM.jpeg" href="https://base-donnees-publique.medicaments.gouv.fr/" target="_blank" rel="noopener noreferrer" title="Base de données sur le médicament"><img data-src="BDPM.jpeg" alt="BDM" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="ameli" data-icon="assurance%20maladie.svg" href="https://www.ameli.fr/" target="_blank" rel="noopener noreferrer" title="Ameli"><img data-src="assurance%20maladie.svg" alt="Ameli" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="has" data-icon="logo-has.png" href="https://www.has-sante.fr/" target="_blank" rel="noopener noreferrer" title="HAS"><img data-src="logo-has.png" alt="HAS" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="ansm" data-icon="logo-ansm%20(1).jpg" href="https://www.ansm.sante.fr/" target="_blank" rel="noopener noreferrer" title="ANSM"><img data-src="logo-ansm%20(1).jpg" alt="ANSM" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="anses" data-icon="anses-small.svg" href="https://www.anses.fr/" target="_blank" rel="noopener noreferrer" title="ANSES"><img data-src="anses-small.svg" alt="ANSES" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="meddispar" data-icon="meddispar.png" href="https://www.meddispar.fr/" target="_blank" rel="noopener noreferrer" title="Meddispar"><img data-src="meddispar.png" alt="Meddispar" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="epansement" data-icon="e_pansement.png" href="https://www.e-pansement.fr/" target="_blank" rel="noopener noreferrer" title="E-pansement"><img data-src="e_pansement.png" alt="E-pansement" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="omedit" data-icon="omedit.png" href="https://www.omedit-idf.fr/" target="_blank" rel="noopener noreferrer" title="OMédit"><img data-src="omedit.png" alt="OMédit" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="spf" data-icon="SPF.png" href="https://www.santepubliquefrance.fr/" target="_blank" rel="noopener noreferrer" title="Santé publique France"><img data-src="SPF.png" alt="SPF" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="hcsp" data-icon="logo_hcsp_rouge.jpg" href="https://www.hcsp.fr/" target="_blank" rel="noopener noreferrer" title="Haut Conseil de la santé publique"><img data-src="logo_hcsp_rouge.jpg" alt="HCSP" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="ars" data-icon="logo-ars.svg" href="https://www.ars.sante.fr/" target="_blank" rel="noopener noreferrer" title="Agences régionales de santé"><img data-src="logo-ars.svg" alt="ARS" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="dqo" data-icon="LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg" href="https://www.demarche-qualite-officine.fr/" target="_blank" rel="noopener noreferrer" title="Démarche qualité en officine"><img data-src="LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg" alt="DQO" role="presentation"></a>
+        <!-- duplication pour défilement infini -->
+        <a class="sources-wheel-item" data-source="bdm" data-icon="BDPM.jpeg" href="https://base-donnees-publique.medicaments.gouv.fr/" target="_blank" rel="noopener noreferrer" title="Base de données sur le médicament"><img data-src="BDPM.jpeg" alt="BDM" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="ameli" data-icon="assurance%20maladie.svg" href="https://www.ameli.fr/" target="_blank" rel="noopener noreferrer" title="Ameli"><img data-src="assurance%20maladie.svg" alt="Ameli" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="has" data-icon="logo-has.png" href="https://www.has-sante.fr/" target="_blank" rel="noopener noreferrer" title="HAS"><img data-src="logo-has.png" alt="HAS" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="ansm" data-icon="logo-ansm%20(1).jpg" href="https://www.ansm.sante.fr/" target="_blank" rel="noopener noreferrer" title="ANSM"><img data-src="logo-ansm%20(1).jpg" alt="ANSM" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="anses" data-icon="anses-small.svg" href="https://www.anses.fr/" target="_blank" rel="noopener noreferrer" title="ANSES"><img data-src="anses-small.svg" alt="ANSES" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="meddispar" data-icon="meddispar.png" href="https://www.meddispar.fr/" target="_blank" rel="noopener noreferrer" title="Meddispar"><img data-src="meddispar.png" alt="Meddispar" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="epansement" data-icon="e_pansement.png" href="https://www.e-pansement.fr/" target="_blank" rel="noopener noreferrer" title="E-pansement"><img data-src="e_pansement.png" alt="E-pansement" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="omedit" data-icon="omedit.png" href="https://www.omedit-idf.fr/" target="_blank" rel="noopener noreferrer" title="OMédit"><img data-src="omedit.png" alt="OMédit" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="spf" data-icon="SPF.png" href="https://www.santepubliquefrance.fr/" target="_blank" rel="noopener noreferrer" title="Santé publique France"><img data-src="SPF.png" alt="SPF" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="hcsp" data-icon="logo_hcsp_rouge.jpg" href="https://www.hcsp.fr/" target="_blank" rel="noopener noreferrer" title="Haut Conseil de la santé publique"><img data-src="logo_hcsp_rouge.jpg" alt="HCSP" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="ars" data-icon="logo-ars.svg" href="https://www.ars.sante.fr/" target="_blank" rel="noopener noreferrer" title="Agences régionales de santé"><img data-src="logo-ars.svg" alt="ARS" role="presentation"></a>
+        <a class="sources-wheel-item" data-source="dqo" data-icon="LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg" href="https://www.demarche-qualite-officine.fr/" target="_blank" rel="noopener noreferrer" title="Démarche qualité en officine"><img data-src="LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg" alt="DQO" role="presentation"></a>
+      </div>
+    </div>
+  </section>
+  <script>
+    (function() {
+      var base = window.OFFIBOX_BANDEAU_BASE != null ? (window.OFFIBOX_BANDEAU_BASE + '') : '';
+      var iconsPath = base ? (base.replace(/\/$/, '') + '/assets/icons/') : '../assets/icons/';
+      document.querySelectorAll('.sources-wheel-item img[data-src]').forEach(function(img) {
+        var name = img.getAttribute('data-src');
+        img.src = iconsPath + name;
+        img.onerror = function() { this.style.visibility = 'hidden'; };
+      });
+    })();
+  </script>
+</body>
+</html>
+

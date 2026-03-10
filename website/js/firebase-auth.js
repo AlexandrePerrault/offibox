@@ -1,0 +1,35 @@
+/**
+ * Wrapper Firebase Auth pour le site web Offibox.
+ * Expose window.OffiboxAuth (getCurrentUser, signInWithGoogle, signInWithEmailPassword, signUpWithEmailPassword, sendPasswordResetEmail, signOut, onAuthStateChanged).
+ */
+(function() {
+  'use strict';
+  if (typeof firebase === 'undefined') {
+    window.OffiboxAuth = null;
+    return;
+  }
+  var auth = firebase.auth();
+  window.OffiboxAuth = {
+    getCurrentUser: function() {
+      return auth.currentUser;
+    },
+    onAuthStateChanged: function(callback) {
+      return auth.onAuthStateChanged(callback);
+    },
+    signInWithGoogle: function() {
+      return auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    },
+    signInWithEmailPassword: function(email, password) {
+      return auth.signInWithEmailAndPassword(email, password);
+    },
+    signUpWithEmailPassword: function(email, password) {
+      return auth.createUserWithEmailAndPassword(email, password);
+    },
+    sendPasswordResetEmail: function(email) {
+      return auth.sendPasswordResetEmail(email);
+    },
+    signOut: function() {
+      return auth.signOut();
+    }
+  };
+})();

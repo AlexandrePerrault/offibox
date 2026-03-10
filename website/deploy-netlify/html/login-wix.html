@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<!-- Page connexion complète (formulaire + description). Version scindée pour inclusion ailleurs : login-form-part.html (colonne gauche), login-desc-part.html (colonne droite). -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      background: var(--white);
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .login-split {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      justify-content: center;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    @media (min-width: 901px) {
+      .login-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+        min-height: 420px;
+      }
+      .login-col {
+        max-width: 480px;
+        justify-self: center;
+        width: 100%;
+        align-self: stretch;
+      }
+      .login-card,
+      .login-desc-card {
+        min-height: 420px;
+      }
+    }
+    .login-col {
+      flex: 1 1 420px;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    /* ----- Colonne gauche : formulaire ----- */
+    .login-card {
+      background: var(--white);
+      padding: 1.25rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      border: 1px solid var(--gray-light);
+      min-height: 380px;
+      height: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    .login-card h2 { font-size: 1.1rem; font-weight: 700; color: var(--gray); margin-bottom: 0.35rem; }
+    .login-card .subtitle { color: #64748b; font-size: 1.1rem; margin-bottom: 2rem; }
+    .login-card .subtitle .offi { color: var(--offi-teal); font-weight: 600; }
+    .btn-google {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.875rem 1.25rem; font-size: 1rem; font-weight: 600; color: var(--gray);
+      background: var(--white); border: 1px solid var(--gray-light); border-radius: 10px;
+      cursor: pointer; transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-google:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .btn-google svg { width: 20px; height: 20px; }
+    .divider { display: flex; align-items: center; margin: 1.5rem 0; color: #94a3b8; font-size: 0.875rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-light); }
+    .divider span { padding: 0 1rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 500; color: var(--gray); margin-bottom: 0.4rem; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 0.75rem 1rem; font-size: 1rem;
+      border: 1px solid var(--gray-light); border-radius: 8px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { outline: none; border-color: var(--offi-teal); box-shadow: 0 0 0 3px rgba(90, 144, 148, 0.15); }
+    .form-group.email-typewriter-wrap .email-input-wrap { position: relative; }
+    .form-group.email-typewriter-wrap .typewriter-placeholder { position: absolute; left: 1rem; top: 0; bottom: 0; display: flex; align-items: center; font-size: 1rem; color: #94a3b8; pointer-events: none; font-family: inherit; }
+    .form-group.email-typewriter-wrap .typewriter-placeholder .cursor, .form-group.email-typewriter-wrap .typewriter-placeholder.cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--offi-teal); margin-left: 2px; vertical-align: text-bottom; animation: typewriter-blink 0.8s step-end infinite; }
+    @keyframes typewriter-blink { 50% { opacity: 0; } }
+    .form-group.email-typewriter-wrap input.email-with-typewriter { background: transparent; }
+    .form-group.email-typewriter-wrap .typewriter-placeholder.hidden { display: none !important; }
+    .form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .checkbox-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .checkbox-wrap input { width: auto; }
+    .checkbox-wrap label { margin: 0; font-size: 0.9rem; color: var(--gray); cursor: pointer; }
+    .forgot { font-size: 0.9rem; color: var(--offi-teal); text-decoration: none; }
+    .forgot:hover { text-decoration: underline; }
+    .btn-submit {
+      width: 100%; padding: 0.875rem; font-size: 1rem; font-weight: 600; color: var(--white);
+      background: var(--offi-teal); border: none; border-radius: 10px;
+      cursor: pointer; transition: background 0.2s, transform 0.2s;
+    }
+    .btn-submit:hover { background: #4a7a7e; transform: translateY(-1px); }
+    .signup-link { text-align: center; margin-top: 1.5rem; font-size: 0.95rem; color: #64748b; }
+    .signup-link a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+    .signup-link a:hover { text-decoration: underline; }
+    .auth-error { margin-bottom: 1rem; padding: 0.75rem 1rem; background: #fef2f2; color: #b91c1c; font-size: 0.9rem; border-radius: 8px; display: none; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+    .auth-error.visible { display: block; }
+    .auth-error.success { background: #f0fdf4; color: #166534; }
+    .auth-loading { opacity: 0.7; pointer-events: none; }
+    #inscription-section { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-light); text-align: center; }
+    #inscription-section.visible { display: block; }
+    #inscription-section .inscription-panel { max-width: 420px; margin: 0 auto; text-align: left; }
+    .form-row-inline { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+    .form-row-inline .form-group { margin-bottom: 0; }
+    .password-reset-form { display: none; margin-top: 1rem; }
+    .password-reset-form.visible { display: block; }
+    .btn-secondary { background: var(--gray-light); color: var(--gray); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
+    .address-autocomplete-wrap { position: relative; }
+    .address-suggestions {
+      display: none;
+      position: absolute; left: 0; right: 0; top: 100%; z-index: 10;
+      margin-top: 2px; margin-bottom: 0; padding: 0;
+      background: var(--white); border: 1px solid var(--gray-light);
+      border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      max-height: 220px; overflow-y: auto; list-style: none;
+    }
+    .address-suggestions.visible { display: block; }
+    .address-suggestions li {
+      padding: 0.6rem 1rem; font-size: 0.9rem; color: var(--gray); cursor: pointer;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .address-suggestions li:last-child { border-bottom: none; }
+    .address-suggestions li:hover { background: rgba(90, 144, 148, 0.08); color: var(--offi-teal); }
+
+    /* ----- Colonne droite : description ----- */
+    .login-desc-card {
+      width: 100%;
+      max-width: 480px;
+      min-height: 380px;
+      height: 100%;
+      flex: 1;
+      padding: 1.25rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      border: 1px solid #e2e8f0;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .badge-3d-wrap { margin-bottom: 1.5rem; perspective: 800px; }
+    .badge-3d {
+      display: inline-block;
+      padding: 1.15rem 1.45rem;
+      background: var(--offi-teal);
+      border: 2px solid var(--offi-teal);
+      border-radius: 16px;
+      box-shadow: 0 4px 0 #4a7a7e, 0 6px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      cursor: default;
+    }
+    .badge-3d:hover {
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 #4a7a7e, 0 4px 16px rgba(0,0,0,0.18);
+      background: var(--white);
+      border-color: var(--offi-teal);
+    }
+    .badge-3d .title-desc { font-size: clamp(1.44rem, 2.3vw, 1.73rem); font-weight: 700; color: var(--white); line-height: 1.3; transition: color 0.2s ease; }
+    .badge-3d .offi,
+    .hover-pill .offi { display: inline-block; margin-right: -0.06em; }
+    .badge-3d .offi { color: rgba(255,255,255,0.95); transition: color 0.2s ease; margin-right: -0.03em; }
+    .badge-3d:hover .title-desc { color: var(--gray); }
+    .badge-3d:hover .offi { color: var(--offi-teal); }
+    .offibox-desc-list {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 2.3rem;
+      color: var(--gray);
+      font-size: 1.1rem;
+      line-height: 1.7;
+      font-family: 'Spinnaker', sans-serif;
+      opacity: 0;
+      animation: list-fade-in 0.8s ease-out 0.15s forwards;
+    }
+    @keyframes list-fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .offibox-desc-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      margin-bottom: 0.55rem;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: line-fade-in 0.7s ease-out forwards;
+      letter-spacing: 0.03em;
+    }
+    .offibox-desc-list .li-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      margin-top: 0.15em;
+      color: var(--offi-teal);
+      transition: transform 0.25s ease;
+    }
+    .offibox-desc-list li:hover .li-icon {
+      transform: scale(1.18);
+    }
+    .offibox-desc-list .li-icon svg { width: 100%; height: 100%; display: block; }
+    .offibox-desc-list .li-icon.icon-zap { color: #f59e0b; }
+    .offibox-desc-list .li-icon.icon-clock { color: #0d9488; }
+    .offibox-desc-list .li-icon.icon-bulb { color: #eab308; }
+    .offibox-desc-list .li-icon.icon-bulb svg { animation: bulb-glow 1.6s ease-in-out infinite; }
+    @keyframes bulb-glow {
+      0%, 100% { opacity: 1; filter: brightness(1.2); }
+      45%, 55% { opacity: 0.5; filter: brightness(0.7); }
+    }
+    .offibox-desc-list .li-icon.icon-calendar { color: #5A9094; }
+    .offibox-desc-list .li-icon.icon-shield { color: #2563eb; }
+    .offibox-desc-list li:nth-child(1) { animation-delay: 0.35s; }
+    .offibox-desc-list li:nth-child(2) { animation-delay: 0.55s; }
+    .offibox-desc-list li:nth-child(3) { animation-delay: 0.75s; }
+    .offibox-desc-list li:nth-child(4) { animation-delay: 0.95s; }
+    .offibox-desc-list li:nth-child(5) { animation-delay: 1.15s; }
+    .offibox-desc-list li:last-child { margin-bottom: 0; }
+    .offibox-desc-list .li-text-wrap { position: relative; }
+    @keyframes line-fade-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hover-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.45rem;
+      background: var(--white);
+      border: 2px solid var(--offi-teal);
+      border-radius: 16px;
+      color: var(--gray);
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(90, 144, 148, 0.15);
+      white-space: nowrap;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+    .hover-pill:hover {
+      transform: translateX(4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      background: var(--offi-teal);
+      border-color: var(--offi-teal);
+      color: var(--white);
+    }
+    .hover-pill .offibox-word { display: inline; white-space: nowrap; margin-left: -0.15em; }
+    .hover-pill .offi { color: var(--offi-teal); }
+    .hover-pill .arrow {
+      display: inline-block;
+      margin-left: 0.35rem;
+      margin-right: 0.4rem;
+      color: var(--offi-teal);
+      font-weight: 800;
+      font-size: 1.25em;
+      line-height: 1;
+      transition: transform 0.2s ease;
+    }
+    .hover-pill:hover .offi,
+    .hover-pill:hover .arrow { color: var(--white); }
+    .hover-pill:hover .arrow { animation: arrow-rebond 0.5s ease; }
+    @keyframes arrow-rebond {
+      0% { transform: translateX(0) scale(1); }
+      40% { transform: translateX(8px) scale(1.15); }
+      70% { transform: translateX(3px) scale(1.05); }
+      100% { transform: translateX(0) scale(1); }
+    }
+
+    @media (max-width: 900px) {
+      .login-split { flex-direction: column; align-items: center; }
+      .login-col { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-split">
+    <!-- Colonne gauche : formulaire de connexion -->
+    <div class="login-col">
+      <div class="login-card">
+        <h2>Connexion</h2>
+        <p class="subtitle">Accédez à votre compte <span class="offi">Offi</span>box</p>
+        <div id="auth-error" class="auth-error" role="alert"></div>
+        <form id="login-form" action="#" method="post">
+          <button type="button" class="btn-google" id="btn-google" aria-label="Se connecter avec Google">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Se connecter avec Google
+          </button>
+          <div class="divider"><span>ou</span></div>
+          <div class="form-group email-typewriter-wrap">
+            <label for="email">Adresse e-mail</label>
+            <div class="email-input-wrap">
+              <span class="typewriter-placeholder" id="email-typewriter-wrap" aria-hidden="true"><span id="email-typewriter"></span><span class="cursor"></span></span>
+              <input type="email" id="email" name="email" class="email-with-typewriter" placeholder=" " autocomplete="email" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+          </div>
+          <div class="form-row">
+            <div class="checkbox-wrap">
+              <input type="checkbox" id="remember" name="remember" checked>
+              <label for="remember">Se souvenir de moi</label>
+            </div>
+            <a href="#" class="forgot" id="forgot-link">Mot de passe oublié ?</a>
+          </div>
+          <div id="password-reset-form" class="password-reset-form">
+            <div class="form-group">
+              <label for="reset-email">E-mail pour réinitialiser</label>
+              <input type="email" id="reset-email" placeholder="vous@exemple.fr">
+            </div>
+            <button type="button" class="btn-submit" id="btn-send-reset">Envoyer le lien</button>
+            <button type="button" class="btn-secondary" id="btn-cancel-reset" style="margin-top:0.5rem;">Annuler</button>
+          </div>
+          <button type="submit" class="btn-submit" id="btn-submit">Se connecter</button>
+        </form>
+        <p class="signup-link">Première connexion ? <a href="inscription.html" id="toggle-signup">Inscrivez-vous</a></p>
+      </div>
+    </div>
+
+    <!-- Colonne droite : description Offibox -->
+    <div class="login-col">
+      <div class="login-desc-card">
+        <div class="badge-3d-wrap">
+          <div class="badge-3d" title="Offibox, la boîte à outils de l'officine">
+            <p class="title-desc"><span class="offi">Offi</span>box, la boîte à outils de l'<span class="offi">offi</span>cine</p>
+          </div>
+        </div>
+        <ul class="offibox-desc-list">
+          <li>
+            <span class="li-icon icon-zap" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+            <span class="li-typewriter-text"><strong>accès rapide</strong> aux informations du quotidien de l'équipe officinale</span>
+          </li>
+          <li>
+            <span class="li-icon icon-clock" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            <span class="li-typewriter-text">informations mises à jour <strong>en temps réel</strong></span>
+          </li>
+          <li>
+            <span class="li-icon icon-bulb" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 4.93-1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg></span>
+            <span class="li-typewriter-text">application en <strong>constante évolution</strong>&nbsp;: actualités, nouvelles missions, nouveaux outils</span>
+          </li>
+          <li>
+            <span class="li-icon icon-shield" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+            <span class="li-typewriter-text">basée sur des <strong>sources</strong> <strong>officielles</strong></span>
+          </li>
+          <li>
+            <span class="li-icon icon-calendar" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            <span class="li-typewriter-text"><span class="offi">Offi</span>box est <strong>sans engagement</strong> de durée&nbsp;– essai gratuit de 15&nbsp;jours</span>
+          </li>
+        </ul>
+        <a href="https://offibox.fr/fonctionnalités" class="hover-pill" target="_blank" rel="noopener noreferrer">
+          Découvrez les fonctionnalités d'<span class="offibox-word"><span class="offi">Offi</span>box</span> <span class="arrow" aria-hidden="true">➜</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-functions-compat.js"></script>
+  <script>
+    (function(){if(typeof firebase==='undefined')return;var c={apiKey:'AIzaSyA3eizSKEwkUnH1Y5Xcum3fVgczGgPAFkk',authDomain:'offibox-prod.firebaseapp.com',projectId:'offibox-prod',storageBucket:'offibox-prod.firebasestorage.app',messagingSenderId:'264737328165',appId:'1:264737328165:web:d8744f8fc1c188d9ddc3cc',measurementId:'G-E1FP98K8WE'};if(!firebase.apps.length)firebase.initializeApp(c);})();
+    (function(){if(typeof firebase==='undefined'){window.OffiboxAuth=null;return;}var a=firebase.auth();var g=function(){return new firebase.auth.GoogleAuthProvider();};window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);},signInWithGoogle:function(){return a.signInWithPopup(g());},signInWithGoogleRedirect:function(){return a.signInWithRedirect(g());},getRedirectResult:function(){return a.getRedirectResult();},signInWithEmailPassword:function(e,p){return a.signInWithEmailAndPassword(e,p);},signUpWithEmailPassword:function(e,p){return a.createUserWithEmailAndPassword(e,p);},sendPasswordResetEmail:function(e){return a.sendPasswordResetEmail(e);},signOut:function(){return a.signOut();}};})();
+  </script>
+  <script>
+    (function() {
+      var authError = document.getElementById('auth-error');
+      var loginForm = document.getElementById('login-form');
+      var btnGoogle = document.getElementById('btn-google');
+      var btnSubmit = document.getElementById('btn-submit');
+      var inscriptionSection = document.getElementById('inscription-section');
+      var toggleSignup = document.getElementById('toggle-signup');
+      var signupForm = document.getElementById('signup-form');
+      var forgotLink = document.getElementById('forgot-link');
+      var passwordResetForm = document.getElementById('password-reset-form');
+      var btnSendReset = document.getElementById('btn-send-reset');
+      var btnCancelReset = document.getElementById('btn-cancel-reset');
+      var signupAuthError = document.getElementById('signup-auth-error');
+      var params = new URLSearchParams(window.location.search || '');
+      if (params.get('inscription') === '1' && authError) {
+        var emailParam = params.get('email') || '';
+        authError.textContent = 'Inscription enregistrée. Un email vous a été envoyé' + (emailParam ? ' à ' + decodeURIComponent(emailParam) : '') + ' pour définir votre mot de passe et finaliser votre inscription.';
+        authError.classList.add('visible', 'success');
+        if (history.replaceState) history.replaceState(null, '', window.location.pathname || 'login-wix.html');
+      }
+      function showError(msg) { if (authError) { authError.textContent = msg || ''; authError.classList.toggle('visible', !!msg); } }
+      function showSignupError(msg) {
+        if (signupAuthError) { signupAuthError.textContent = msg || ''; signupAuthError.classList.toggle('visible', !!msg); if (msg) signupAuthError.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      }
+      function setLoading(loading) { loginForm.classList.toggle('auth-loading', loading); if (btnGoogle) btnGoogle.disabled = loading; if (btnSubmit) btnSubmit.disabled = loading; }
+      var OFFIBOX_WEB_APP_URL = 'https://alexandreperrault.github.io/offibox/';
+      function goToConnected() {
+        var target = OFFIBOX_WEB_APP_URL;
+        try {
+          if (window.top && window.top !== window) {
+            window.top.location.href = target;
+          } else {
+            window.location.href = target;
+          }
+        } catch (e) {
+          window.location.href = target;
+        }
+      }
+      function goToValidation() {
+        var validationUrl = 'validation.html';
+        try {
+          if (window.top && window.top !== window) {
+            window.top.location.href = validationUrl;
+          } else {
+            window.location.href = validationUrl;
+          }
+        } catch (e) {
+          window.location.href = validationUrl;
+        }
+      }
+      function goAfterGoogleSignIn(user) {
+        if (!user || !user.uid) { goToConnected(); return; }
+        try {
+          var key = 'offibox_coord_done_' + user.uid;
+          if (localStorage.getItem(key) === '1') {
+            goToConnected();
+          } else {
+            var inscriptionUrl = 'inscription.html?from=google';
+            if (window.top && window.top !== window) {
+              window.top.location.href = inscriptionUrl;
+            } else {
+              window.location.href = inscriptionUrl;
+            }
+          }
+        } catch (e) {
+          goToConnected();
+        }
+      }
+      function initNormalAuthFlow() {
+        /* Ne pas rediriger à l'affichage de la page : la page d'accueil reste le formulaire de connexion.
+           La redirection vers validation/connected ne se fait qu'après un clic sur Google ou connexion email. */
+      }
+      if (window.OffiboxAuth) {
+        OffiboxAuth.getRedirectResult().then(function(result) {
+          if (result && result.user) { goAfterGoogleSignIn(result.user); return; }
+          initNormalAuthFlow();
+        }).catch(function(err) {
+          if (err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/redirect-cancelled-by-user') {
+            showError(err.message || 'Connexion Google annulée ou erreur.');
+          }
+          initNormalAuthFlow();
+        });
+      }
+      var inIframe = (window.self !== window.top);
+      if (btnGoogle) btnGoogle.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!window.OffiboxAuth) { goToConnected(); return; }
+        showError(''); setLoading(true);
+        if (inIframe) {
+          showError('Redirection vers Google…');
+          OffiboxAuth.signInWithGoogleRedirect();
+          return;
+        }
+        OffiboxAuth.signInWithGoogle().then(function() {
+          var u = OffiboxAuth.getCurrentUser && OffiboxAuth.getCurrentUser();
+          goAfterGoogleSignIn(u || null);
+        }).catch(function(err) {
+          setLoading(false);
+          var msg = 'Connexion Google impossible. Réessayez.';
+          if (err && err.code === 'auth/popup-closed-by-user') msg = 'Connexion annulée.';
+          else if (err && err.code === 'auth/popup-blocked') msg = 'Popup bloquée. Autorisez les fenêtres popup pour ce site.';
+          else if (err && (err.code === 'auth/unauthorized-domain' || (err.message && (err.message.indexOf('forbidden') !== -1 || err.message.indexOf('403') !== -1 || err.message.indexOf('unauthorized') !== -1)))) {
+            var origin = window.location.origin || '';
+            var host = window.location.host || '';
+            msg = 'Domaine non autorisé. Ajoutez ce domaine aux deux endroits : (1) Firebase Console → Authentication → Authorized domains → Add domain : « ' + host + ' » (sans https://). (2) Google Cloud Console → Credentials → client « Web client (auto created by Google Service) » → Authorized JavaScript origins : « ' + origin + ' ». Puis attendez 1–2 min et réessayez.';
+          } else if (err && err.message) msg = err.message;
+          showError(msg);
+        });
+      });
+      if (loginForm) loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!window.OffiboxAuth) { goToConnected(); return; }
+        var email = document.getElementById('email').value.trim();
+        var password = document.getElementById('password').value;
+        if (!email || !password) { showError('Veuillez remplir l\'email et le mot de passe.'); return; }
+        showError(''); setLoading(true);
+        OffiboxAuth.signInWithEmailPassword(email, password).then(goToConnected).catch(function(err) {
+          setLoading(false);
+          var msg = 'Connexion impossible. Vérifiez vos identifiants.';
+          if (err && (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password')) msg = 'E-mail ou mot de passe incorrect.';
+          else if (err && err.code === 'auth/invalid-email') msg = 'Adresse e-mail invalide.';
+          else if (err && err.message) msg = err.message;
+          showError(msg);
+        });
+      });
+      if (toggleSignup) toggleSignup.addEventListener('click', function(e) {
+        e.preventDefault();
+        var inscriptionUrl = 'inscription.html';
+        try {
+          if (window.top && window.top !== window) { window.top.location.href = inscriptionUrl; }
+          else { window.location.href = inscriptionUrl; }
+        } catch (err) { window.location.href = inscriptionUrl; }
+      });
+      function randomPassword(len) {
+        var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var pwd = '';
+        for (var i = 0; i < (len || 12); i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        return pwd;
+      }
+      if (signupForm) signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!window.OffiboxAuth || typeof window.OffiboxAuth.signUpWithEmailPassword !== 'function') {
+          showSignupError('Inscription temporairement indisponible. Rechargez la page ou réessayez plus tard.');
+          return;
+        }
+        var email = document.getElementById('signup-email').value.trim();
+        if (!email) { showSignupError('Veuillez indiquer votre adresse e-mail.'); return; }
+        showSignupError(''); setLoading(true);
+        var generatedPwd = randomPassword(12);
+        window.OffiboxAuth.signUpWithEmailPassword(email, generatedPwd).then(function() {
+          var fn = typeof firebase !== 'undefined' && firebase.functions ? firebase.functions().httpsCallable('sendPasswordResetEmailFr') : null;
+          return fn ? fn({ email: email }) : (OffiboxAuth.sendPasswordResetEmail ? OffiboxAuth.sendPasswordResetEmail(email) : Promise.resolve());
+        }).then(function() {
+          var samePage = (window.location.pathname || '').split('/').pop() || 'login-wix.html';
+          window.location.href = samePage + '?inscription=1&email=' + encodeURIComponent(email);
+        }).catch(function(err) {
+          setLoading(false);
+          var msg = 'Inscription impossible. Réessayez.';
+          if (err && err.code === 'auth/email-already-in-use') msg = 'Un compte existe déjà avec cet e-mail.';
+          else if (err && err.message) msg = err.message;
+          showSignupError(msg);
+        });
+      });
+      if (forgotLink) forgotLink.addEventListener('click', function(e) { e.preventDefault(); passwordResetForm.classList.add('visible'); });
+      if (btnCancelReset) btnCancelReset.addEventListener('click', function() { passwordResetForm.classList.remove('visible'); document.getElementById('reset-email').value = ''; });
+      if (btnSendReset) btnSendReset.addEventListener('click', function() {
+        var email = document.getElementById('reset-email').value.trim();
+        if (!email) { showError('Indiquez votre adresse e-mail.'); return; }
+        showError('');
+        var sendReset = function() {
+          var fn = typeof firebase !== 'undefined' && firebase.functions ? firebase.functions().httpsCallable('sendPasswordResetEmailFr') : null;
+          return fn ? fn({ email: email }) : (OffiboxAuth.sendPasswordResetEmail ? OffiboxAuth.sendPasswordResetEmail(email) : Promise.reject(new Error('Non disponible')));
+        };
+        sendReset().then(function() { showError('Un lien de réinitialisation a été envoyé à votre adresse.'); passwordResetForm.classList.remove('visible'); }).catch(function(err) {
+          if (err && err.code === 'auth/user-not-found') showError('Aucun compte avec cet e-mail.'); else showError(err && err.message ? err.message : 'Envoi impossible.');
+        });
+      });
+    })();
+    (function typewriterEmail() {
+      var wrap = document.getElementById('email-typewriter-wrap');
+      var textEl = document.getElementById('email-typewriter');
+      var input = document.getElementById('email');
+      if (!wrap || !textEl || !input) return;
+      var text = 'mon email@exemple.fr';
+      var speed = 90;
+      var pauseStart = 600;
+      function run() {
+        textEl.textContent = '';
+        var i = 0;
+        function type() {
+          if (i < text.length) {
+            textEl.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+          }
+        }
+        setTimeout(type, pauseStart);
+      }
+      run();
+      input.addEventListener('focus', function() { wrap.classList.add('hidden'); if (!input.value || input.value === text) input.value = ''; });
+      input.addEventListener('blur', function() { if (!input.value.trim()) { wrap.classList.remove('hidden'); run(); } });
+    })();
+    (function addressAutocomplete() {
+      var input = document.getElementById('signup-address');
+      var list = document.getElementById('address-suggestions');
+      var zip = document.getElementById('signup-zip');
+      var city = document.getElementById('signup-city');
+      if (!input || !list || !zip || !city) return;
+      var debounceTimer;
+      var lastAbort = null;
+      function showSuggestions(features) {
+        list.innerHTML = '';
+        list.setAttribute('aria-hidden', 'false');
+        if (!features || features.length === 0) { list.classList.remove('visible'); return; }
+        features.forEach(function(f) {
+          var p = (f && f.properties) || {};
+          var label = p.label || (p.housenumber || '') + ' ' + (p.street || '') + ', ' + (p.postcode || '') + ' ' + (p.city || '');
+          var streetLine = [p.housenumber, p.street].filter(Boolean).join(' ') || label.split(',')[0] || label;
+          var li = document.createElement('li');
+          li.textContent = label;
+          li.setAttribute('data-postcode', p.postcode || '');
+          li.setAttribute('data-city', p.city || '');
+          li.setAttribute('data-street', streetLine);
+          li.tabIndex = 0;
+          li.addEventListener('click', function() {
+            input.value = this.getAttribute('data-street');
+            zip.value = this.getAttribute('data-postcode');
+            city.value = this.getAttribute('data-city');
+            list.innerHTML = '';
+            list.setAttribute('aria-hidden', 'true');
+            list.classList.remove('visible');
+          });
+          list.appendChild(li);
+        });
+        list.classList.add('visible');
+      }
+      function hideSuggestions() {
+        list.innerHTML = '';
+        list.setAttribute('aria-hidden', 'true');
+        list.classList.remove('visible');
+      }
+      input.addEventListener('input', function() {
+        var q = input.value.trim();
+        clearTimeout(debounceTimer);
+        if (lastAbort) lastAbort.abort();
+        if (q.length < 3) { hideSuggestions(); return; }
+        debounceTimer = setTimeout(function() {
+          lastAbort = new AbortController();
+          fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=6', { signal: lastAbort.signal })
+            .then(function(r) { return r.json(); })
+            .then(function(data) { showSuggestions(data.features || []); })
+            .catch(function() { hideSuggestions(); });
+        }, 300);
+      });
+      input.addEventListener('blur', function() { setTimeout(hideSuggestions, 200); });
+      input.addEventListener('focus', function() { if (list.children.length) list.classList.add('visible'); });
+    })();
+  </script>
+</body>
+</html>

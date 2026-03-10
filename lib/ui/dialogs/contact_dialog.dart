@@ -9,9 +9,21 @@ const String kContactEmailDisplay = 'contact@offibox.fr';
 /// Destinataire du mailto (identique à l’affiché pour cohérence).
 const String kContactMailtoRecipient = 'contact@offibox.fr';
 
-/// Dialogue de contact : en-tête (téléphone, mail, adresse Offibox) + formulaire qui ouvre le client mail.
+/// Dialogue de contact : en-tête (téléphone, mail, adresse Offibox) + formulaire.
+/// Peut être affiché en [Dialog] centré ou en panneau sous la barre via [ContactDialog.asPanel].
 class ContactDialog extends StatefulWidget {
-  const ContactDialog({super.key});
+  const ContactDialog({super.key, this.maxWidth, this.onClose});
+
+  /// Affiche le formulaire dans un panneau (sous la barre, largeur = [maxWidth], avec [onClose]).
+  const ContactDialog.asPanel({
+    super.key,
+    required double maxWidth,
+    required VoidCallback onClose,
+  }) : maxWidth = maxWidth,
+       onClose = onClose;
+
+  final double? maxWidth;
+  final VoidCallback? onClose;
 
   @override
   State<ContactDialog> createState() => _ContactDialogState();
@@ -94,7 +106,11 @@ class _ContactDialogState extends State<ContactDialog> {
         throw Exception(err ?? 'Envoi impossible');
       }
       if (!mounted) return;
-      Navigator.of(context).pop();
+      if (widget.onClose != null) {
+        widget.onClose!();
+      } else {
+        Navigator.of(context).pop();
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Message envoyé à Offibox.')),
       );
@@ -108,29 +124,41 @@ class _ContactDialogState extends State<ContactDialog> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Contact',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Spinnaker',
-                    color: Colors.black87,
+  Widget _buildContent(double maxWidth) {
+    final isPanel = widget.onClose != null;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: isPanel ? 16 : 24, vertical: isPanel ? 14 : 20),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Formulaire de contact',
+                      style: TextStyle(
+                        fontSize: isPanel ? 16 : 18,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Spinnaker',
+                        color: Colors.black87,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  if (isPanel)
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: widget.onClose,
+                      tooltip: 'Fermer',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
                 // Téléphone, mail, adresse (gris + Offibox)
                 const _ContactLine(
                   icon: Icons.phone_outlined,
@@ -138,7 +166,7 @@ class _ContactDialogState extends State<ContactDialog> {
                   value: '—',
                   onTap: null,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 _ContactLine(
                   icon: Icons.email_outlined,
                   label: 'Mail',
@@ -146,14 +174,14 @@ class _ContactDialogState extends State<ContactDialog> {
                   onTap: () => openUrl('mailto:$kContactMailtoRecipient'),
                   linkStyle: true,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 _ContactLine(
                   icon: Icons.location_on_outlined,
                   label: 'Adresse',
                   child: RichText(
                     text: const TextSpan(
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontFamily: 'Spinnaker',
                         fontWeight: FontWeight.w500,
                       ),
@@ -170,19 +198,19 @@ class _ContactDialogState extends State<ContactDialog> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
                 const Divider(height: 1),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 const Text(
                   'Envoyer un message',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Spinnaker',
                     color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Form(
                   key: _formKey,
                   child: Column(
@@ -193,45 +221,45 @@ class _ContactDialogState extends State<ContactDialog> {
                         decoration: _dec('Nom', 'Votre nom'),
                         textCapitalization: TextCapitalization.words,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       TextFormField(
                         controller: _prenomController,
                         decoration: _dec('Prénom', 'Votre prénom'),
                         textCapitalization: TextCapitalization.words,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       TextFormField(
                         controller: _mailController,
                         decoration: _dec('Mail', 'votre@email.fr'),
                         keyboardType: TextInputType.emailAddress,
                         autocorrect: false,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       TextFormField(
                         controller: _nomPharmacieController,
                         decoration: _dec('Nom de la pharmacie (optionnel)', 'Nom de votre pharmacie'),
                         textCapitalization: TextCapitalization.words,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       TextFormField(
                         controller: _telephoneController,
                         decoration: _dec('Téléphone (optionnel)', 'Numéro de téléphone'),
                         keyboardType: TextInputType.phone,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       TextFormField(
                         controller: _subjectController,
                         decoration: _dec('Objet', 'Objet du message'),
                         textCapitalization: TextCapitalization.sentences,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       TextFormField(
                         controller: _bodyController,
                         decoration: _dec('Message', 'Votre message…').copyWith(alignLabelWithHint: true),
-                        maxLines: 5,
+                        maxLines: 4,
                         textCapitalization: TextCapitalization.sentences,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -259,11 +287,33 @@ class _ContactDialogState extends State<ContactDialog> {
                     ],
                   ),
                 ),
-              ],
+              ],  // children of Column
             ),
           ),
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final maxWidth = widget.maxWidth ?? 360;
+    if (widget.onClose != null) {
+      return Material(
+        elevation: 8,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
+          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+        ),
+        child: _buildContent(maxWidth),
+      );
+    }
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
+      ),
+      child: _buildContent(maxWidth),
     );
   }
 }

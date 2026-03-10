@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnostic connexion Google – Offibox</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      max-width: 680px;
+      margin: 2rem auto;
+      padding: 0 1rem 3rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.35rem; margin-bottom: 0.5rem; color: #0f172a; }
+    .intro { color: #64748b; font-size: 0.95rem; margin-bottom: 2rem; }
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card.firebase { border-left: 4px solid #f59e0b; }
+    .card.google { border-left: 4px solid #4285f4; }
+    .card.test { border-left: 4px solid #5A9094; }
+    .card h2 { font-size: 1rem; margin: 0 0 0.5rem; color: #0f172a; }
+    .card p { margin: 0.35rem 0; font-size: 0.9rem; }
+    .value {
+      display: block;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 0.6rem 0.9rem;
+      border-radius: 8px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+      margin: 0.5rem 0;
+    }
+    .value.firebase-domain { background: #422006; color: #fef3c7; }
+    .value.origin { background: #1e3a5f; color: #bfdbfe; }
+    .btn {
+      display: inline-block;
+      padding: 0.6rem 1rem;
+      background: #5A9094;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .btn:hover { background: #4a7a7e; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-copy {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.8rem;
+      background: #64748b;
+      margin-left: 0.5rem;
+    }
+    .btn-copy:hover { background: #475569; }
+    #result { margin-top: 1.25rem; }
+    .success { color: #059669; font-weight: 600; }
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    .error-box code { background: #fee2e2; padding: 0.1rem 0.35rem; border-radius: 4px; }
+    .error-box pre { background: #1e293b; color: #e2e8f0; padding: 0.75rem; border-radius: 6px; overflow: auto; font-size: 0.8rem; white-space: pre-wrap; word-break: break-word; margin: 0.5rem 0 0; }
+    .hint { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 1rem; margin-top: 1rem; font-size: 0.9rem; }
+    .hint strong { color: #b45309; }
+    ul.steps { margin: 0.5rem 0 0 1.25rem; padding: 0; }
+    ul.steps li { margin: 0.25rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Diagnostic connexion Google (Firebase Auth)</h1>
+  <p class="intro">Ouvrez cette page <strong>exactement sur le même domaine</strong> que votre page de connexion ou validation (même URL dans la barre d’adresse, même sous-domaine). Les valeurs ci-dessous sont celles à autoriser dans Firebase et Google Cloud.</p>
+
+  <div class="card firebase">
+    <h2>1. Firebase Console – Authorized domains</h2>
+    <p>Aller dans : Firebase Console → projet <strong>offibox-prod</strong> → <strong>Authentication</strong> → <strong>Settings</strong> → <strong>Authorized domains</strong> → <strong>Add domain</strong>.</p>
+    <p>Valeur à ajouter <em>(sans https://, sans /)</em> :</p>
+    <span id="firebase-domain" class="value firebase-domain"></span>
+    <button type="button" class="btn-copy" id="copy-firebase" aria-label="Copier">Copier</button>
+  </div>
+
+  <div class="card google">
+    <h2>2. Google Cloud Console – Authorized JavaScript origins</h2>
+    <p>Aller dans : Google Cloud Console → <strong>APIs & Services</strong> → <strong>Credentials</strong> → ouvrir le client <strong>« Web client (auto created by Google Service) »</strong> (ID en <code>-cskk...</code>).</p>
+    <p>Dans <strong>Authorized JavaScript origins</strong>, cliquer <strong>+ ADD URI</strong> et coller :</p>
+    <span id="origin-google" class="value origin"></span>
+    <button type="button" class="btn-copy" id="copy-google" aria-label="Copier">Copier</button>
+  </div>
+
+  <div class="card">
+    <h2>3. Redirect URI (Google Cloud)</h2>
+    <p>Dans le même client OAuth, section <strong>Authorized redirect URIs</strong>, cette URI doit être présente :</p>
+    <span id="redirect-uri" class="value">https://offibox-prod.firebaseapp.com/__/auth/handler</span>
+  </div>
+
+  <div class="card test">
+    <h2>4. Tester la connexion Google</h2>
+    <p>Cliquez sur le bouton ci-dessous. Si une erreur s’affiche, le domaine ci-dessus n’est pas encore autorisé ou la propagation n’est pas terminée (attendre 2–5 min après avoir enregistré).</p>
+    <button type="button" class="btn" id="btn-test">Tester la connexion Google</button>
+    <div id="result"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script>
+    (function() {
+      var origin = (window.location.origin || '').replace(/\/$/, '');
+      var host = window.location.host || '';
+
+      document.getElementById('firebase-domain').textContent = host || '(vide)';
+      document.getElementById('origin-google').textContent = origin || '(vide)';
+
+      function copyToClipboard(text, btnId) {
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function() {
+          var btn = document.getElementById(btnId);
+          if (btn) { var t = btn.textContent; btn.textContent = 'Copié'; setTimeout(function() { btn.textContent = t; }, 1500); }
+        }).catch(function() {});
+      }
+      document.getElementById('copy-firebase').addEventListener('click', function() {
+        copyToClipboard(host, 'copy-firebase');
+      });
+      document.getElementById('copy-google').addEventListener('click', function() {
+        copyToClipboard(origin, 'copy-google');
+      });
+
+      var firebaseConfig = {
+        apiKey: 'AIzaSyA3eizSKEwkUnH1Y5Xcum3fVgczGgPAFkk',
+        authDomain: 'offibox-prod.firebaseapp.com',
+        projectId: 'offibox-prod',
+        storageBucket: 'offibox-prod.firebasestorage.app',
+        messagingSenderId: '264737328165',
+        appId: '1:264737328165:web:d8744f8fc1c188d9ddc3cc',
+        measurementId: 'G-E1FP98K8WE'
+      };
+
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      } catch (e) {
+        document.getElementById('result').innerHTML = '<div class="error-box">Erreur d’initialisation Firebase : ' + (e.message || e) + '</div>';
+        return;
+      }
+
+      var btn = document.getElementById('btn-test');
+      var result = document.getElementById('result');
+
+      btn.addEventListener('click', function() {
+        btn.disabled = true;
+        result.innerHTML = '<p>Ouverture de la fenêtre Google…</p>';
+
+        var auth = firebase.auth();
+        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+          .then(function(res) {
+            result.innerHTML = '<p class="success">Connexion réussie. UID : ' + (res.user && res.user.uid) + '</p>';
+            if (res.user) auth.signOut();
+            btn.disabled = false;
+          })
+          .catch(function(err) {
+            var code = (err && err.code) || '';
+            var msg = (err && err.message) || String(err);
+            var hint = '';
+            if (code === 'auth/unauthorized-domain') {
+              hint = '<div class="hint"><strong>auth/unauthorized-domain</strong><br>Le domaine <code>' + host + '</code> n’est pas encore autorisé ou la modification n’a pas été prise en compte.<ul class="steps">' +
+                '<li>Firebase : Authorized domains → ajouter <code>' + host + '</code></li>' +
+                '<li>Google Cloud : Authorized JavaScript origins → ajouter <code>' + origin + '</code></li>' +
+                '<li>Enregistrer puis attendre 2–5 minutes avant de retester.</li></ul></div>';
+            }
+            result.innerHTML =
+              '<div class="error-box">' +
+              '<p><strong>Erreur</strong></p>' +
+              '<p><strong>code :</strong> <code>' + (code || '—') + '</code></p>' +
+              '<p><strong>message :</strong> <code>' + (msg || '—') + '</code></p>' +
+              hint +
+              '<pre>' + (err ? JSON.stringify({ code: err.code, message: err.message }, null, 2) : '') + '</pre></div>';
+            console.error('Firebase Google sign-in error:', err);
+            btn.disabled = false;
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,7 +1,8 @@
-import 'dart:io' show Platform;
+import 'package:offibox/io_platform_stub.dart' if (dart.library.io) 'dart:io' show Platform;
 
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/ui/widgets/offibox_logo_complete.dart';
 import 'package:offibox/services/cerp_client_service.dart';
 import 'package:offibox/services/firestore_user_cache.dart';
+import 'package:offibox/services/trial_guard.dart';
 
 /// Étape du flux de connexion / première connexion.
 enum _LoginStep {
@@ -113,6 +115,7 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
+      await TrialGuard.ensureTrialStartedOnFirstConnection();
       await _saveRememberedCredentials();
       if (_isCerpBaClient) {
         await CerpClientService.upsertForCurrentUser(
@@ -224,6 +227,7 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
+      await TrialGuard.ensureTrialStartedOnFirstConnection();
       await _saveRememberedCredentials();
       if (_isCerpBaClient) {
         await CerpClientService.upsertForCurrentUser(
@@ -272,6 +276,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
       await FirebaseAuth.instance.signInWithCredential(creds.firebaseCredential);
+      await TrialGuard.ensureTrialStartedOnFirstConnection();
       if (_isCerpBaClient) {
         await CerpClientService.upsertForCurrentUser(
           isCerpBaClient: true,
@@ -385,39 +390,233 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final content = _buildLoginCard();
+    if (kIsWeb && MediaQuery.sizeOf(context).width >= 900) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFE8F0F1),
+        body: Row(
+          children: [
+            Expanded(child: Center(child: SingleChildScrollView(child: content))),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+                child: _buildWebRightPanel(context),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFFE8F0F1),
       body: Center(
         child: SingleChildScrollView(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 380),
-              child: Container(
-                margin: const EdgeInsets.all(24),
-                width: 420,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+            child: content,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginCard() {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 380),
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        width: 420,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: _step == _LoginStep.mainLogin
+            ? _buildMainLogin()
+            : _step == _LoginStep.firstConnectionEmail
+                ? _buildFirstConnectionEmail()
+                : _step == _LoginStep.firstConnectionPassword
+                    ? _buildFirstConnectionPassword()
+                    : _buildFirstConnectionSuccess(),
+      ),
+    );
+  }
+
+  static const Color _offiTeal = Color(0xFF5A9094);
+
+  /// Panneau droit web : texte Offibox (Offi en teal) + 3 phrases + effet 3D + bandeau déroulant (largeur réduite).
+  Widget _buildWebRightPanel(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildOffiboxDescription3D(context),
+        const SizedBox(height: 32),
+        _buildSourcesBanner(context),
+      ],
+    );
+  }
+
+  Widget _buildOffiboxDescription3D(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.95, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Transform(
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..rotateX(0.02 * (1 - value))
+            ..scale(value),
+          alignment: Alignment.centerLeft,
+          child: child,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: _offiTeal.withValues(alpha: 0.12),
+              blurRadius: 24,
+              offset: const Offset(4, 8),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF3F4346),
+                  fontFamily: 'Spinnaker',
+                  height: 1.3,
                 ),
-                child: _step == _LoginStep.mainLogin
-                    ? _buildMainLogin()
-                    : _step == _LoginStep.firstConnectionEmail
-                        ? _buildFirstConnectionEmail()
-                        : _step == _LoginStep.firstConnectionPassword
-                            ? _buildFirstConnectionPassword()
-                            : _buildFirstConnectionSuccess(),
+                children: [
+                  const TextSpan(text: 'Offi', style: TextStyle(color: _offiTeal)),
+                  const TextSpan(text: 'box : la boîte à outils de l\'officine'),
+                ],
               ),
             ),
-          ),
+            const SizedBox(height: 20),
+            _sentence(
+              context,
+              'Bienvenue sur Offibox : la boîte à outils pensée pour l\'officine.',
+            ),
+            const SizedBox(height: 12),
+            _sentence(
+              context,
+              'Une information à jour quotidiennement, issue des sources officielles.',
+            ),
+            const SizedBox(height: 12),
+            _sentence(
+              context,
+              'Au service de l\'équipe officinale pour gagner en efficacité au quotidien.',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sentence(BuildContext context, String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 15,
+        color: Colors.grey.shade700,
+        fontFamily: 'Spinnaker',
+        height: 1.5,
+      ),
+    );
+  }
+
+  /// Bandeau déroulant sources officielles (largeur réduite).
+  Widget _buildSourcesBanner(BuildContext context) {
+    const sources = [
+      'BDM', 'ANSM', 'SPF', 'HAS', 'Ameli', 'Vidal', 'Service public',
+    ];
+    return SizedBox(
+      width: 280,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Sources officielles',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600,
+                fontFamily: 'Spinnaker',
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 36,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: sources.length * 2,
+                itemBuilder: (context, index) {
+                  final name = sources[index % sources.length];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _offiTeal.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: _offiTeal,
+                            fontFamily: 'Spinnaker',
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (_, __) => const SizedBox(width: 4),
+              ),
+            ),
+          ],
         ),
       ),
     );

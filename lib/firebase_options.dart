@@ -50,6 +50,10 @@ class DefaultFirebaseOptions {
     measurementId: 'G-E1FP98K8WE',
   );
 
+  /// Client ID OAuth 2.0 pour Google Sign-In sur le web. Récupérer dans Firebase Console :
+  /// Authentication > Sign-in method > Google > Web client ID (format: 264737328165-xxx.apps.googleusercontent.com).
+  static const String? webGoogleClientId = '264737328165-cskk83jevrjrc94veihvcfo3jola2p63.apps.googleusercontent.com';
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCi1AhMabx9PZYeNnZxZqfyogtrmEWp8pA',
     appId: '1:264737328165:android:9156ce010d5fd07cddc3cc',

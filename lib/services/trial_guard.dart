@@ -38,4 +38,27 @@ class TrialGuard {
 
     return trialEndsAt.toDate().isBefore(DateTime.now());
   }
+
+  /// Démarre la période de 15 jours à la première connexion (web ou app).
+  /// Si le document users/{uid} n'existe pas ou n'a pas trialEndsAt, on le crée/met à jour.
+  /// À appeler après toute connexion réussie (Google ou e-mail).
+  static Future<void> ensureTrialStartedOnFirstConnection() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final data = await getUserDocCached(user.uid);
+    final hasTrial = data != null && data['trialEndsAt'] != null;
+    if (hasTrial) return;
+
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+      {
+        'email': user.email,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'trialEndsAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 15))),
+        'plan': 'trial',
+      },
+      SetOptions(merge: true),
+    );
+    FirestoreUserCache.instance.invalidate(user.uid);
+  }
 }

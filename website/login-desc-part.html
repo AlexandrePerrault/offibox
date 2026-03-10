@@ -1,0 +1,181 @@
+<!-- Partie description Offibox (colonne droite) – à inclure dans la version mobile ou autre page. Pas de script. -->
+<style>
+  .login-desc-part :root,
+  .login-desc-part { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+  .login-desc-part * { margin: 0; padding: 0; box-sizing: border-box; }
+  .login-desc-part {
+    font-family: 'Spinnaker', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--gray);
+  }
+  .login-desc-part .login-desc-card {
+    width: 100%;
+    max-width: 480px;
+    min-height: 420px;
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    border: 1px solid #e2e8f0;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .login-desc-part .badge-3d-wrap { margin-bottom: 1.5rem; perspective: 800px; }
+  .login-desc-part .badge-3d {
+    display: inline-block;
+    padding: 1.15rem 1.45rem;
+    background: var(--offi-teal);
+    border: 2px solid var(--offi-teal);
+    border-radius: 16px;
+    box-shadow: 0 4px 0 #4a7a7e, 0 6px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    cursor: default;
+  }
+  .login-desc-part .badge-3d:hover {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #4a7a7e, 0 4px 16px rgba(0,0,0,0.18);
+    background: var(--white);
+    border-color: var(--offi-teal);
+  }
+  .login-desc-part .badge-3d .title-desc { font-size: clamp(1.44rem, 2.3vw, 1.73rem); font-weight: 700; color: var(--white); line-height: 1.3; transition: color 0.2s ease; }
+  .login-desc-part .badge-3d .offi,
+  .login-desc-part .hover-pill .offi { display: inline-block; margin-right: -0.06em; }
+  .login-desc-part .badge-3d .offi { color: rgba(255,255,255,0.95); transition: color 0.2s ease; margin-right: -0.03em; }
+  .login-desc-part .badge-3d:hover .title-desc { color: var(--gray); }
+  .login-desc-part .badge-3d:hover .offi { color: var(--offi-teal); }
+  .login-desc-part .offibox-desc-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 2.3rem;
+    color: var(--gray);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    font-family: 'Spinnaker', sans-serif;
+    opacity: 0;
+    animation: list-fade-in-desc 0.8s ease-out 0.15s forwards;
+  }
+  @keyframes list-fade-in-desc {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .login-desc-part .offibox-desc-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 0.55rem;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: line-fade-in-desc 0.7s ease-out forwards;
+    letter-spacing: 0.03em;
+  }
+  .login-desc-part .offibox-desc-list .li-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    margin-top: 0.15em;
+    color: var(--offi-teal);
+    transition: transform 0.25s ease;
+  }
+  .login-desc-part .offibox-desc-list li:hover .li-icon { transform: scale(1.18); }
+  .login-desc-part .offibox-desc-list .li-icon svg { width: 100%; height: 100%; display: block; }
+  .login-desc-part .offibox-desc-list .li-icon.icon-zap { color: #f59e0b; }
+  .login-desc-part .offibox-desc-list .li-icon.icon-clock { color: #0d9488; }
+  .login-desc-part .offibox-desc-list .li-icon.icon-bulb { color: #eab308; }
+  .login-desc-part .offibox-desc-list .li-icon.icon-bulb svg { animation: bulb-glow-desc 1.6s ease-in-out infinite; }
+  @keyframes bulb-glow-desc {
+    0%, 100% { opacity: 1; filter: brightness(1.2); }
+    45%, 55% { opacity: 0.5; filter: brightness(0.7); }
+  }
+  .login-desc-part .offibox-desc-list .li-icon.icon-calendar { color: #5A9094; }
+  .login-desc-part .offibox-desc-list .li-icon.icon-shield { color: #2563eb; }
+  .login-desc-part .offibox-desc-list li:nth-child(1) { animation-delay: 0.35s; }
+  .login-desc-part .offibox-desc-list li:nth-child(2) { animation-delay: 0.55s; }
+  .login-desc-part .offibox-desc-list li:nth-child(3) { animation-delay: 0.75s; }
+  .login-desc-part .offibox-desc-list li:nth-child(4) { animation-delay: 0.95s; }
+  .login-desc-part .offibox-desc-list li:nth-child(5) { animation-delay: 1.15s; }
+  .login-desc-part .offibox-desc-list li:last-child { margin-bottom: 0; }
+  @keyframes line-fade-in-desc {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .login-desc-part .hover-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.45rem;
+    background: var(--white);
+    border: 2px solid var(--offi-teal);
+    border-radius: 16px;
+    color: var(--gray);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(90, 144, 148, 0.15);
+    white-space: nowrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+  .login-desc-part .hover-pill:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    background: var(--offi-teal);
+    border-color: var(--offi-teal);
+    color: var(--white);
+  }
+  .login-desc-part .hover-pill .offibox-word { display: inline; white-space: nowrap; margin-left: -0.15em; }
+  .login-desc-part .hover-pill .offi { color: var(--offi-teal); }
+  .login-desc-part .hover-pill .arrow {
+    display: inline-block;
+    margin-left: 0.35rem;
+    margin-right: 0.4rem;
+    color: var(--offi-teal);
+    font-weight: 800;
+    font-size: 1.25em;
+    line-height: 1;
+    transition: transform 0.2s ease;
+  }
+  .login-desc-part .hover-pill:hover .offi,
+  .login-desc-part .hover-pill:hover .arrow { color: var(--white); }
+  .login-desc-part .hover-pill:hover .arrow { animation: arrow-rebond-desc 0.5s ease; }
+  @keyframes arrow-rebond-desc {
+    0% { transform: translateX(0) scale(1); }
+    40% { transform: translateX(8px) scale(1.15); }
+    70% { transform: translateX(3px) scale(1.05); }
+    100% { transform: translateX(0) scale(1); }
+  }
+</style>
+<div class="login-desc-part">
+  <div class="login-desc-card">
+    <div class="badge-3d-wrap">
+      <div class="badge-3d" title="Offibox, la boîte à outils de l'officine">
+        <p class="title-desc"><span class="offi">Offi</span>box, la boîte à outils de l'<span class="offi">offi</span>cine</p>
+      </div>
+    </div>
+    <ul class="offibox-desc-list">
+      <li>
+        <span class="li-icon icon-zap" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+        <span class="li-typewriter-text"><strong>accès rapide</strong> aux informations du quotidien de l'équipe officinale</span>
+      </li>
+      <li>
+        <span class="li-icon icon-clock" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+        <span class="li-typewriter-text">informations mises à jour <strong>en temps réel</strong></span>
+      </li>
+      <li>
+        <span class="li-icon icon-bulb" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 4.93-1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg></span>
+        <span class="li-typewriter-text">application en <strong>constante évolution</strong>&nbsp;: actualités, nouvelles missions, nouveaux outils</span>
+      </li>
+      <li>
+        <span class="li-icon icon-shield" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        <span class="li-typewriter-text">basée sur des <strong>sources</strong> <strong>officielles</strong></span>
+      </li>
+      <li>
+        <span class="li-icon icon-calendar" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+        <span class="li-typewriter-text"><span class="offi">Offi</span>box est <strong>sans engagement</strong> de durée&nbsp;– essai gratuit de 15&nbsp;jours</span>
+      </li>
+    </ul>
+    <a href="https://offibox.fr/fonctionnalités" class="hover-pill" target="_blank" rel="noopener noreferrer">
+      Découvrez les fonctionnalités d'<span class="offibox-word"><span class="offi">Offi</span>box</span> <span class="arrow" aria-hidden="true">➜</span>
+    </a>
+  </div>
+</div>

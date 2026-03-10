@@ -103,6 +103,8 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   }
   bool _isGoogleConnected = false;
   bool _showIdeasPanel = false;
+  /// Formulaire de contact affiché sous la barre (largeur barre, apparition en fondu).
+  bool _showContactPanel = false;
   /// Barre d’infos déroulante en haut : true = déployée, false = repliée
   bool _infoBarExpanded = true;
   /// Panneau catalogue sous la barre (affiché uniquement après clic sur le badge Catalogue).
@@ -251,6 +253,8 @@ Future<void> _registerDeviceIfNeeded() async {
     _therapeuticVideoUrl = null;
     _showPharmaradioFlashPanel = false;
     _hidePdfHitPanel = true;
+    _showContactPanel = false;
+    _showIdeasPanel = false;
   }
 
   /// Ouvre une image asset (assets/images/...) dans le panneau sous la barre.
@@ -556,6 +560,93 @@ void initState() {
         ],
       ),
     );
+  }
+
+  /// Paramètre optionnel passé à la page d'accueil pour connexion directe si l'utilisateur est déjà connecté dans l'app.
+  /// Le site offibox.fr doit vérifier ce token (ex. Firebase Admin) et créer une session.
+  static const String _kAppLoginTokenParam = 'app_login_token';
+
+  void _showOpenOffiboxConfirmationDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      barrierLabel: 'Fermer la boîte de dialogue',
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius)),
+        contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+        actionsPadding: const EdgeInsets.fromLTRB(10, 2, 10, 8),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 200),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: 'Spinnaker',
+                color: OffiboxColors.darkGray,
+                height: 1.25,
+              ),
+              children: [
+                const TextSpan(text: 'Fermer '),
+                TextSpan(
+                  text: 'Offi',
+                  style: TextStyle(
+                    color: OffiboxColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    fontFamily: 'Spinnaker',
+                  ),
+                ),
+                const TextSpan(text: 'box ?'),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          IntrinsicWidth(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _QuitDialogPill(
+                  label: 'Non',
+                  atRestTeal: true,
+                  onTap: () => Navigator.of(ctx).pop(),
+                ),
+                const SizedBox(width: 12),
+                _QuitDialogPill(
+                  label: 'Oui',
+                  atRestTeal: false,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _close();
+                    _launchOffiboxWithOptionalToken();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchOffiboxWithOptionalToken() async {
+    _onLinkOpened();
+    Uri uri = Uri.parse('https://offibox.fr');
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final token = await user.getIdToken();
+        if (token != null && token.isNotEmpty) {
+          uri = uri.replace(queryParameters: {_kAppLoginTokenParam: token});
+        }
+      } catch (_) {
+        // Ignorer : on ouvre sans token
+      }
+    }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _showCopyChoiceMenu(BuildContext context, dynamic result) {
@@ -1260,13 +1351,7 @@ Widget build(BuildContext context) {
 
       // 🍔 Menu à droite du logo + clic droit sur le logo
       menuPopupKey: _menuPopupKey,
-      onOpenOffibox: () async {
-        _onLinkOpened();
-        final uri = Uri.parse('https://offibox.fr');
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
-      },
+      onOpenOffibox: () => _showOpenOffiboxConfirmationDialog(context),
       onMinimize: () => windowManager.minimize(),
       onClose: () => _showQuitConfirmationDialog(context),
       onShowAccount: () {
@@ -1312,11 +1397,10 @@ Widget build(BuildContext context) {
         );
       },
       onShowContact: () {
-        showDialog<void>(
-          context: context,
-          barrierLabel: 'Fermer',
-          builder: (_) => const ContactDialog(),
-        );
+        setState(() {
+          expanded = true;
+          _showContactPanel = true;
+        });
       },
       onShowVersionHistory: () {
         showDialog<void>(
@@ -1450,6 +1534,28 @@ Widget build(BuildContext context) {
               child: IdeasBoxPanel(
                 barWidth: _barWidth(context),
                 onClose: () => setState(() => _showIdeasPanel = false),
+              ),
+            ),
+
+          // Formulaire de contact sous la barre (largeur barre, apparition en fondu)
+          if (_showContactPanel && expanded)
+            Positioned(
+              top: OffiboxWindowUI.menuBelowBarTop,
+              right: OffiboxWindowUI.rightMargin,
+              width: _barWidth(context),
+              child: TweenAnimationBuilder<double>(
+                key: const ValueKey('contact-panel-fade'),
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: child,
+                ),
+                child: ContactDialog.asPanel(
+                  maxWidth: _barWidth(context),
+                  onClose: () => setState(() => _showContactPanel = false),
+                ),
               ),
             ),
 
