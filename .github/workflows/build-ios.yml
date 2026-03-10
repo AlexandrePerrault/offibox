@@ -43,28 +43,26 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ios-pods-
 
-      # Forcer la cible iOS 15.0 (requise par cloud_firestore) dans le projet Xcode
-      - name: Fixer deployment target iOS 15.0
+      # Cible iOS 16.0 (requise par google_mlkit_commons / cloud_firestore)
+      - name: Fixer deployment target iOS 16.0
         run: |
           PBX="ios/Runner.xcodeproj/project.pbxproj"
           if [ -f "$PBX" ]; then
-            sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' "$PBX"
+            sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 16.0;/g' "$PBX"
             grep "IPHONEOS_DEPLOYMENT_TARGET" "$PBX" || true
-            echo "Deployment target forcé à 15.0"
+            echo "Deployment target forcé à 16.0"
           fi
 
-      # CocoaPods exige "platform :ios, '15.0'" dans le Podfile (sinon il utilise 13.0)
-      - name: Forcer platform iOS 15.0 dans Podfile
+      # CocoaPods : platform :ios, '16.0' (requis par google_mlkit_commons)
+      - name: Forcer platform iOS 16.0 dans Podfile
         run: |
           PODFILE="ios/Podfile"
           if [ ! -f "$PODFILE" ]; then
             echo "::error::Podfile absent dans ios/"
             exit 1
           fi
-          # Supprimer toute ligne platform :ios existante (commentée ou non)
           sed -i '' '/^[[:space:]]*#*[[:space:]]*platform[[:space:]]*:ios/d' "$PODFILE"
-          # Ajouter platform :ios, '15.0' en première ligne
-          printf "platform :ios, '15.0'\n\n" | cat - "$PODFILE" > "${PODFILE}.tmp" && mv "${PODFILE}.tmp" "$PODFILE"
+          printf "platform :ios, '16.0'\n\n" | cat - "$PODFILE" > "${PODFILE}.tmp" && mv "${PODFILE}.tmp" "$PODFILE"
           echo "--- Premières lignes du Podfile ---"
           head -8 "$PODFILE"
           echo "---"
