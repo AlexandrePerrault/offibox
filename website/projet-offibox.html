@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Le projet Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Spinnaker', sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; background: var(--white); color: var(--gray); padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; }
+    .legal-wrap { width: 100%; max-width: 680px; margin: 0 auto; }
+    .legal-header { text-align: center; margin-bottom: 2rem; }
+    .legal-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--gray); }
+    .legal-header .brand { color: var(--offi-teal); font-weight: 600; }
+    .legal-card { background: var(--white); padding: 2rem 2.25rem; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid var(--gray-light); }
+    .legal-card h2 { font-size: 1.05rem; font-weight: 700; color: var(--offi-teal); margin: 1.75rem 0 0.5rem; padding-bottom: 0.35rem; }
+    .legal-card h2:first-child { margin-top: 0; }
+    .legal-card p { margin-bottom: 0.85rem; color: var(--gray); font-size: 0.95rem; }
+    .legal-card a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+    .legal-card a:hover { text-decoration: underline; }
+    .projet-stats { margin: 1.5rem 0; padding-left: 0.5rem; border-left: 3px solid var(--offi-teal); }
+    .projet-stats .stat-line { opacity: 0; transform: translateY(8px); animation: stat-fade-in 1s ease-out forwards; }
+    .projet-stats .stat-line:nth-child(1) { animation-delay: 0.4s; }
+    .projet-stats .stat-line:nth-child(2) { animation-delay: 1s; }
+    .projet-stats .stat-line:nth-child(3) { animation-delay: 1.6s; }
+    .projet-stats .stat-line:nth-child(4) { animation-delay: 2.2s; }
+    @keyframes stat-fade-in { to { opacity: 1; transform: translateY(0); } }
+    .projet-stats .stat-line { margin-bottom: 0.5rem; font-size: 1rem; color: var(--gray); }
+    .projet-stats .stat-number { font-weight: 700; color: var(--offi-teal); font-size: 1.1em; }
+    .stat-number-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 2.8em; padding: 0.25rem 0.6rem; background: var(--offi-teal); color: var(--white); font-weight: 800; font-size: 1.15em; border-radius: 10px; box-shadow: 0 2px 8px rgba(90,144,148,0.35); margin-right: 0.25rem; letter-spacing: 0.02em; }
+    .badge-fonctionnalites { display: inline-flex; align-items: center; gap: 0.5rem; margin: 1.5rem 0; padding: 0.85rem 1.5rem; background: var(--offi-teal); color: var(--white); font-weight: 600; font-size: 1rem; border-radius: 12px; text-decoration: none; transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(90,144,148,0.3); }
+    .badge-fonctionnalites:hover { background: var(--white); color: var(--offi-teal); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(90,144,148,0.25); outline: 2px solid var(--offi-teal); outline-offset: 2px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 2rem; margin-right: 0.5rem; padding: 0.6rem 1.2rem; background: var(--white); border: 2px solid var(--offi-teal); border-radius: 12px; color: var(--offi-teal); font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: background 0.2s, color 0.2s; }
+    .back-link:hover { background: var(--offi-teal); color: var(--white); }
+  </style>
+</head>
+<body>
+  <div class="legal-wrap">
+    <header class="legal-header">
+      <h1>Le projet <span class="brand">Offi</span>box</h1>
+    </header>
+    <main class="legal-card">
+      <p>Au cours de mes 17 années passées comme titulaire d'officine, je me suis rendu compte que les sources d'information nécessaires au quotidien en pharmacie sont multiples et très évolutives. Par ailleurs, les nouvelles missions confiées aux pharmaciens exigent une mise à jour régulière de ces informations.</p>
+      <p>De plus, la transmission de l'information au sein de l'équipe n'est pas toujours simple, malgré les nombreux canaux disponibles (messageries internes, mails, cahier de liaison, etc.).</p>
+      <p>À partir de ce constat, l'idée de créer une boîte à outils digitale pour les officines a germé. Je me suis alors lancé le défi de développer un outil capable de centraliser un maximum d'informations utiles au quotidien.</p>
+      <p>Après près d'un an de développement et une phase de test, Offibox voit le jour en 2026 : un outil créé par un pharmacien, destiné à l'ensemble de l'équipe officinale, dont l'objectif principal est de garantir une information officielle, fiable et à jour.</p>
+      <h2>Aujourd'hui, Offibox, c'est :</h2>
+      <div class="projet-stats">
+        <div class="stat-line"><span class="stat-number-badge" aria-hidden="true"><span id="stat-count">—</span></span> liens et entrées indexés (données raw GitHub offiboxdata, hors catalogues laboratoires)</div>
+        <div class="stat-line">Médicaments BDM, présentations LPP, pansements, outils métier, sites web, vidéos, annuaires.</div>
+        <div class="stat-line">Données mises à jour régulièrement.</div>
+        <div class="stat-line">Un accès unique pour toute l'équipe officinale.</div>
+      </div>
+      <p style="margin-top: 1.25rem;">
+        <a href="https://www.offibox.fr/fonctionnalités" class="badge-fonctionnalites" target="_blank" rel="noopener noreferrer">Voir toutes les fonctionnalités →</a>
+      </p>
+      <p style="margin-top: 1.5rem;">Offibox est un outil réactif, sourcé et évolutif, conçu pour s'adapter aux nouvelles législations ainsi qu'aux futures missions des pharmaciens d'officine.</p>
+    </main>
+    <p style="text-align: center;">
+      <a href="login-wix.html" class="back-link">Retour à l'accueil</a>
+      <a href="mentions-legales.html" class="back-link">Mentions légales</a>
+      <a href="politique-confidentialite.html" class="back-link">Politique de confidentialité</a>
+    </p>
+  </div>
+  <script>
+  (function(){
+    var el = document.getElementById('stat-count');
+    if (!el) return;
+    var count = 58790; // Total lignes (raw GitHub offiboxdata) : BDM_MASTER, PANSEMENTS, LPP, outils_metier, sites_web, videos, codes_actes, pharmacovigilance, centres_anti_poison, chu, ceip — hors catalogues labo
+    var duration = 5200;
+    var steps = 52;
+    var stepDuration = duration / steps;
+    var current = 0;
+    var step = Math.ceil(count / steps);
+    var stepIndex = 0;
+    function formatNum(n) { return n.toLocaleString('fr-FR'); }
+    function tick() { stepIndex++; current = Math.min(current + step, count); el.textContent = formatNum(current); if (stepIndex < steps) setTimeout(tick, stepDuration); else el.textContent = formatNum(count); }
+    setTimeout(tick, 1000);
+  })();
+  </script>
+</body>
+</html>

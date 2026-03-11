@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offibox - Plateformes (bandeau)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Spinnaker', sans-serif; background: var(--white); padding: 1rem 1.5rem; }
+    .plateformes-bandeau { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 1.5rem; max-width: 560px; margin: 0 auto; }
+    .plateforme-item { display: flex; flex-direction: column; align-items: center; padding: 1rem 1.25rem; background: var(--white); border: 2px solid var(--gray-light); border-radius: 12px; pointer-events: none; opacity: 0.9; }
+    .plateforme-item img { width: 120px; height: 40px; object-fit: contain; display: block; }
+    .plateforme-item .soon { font-size: 0.8rem; color: var(--offi-teal); font-weight: 600; margin-top: 0.5rem; font-family: 'Spinnaker', sans-serif; }
+  </style>
+</head>
+<body>
+  <div class="plateformes-bandeau" role="region" aria-label="Disponibilité sur les plateformes">
+    <div class="plateforme-item">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" width="120" height="40">
+      <span class="soon">Disponible prochainement</span>
+    </div>
+    <div class="plateforme-item">
+      <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store" width="120" height="40">
+      <span class="soon">Disponible prochainement</span>
+    </div>
+  </div>
+</body>
+</html>

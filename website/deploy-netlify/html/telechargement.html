@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Téléchargement - Offibox</title>
+  <link rel="canonical" href="https://www.offibox.fr/telechargement">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #0f172a; --text: #f8fafc; --text-muted: #94a3b8; --white: #ffffff; --offi-teal: #5A9094; --offi-teal-dark: #4a7a7e; --section-bg: #f8fafb; --gray: #334155; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Spinnaker', sans-serif; font-size: 17px; line-height: 1.6; color: var(--gray); background: var(--section-bg); }
+    main { padding: 2rem; max-width: 720px; margin: 0 auto; }
+    .page-title { font-size: 2rem; font-weight: 700; color: var(--gray); margin-bottom: 1rem; }
+    .download-card { background: var(--white); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; padding: 2rem; text-align: center; margin-bottom: 2rem; }
+    .download-badge { display: inline-block; padding: 1rem 1.5rem; background: linear-gradient(135deg, var(--offi-teal) 0%, var(--offi-teal-dark) 100%); color: var(--white); border-radius: 12px; font-weight: 600; font-size: 1.1rem; text-decoration: none; box-shadow: 0 4px 20px rgba(90,144,148,0.35); transition: transform 0.2s, box-shadow 0.2s; margin-bottom: 1rem; }
+    .download-badge:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(90,144,148,0.45); color: var(--white); }
+    .download-badge .version { display: block; font-size: 0.9rem; opacity: 0.95; margin-bottom: 0.25rem; }
+    .download-badge .platform { display: block; font-size: 0.8rem; opacity: 0.85; margin-top: 0.35rem; }
+    .plateformes-iframe-wrap { margin-top: 2rem; }
+    .plateformes-iframe-wrap iframe { border: none; width: 100%; min-height: 120px; display: block; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 class="page-title">Télécharger Offibox</h1>
+    <div class="download-card">
+      <a href="#" id="download-badge" class="download-badge" target="_blank" rel="noopener">
+        <span class="version" id="version-label">Offibox — chargement…</span>
+        <span>Télécharger pour Windows</span>
+        <span class="platform" id="platform-label">Windows · 64 bits</span>
+      </a>
+      <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray);">Cliquez sur le bouton pour lancer le téléchargement du fichier .msi</p>
+    </div>
+    <div class="plateformes-iframe-wrap">
+      <iframe src="plateformes.html" title="Disponibilité mobile"></iframe>
+    </div>
+  </main>
+  <script>
+    (function() {
+      var GITHUB_API = 'https://api.github.com/repos/AlexandrePerrault/offibox/releases/latest';
+      var GITHUB_RELEASES = 'https://github.com/AlexandrePerrault/offibox/releases/latest';
+      var badge = document.getElementById('download-badge');
+      var versionLabel = document.getElementById('version-label');
+      var platformLabel = document.getElementById('platform-label');
+      function windowsLabel() {
+        var ua = navigator.userAgent || '';
+        if (/Windows NT 11/.test(ua) || /Windows 11/.test(ua)) return 'Windows 11 · 64 bits';
+        if (/Windows NT 10/.test(ua) || /Windows 10/.test(ua)) return 'Windows 10 · 64 bits';
+        if (/Windows/i.test(ua)) return 'Windows · 64 bits';
+        return '64 bits';
+      }
+      if (platformLabel) platformLabel.textContent = windowsLabel();
+      fetch(GITHUB_API, { headers: { 'Accept': 'application/vnd.github.v3+json' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var tag = (data && data.tag_name) ? data.tag_name.replace(/^v/i, '') : '';
+          var ver = tag ? ('v' + tag.split('-')[0]) : 'dernière version';
+          var url = GITHUB_RELEASES;
+          if (data && data.assets && data.assets.length) {
+            var win = data.assets.filter(function(a) {
+              var n = (a.name || '').toLowerCase();
+              return n.indexOf('.msi') !== -1 || (n.indexOf('windows') !== -1 && (n.indexOf('.exe') !== -1 || n.indexOf('.msi') !== -1));
+            });
+            var x64 = win.filter(function(a) { return (a.name || '').toLowerCase().indexOf('x64') !== -1; })[0] || win[0];
+            if (x64 && x64.browser_download_url) url = x64.browser_download_url;
+          }
+          if (badge) { badge.href = url; }
+          if (versionLabel) versionLabel.textContent = 'Offibox ' + ver;
+        })
+        .catch(function() {
+          if (badge) badge.href = GITHUB_RELEASES;
+          if (versionLabel) versionLabel.textContent = 'Offibox (télécharger)';
+        });
+    })();
+  </script>
+</body>
+</html>

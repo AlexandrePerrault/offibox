@@ -5,15 +5,23 @@
  *   Installez l'extension, configurez SMTP. Les docs créés dans `mail`
  *   sont envoyés automatiquement.
  *
- * Option 2 - Nodemailer (config via variables d'environnement) :
- *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
+ * Option 2 - Nodemailer (config via Firebase Secret Manager) :
+ *   Définir les secrets SMTP_HOST, SMTP_USER, SMTP_PASS (voir README_EMAILS.md).
  */
 
 import * as admin from "firebase-admin";
+import { defineSecret } from "firebase-functions/params";
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as nodemailer from "nodemailer";
+
+/** Secrets SMTP (Firebase Secret Manager). À définir via CLI : firebase functions:secrets:set SMTP_HOST etc. */
+const smtpHost = defineSecret("SMTP_HOST");
+const smtpUser = defineSecret("SMTP_USER");
+const smtpPass = defineSecret("SMTP_PASS");
+
+const emailSecrets = [smtpHost, smtpUser, smtpPass];
 
 /** Options runtime 2nd gen : RAM limitée + timeout court = moins cher. Pas de 1GB pour un email. */
 const runOpts = { memory: "256MiB" as const, timeoutSeconds: 30 };
@@ -39,24 +47,36 @@ function createMailDoc(
   });
 }
 
-/** Envoi via nodemailer si configuré */
+export type SmtpConfig = {
+  host: string;
+  port: number;
+  user: string;
+  pass: string;
+  secure: boolean;
+};
+
+/** Envoi via nodemailer si config fournie (secrets) ou process.env (rétrocompat). */
 async function sendWithNodemailer(
   to: string,
   subject: string,
   text: string,
-  html?: string
+  html: string | undefined,
+  config?: SmtpConfig | null
 ): Promise<boolean> {
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const host = config?.host ?? process.env.SMTP_HOST;
+  const user = config?.user ?? process.env.SMTP_USER;
+  const pass = config?.pass ?? process.env.SMTP_PASS;
   const configured = !!(host && user && pass);
   console.log(`[sendEmail] SMTP configuré: ${configured} (host=${!!host}, user=${!!user}, pass=${!!pass})`);
   if (!host || !user || !pass) return false;
 
+  const port = config?.port ?? parseInt(process.env.SMTP_PORT || "587", 10);
+  const secure = config?.secure ?? process.env.SMTP_SECURE === "true";
+
   const transporter = nodemailer.createTransport({
     host,
-    port: parseInt(process.env.SMTP_PORT || "587", 10),
-    secure: process.env.SMTP_SECURE === "true",
+    port,
+    secure,
     auth: { user, pass },
   });
 
@@ -70,16 +90,17 @@ async function sendWithNodemailer(
   return true;
 }
 
-/** Envoi : Nodemailer (immédiat) ou Firestore "mail" (extension Trigger Email, délai possible 10s–1 min).
- *  Si SMTP non configuré et extension non installée → aucun mail ne part.
+/** Envoi : Nodemailer (immédiat) si config SMTP, sinon Firestore "mail" (extension Trigger Email).
+ *  smtpConfig : optionnel, fourni par les handlers quand les secrets sont définis.
  */
 async function sendEmail(
   to: string,
   subject: string,
   text: string,
-  html?: string
+  html?: string,
+  smtpConfig?: SmtpConfig | null
 ): Promise<"smtp" | "firestore"> {
-  const sent = await sendWithNodemailer(to, subject, text, html);
+  const sent = await sendWithNodemailer(to, subject, text, html, smtpConfig);
   if (sent) {
     console.log(`[sendEmail] Envoyé via SMTP vers ${to}`);
     return "smtp";
@@ -89,12 +110,31 @@ async function sendEmail(
   return "firestore";
 }
 
+/** Construit la config SMTP à partir des secrets (à appeler dans chaque handler qui envoie un email). */
+function getSmtpConfigFromSecrets(): SmtpConfig | null {
+  try {
+    const host = smtpHost.value();
+    const user = smtpUser.value();
+    const pass = smtpPass.value();
+    if (!host || !user || !pass) return null;
+    return {
+      host,
+      user,
+      pass,
+      port: parseInt(process.env.SMTP_PORT || "587", 10),
+      secure: process.env.SMTP_SECURE === "true",
+    };
+  } catch {
+    return null;
+  }
+}
+
 const IDEAS_RECIPIENT = "contact@offibox.fr";
 const IDEAS_SUBJECT = "Boîte à idées";
 
 /** Email de bienvenue (1ère connexion, essai 15 jours). onCreate ciblé = pas de surcoût onWrite. */
 export const onUserFirstConnection = onDocumentCreated(
-  { document: "users/{userId}", ...runOpts },
+  { document: "users/{userId}", ...runOpts, secrets: emailSecrets },
   async (event) => {
     const after = event.data?.data();
 
@@ -124,13 +164,14 @@ Profitez de toutes les fonctionnalités pour découvrir la boîte à outils de l
 À bientôt,
 L'équipe Offibox`;
 
-    await sendEmail(email, subject, text);
+    const smtp = getSmtpConfigFromSecrets();
+    await sendEmail(email, subject, text, undefined, smtp);
   }
 );
 
 /** Envoi email fin d'essai (tous les jours à 8h) */
 export const sendTrialEndEmails = onSchedule(
-  { schedule: "0 8 * * *", timeZone: "Europe/Paris", ...runOpts },
+  { schedule: "0 8 * * *", timeZone: "Europe/Paris", ...runOpts, secrets: emailSecrets },
   async () => {
     const db = admin.firestore();
     const now = new Date();
@@ -157,34 +198,41 @@ Pour continuer à utiliser Offibox et accéder à toutes les fonctionnalités, s
 À bientôt,
 L'équipe Offibox`;
 
-      await sendEmail(email, subject, text);
+      const smtp = getSmtpConfigFromSecrets();
+      await sendEmail(email, subject, text, undefined, smtp);
       await doc.ref.update({ trialEndEmailSent: true });
     }
   }
 );
 
 /** Envoi depuis la Boîte à idées (sans ouvrir le client mail) */
-export const sendIdeasEmail = onCall(runOpts, async (request) => {
-  const data = request.data as { message?: string; email?: string } | undefined;
-  const message = typeof data?.message === "string" ? data.message.trim() : "";
-  const contactEmail = typeof data?.email === "string" ? data.email.trim() : "";
+export const sendIdeasEmail = onCall(
+  { ...runOpts, secrets: emailSecrets },
+  async (request) => {
+    const data = request.data as { message?: string; email?: string } | undefined;
+    const message = typeof data?.message === "string" ? data.message.trim() : "";
+    const contactEmail = typeof data?.email === "string" ? data.email.trim() : "";
 
-  const text = [
-    message || "(Aucun message)",
-    contactEmail ? `Email du contact : ${contactEmail}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+    const text = [
+      message || "(Aucun message)",
+      contactEmail ? `Email du contact : ${contactEmail}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
-  await sendEmail(IDEAS_RECIPIENT, IDEAS_SUBJECT, text);
-  return { success: true };
-});
+    const smtp = getSmtpConfigFromSecrets();
+    await sendEmail(IDEAS_RECIPIENT, IDEAS_SUBJECT, text, undefined, smtp);
+    return { success: true };
+  }
+);
 
 /** Boîte à idées — version HTTP pour clients desktop (Windows) où le callable n’est pas disponible.
  *  Destinataire : contact@offibox.fr (IDEAS_RECIPIENT).
  *  Pour que le mail parte vraiment : configurer SMTP (SMTP_HOST, SMTP_USER, SMTP_PASS) ou l’extension Firestore "Trigger Email".
  */
-export const sendIdeasEmailHttp = onRequest(runOpts, async (req, res) => {
+export const sendIdeasEmailHttp = onRequest(
+  { ...runOpts, secrets: emailSecrets },
+  async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;
@@ -205,8 +253,8 @@ export const sendIdeasEmailHttp = onRequest(runOpts, async (req, res) => {
     .filter(Boolean)
     .join("\n\n");
   try {
-    const delivery = await sendEmail(IDEAS_RECIPIENT, IDEAS_SUBJECT, text);
-    // smtp = envoi immédiat ; firestore = extension envoie sous 10s–1 min (si installée)
+    const smtp = getSmtpConfigFromSecrets();
+    const delivery = await sendEmail(IDEAS_RECIPIENT, IDEAS_SUBJECT, text, undefined, smtp);
     res.status(200).json({ success: true, to: IDEAS_RECIPIENT, delivery });
   } catch (err) {
     console.error("sendIdeasEmailHttp error:", err);
@@ -219,7 +267,9 @@ export const sendIdeasEmailHttp = onRequest(runOpts, async (req, res) => {
 });
 
 /** Formulaire "Contact" (sans ouvrir Outlook / mailto) → envoie à contact@offibox.fr */
-export const sendContactEmail = onCall(runOpts, async (request) => {
+export const sendContactEmail = onCall(
+  { ...runOpts, secrets: emailSecrets },
+  async (request) => {
   const data = request.data as
     | {
         nom?: string;
@@ -262,7 +312,8 @@ export const sendContactEmail = onCall(runOpts, async (request) => {
     .filter(Boolean)
     .join("\n");
 
-  const delivery = await sendEmail(IDEAS_RECIPIENT, subject, text);
+  const smtp = getSmtpConfigFromSecrets();
+  const delivery = await sendEmail(IDEAS_RECIPIENT, subject, text, undefined, smtp);
   return { success: true, to: IDEAS_RECIPIENT, delivery };
 });
 
@@ -274,7 +325,9 @@ const AUTH_CONTINUE_URL = "https://www.offibox.fr/";
  * À appeler après l'inscription au lieu de sendEmailVerification() côté client.
  * L'utilisateur doit être connecté (auth).
  */
-export const sendVerificationEmailFr = onCall(runOpts, async (request) => {
+export const sendVerificationEmailFr = onCall(
+  { ...runOpts, secrets: emailSecrets },
+  async (request) => {
   const auth = request.auth;
   if (!auth) {
     throw new HttpsError("unauthenticated", "Utilisateur non connecté");
@@ -323,7 +376,8 @@ L'équipe Offibox`;
 </body>
 </html>`;
 
-  const delivery = await sendEmail(email, subject, text, html);
+  const smtp = getSmtpConfigFromSecrets();
+  const delivery = await sendEmail(email, subject, text, html, smtp);
   return { success: true, delivery };
 });
 
@@ -331,7 +385,9 @@ L'équipe Offibox`;
  * Envoie un e-mail de réinitialisation de mot de passe en français (lien « Définir le mot de passe »).
  * Utilisable après inscription ou pour « Mot de passe oublié ». Appelable sans être connecté en passant { email }.
  */
-export const sendPasswordResetEmailFr = onCall(runOpts, async (request) => {
+export const sendPasswordResetEmailFr = onCall(
+  { ...runOpts, secrets: emailSecrets },
+  async (request) => {
   const auth = request.auth;
   const data = (request.data as { email?: string } | undefined) ?? {};
   const email = (auth?.token?.email ?? data.email ?? "").toString().trim().toLowerCase();
@@ -375,7 +431,8 @@ L'équipe Offibox`;
 </body>
 </html>`;
 
-  const delivery = await sendEmail(email, subject, text, html);
+  const smtp = getSmtpConfigFromSecrets();
+  const delivery = await sendEmail(email, subject, text, html, smtp);
   return { success: true, delivery };
 });
 

@@ -15,12 +15,11 @@ class ContactDialog extends StatefulWidget {
   const ContactDialog({super.key, this.maxWidth, this.onClose});
 
   /// Affiche le formulaire dans un panneau (sous la barre, largeur = [maxWidth], avec [onClose]).
-  const ContactDialog.asPanel({
+  ContactDialog.asPanel({
     super.key,
-    required double maxWidth,
-    required VoidCallback onClose,
-  }) : maxWidth = maxWidth,
-       onClose = onClose;
+    required this.maxWidth,
+    required this.onClose,
+  });
 
   final double? maxWidth;
   final VoidCallback? onClose;
@@ -291,7 +290,6 @@ class _ContactDialogState extends State<ContactDialog> {
             ),
           ),
         ),
-      ),
     );
   }
 

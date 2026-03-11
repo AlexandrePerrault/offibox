@@ -270,12 +270,16 @@ class _LoginPageState extends State<LoginPage> {
     }
     setState(() => loading = true);
     try {
-      final creds = await OffiboxGoogleSignIn.signIn();
-      if (creds == null) {
-        if (mounted) setState(() => loading = false);
-        return;
+      if (kIsWeb) {
+        await FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
+      } else {
+        final creds = await OffiboxGoogleSignIn.signIn();
+        if (creds == null) {
+          if (mounted) setState(() => loading = false);
+          return;
+        }
+        await FirebaseAuth.instance.signInWithCredential(creds.firebaseCredential);
       }
-      await FirebaseAuth.instance.signInWithCredential(creds.firebaseCredential);
       await TrialGuard.ensureTrialStartedOnFirstConnection();
       if (_isCerpBaClient) {
         await CerpClientService.upsertForCurrentUser(

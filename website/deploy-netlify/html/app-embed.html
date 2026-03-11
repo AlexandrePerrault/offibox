@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offibox - Application</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; background: #f8fafb; }
+    .app-frame-wrap { flex: 1; min-height: 0; display: none; width: 100%; }
+    .app-frame-wrap.visible { display: block; }
+    .app-frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+    #auth-loading { display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-family: system-ui, sans-serif; }
+    #auth-loading.hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="auth-loading">Vérification de l'accès…</div>
+  <div class="app-frame-wrap" id="app-frame-wrap">
+    <iframe id="app-iframe" title="Application Offibox" src="about:blank"></iframe>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script>(function(){if(typeof firebase==="undefined")return;var c={apiKey:"AIzaSyA3eizSKEwkUnH1Y5Xcum3fVgczGgPAFkk",authDomain:"offibox-prod.firebaseapp.com",projectId:"offibox-prod",storageBucket:"offibox-prod.firebasestorage.app",messagingSenderId:"264737328165",appId:"1:264737328165:web:d8744f8fc1c188d9ddc3cc",measurementId:"G-E1FP98K8WE"};if(!firebase.apps.length)firebase.initializeApp(c);})();</script>
+  <script>(function(){var a=firebase.auth();window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);}};})();</script>
+  <script>
+  (function(){
+    var loadingEl=document.getElementById("auth-loading");
+    var wrapEl=document.getElementById("app-frame-wrap");
+    var iframeEl=document.getElementById("app-iframe");
+    var APP_IFRAME_SRC="/app/";
+    var base=window.location.origin+(window.location.pathname?window.location.pathname.replace(/[^/]*$/,""):"");
+    if(base&&!base.endsWith("/")) base+="/";
+    var LOGIN_URL=base+"login-wix.html";
+    function goToLogin(){
+      try{
+        if(window.top&&window.top!==window) window.top.location.href=LOGIN_URL;
+        else window.location.href=LOGIN_URL;
+      }catch(e){ window.location.href=LOGIN_URL; }
+    }
+    if(!window.OffiboxAuth){ goToLogin(); return; }
+    window.OffiboxAuth.onAuthStateChanged(function(user){
+      if(!user||!user.uid){ goToLogin(); return; }
+      if(loadingEl) loadingEl.classList.add("hidden");
+      if(wrapEl) wrapEl.classList.add("visible");
+      if(iframeEl) iframeEl.src=APP_IFRAME_SRC;
+    });
+  })();
+  </script>
+</body>
+</html>

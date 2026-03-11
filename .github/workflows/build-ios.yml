@@ -76,19 +76,20 @@ jobs:
             echo "::warning::GoogleService-Info.plist absent. Crée une app iOS dans Firebase et place le fichier dans ios/Runner/"
           fi
 
-      - name: Build iOS (sans signature)
-        run: flutter build ios --no-codesign
+      # Build pour simulateur (pas de signature Apple requise en CI)
+      - name: Build iOS (simulateur)
+        run: flutter build ios --simulator
         env:
           FLUTTER_GIT_URL: https://github.com/flutter/flutter.git
 
-      - name: Archiver le build
+      - name: Archiver le build simulateur
         run: |
-          cd build/ios/iphoneos
-          zip -r ../../../ios-build.zip Runner.app
+          cd build/ios/iphonesimulator
+          zip -r ../../../ios-simulator-build.zip Runner.app
           cd ../../..
 
       - name: Déposer le build en artefact
         uses: actions/upload-artifact@v4
         with:
-          name: ios-build
-          path: ios-build.zip
+          name: ios-simulator-build
+          path: ios-simulator-build.zip
