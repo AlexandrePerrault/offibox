@@ -155,10 +155,10 @@ SearchResult fromBdm(
     hospitalOnly: hospitalOnly,
     isMds: isMds,
 
-    // ───── AUTRES FLAGS (stupéfiants = CIP13 dans stupéfiants+hopital col 0 ; exception/OTC = BDM ou exception_otc_2026.csv)
+    // ───── AUTRES FLAGS (stupéfiants = CIP13 dans stupéfiants+hopital col 0 ; exception = BDM ou CSV ; OTC/Libre accès = liste médication officinale uniquement)
     isStupefiant: cip13 != null && stupCips.contains(cip13),
     isException: row['isException'] == true || (cip13 != null && exceptionCips.contains(cip13)),
-    isOtc: row['isOtc'] == true || (cip13 != null && otcCips.contains(cip13)),
+    isOtc: cip13 != null && otcCips.contains(cip13),
     nsfp: row['nsfp'] == true,
     nsfpDate: row['nsfpDate']?.toString(),
 

@@ -237,7 +237,7 @@ class OffiboxController extends ChangeNotifier {
     final exceptionOtcSets = phase1[1] as ExceptionOtcSets;
     if (kDebugMode) {
       debugPrint('[Offibox] Stupéfiants (badge S/AS): ${hospitalSets.stupCips.length} CIP13');
-      debugPrint('[Offibox] Exception: ${exceptionOtcSets.exceptionCips.length} CIP13, OTC/autre: ${exceptionOtcSets.otcCips.length} CIP13 (exception_otc_2026.csv)');
+      debugPrint('[Offibox] Exception: ${exceptionOtcSets.exceptionCips.length} CIP13, OTC/Libre accès: ${exceptionOtcSets.otcCips.length} CIP13 (liste médication officinale)');
     }
     _loadingProgressTimer?.cancel();
     // Ne pas sauter à 50 % : on garde la progression actuelle (10, 20, 30…) et on continue jusqu'à 100.
@@ -980,7 +980,7 @@ class OffiboxController extends ChangeNotifier {
         case BdmSubFilter.biosimilaires:
           return 'Liste : Biosimilaires';
         case BdmSubFilter.otc:
-          return 'Liste : OTC / autre';
+          return 'Liste : OTC/Libre accès';
       }
     }
     final labels = subs.map((s) {
@@ -990,7 +990,7 @@ class OffiboxController extends ChangeNotifier {
         case BdmSubFilter.mds: return 'MDS';
         case BdmSubFilter.mte: return 'MTE';
         case BdmSubFilter.biosimilaires: return 'Biosimilaires';
-        case BdmSubFilter.otc: return 'OTC';
+        case BdmSubFilter.otc: return 'OTC/Libre accès';
       }
     }).toList();
     return 'Liste : ${labels.join(', ')}';

@@ -40,7 +40,7 @@ $OutDir   = Join-Path $ProjectRoot "website\download"
 # Lire la version depuis pubspec.yaml (format X.Y.Z ou X.Y.Z+build)
 $PubspecPath = Join-Path $ProjectRoot "pubspec.yaml"
 $versionLine = Get-Content $PubspecPath -Raw | Select-String -Pattern "version:\s*([\d.]+)(?:\+\d+)?" | ForEach-Object { $_.Matches.Groups[1].Value }
-$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.24" }
+$VersionName = if ($versionLine) { $versionLine.Trim() } else { "1.1.25" }
 $OutMsi = Join-Path $OutDir "Offibox-Setup-$VersionName.msi"
 
 # WiX : variable d'environnement WIX ou chemin par défaut (doit pointer vers le dossier contenant heat.exe, souvent ...\bin)

@@ -57,6 +57,12 @@ const String MEDICAMENTS_EXCEPTION_URL =
 const String EXCEPTION_OTC_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/exception_otc_2026.csv';
 
+/// Liste des médicaments de médication officinale (OTC/Libre accès).
+/// Source officielle : https://ansm.sante.fr/uploads/2025/12/22/20251222-liste-medication-officinale-listecomplete-decembre-2025.xls (CIP13 en col D).
+/// Ce CSV doit contenir les CIP13 (un par ligne ou col 0) exportés depuis la colonne D du XLS.
+const String LISTE_MEDICATION_OFFICINALE_CIP13_URL =
+  'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/liste_medication_officinale_cip13.csv';
+
 const String AMC_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/mutuelles_2026.csv';
 
@@ -147,6 +153,11 @@ const String ANSM_RAPPELS_CSV_URL = '';
 /// Fiches VOC (voie orale cancer) OMÉDIT : col A = médicament, col B = URL fiche patient, col C = URL fiche pro.
 const String FICHES_VOC_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/fiches_voc.csv';
+
+/// URL d’un PDF utilisé **uniquement** pour la démo de la page de connexion (animation bandeau + panneau).
+/// Exemple pris parmi les fiches VOC (OMÉDIT) ; ne pas généraliser : les vraies fiches viennent de [FICHES_VOC_CSV_URL] et [loadFichesVoc].
+const String DEMO_VOC_PDF_URL =
+    'https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf';
 
 /// Actualités (popup barre) : col 1 = date, col 2 = Affichage, col 3 = URL, col 4 = CIP 13.
 const String NEWS_CSV_URL =

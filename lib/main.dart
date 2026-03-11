@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 
@@ -38,6 +39,10 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Au démarrage Windows : exiger identifiant/mot de passe (pas de session persistée entre les lancements).
+  if (Platform.isWindows) {
+    await FirebaseAuth.instance.signOut();
+  }
   // Sur Windows, le plugin firebase_auth peut afficher des erreurs "channel sent a message from
   // native to Flutter on a non-platform thread" (auth-state, id-token). Problème connu FlutterFire
   // (issue #13340). L'app utilise un polling pour l'auth sur Windows pour limiter l'impact.

@@ -400,13 +400,13 @@ WidgetSpan surveillanceSquareSpan({
 
 
 
-//🟩 OTC/AUTRE//
+//🟩 OTC/Libre accès (liste médication officinale ANSM)//
 
 WidgetSpan otcSquareSpan({
-  String tooltip = 'OTC / autre / NR',
+  String tooltip = 'OTC / Libre accès',
 }) {
   return squareTagSpan(
-    label: 'OTC/autre',
+    label: 'OTC/Libre accès',
     color: Colors.lightGreenAccent.shade700, // 🟩 vert fluo
     tooltip: tooltip,
     url: 'https://ansm.sante.fr/',

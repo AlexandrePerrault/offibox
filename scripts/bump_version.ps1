@@ -63,5 +63,15 @@ $buildMsiContent = Get-Content $buildMsiPath -Raw
 $buildMsiContent = $buildMsiContent -replace 'else \{ "[\d.]+" \}', "else { `"$newVersionName`" }"
 Set-Content $buildMsiPath -Value $buildMsiContent -NoNewline
 
+# 4) release_notes.md : mettre à jour le titre de version (## Offibox vX.Y.Z) pour la prochaine release
+$releaseNotesPath = Join-Path $ProjectRoot 'release_notes.md'
+if (Test-Path $releaseNotesPath) {
+  $notesContent = Get-Content $releaseNotesPath -Raw -Encoding UTF8
+  if ($notesContent -match '(?m)^##\s*Offibox\s+v[\d.]+') {
+    $notesContent = $notesContent -replace '(?m)^(##\s*Offibox\s+)v[\d.]+', ('$1v' + $newVersionName)
+    Set-Content $releaseNotesPath -Value $notesContent -NoNewline -Encoding UTF8
+  }
+}
+
 Write-Host "Version : $oldVersionName -> $newVersion" -ForegroundColor Green
-Write-Host "Fichiers mis a jour : pubspec.yaml, installer, website, build_msi.ps1"
+Write-Host "Fichiers mis a jour : pubspec.yaml, installer, website, build_msi.ps1, release_notes.md (titre)"

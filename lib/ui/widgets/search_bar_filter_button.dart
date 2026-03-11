@@ -447,7 +447,7 @@ class _FilterPanelState extends State<_FilterPanel> {
       case BdmSubFilter.biosimilaires:
         return 'Biosimilaires';
       case BdmSubFilter.otc:
-        return 'OTC / autre';
+        return 'OTC/Libre accès';
     }
   }
 

@@ -326,7 +326,7 @@ class ResultLine1 extends StatelessWidget {
         }
       }
 
-      // Stupéfiant / Exception / OTC / PIH / HOP en ligne 1 — pour BDM ils sont ajoutés après la gélule (avant le libellé) plus bas
+      // Stupéfiant / Exception / OTC/Libre accès / PIH / HOP en ligne 1 — pour BDM ils sont ajoutés après la gélule (avant le libellé) plus bas
       if (item.source != SourceType.bdm) {
         if (item.isStupefiant == true) {
           spans.add(stupSquareSpan());
@@ -352,7 +352,7 @@ class ResultLine1 extends StatelessWidget {
 
       spans.addAll(buildMedicinePictos(item));
 
-      // BDM : badges STUPS / EXCEPTION / SURV / OTC/NR/autre / PIH / HOP toujours après la gélule, avant le libellé (ligne 1).
+      // BDM : badges STUPS / EXCEPTION / SURV / OTC/Libre accès / PIH / HOP toujours après la gélule, avant le libellé (ligne 1).
         final cip13Digits = item.cip13?.replaceAll(RegExp(r'\D'), '');
         final bool showNrBadge = item.source == SourceType.bdm &&
             (tauxRemboursement == null || tauxRemboursement!.trim().isEmpty) &&
@@ -1062,7 +1062,7 @@ void _buildBdmFastPathSpans({
       spans.add(const TextSpan(text: ' '));
     }
   }
-  // BDM : badges STUPS / EXCEPTION / SURV / OTC/NR/autre / PIH / HOP après la gélule, avant le libellé (ligne 1).
+  // BDM : badges STUPS / EXCEPTION / SURV / OTC/Libre accès / PIH / HOP après la gélule, avant le libellé (ligne 1).
   final cip13DigitsFast = item.cip13?.replaceAll(RegExp(r'\D'), '');
   final bool showNrBadgeFast = item.source == SourceType.bdm &&
       (tauxRemboursement == null || tauxRemboursement.trim().isEmpty) &&

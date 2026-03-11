@@ -1,5 +1,25 @@
 # Générer l'installateur Inno Setup et publier sur GitHub
 
+## Procédure complète (build → déploiement GitHub)
+
+À faire **à la racine du projet** (`C:\...\offibox`) dans PowerShell.
+
+| Étape | Commande / action |
+|-------|-------------------|
+| **1. Build Flutter** | `flutter build windows --release` |
+| **2. Installateur + incrément version** | `cd installer` puis `.\build_inno.ps1 -SkipFlutter` puis `cd ..` |
+| **3. Commit & push** | `git add ...` puis `git commit -m "Release X.Y.Z - Installateur Inno Setup"` puis `git push origin master` |
+| **4. Tag & push (déclenche la CI)** | `git tag vX.Y.Z` puis `git push origin vX.Y.Z` (X.Y.Z = version dans pubspec après étape 2) |
+| **5. Attendre la CI** | GitHub Actions → Release → 2–5 min → release créée avec le .exe |
+
+**URLs une fois la release publiée** (remplacer `X.Y.Z` par la version, ex. `1.1.26`) :
+
+- **Page release :** `https://github.com/AlexandrePerrault/offibox/releases/tag/vX.Y.Z`
+- **Lien direct du setup :** `https://github.com/AlexandrePerrault/offibox/releases/download/vX.Y.Z/Offibox-Setup-X.Y.Z.exe`
+- **Dernière release :** `https://github.com/AlexandrePerrault/offibox/releases/latest`
+
+---
+
 ## 1. Générer le .exe en local
 
 Dans un terminal PowerShell à la **racine du projet** ou dans `installer` :
@@ -17,7 +37,7 @@ Sans refaire le build Flutter (dossier Release déjà à jour) :
 
 Le fichier produit est : **`website\download\Offibox-Setup-<version>.exe`**.
 
-**Version :** elle est lue automatiquement depuis **`pubspec.yaml`** (ligne `version: 1.1.25`) à chaque build. Le script affiche `Version (pubspec.yaml) : 1.1.25` avant la compilation.
+**Version :** à chaque exécution, le script **incrémente le patch** dans **`pubspec.yaml`** (ex. 1.1.25 → 1.1.26), met à jour le fichier, puis compile. Il affiche `Ancienne version` et `Nouvelle version` avant la compilation.
 
 **Historique des versions (menu hamburger) :** les textes affichés viennent des **releases GitHub** (corps/description de chaque release). Modifier la description d’une release sur GitHub (Releases → Edit) met à jour automatiquement l’onglet hamburger « Historique des versions » au prochain chargement. La date affichée dans « À propos » vient de `lib/generated/build_info.dart` (`kVersionDate`).
 

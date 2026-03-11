@@ -1038,7 +1038,7 @@ Widget build(BuildContext context) {
         (compositionLine != null && compositionLine!.trim().isNotEmpty) ||
         (listes != null && listes!.isNotEmpty);
 
-    // Badges S/AS, EXCEPTION, OTC, PIH, HOP : affichés uniquement en ligne 1 (ResultLine1), pas ici.
+    // Badges S/AS, EXCEPTION, OTC/Libre accès, PIH, HOP : affichés uniquement en ligne 1 (ResultLine1), pas ici.
 
     // Badge « arrêt de commercialisation » pour NSFP dont le CIS est dans CIS_CIP_Dispo_Spec (exception affichée).
     final isArretCommercialisation = item.isNsfpEffective == true &&
