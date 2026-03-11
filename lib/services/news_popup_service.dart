@@ -13,11 +13,14 @@ class NewsEntry {
     required this.body,
     this.url,
     this.date,
+    this.source,
   });
   final String title;
   final String body;
   final String? url;
   final String? date;
+  /// Source (colonne D du CSV), affichée en italique sous l'info.
+  final String? source;
 }
 
 /// Récupère la dernière actualité (news.csv).
@@ -26,7 +29,7 @@ class NewsEntry {
 /// - col 0 : date (ex. `10/03/2026 12:00:00`)
 /// - col 1 : texte d’affichage (inclut « DGS‑Urgent », « rappel », etc.)
 /// - col 2 : URL (facultatif, ex. lien ANSM / DGS)
-/// - col 3 : CIP13 (facultatif).
+/// - col 3 (D) : source (facultatif), affichée en italique sous l'info.
 ///
 /// On suppose que la ligne la plus récente est en haut du fichier (après l’en‑tête).
 Future<NewsEntry?> fetchLatestNews() async {
@@ -54,12 +57,14 @@ Future<NewsEntry?> fetchLatestNews() async {
       final date = row.isNotEmpty ? row[0] : '';
       final text = row.length > 1 ? row[1] : '';
       final url = row.length > 2 && row[2].isNotEmpty ? row[2] : null;
+      final source = row.length > 3 && row[3].isNotEmpty ? row[3] : null;
       if (text.isEmpty) continue;
       return NewsEntry(
         title: text,
         body: '',
         url: url,
         date: date,
+        source: source,
       );
     }
   } catch (e) {
@@ -91,4 +96,29 @@ Future<void> markNewsShown(NewsEntry entry) async {
       await prefs.setString(_kNewsPrefsKey, entry.date!);
     }
   } catch (_) {}
+}
+
+/// Formate la date brute (ex. "10/03/2026 12:00:00" ou "2026-03-10") en JJ:mm/YYYY (ex. "10:03/2026").
+String? formatNewsDateDisplay(String? rawDate) {
+  if (rawDate == null || rawDate.trim().isEmpty) return null;
+  final s = rawDate.trim();
+  // DD/MM/YYYY ou DD/MM/YYYY HH:MM:SS
+  final ddmmyyyy = RegExp(r'^(\d{1,2})/(\d{1,2})/(\d{4})');
+  final m = ddmmyyyy.firstMatch(s);
+  if (m != null) {
+    final j = m.group(1)!.padLeft(2, '0');
+    final mo = m.group(2)!.padLeft(2, '0');
+    final a = m.group(3)!;
+    return '$j:$mo/$a';
+  }
+  // YYYY-MM-DD
+  final iso = RegExp(r'^(\d{4})-(\d{2})-(\d{2})');
+  final m2 = iso.firstMatch(s);
+  if (m2 != null) {
+    final a = m2.group(1)!;
+    final mo = m2.group(2)!;
+    final j = m2.group(3)!;
+    return '$j:$mo/$a';
+  }
+  return null;
 }

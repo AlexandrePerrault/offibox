@@ -19,7 +19,7 @@ class OffiboxPill extends StatefulWidget {
   final VoidCallback? onSecondaryTap;
   /// true quand la barre est déployée (ou menu/fenêtre ouverts) → logo scale légèrement pour rester cohérent.
   final bool expanded;
-  /// true pendant une recherche → affiche la gélule (💊) en rotation.
+  /// true pendant une recherche → affiche un trait bleu indéterminé (style Google).
   final bool searching;
 
   static double get size => OffiboxWindowUI.pillSize;
@@ -37,7 +37,9 @@ class _OffiboxPillState extends State<OffiboxPill>
   Timer? _restTimer;
   late final AnimationController _fadeController;
   late final Animation<double> _opacity;
-  late final AnimationController _rotationController;
+
+  /// Bleu type Google pour le trait de chargement.
+  static const Color _loadingBlue = Color(0xFF4285F4);
 
   /// Au lancement le logo reste au repos (pas de scale au survol) pendant cette durée.
   static const Duration _restDuration = Duration(milliseconds: 450);
@@ -54,34 +56,15 @@ class _OffiboxPillState extends State<OffiboxPill>
       curve: Curves.easeOutCubic,
     );
     _fadeController.forward();
-    _rotationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
     _restTimer = Timer(_restDuration, () {
       if (mounted) setState(() => _restEnded = true);
     });
-    if (widget.searching) _rotationController.repeat();
-  }
-
-  @override
-  void didUpdateWidget(covariant OffiboxPill oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.searching != oldWidget.searching) {
-      if (widget.searching) {
-        _rotationController.repeat();
-      } else {
-        _rotationController.stop();
-        _rotationController.reset();
-      }
-    }
   }
 
   @override
   void dispose() {
     _restTimer?.cancel();
     _fadeController.dispose();
-    _rotationController.dispose();
     super.dispose();
   }
 
@@ -134,14 +117,18 @@ class _OffiboxPillState extends State<OffiboxPill>
                 ),
                 child: Center(
                   child: widget.searching
-                      ? RotationTransition(
-                          turns: _rotationController,
-                          child: GestureDetector(
-                            onTap: widget.onTap,
-                            child: const Text(
-                              '💊',
-                              style: TextStyle(fontSize: 28),
-                              textAlign: TextAlign.center,
+                      ? GestureDetector(
+                          onTap: widget.onTap,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: SizedBox(
+                              height: 4,
+                              child: LinearProgressIndicator(
+                                value: null,
+                                backgroundColor: _loadingBlue.withValues(alpha: 0.2),
+                                valueColor: const AlwaysStoppedAnimation<Color>(_loadingBlue),
+                                minHeight: 4,
+                              ),
                             ),
                           ),
                         )

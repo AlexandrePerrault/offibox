@@ -500,6 +500,7 @@ class _MenuItemRowState extends State<_MenuItemRow> {
         child: SizedBox(
           width: double.infinity,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (widget.iconAssetPath != null)
                 SizedBox(
@@ -544,7 +545,6 @@ class _MenuItemRowState extends State<_MenuItemRow> {
               else if (widget.icon != null)
                 SizedBox(
                   width: _iconSlotWidth,
-                  height: 20,
                   child: Center(
                     child: Transform.rotate(
                       angle: widget.rotateMinimize ? math.pi : 0,

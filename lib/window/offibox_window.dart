@@ -27,6 +27,7 @@ import 'package:offibox/window/widgets/offibox_top_bar.dart';
 import 'package:offibox/ui/widgets/offibox_info_bar.dart';
 import 'package:offibox/ui/widgets/calendar_reminder_bubble.dart';
 import 'package:offibox/services/admin_service.dart';
+import 'package:offibox/services/trial_guard.dart';
 import 'package:offibox/services/google_calendar_service.dart';
 import 'package:offibox/services/google_calendar_desktop_auth.dart';
 import 'package:offibox/config/google_oauth_config.dart';
@@ -139,6 +140,8 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   /// Calculatrice de marge (mot-clé « calculatrice de marge ») ouverte sous la barre.
   bool _showMarginCalculatorPanel = false;
   String _appVersion = '1.0.0';
+  /// Date de fin de licence affichée à côté de « mis à jour le » (ex. « 25/03/2026 »). Null si pro ou non chargée.
+  String? _licenseEndDate;
   /// Actualités (news.csv) : popup sous la barre, 48 h, 2×/jour (matin + après 14h).
   NewsEntry? _newsPopupEntry;
   bool _showNewsPopup = false;
@@ -324,6 +327,13 @@ void initState() {
   onBeforeOpenExternalBrowser = () {
     windowManager.minimize();
   };
+  TrialGuard.getLicenseEndDate().then((date) {
+    if (!mounted) return;
+    if (date != null) {
+      final s = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+      setState(() => _licenseEndDate = s);
+    }
+  });
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
     if (!mounted) return;
@@ -377,6 +387,9 @@ void initState() {
 
       // 🔐 Vérification appareil (5 PC max)
       await _registerDeviceIfNeeded();
+
+      // Actualités (news.csv) : afficher sous la barre au démarrage (ex. le matin)
+      if (mounted) _maybeShowNewsPopup();
     });
   });
 }
@@ -486,13 +499,14 @@ void initState() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius)),
         contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
         actionsPadding: const EdgeInsets.fromLTRB(10, 2, 10, 8),
+        actionsAlignment: MainAxisAlignment.center,
         content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 125),
+          constraints: const BoxConstraints(maxWidth: 220),
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 18,
                 fontFamily: 'Spinnaker',
                 color: OffiboxColors.darkGray,
                 height: 1.25,
@@ -504,15 +518,15 @@ void initState() {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: SizedBox(
-                      width: 32,
-                      height: 32,
+                      width: 36,
+                      height: 36,
                       child: Image.asset(
                         'assets/icons/logo_offibox_installer.png',
                         fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => const Text(
                           AppConfig.appName,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 18,
                             fontFamily: 'Spinnaker',
                             color: OffiboxColors.primary,
                             fontWeight: FontWeight.w700,
@@ -1510,6 +1524,7 @@ Widget build(BuildContext context) {
               return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
             }()
           : null,
+      licenseEndDate: _licenseEndDate,
 
       // 🔗 OUVERTURE EXPLICITE UNIQUEMENT (bouton)
       onOpenSelected: () {
@@ -1590,11 +1605,18 @@ Widget build(BuildContext context) {
             ),
 
           // ───────────────────────────
-          // ACTUALITÉS (news.csv) : fenêtre avant déploiement de la barre, 48 h, 2×/jour
+          // ACTUALITÉS (news.csv) : sous la barre, date JJ:mm/YYYY + titre (ex. 11:03/2025 nouveau code de déontologie)
           // ───────────────────────────
           if (_showNewsPopup && _newsPopupEntry != null)
             Positioned(
-              top: OffiboxWindowUI.topMargin + 8,
+              top: OffiboxWindowUI.topMargin +
+                  (_infoBarExpanded
+                      ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap
+                      : 0) +
+                  (expanded
+                      ? (effectiveExpandedBarHeight ?? OffiboxWindowUI.barHeightExpanded)
+                      : OffiboxWindowUI.barHeight) +
+                  OffiboxWindowUI.gapBelowBar,
               right: OffiboxWindowUI.rightMargin,
               child: NewsPopupCard(
                 entry: _newsPopupEntry!,

@@ -1,6 +1,8 @@
 # Build Inno Setup - Offibox
-# 1) Optionnel : flutter build windows
-# 2) Compile Offibox.iss avec ISCC (Inno Setup 6)
+# À chaque exécution :
+#   - Met à jour pubspec.yaml : version X.Y.Z → X.Y.(Z+1)
+#   - Optionnel : flutter build windows
+#   - Compile Offibox.iss avec ISCC (Inno Setup 6)
 # Sortie : ..\website\download\Offibox-Setup-<version>.exe
 
 param(
@@ -69,14 +71,16 @@ $AppVersion = "$major.$minor.$newPatch$suffix"
 Write-Host "Ancienne version (pubspec.yaml) : $oldVersion" -ForegroundColor Yellow
 Write-Host "Nouvelle version (pubspec.yaml) : $AppVersion" -ForegroundColor Cyan
 
-# Mettre à jour pubspec.yaml avec la nouvelle version
+# Mettre à jour pubspec.yaml avec la nouvelle version (dès ce build)
 $newContent = [regex]::Replace(
     $pubspecContent,
     $versionRegex,
     "version: $AppVersion",
     [System.Text.RegularExpressions.RegexOptions]::Multiline
 )
-Set-Content -Path $pubspecPath -Value $newContent -Encoding UTF8
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[IO.File]::WriteAllText($pubspecPath, $newContent, $utf8NoBom)
+Write-Host "pubspec.yaml mis a jour : version $AppVersion" -ForegroundColor Green
 
 Write-Host "Compilation Inno Setup : Offibox.iss" -ForegroundColor Cyan
 Push-Location $PSScriptRoot

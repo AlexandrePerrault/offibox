@@ -31,16 +31,16 @@ Les fonctions utilisent **Firebase Secret Manager** pour SMTP. Une fois les secr
 À la racine du projet (ou dans `functions`), exécuter :
 
 ```bash
-firebase functions:secrets:set SMTP_HOST
-firebase functions:secrets:set SMTP_USER
-firebase functions:secrets:set SMTP_PASS
+firebase functions:secrets:set OFFIBOX_SMTP_HOST
+firebase functions:secrets:set OFFIBOX_SMTP_USER
+firebase functions:secrets:set OFFIBOX_SMTP_PASS
 ```
 
 À chaque commande, le CLI demande la **valeur** du secret (saisie au clavier, ou coller depuis votre fournisseur SMTP).
 
 - **SMTP_HOST** : serveur SMTP (ex. `smtp.office365.com`, `smtp.gmail.com`, `smtp.sendgrid.net`, ou le serveur de votre hébergeur email)
-- **SMTP_USER** : identifiant (souvent l’email d’envoi, ex. `no-reply@offibox.fr`)
-- **SMTP_PASS** : mot de passe ou mot de passe d’application
+- **OFFIBOX_SMTP_USER** : identifiant (souvent l’email d’envoi, ex. `no-reply@offibox.fr`)
+- **OFFIBOX_SMTP_PASS** : mot de passe ou mot de passe d’application
 
 ### 2. (Optionnel) Port et TLS
 
@@ -93,4 +93,4 @@ Les fonctions qui envoient des emails déclarent déjà ces secrets ; elles rece
 | SendGrid        | smtp.sendgrid.net      | 587  | User = `apikey`, Pass = clé API |
 | OVH / hébergeur | ex. ssl0.ovh.net       | 587 ou 465 | Selon offre email du domaine |
 
-Une fois **SMTP_HOST**, **SMTP_USER** et **SMTP_PASS** définis dans Secret Manager et les functions redéployées, les emails partent directement depuis les Cloud Functions sans avoir à configurer l’extension Trigger Email.
+Une fois **OFFIBOX_SMTP_HOST**, **OFFIBOX_SMTP_USER** et **OFFIBOX_SMTP_PASS** définis dans Secret Manager et les functions redéployées, les emails partent directement depuis les Cloud Functions sans avoir à configurer l’extension Trigger Email.

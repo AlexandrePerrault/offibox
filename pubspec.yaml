@@ -1,7 +1,7 @@
-﻿name: offibox
+name: offibox
 description: Offibox desktop search bar
 publish_to: "none"
-version: 1.1.26
+version: 1.1.28
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -93,4 +93,5 @@ flutter:
     - assets/icons/logo_offibox_installer.png
     - assets/debug/
     - assets/pdf/
+
 

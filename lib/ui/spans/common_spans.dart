@@ -400,7 +400,7 @@ WidgetSpan surveillanceSquareSpan({
 
 
 
-//🟩 OTC/Libre accès (liste médication officinale ANSM)//
+//🟩 OTC/Libre accès (liste médication officinale ANSM) — badge retiré : on n’affiche plus que NR pour non remboursé.//
 
 WidgetSpan otcSquareSpan({
   String tooltip = 'OTC / Libre accès',
@@ -413,6 +413,17 @@ WidgetSpan otcSquareSpan({
   );
 }
 
+/// Badge NR (non remboursé) — même style vert que l’ancien OTC ; affiché uniquement pour les BDM hors liste hospitalière et sans taux.
+WidgetSpan nrSquareSpan({
+  String tooltip = 'Non remboursé',
+}) {
+  return squareTagSpan(
+    label: 'NR',
+    color: Colors.lightGreenAccent.shade700,
+    tooltip: tooltip,
+    url: 'https://ansm.sante.fr/',
+  );
+}
 
 // 🩸 MDS — Médicaments dérivés du sang
 WidgetSpan mdsSquareSpan({

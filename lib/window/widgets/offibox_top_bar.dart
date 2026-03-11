@@ -157,6 +157,8 @@ class OffiboxTopBar extends StatelessWidget {
     this.rightMargin,
     /// Date de MAJ des données (dernier commit GitHub offiboxdata). Si null, affiche [kVersionDate].
     this.dataUpdateDate,
+    /// Date de fin de licence à afficher à côté de la date de MAJ (ex. « licence jusqu'au 25/03/2026 »). Null si pro ou non applicable.
+    this.licenseEndDate,
     /// Au clic sur le badge DCI (princeps) : lance une recherche avec cette requête (DCI) pour afficher les génériques sous la barre.
     this.onSearchWithQuery,
   });
@@ -225,12 +227,14 @@ class OffiboxTopBar extends StatelessWidget {
   final double? rightMargin;
   /// Date de MAJ des données (ex. dernier commit GitHub). Format JJ/MM/AAAA. Si null, utilise [kVersionDate].
   final String? dataUpdateDate;
+  /// Date de fin de licence (ex. « 25/03/2026 »). Affichée à côté de la date de MAJ : « licence jusqu'au … ». Null si pro ou non affichée.
+  final String? licenseEndDate;
   /// Au clic sur le badge DCI (princeps) : lance une recherche avec cette requête (DCI) pour afficher les génériques sous la barre.
   final void Function(String query)? onSearchWithQuery;
 
   final bool expanded;
   /// Barre d’infos (DGS-Urgent, ANSM, etc.) : true = déployée, false = repliée
-  /// true pendant une recherche → gélule en rotation.
+  /// true pendant une recherche → trait bleu indéterminé (style Google).
   final bool searching;
   final bool infoBarExpanded;
   final VoidCallback? onToggleInfoBar;
@@ -451,6 +455,18 @@ class OffiboxTopBar extends StatelessWidget {
                             height: 1.2,
                           ),
                         ),
+                        if (licenseEndDate != null && licenseEndDate!.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            'licence jusqu\'au $licenseEndDate',
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey.shade500,
+                              fontSize: 10,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
                         const SizedBox(width: 8),
                       ],
                       if (expanded &&

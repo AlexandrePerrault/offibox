@@ -6,7 +6,7 @@
  *   sont envoyés automatiquement.
  *
  * Option 2 - Nodemailer (config via Firebase Secret Manager) :
- *   Définir les secrets SMTP_HOST, SMTP_USER, SMTP_PASS (voir README_EMAILS.md).
+ *   Définir les secrets OFFIBOX_SMTP_HOST, OFFIBOX_SMTP_USER, OFFIBOX_SMTP_PASS (voir README_EMAILS.md).
  */
 
 import * as admin from "firebase-admin";
@@ -16,10 +16,10 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as nodemailer from "nodemailer";
 
-/** Secrets SMTP (Firebase Secret Manager). À définir via CLI : firebase functions:secrets:set SMTP_HOST etc. */
-const smtpHost = defineSecret("SMTP_HOST");
-const smtpUser = defineSecret("SMTP_USER");
-const smtpPass = defineSecret("SMTP_PASS");
+/** Secrets SMTP (Firebase Secret Manager). Préfixe OFFIBOX_ pour éviter conflit avec d’éventuelles env vars SMTP_* sur Cloud Run. */
+const smtpHost = defineSecret("OFFIBOX_SMTP_HOST");
+const smtpUser = defineSecret("OFFIBOX_SMTP_USER");
+const smtpPass = defineSecret("OFFIBOX_SMTP_PASS");
 
 const emailSecrets = [smtpHost, smtpUser, smtpPass];
 
@@ -63,9 +63,9 @@ async function sendWithNodemailer(
   html: string | undefined,
   config?: SmtpConfig | null
 ): Promise<boolean> {
-  const host = config?.host ?? process.env.SMTP_HOST;
-  const user = config?.user ?? process.env.SMTP_USER;
-  const pass = config?.pass ?? process.env.SMTP_PASS;
+  const host = config?.host ?? process.env.OFFIBOX_SMTP_HOST ?? process.env.SMTP_HOST;
+  const user = config?.user ?? process.env.OFFIBOX_SMTP_USER ?? process.env.SMTP_USER;
+  const pass = config?.pass ?? process.env.OFFIBOX_SMTP_PASS ?? process.env.SMTP_PASS;
   const configured = !!(host && user && pass);
   console.log(`[sendEmail] SMTP configuré: ${configured} (host=${!!host}, user=${!!user}, pass=${!!pass})`);
   if (!host || !user || !pass) return false;
@@ -228,7 +228,7 @@ export const sendIdeasEmail = onCall(
 
 /** Boîte à idées — version HTTP pour clients desktop (Windows) où le callable n’est pas disponible.
  *  Destinataire : contact@offibox.fr (IDEAS_RECIPIENT).
- *  Pour que le mail parte vraiment : configurer SMTP (SMTP_HOST, SMTP_USER, SMTP_PASS) ou l’extension Firestore "Trigger Email".
+ *  Pour que le mail parte vraiment : configurer SMTP (OFFIBOX_SMTP_*) ou l’extension Firestore "Trigger Email".
  */
 export const sendIdeasEmailHttp = onRequest(
   { ...runOpts, secrets: emailSecrets },

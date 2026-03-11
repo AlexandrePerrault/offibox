@@ -9,6 +9,8 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    permissions:
+      contents: write   # nécessaire pour créer la release et uploader le .exe
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,23 +30,56 @@ jobs:
       - name: Install Inno Setup 6
         run: choco install innosetup -y
 
-      - name: Get version from pubspec.yaml
+      # Version = tag sans le "v" (ex. v1.1.26 → 1.1.26) pour que l'URL releases/download/vX.Y.Z/Offibox-Setup-X.Y.Z.exe soit toujours valide
+      - name: Get version from tag
         id: version
         run: |
-          $v = (Get-Content pubspec.yaml | Select-String '^\s*version:\s*(.+)$').Matches.Groups[1].Value.Trim()
+          $tag = "${{ github.ref_name }}"
+          $v = $tag -replace '^v', ''
           echo "VERSION=$v" >> $env:GITHUB_ENV
-          echo "Version: $v"
+          echo "Version (tag): $tag -> $v"
 
       - name: Build installer (Inno Setup)
         run: |
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "ISCC introuvable: $iscc" }
           & $iscc "/DMyAppVersion=$env:VERSION" installer/Offibox.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup a échoué (code $LASTEXITCODE)" }
+
+      - name: Vérifier le .exe généré
+        id: exe
+        run: |
+          $exe = Get-ChildItem -Path website/download -Filter "Offibox-Setup-*.exe" -ErrorAction SilentlyContinue
+          if (-not $exe) { throw "Aucun Offibox-Setup-*.exe dans website/download - le build Inno a peut-être échoué." }
+          $exe | ForEach-Object { Write-Host "Fichier prêt: $($_.FullName)" }
+          echo "path=$($exe[0].FullName)" >> $env:GITHUB_OUTPUT
+
+      # Signature numérique optionnelle : définir les secrets OFFIBOX_SIGNING_CERT_BASE64 (PFX en base64) et OFFIBOX_SIGNING_PASSWORD pour signer le .exe
+      - name: Sign setup (optional)
+        env:
+          OFFIBOX_CERT_B64: ${{ secrets.OFFIBOX_SIGNING_CERT_BASE64 }}
+          OFFIBOX_CERT_PWD: ${{ secrets.OFFIBOX_SIGNING_PASSWORD }}
+        run: |
+          if (-not $env:OFFIBOX_CERT_B64 -or -not $env:OFFIBOX_CERT_PWD) { Write-Host "Secrets de signature non configures, skip."; exit 0 }
+          $exePath = "${{ steps.exe.outputs.path }}"
+          $certPath = Join-Path $env:RUNNER_TEMP "offibox-sign.pfx"
+          [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:OFFIBOX_CERT_B64))
+          $signtool = (Get-ChildItem -Path "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match "x64\\signtool" } | Sort-Object -Property FullName -Descending | Select-Object -First 1).FullName
+          if (-not $signtool) { Write-Host "signtool introuvable (Windows SDK). Signature ignoree."; exit 0 }
+          $ts = "http://timestamp.digicert.com"
+          & $signtool sign /tr $ts /td sha256 /fd sha256 /f $certPath /p $env:OFFIBOX_CERT_PWD /v $exePath
+          if ($LASTEXITCODE -eq 0) { Write-Host "Setup signe avec succes." } else { Write-Host "ATTENTION: signature echouee (code $LASTEXITCODE)." }
+          Remove-Item $certPath -Force -ErrorAction SilentlyContinue
 
       - name: Upload EXE to release
         uses: softprops/action-gh-release@v2
         with:
-          files: website/download/*.exe
-          generate_release_notes: true
+          files: website/download/Offibox-Setup-*.exe
+          generate_release_notes: false
           draft: false
+          overwrite_files: true
+          body: |
+            Installation Windows (Inno Setup).
+            Téléchargez **Offibox-Setup-${{ env.VERSION }}.exe** et exécutez-le.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

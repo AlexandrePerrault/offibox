@@ -56,6 +56,24 @@ class TrialGuard {
     return trialEndsAt.toDate().isBefore(DateTime.now());
   }
 
+  /// Retourne la date de fin de licence à afficher (« licence jusqu'au DD/MM/YYYY »).
+  /// Pour plan 'pro' : null (pas d'affichage ou « licence illimitée » selon choix).
+  /// Pour trial : trialEndsAt.
+  static Future<DateTime?> getLicenseEndDate() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+
+    final data = await getUserDocCached(user.uid);
+    if (data == null) return null;
+
+    if (data['plan'] == 'pro') return null;
+
+    final trialEndsAt = data['trialEndsAt'] as Timestamp?;
+    if (trialEndsAt == null) return null;
+
+    return trialEndsAt.toDate();
+  }
+
   /// Démarre la période de 15 jours à la première connexion (web ou app).
   /// Si le document users/{uid} n'existe pas ou n'a pas trialEndsAt, on le crée/met à jour.
   /// À appeler après toute connexion réussie (Google ou e-mail).

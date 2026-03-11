@@ -336,10 +336,6 @@ class ResultLine1 extends StatelessWidget {
           spans.add(exceptionSquareSpan());
           spans.add(const TextSpan(text: ' '));
         }
-        if (item.isOtc == true) {
-          spans.add(otcSquareSpan());
-          spans.add(const TextSpan(text: ' '));
-        }
         if (item.isPih == true) {
           spans.add(pihSquareSpan());
           spans.add(const TextSpan(text: ' '));
@@ -357,11 +353,11 @@ class ResultLine1 extends StatelessWidget {
         final bool showNrBadge = item.source == SourceType.bdm &&
             (tauxRemboursement == null || tauxRemboursement!.trim().isEmpty) &&
             (hospitalCip13Set != null && cip13Digits != null && cip13Digits.length == 13 && !hospitalCip13Set!.contains(cip13Digits));
+      // Badge OTC/Libre accès retiré : on n’affiche que NR (non remboursé) pour les BDM hors liste hospitalière et sans taux.
       if (item.source == SourceType.bdm &&
           (item.isStupefiant == true ||
               item.isException == true ||
               item.isSurveillanceParticuliere == true ||
-              item.isOtc == true ||
               showNrBadge ||
               item.isPih == true ||
               item.hospitalOnly == true)) {
@@ -378,8 +374,8 @@ class ResultLine1 extends StatelessWidget {
           spans.add(surveillanceSquareSpan());
           spans.add(const TextSpan(text: ' '));
         }
-        if (item.isOtc == true || showNrBadge) {
-          spans.add(otcSquareSpan());
+        if (showNrBadge) {
+          spans.add(nrSquareSpan());
           spans.add(const TextSpan(text: ' '));
         }
         if (item.isPih == true) {
@@ -1071,7 +1067,6 @@ void _buildBdmFastPathSpans({
       (item.isStupefiant == true ||
           item.isException == true ||
           item.isSurveillanceParticuliere == true ||
-          item.isOtc == true ||
           showNrBadgeFast ||
           item.isPih == true ||
           item.hospitalOnly == true)) {
@@ -1088,8 +1083,8 @@ void _buildBdmFastPathSpans({
       spans.add(surveillanceSquareSpan());
       spans.add(const TextSpan(text: ' '));
     }
-    if (item.isOtc == true || showNrBadgeFast) {
-      spans.add(otcSquareSpan());
+    if (showNrBadgeFast) {
+      spans.add(nrSquareSpan());
       spans.add(const TextSpan(text: ' '));
     }
     if (item.isPih == true) {

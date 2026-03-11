@@ -120,7 +120,43 @@ Remplacer **1.1.25** par la version concernée (ex. 1.1.26 → `v1.1.26` et `Off
 
 ---
 
-## 5. Modifications effectuées (pour les notes de release)
+## 5. Erreur 403 « Resource not accessible by integration »
+
+Si le workflow Release échoue avec **403** et le message lié à **generate release notes** :
+
+- Le workflow utilise désormais **`generate_release_notes: false`** : l’API de génération automatique des release notes n’est pas accessible avec le `GITHUB_TOKEN` par défaut. La description de la release est un court texte fixe.
+- Vérifier aussi : **Settings** → **Actions** → **General** → **Workflow permissions** = **« Read and write permissions »** (pas « Read repository contents only »).
+
+---
+
+## 6. Vérifier que le setup .exe est sur GitHub
+
+- **Page des releases :** https://github.com/AlexandrePerrault/offibox/releases  
+- **Dernière release :** https://github.com/AlexandrePerrault/offibox/releases/latest  
+- Le .exe est attaché à chaque release (ex. **Offibox-Setup-1.1.25.exe** pour le tag **v1.1.25**).  
+- Lien direct de téléchargement : `https://github.com/AlexandrePerrault/offibox/releases/download/vX.Y.Z/Offibox-Setup-X.Y.Z.exe`
+
+---
+
+## 7. Signature numérique du setup (optionnel)
+
+Pour que Windows et SmartScreen ne bloquent pas le téléchargement (« Windows a protégé votre ordinateur »), vous pouvez **signer le .exe** dans la CI avec un certificat Code Signing.
+
+1. **Certificat** : obtenir un certificat Code Signing (DigiCert, Sectigo, etc.) au format **.pfx**.
+2. **Secrets du dépôt** : dans le dépôt GitHub → **Settings** → **Secrets and variables** → **Actions**, ajouter :
+   - **`OFFIBOX_SIGNING_CERT_BASE64`** : contenu du fichier .pfx encodé en **base64**.  
+     Sous PowerShell :  
+     `[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\chemin\to\votre-cert.pfx"))`  
+     Copier le résultat (une longue chaîne) dans la valeur du secret.
+   - **`OFFIBOX_SIGNING_PASSWORD`** : mot de passe du fichier .pfx.
+3. **Obtenir un .exe signé** :
+   - **Option A** : pousser un **nouveau tag** (ex. `git tag v1.1.26` puis `git push origin v1.1.26`). Le workflow build + signe + uploade le .exe.
+   - **Option B** : pour **re-signer une release existante**, aller dans **Actions** → ouvrir l’exécution du workflow **Release** du tag concerné → **Re-run all jobs**. Le .exe sera reconstruit, signé et ré-uploadé (écrasement grâce à `overwrite_files: true`).
+4. Si les secrets sont absents, l’étape « Sign setup (optional) » affiche « Secrets de signature non configures, skip. » et le .exe est publié **non signé**.
+
+---
+
+## 8. Modifications effectuées (pour les notes de release)
 
 - **Installateur Windows** : passage à **Inno Setup 6** (fichier .exe) à la place du MSI WiX.
 - **Comportement** : même installation par utilisateur (sans admin), même options (icône bureau, lancement au démarrage, lancement à la fin), même clés de registre.
