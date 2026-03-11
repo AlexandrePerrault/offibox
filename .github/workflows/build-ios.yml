@@ -76,6 +76,14 @@ jobs:
             echo "::warning::GoogleService-Info.plist absent. Crée une app iOS dans Firebase et place le fichier dans ios/Runner/"
           fi
 
+      # Pod install explicite après modification du Podfile (évite "Framework Pods_Runner not found").
+      # Nécessaire car le cache Pods peut être restauré avant les sed du Podfile → désynchronisation.
+      - name: Pod install
+        run: |
+          cd ios
+          pod install --repo-update
+          cd ..
+
       # Build pour simulateur (pas de signature Apple requise en CI)
       - name: Build iOS (simulateur)
         run: flutter build ios --simulator
