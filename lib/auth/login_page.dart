@@ -851,13 +851,32 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 20),
 
         // Badge Première connexion (style "Pas encore de compte")
+        // Sur PC (setup Windows), ouvre la même page d'inscription que le site pour recevoir le lien par email.
         Material(
           color: OffiboxColors.primary.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             onTap: loading
                 ? null
-                : () {
+                : () async {
+                    if (!kIsWeb && Platform.isWindows) {
+                      final uri = Uri.parse(AppUpdateConfig.publicInscriptionPageUrl);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Le formulaire d\'inscription s\'ouvre dans votre navigateur. '
+                                'Après avoir reçu l\'email et défini votre mot de passe, revenez ici pour vous connecter.',
+                              ),
+                              duration: Duration(seconds: 6),
+                            ),
+                          );
+                        }
+                      }
+                      return;
+                    }
                     setState(() {
                       _step = _LoginStep.firstConnectionEmail;
                       _firstConnectionEmail = emailController.text.trim();

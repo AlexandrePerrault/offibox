@@ -125,8 +125,15 @@
     .btn-submit:hover { background: #4a7a7e; transform: translateY(-1px); }
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
     .signup-link { text-align: center; margin-top: 1.5rem; font-size: 0.95rem; color: #64748b; }
-    .signup-link a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
-    .signup-link a:hover { text-decoration: underline; }
+    .signup-link .signup-badge {
+      display: inline-flex; align-items: center; padding: 0.45em 1em; margin-left: 0.35rem;
+      background: var(--white); border: 2px solid #94a3b8; border-radius: 999px;
+      color: var(--offi-teal); font-weight: 600; text-decoration: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .signup-link .signup-badge:hover {
+      background: var(--offi-teal); color: var(--white); border-color: var(--offi-teal);
+    }
     .address-autocomplete-wrap { position: relative; }
     .address-suggestions {
       display: none;
@@ -168,6 +175,8 @@
       .form-group input, .form-group select { padding: 0.875rem 1rem; font-size: 16px; min-height: 44px; }
       .btn-submit { padding: 1rem; min-height: 48px; font-size: 1rem; }
       .address-suggestions { max-height: 180px; }
+      .signup-link { margin-top: 1.25rem; font-size: 0.9rem; }
+      .signup-link .signup-badge { padding: 0.5rem 1rem; min-height: 44px; margin-left: 0.25rem; font-size: 0.95rem; }
     }
   </style>
 </head>
@@ -242,7 +251,7 @@
         </p>
         <button type="submit" class="btn-submit" id="btn-signup-submit">S'inscrire</button>
       </form>
-      <p class="signup-link">Déjà un compte ? <a href="login-wix.html">Se connecter</a></p>
+      <p class="signup-link">Déjà un compte ? <a href="login-wix.html" class="signup-badge">Se connecter</a></p>
     </div>
   </div>
 
@@ -315,7 +324,10 @@
           })
           .then(function() {
             if (window.OffiboxTrial) OffiboxTrial.startIfNeeded();
-            window.location.href = baseUrl() + 'validation.html?inscription=1&email=' + encodeURIComponent(email);
+            var signOut = (window.OffiboxAuth && typeof OffiboxAuth.signOut === 'function') ? OffiboxAuth.signOut() : Promise.resolve();
+            return signOut.then(function() {
+              window.location.href = baseUrl() + 'validation.html?inscription=1&email=' + encodeURIComponent(email);
+            });
           })
           .catch(function(err) {
             setLoading(false);

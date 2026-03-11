@@ -296,7 +296,10 @@
           })
           .then(function() {
             if (window.OffiboxTrial) OffiboxTrial.startIfNeeded();
-            window.location.href = baseUrl() + 'validation.html?inscription=1&email=' + encodeURIComponent(email);
+            var signOut = (window.OffiboxAuth && typeof OffiboxAuth.signOut === 'function') ? OffiboxAuth.signOut() : Promise.resolve();
+            return signOut.then(function() {
+              window.location.href = baseUrl() + 'validation.html?inscription=1&email=' + encodeURIComponent(email);
+            });
           })
           .catch(function(err) {
             setLoading(false);

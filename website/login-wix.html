@@ -116,8 +116,15 @@
     .legal-links-notice a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
     .legal-links-notice a:hover { text-decoration: underline; }
     .signup-link { text-align: center; margin-top: 1.5rem; font-size: 0.95rem; color: #64748b; }
-    .signup-link a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
-    .signup-link a:hover { text-decoration: underline; }
+    .signup-link .signup-badge {
+      display: inline-flex; align-items: center; padding: 0.45em 1em; margin-left: 0.35rem;
+      background: var(--white); border: 2px solid #94a3b8; border-radius: 999px;
+      color: var(--offi-teal); font-weight: 600; text-decoration: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .signup-link .signup-badge:hover {
+      background: var(--offi-teal); color: var(--white); border-color: var(--offi-teal);
+    }
     .auth-error { margin-bottom: 1rem; padding: 0.75rem 1rem; background: #fef2f2; color: #b91c1c; font-size: 0.9rem; border-radius: 8px; display: none; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
     .auth-error.visible { display: block; }
     .auth-error.success { background: #f0fdf4; color: #166534; }
@@ -368,7 +375,7 @@
           </div>
           <button type="submit" class="btn-submit" id="btn-submit">Se connecter</button>
         </form>
-        <p class="signup-link">Première connexion ? <a href="inscription.html" id="toggle-signup">Inscrivez-vous</a></p>
+        <p class="signup-link">Première connexion ? <a href="inscription.html" id="toggle-signup" class="signup-badge">Inscrivez-vous</a></p>
       </div>
     </div>
 
