@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <!-- Page connexion complète (formulaire + description). Version scindée pour inclusion ailleurs : login-form-part.html (colonne gauche), login-desc-part.html (colonne droite). -->
 <head>
@@ -340,16 +340,6 @@
         <p class="subtitle">Accédez à <span class="offi">Offi</span>box sur votre navigateur</p>
         <div id="auth-error" class="auth-error" role="alert"></div>
         <form id="login-form" action="#" method="post">
-          <button type="button" class="btn-google" id="btn-google" aria-label="Se connecter avec Google">
-            <svg viewBox="0 0 24 24" width="20" height="20">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            Se connecter avec Google
-          </button>
-          <div class="divider"><span>ou</span></div>
           <div class="form-group email-typewriter-wrap">
             <label for="email">Adresse e-mail</label>
             <div class="email-input-wrap">
@@ -422,64 +412,28 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-functions-compat.js"></script>
-  <script>
-    (function(){if(typeof firebase==='undefined')return;var c={apiKey:'AIzaSyA3eizSKEwkUnH1Y5Xcum3fVgczGgPAFkk',authDomain:'offibox-prod.firebaseapp.com',projectId:'offibox-prod',storageBucket:'offibox-prod.firebasestorage.app',messagingSenderId:'264737328165',appId:'1:264737328165:web:d8744f8fc1c188d9ddc3cc',measurementId:'G-E1FP98K8WE'};if(!firebase.apps.length)firebase.initializeApp(c);})();
-    (function(){if(typeof firebase==='undefined'){window.OffiboxAuth=null;return;}var a=firebase.auth();var g=function(){return new firebase.auth.GoogleAuthProvider();};window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);},signInWithGoogle:function(){return a.signInWithPopup(g());},signInWithGoogleRedirect:function(){return a.signInWithRedirect(g());},getRedirectResult:function(){return a.getRedirectResult();},signInWithEmailPassword:function(e,p){return a.signInWithEmailAndPassword(e,p);},signUpWithEmailPassword:function(e,p){return a.createUserWithEmailAndPassword(e,p);},sendPasswordResetEmail:function(e){return a.sendPasswordResetEmail(e);},signOut:function(){return a.signOut();}};})();
-  </script>
+  <script src="../website/js/firebase-config.js"></script>
+  <script src="../website/js/firebase-auth.js"></script>
   <script>
     (function() {
       var authError = document.getElementById('auth-error');
       var loginForm = document.getElementById('login-form');
-      var btnGoogle = document.getElementById('btn-google');
       var btnSubmit = document.getElementById('btn-submit');
-      var inscriptionSection = document.getElementById('inscription-section');
       var toggleSignup = document.getElementById('toggle-signup');
-      var signupForm = document.getElementById('signup-form');
       var forgotLink = document.getElementById('forgot-link');
       var passwordResetForm = document.getElementById('password-reset-form');
       var btnSendReset = document.getElementById('btn-send-reset');
       var btnCancelReset = document.getElementById('btn-cancel-reset');
-      var signupAuthError = document.getElementById('signup-auth-error');
       var params = new URLSearchParams(window.location.search || '');
       if (params.get('inscription') === '1' && authError) {
         var emailParam = params.get('email') || '';
-        authError.textContent = 'Inscription enregistrée. Un email vous a été envoyé' + (emailParam ? ' à ' + decodeURIComponent(emailParam) : '') + ' pour définir votre mot de passe et finaliser votre inscription.';
+        authError.textContent = 'Inscription enregistrée. Un e-mail vous a été envoyé' + (emailParam ? ' à ' + decodeURIComponent(emailParam) : '') + ' pour définir votre mot de passe. Cliquez sur le lien reçu puis connectez-vous ici.';
         authError.classList.add('visible', 'success');
         if (history.replaceState) history.replaceState(null, '', window.location.pathname || 'login-wix.html');
       }
-      function showError(msg) { if (authError) { authError.textContent = msg || ''; authError.classList.toggle('visible', !!msg); } }
-      function showSignupError(msg) {
-        if (signupAuthError) { signupAuthError.textContent = msg || ''; signupAuthError.classList.toggle('visible', !!msg); if (msg) signupAuthError.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-      }
-      function setLoading(loading) { loginForm.classList.toggle('auth-loading', loading); if (btnGoogle) btnGoogle.disabled = loading; if (btnSubmit) btnSubmit.disabled = loading; }
-      // Après connexion : redirection vers l'application Offibox version web (hébergée sur GitHub Pages).
+      function showError(msg) { if (authError) { authError.textContent = msg || ''; authError.classList.toggle('visible', !!msg); authError.classList.remove('success'); } }
+      function setLoading(loading) { if (loginForm) loginForm.classList.toggle('auth-loading', loading); if (btnSubmit) btnSubmit.disabled = loading; }
       var OFFIBOX_WEB_APP_URL = 'https://alexandreperrault.github.io/offibox/';
-      var CONNECTED_URL = 'https://www.offibox.fr/connected';
-      function goToConnected() {
-        var target = OFFIBOX_WEB_APP_URL;
-        try {
-          if (window.top && window.top !== window) {
-            window.top.location.href = target;
-          } else {
-            window.location.href = target;
-          }
-        } catch (e) {
-          window.location.href = target;
-        }
-      }
-      function goToValidation() {
-        var validationUrl = 'validation.html';
-        try {
-          if (window.top && window.top !== window) {
-            window.top.location.href = validationUrl;
-          } else {
-            window.location.href = validationUrl;
-          }
-        } catch (e) {
-          window.location.href = validationUrl;
-        }
-      }
-      var OFFIBOX_MAIN_URL = 'https://www.offibox.fr/';
       function showLoginSuccessPanel() {
         var p = document.getElementById('login-success-panel');
         var b = document.body;
@@ -488,86 +442,25 @@
         if (b) b.classList.add('success-panel-visible');
         if (btnContinue) btnContinue.style.display = (window.self !== window.top) ? 'inline-flex' : 'none';
       }
-      function goAfterGoogleSignIn(user) {
-        if (!user || !user.uid) { showLoginSuccessPanel(); return; }
-        try {
-          var key = 'offibox_coord_done_' + user.uid;
-          var inIframe = (window.self !== window.top);
-          if (localStorage.getItem(key) === '1') {
-            if (inIframe) { showLoginSuccessPanel(); return; }
-            showLoginSuccessPanel();
-            return;
-          }
-          var inscriptionUrl = 'inscription.html?from=google';
-          if (inIframe) {
-            showLoginSuccessPanel();
-            return;
-          }
-          window.location.href = inscriptionUrl;
-        } catch (e) {
-          showLoginSuccessPanel();
-        }
-      }
-      var signInInProgress = false;
-      function initNormalAuthFlow() {
-        /* Si l'utilisateur est déjà connecté (session persistante), le rediriger vers l'app pour ne plus afficher la page de connexion. */
-        if (!window.OffiboxAuth || !OffiboxAuth.onAuthStateChanged) return;
+      if (window.OffiboxAuth && OffiboxAuth.onAuthStateChanged) {
         OffiboxAuth.onAuthStateChanged(function(user) {
-          if (user && user.uid && !signInInProgress) {
+          if (user && user.uid) {
             var inIframe = (window.self !== window.top);
             if (inIframe) { showLoginSuccessPanel(); return; }
-            try { window.location.href = 'app.html'; } catch (e) { window.location.href = 'app.html'; }
+            window.location.href = OFFIBOX_WEB_APP_URL;
           }
         });
       }
-      if (window.OffiboxAuth) {
-        OffiboxAuth.getRedirectResult().then(function(result) {
-          if (result && result.user) { goAfterGoogleSignIn(result.user); return; }
-          initNormalAuthFlow();
-        }).catch(function(err) {
-          if (err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/redirect-cancelled-by-user') {
-            showError(err.message || 'Connexion Google annulée ou erreur.');
-          }
-          initNormalAuthFlow();
-        });
-      }
-      var inIframe = (window.self !== window.top);
-      if (btnGoogle) btnGoogle.addEventListener('click', function(e) {
-        signInInProgress = true;
-        e.preventDefault();
-        if (!window.OffiboxAuth) { goToConnected(); return; }
-        showError(''); setLoading(true);
-        if (inIframe) {
-          showError('Redirection vers Google…');
-          OffiboxAuth.signInWithGoogleRedirect();
-          return;
-        }
-        OffiboxAuth.signInWithGoogle().then(function() {
-          var u = OffiboxAuth.getCurrentUser && OffiboxAuth.getCurrentUser();
-          goAfterGoogleSignIn(u || null);
-        }).catch(function(err) {
-          setLoading(false);
-          var msg = 'Connexion Google impossible. Réessayez.';
-          if (err && err.code === 'auth/popup-closed-by-user') msg = 'Connexion annulée.';
-          else if (err && err.code === 'auth/popup-blocked') msg = 'Popup bloquée. Autorisez les fenêtres popup pour ce site.';
-          else if (err && (err.code === 'auth/unauthorized-domain' || (err.message && (err.message.indexOf('forbidden') !== -1 || err.message.indexOf('403') !== -1 || err.message.indexOf('unauthorized') !== -1)))) {
-            var origin = window.location.origin || '';
-            var host = window.location.host || '';
-            msg = 'Domaine non autorisé. Ajoutez ce domaine aux deux endroits : (1) Firebase Console → Authentication → Authorized domains → Add domain : « ' + host + ' » (sans https://). (2) Google Cloud Console → Credentials → client « Web client (auto created by Google Service) » → Authorized JavaScript origins : « ' + origin + ' ». Puis attendez 1–2 min et réessayez.';
-          } else if (err && err.message) msg = err.message;
-          showError(msg);
-        });
-      });
       if (loginForm) loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (!window.OffiboxAuth) { goToConnected(); return; }
+        if (!window.OffiboxAuth) { window.location.href = OFFIBOX_WEB_APP_URL; return; }
         var email = document.getElementById('email').value.trim();
         var password = document.getElementById('password').value;
         if (!email || !password) { showError('Veuillez remplir l\'email et le mot de passe.'); return; }
-        signInInProgress = true;
         showError(''); setLoading(true);
-        OffiboxAuth.signInWithEmailPassword(email, password).then(showLoginSuccessPanel).catch(function(err) {
-          signInInProgress = false;
+        OffiboxAuth.signInWithEmailPassword(email, password).then(function() {
+          window.location.href = OFFIBOX_WEB_APP_URL;
+        }).catch(function(err) {
           setLoading(false);
           var msg = 'Connexion impossible. Vérifiez vos identifiants.';
           if (err && (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password')) msg = 'E-mail ou mot de passe incorrect.';
@@ -577,48 +470,14 @@
         });
       });
       var btnOpenApp = document.getElementById('btn-open-app');
-      if (btnOpenApp) btnOpenApp.addEventListener('click', function() { window.location.href = 'app.html'; });
+      if (btnOpenApp) btnOpenApp.addEventListener('click', function() { window.location.href = OFFIBOX_WEB_APP_URL; });
       var btnContinueOffibox = document.getElementById('btn-continue-offibox');
       if (btnContinueOffibox) btnContinueOffibox.addEventListener('click', function() {
-        try { window.top.location.href = OFFIBOX_MAIN_URL + 'app.html'; } catch (e) { window.top.location.href = OFFIBOX_MAIN_URL + 'app.html'; }
+        try { window.top.location.href = OFFIBOX_WEB_APP_URL; } catch (e) { window.top.location.href = OFFIBOX_WEB_APP_URL; }
       });
       if (toggleSignup) toggleSignup.addEventListener('click', function(e) {
         e.preventDefault();
-        var inscriptionUrl = 'inscription.html';
-        try {
-          if (window.top && window.top !== window) { window.top.location.href = inscriptionUrl; }
-          else { window.location.href = inscriptionUrl; }
-        } catch (err) { window.location.href = inscriptionUrl; }
-      });
-      function randomPassword(len) {
-        var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        var pwd = '';
-        for (var i = 0; i < (len || 12); i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-        return pwd;
-      }
-      if (signupForm) signupForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!window.OffiboxAuth || typeof window.OffiboxAuth.signUpWithEmailPassword !== 'function') {
-          showSignupError('Inscription temporairement indisponible. Rechargez la page ou réessayez plus tard.');
-          return;
-        }
-        var email = document.getElementById('signup-email').value.trim();
-        if (!email) { showSignupError('Veuillez indiquer votre adresse e-mail.'); return; }
-        showSignupError(''); setLoading(true);
-        var generatedPwd = randomPassword(12);
-        window.OffiboxAuth.signUpWithEmailPassword(email, generatedPwd).then(function() {
-          var fn = typeof firebase !== 'undefined' && firebase.functions ? firebase.functions().httpsCallable('sendPasswordResetEmailFr') : null;
-          return fn ? fn({ email: email }) : (OffiboxAuth.sendPasswordResetEmail ? OffiboxAuth.sendPasswordResetEmail(email) : Promise.resolve());
-        }).then(function() {
-          var samePage = (window.location.pathname || '').split('/').pop() || 'login-wix.html';
-          window.location.href = samePage + '?inscription=1&email=' + encodeURIComponent(email);
-        }).catch(function(err) {
-          setLoading(false);
-          var msg = 'Inscription impossible. Réessayez.';
-          if (err && err.code === 'auth/email-already-in-use') msg = 'Un compte existe déjà avec cet e-mail.';
-          else if (err && err.message) msg = err.message;
-          showSignupError(msg);
-        });
+        window.location.href = 'inscription.html';
       });
       if (forgotLink) forgotLink.addEventListener('click', function(e) { e.preventDefault(); passwordResetForm.classList.add('visible'); });
       if (btnCancelReset) btnCancelReset.addEventListener('click', function() { passwordResetForm.classList.remove('visible'); document.getElementById('reset-email').value = ''; });

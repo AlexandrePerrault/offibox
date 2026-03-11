@@ -40,6 +40,10 @@ jobs:
       - name: Copy static HTML to build
         run: cp -r website/deploy-netlify/html build/web/html
 
+      # Tout le dossier website (tous les HTML) pour GitHub Pages
+      - name: Copy full website to build
+        run: cp -r website build/web/website
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

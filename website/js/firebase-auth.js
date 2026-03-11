@@ -1,6 +1,7 @@
 /**
  * Wrapper Firebase Auth pour le site web Offibox.
- * Expose window.OffiboxAuth (getCurrentUser, signInWithGoogle, signInWithEmailPassword, signUpWithEmailPassword, sendPasswordResetEmail, signOut, onAuthStateChanged).
+ * Connexion par e-mail/mot de passe uniquement pour l'instant.
+ * signInWithGoogle est conservé pour une réactivation ultérieure (Gmail).
  */
 (function() {
   'use strict';

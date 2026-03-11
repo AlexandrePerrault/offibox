@@ -52,18 +52,12 @@
   <script>(function(){var a=firebase.auth();window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);},signOut:function(){return a.signOut();}};})();</script>
   <script>
   (function(){
-    var loadingEl=document.getElementById("auth-loading"),contentEl=document.getElementById("app-content"),iframeEl=document.getElementById("app-iframe"),navEmail=document.getElementById("nav-user-email"),navSignout=document.getElementById("nav-signout");
-    // App Flutter sur le même domaine (ex. https://www.offibox.fr/app/) → session Firebase partagée, une seule connexion
-    var APP_IFRAME_SRC="/app/";
+    var OFFIBOX_WEB_APP_URL="https://alexandreperrault.github.io/offibox/";
     if(!window.OffiboxAuth){window.location.href="login-wix.html";return;}
     window.OffiboxAuth.onAuthStateChanged(function(user){
       if(!user||!user.uid){window.location.href="login-wix.html";return;}
-      if(loadingEl)loadingEl.style.display="none";
-      if(contentEl)contentEl.style.display="flex";
-      if(navEmail)navEmail.textContent=user.email||"";
-      if(iframeEl)iframeEl.src=APP_IFRAME_SRC;
+      window.location.href=OFFIBOX_WEB_APP_URL;
     });
-    if(navSignout)navSignout.addEventListener("click",function(e){e.preventDefault();window.OffiboxAuth.signOut().then(function(){window.location.href="login-wix.html";});});
   })();
   </script>
 </body>

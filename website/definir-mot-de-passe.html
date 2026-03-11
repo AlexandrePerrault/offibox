@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Définir votre mot de passe – Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      background: var(--white);
+      padding: 1.5rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--white);
+      padding: 2rem 2.25rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      border: 1px solid var(--gray-light);
+    }
+    .card h1 { font-size: 1.35rem; font-weight: 700; color: var(--gray); margin-bottom: 0.5rem; }
+    .card .sub { color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .auth-error { margin-bottom: 1rem; padding: 0.75rem 1rem; background: #fef2f2; color: #b91c1c; font-size: 0.9rem; border-radius: 8px; display: none; }
+    .auth-error.visible { display: block; }
+    .auth-success { background: #f0fdf4; color: #166534; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 500; color: var(--gray); margin-bottom: 0.4rem; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 0.75rem 1rem; font-size: 1rem;
+      border: 1px solid var(--gray-light); border-radius: 8px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { outline: none; border-color: var(--offi-teal); box-shadow: 0 0 0 3px rgba(90, 144, 148, 0.15); }
+    .btn-submit {
+      width: 100%; padding: 0.875rem; font-size: 1rem; font-weight: 600; color: var(--white);
+      background: var(--offi-teal); border: none; border-radius: 10px;
+      cursor: pointer; transition: background 0.2s, transform 0.2s;
+    }
+    .btn-submit:hover { background: #4a7a7e; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .success-panel { display: none; text-align: center; }
+    .success-panel.visible { display: block; }
+    .success-panel h2 { font-size: 1.2rem; color: var(--gray); margin-bottom: 0.5rem; }
+    .success-panel p { color: #64748b; margin-bottom: 1.25rem; font-size: 0.95rem; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+    .btn-row a, .btn-row button {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.75rem 1.25rem; font-size: 0.95rem; font-weight: 600;
+      border-radius: 10px; text-decoration: none; cursor: pointer;
+      font-family: inherit; border: none;
+    }
+    .btn-primary { background: var(--offi-teal); color: var(--white); }
+    .btn-primary:hover { background: #4a7a7e; color: var(--white); }
+    .btn-secondary { background: var(--gray-light); color: var(--gray); }
+    .btn-secondary:hover { background: #cbd5e1; color: var(--gray); }
+    .form-panel { display: block; }
+    .form-panel.hidden { display: none; }
+    .back-link { margin-bottom: 1rem; font-size: 0.9rem; }
+    .back-link a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+    .back-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <p class="back-link"><a href="login-wix.html">← Retour à la connexion</a></p>
+
+    <div id="form-panel" class="form-panel">
+      <h1>Créer votre mot de passe</h1>
+      <p class="sub">Choisissez un mot de passe pour finaliser votre inscription Offibox.</p>
+      <div id="auth-error" class="auth-error" role="alert"></div>
+      <form id="pwd-form" action="#" method="post">
+        <div class="form-group">
+          <label for="new-password">Nouveau mot de passe</label>
+          <input type="password" id="new-password" name="new-password" placeholder="••••••••" autocomplete="new-password" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirmer le mot de passe</label>
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="••••••••" autocomplete="new-password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-submit" id="btn-submit">Définir le mot de passe</button>
+      </form>
+    </div>
+
+    <div id="success-panel" class="success-panel">
+      <h2>Mot de passe créé</h2>
+      <p>Vous pouvez maintenant vous connecter et utiliser Offibox.</p>
+      <div class="btn-row">
+        <a href="login-wix.html" class="btn-primary">Se connecter</a>
+        <a href="offibox://" id="btn-open-app" class="btn-secondary">Ouvrir l'application Offibox</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search || '');
+      var oobCode = params.get('oobCode');
+      var mode = params.get('mode');
+      var formPanel = document.getElementById('form-panel');
+      var successPanel = document.getElementById('success-panel');
+      var authError = document.getElementById('auth-error');
+      var form = document.getElementById('pwd-form');
+      var btnSubmit = document.getElementById('btn-submit');
+
+      function showError(msg) {
+        if (authError) {
+          authError.textContent = msg || '';
+          authError.classList.toggle('visible', !!msg);
+          authError.classList.remove('auth-success');
+          if (msg) authError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+
+      function setLoading(loading) { if (btnSubmit) btnSubmit.disabled = loading; }
+
+      function baseUrl() {
+        var o = window.location.origin || '';
+        var p = window.location.pathname || '';
+        var dir = p.lastIndexOf('/') >= 0 ? p.substring(0, p.lastIndexOf('/') + 1) : '/';
+        return (o + dir).replace(/([^/])$/, '$1/');
+      }
+
+      if (!oobCode || mode !== 'resetPassword') {
+        showError('Lien invalide ou expiré. Demandez un nouveau lien depuis la page de connexion (« Mot de passe oublié ») ou inscrivez-vous à nouveau.');
+        if (form) form.style.display = 'none';
+      } else if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var newPwd = document.getElementById('new-password').value;
+          var confirmPwd = document.getElementById('confirm-password').value;
+          if (newPwd.length < 6) {
+            showError('Le mot de passe doit contenir au moins 6 caractères.');
+            return;
+          }
+          if (newPwd !== confirmPwd) {
+            showError('Les deux mots de passe ne correspondent pas.');
+            return;
+          }
+          showError('');
+          setLoading(true);
+          if (typeof firebase === 'undefined' || !firebase.auth) {
+            showError('Service temporairement indisponible. Réessayez plus tard.');
+            setLoading(false);
+            return;
+          }
+          firebase.auth().confirmPasswordReset(oobCode, newPwd)
+            .then(function() {
+              if (formPanel) formPanel.classList.add('hidden');
+              if (successPanel) successPanel.classList.add('visible');
+            })
+            .catch(function(err) {
+              setLoading(false);
+              var msg = 'Impossible de définir le mot de passe. Le lien a peut-être expiré.';
+              if (err && err.code === 'auth/expired-action-code') msg = 'Ce lien a expiré. Utilisez « Mot de passe oublié » sur la page de connexion pour en recevoir un nouveau.';
+              else if (err && err.message) msg = err.message;
+              showError(msg);
+            });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

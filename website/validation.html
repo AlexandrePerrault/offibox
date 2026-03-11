@@ -269,7 +269,7 @@
       <h1>Inscription enregistrée</h1>
       <p>Un email vous a été envoyé pour définir votre mot de passe et finaliser votre inscription.</p>
       <p class="pending-email" id="pending-email"></p>
-      <p>Consultez votre boîte mail, cliquez sur le lien reçu puis connectez-vous.</p>
+      <p>Consultez votre boîte mail, cliquez sur le lien reçu, créez votre mot de passe (et confirmez-le), puis connectez-vous.</p>
       <a href="login-wix.html" class="btn-to-login" id="btn-to-login">Aller à la connexion</a>
     </div>
     <div id="validation-content" style="display: none;">
@@ -319,7 +319,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
   <script>
   (function(){if(typeof firebase==='undefined')return;var c={apiKey:'AIzaSyA3eizSKEwkUnH1Y5Xcum3fVgczGgPAFkk',authDomain:'offibox-prod.firebaseapp.com',projectId:'offibox-prod',storageBucket:'offibox-prod.firebasestorage.app',messagingSenderId:'264737328165',appId:'1:264737328165:web:d8744f8fc1c188d9ddc3cc',measurementId:'G-E1FP98K8WE'};if(!firebase.apps.length)firebase.initializeApp(c);})();
-  (function(){if(typeof firebase==='undefined'){window.OffiboxAuth=null;return;}var a=firebase.auth();window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);},signInWithGoogle:function(){return a.signInWithPopup(new firebase.auth.GoogleAuthProvider());},signInWithEmailPassword:function(e,p){return a.signInWithEmailAndPassword(e,p);},signUpWithEmailPassword:function(e,p){return a.createUserWithEmailAndPassword(e,p);},sendPasswordResetEmail:function(e){return a.sendPasswordResetEmail(e);},signOut:function(){return a.signOut();}};})();
+  (function(){if(typeof firebase==='undefined'){window.OffiboxAuth=null;return;}var a=firebase.auth();window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);},signInWithEmailPassword:function(e,p){return a.signInWithEmailAndPassword(e,p);},signUpWithEmailPassword:function(e,p){return a.createUserWithEmailAndPassword(e,p);},sendPasswordResetEmail:function(e){return a.sendPasswordResetEmail(e);},signOut:function(){return a.signOut();}};})();
   </script>
   <script>
     (function() {
