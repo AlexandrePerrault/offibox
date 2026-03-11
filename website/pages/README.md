@@ -1,12 +1,12 @@
-# Déployer les pages Offibox (login, inscription, validation) pour iframes Wix
+# Pages Offibox (login, inscription, validation) – GitHub Pages
 
-Ce dossier contient les pages à héberger : **login**, **inscription**, **validation**, **démo**, etc.
+Ce dossier contient les pages déployées sur **GitHub Pages** : **login**, **inscription**, **validation**, **démo**, etc. (iframes Wix, lien depuis l’app PC.)
 
-## Option recommandée : GitHub Pages (gratuit)
+## Déploiement
 
-Les fichiers de `html/` sont déployés automatiquement sur **GitHub Pages** à chaque push sur `main`/`master` (workflow `.github/workflows/pages.yml`). Aucun coût, aucun compte Netlify nécessaire.
+Les fichiers de `html/` sont copiés vers le build et déployés automatiquement à chaque push sur `main`/`master` (workflow `.github/workflows/pages.yml`).
 
-### URL de base (une fois Pages activé)
+### URL de base
 
 - **Base** : `https://alexandreperrault.github.io/offibox/`
 - **Pages HTML** : `https://alexandreperrault.github.io/offibox/html/`
@@ -15,7 +15,7 @@ Les fichiers de `html/` sont déployés automatiquement sur **GitHub Pages** à 
 
 1. Sur le dépôt GitHub : **Settings** → **Pages**.
 2. **Source** : choisir **GitHub Actions** (pas "Deploy from a branch").
-3. Après un push sur `main`, le workflow déploie ; le site est disponible sous quelques minutes.
+3. Après un push sur `main`/`master`, le workflow déploie ; le site est disponible sous quelques minutes.
 
 ### Vérifier
 
@@ -26,7 +26,7 @@ Les fichiers de `html/` sont déployés automatiquement sur **GitHub Pages** à 
 
 ### Iframes Wix (snippets)
 
-Remplacez l’URL de base dans vos iframes par : `https://alexandreperrault.github.io/offibox/html/`
+URL de base pour les iframes : `https://alexandreperrault.github.io/offibox/html/`
 
 **Connexion :**
 ```html
@@ -70,23 +70,12 @@ Ajoutez le domaine GitHub Pages dans :
 
 ### Mises à jour
 
-Modifiez les fichiers dans `deploy-netlify/html/`, commitez et poussez sur `main`. Le workflow déploie automatiquement.
-
----
-
-## Alternative : Netlify
-
-Si vous préférez Netlify (manuel ou connecté au dépôt) :
-
-1. [app.netlify.com](https://app.netlify.com) → **Add new site** → **Deploy manually**.
-2. Glissez-déposez le contenu de `deploy-netlify` (dossier `html` + README).
-3. URL type : `https://VOTRE-SITE.netlify.app/html/...`
-4. Dans Firebase / Google, ajoutez `VOTRE-SITE.netlify.app` en domaine autorisé.
+Modifiez les fichiers dans `website/pages/html/`, commitez et poussez sur `master`. Le workflow déploie automatiquement.
 
 ## Structure
 
 ```
-deploy-netlify/
+website/pages/
   html/
     login-wix.html
     inscription.html

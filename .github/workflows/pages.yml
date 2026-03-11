@@ -43,7 +43,7 @@ jobs:
 
       # Pages statiques (login, inscription, validation, démo) pour iframes Wix / app
       - name: Copy static HTML to build
-        run: cp -r website/deploy-netlify/html build/web/html
+        run: cp -r website/pages/html build/web/html
 
       # Tout le dossier website (tous les HTML) pour GitHub Pages
       - name: Copy full website to build

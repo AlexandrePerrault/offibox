@@ -38,7 +38,7 @@ Après déploiement (push sur `master`), les pages du dossier `website/` sont di
 - https://alexandreperrault.github.io/offibox/website/archive/mentions-legales.html
 - https://alexandreperrault.github.io/offibox/website/archive/politique-confidentialite.html
 
-## website/deploy-netlify/html/ (déjà déployé sous /offibox/html/)
+## website/pages/html/ (déployé sous /offibox/html/)
 
 - https://alexandreperrault.github.io/offibox/html/app-embed.html
 - https://alexandreperrault.github.io/offibox/html/app.html

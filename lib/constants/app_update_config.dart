@@ -16,7 +16,7 @@ class AppUpdateConfig {
 
   /// Page d'inscription Offibox (formulaire web) utilisée pour la première connexion
   /// depuis le site et depuis l'application desktop.
-  /// Hébergée sur GitHub Pages (gratuit) ; voir website/deploy-netlify/README.md.
+  /// Hébergée sur GitHub Pages ; voir website/pages/README.md.
   static const String publicInscriptionPageUrl =
       'https://alexandreperrault.github.io/offibox/html/inscription.html';
 

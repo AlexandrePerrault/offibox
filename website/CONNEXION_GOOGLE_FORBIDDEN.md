@@ -22,7 +22,7 @@ Si la requête vers `content-people.googleapis.com` ou une API Google renvoie **
    - **Authorized JavaScript origins** : ajouter **exactement** les origines d’où vous testez ou déployez, par exemple :  
      - `https://www.offibox.fr`  
      - `https://offibox.fr`  
-     - `https://golden-mochi-ba95d4.netlify.app` (ou votre URL Netlify)  
+     - `https://alexandreperrault.github.io` (GitHub Pages)  
      - En test local : `http://localhost:PORT`  
    - **Authorized redirect URIs** : doit contenir **exactement** (obligatoire pour Firebase Auth) :  
      - `https://offibox-prod.firebaseapp.com/__/auth/handler`  

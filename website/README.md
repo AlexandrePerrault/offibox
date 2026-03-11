@@ -61,7 +61,7 @@ La config web est dans `js/firebase-config.js` (alignée sur `lib/firebase_optio
    - Saisir le domaine exact utilisé par le site, **sans** `https://` ni chemin, par exemple :  
      - `www.offibox.fr`  
      - `offibox.fr` (si le site est servi à la racine)  
-     - `votre-projet.netlify.app` ou `votre-projet.vercel.app` (hébergement de préproduction).  
+     - `alexandreperrault.github.io` (GitHub Pages) ou autre hébergeur de préproduction.  
    - Pour tester en local : `localhost` est en général déjà autorisé.  
    - Enregistrer.
 
