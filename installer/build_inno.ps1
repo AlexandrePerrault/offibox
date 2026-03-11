@@ -42,11 +42,20 @@ if (-not $iscc) {
 
 # Lire la version depuis pubspec.yaml (source unique)
 $pubspecPath = Join-Path $ProjectRoot "pubspec.yaml"
-$versionLine = Get-Content $pubspecPath -Raw | Select-String -Pattern '^\s*version:\s*([^\s#]+)' | ForEach-Object { $_.Matches.Groups[1].Value.Trim() }
-if (-not $versionLine) {
-    Write-Error "Impossible de lire la version dans pubspec.yaml"
+if (-not (Test-Path $pubspecPath)) {
+    Write-Error "pubspec.yaml introuvable à la racine du projet : $pubspecPath"
 }
-$AppVersion = $versionLine
+
+$pubspecContent = Get-Content $pubspecPath -Raw
+$versionMatch = [regex]::Match(
+    $pubspecContent,
+    '^\s*version:\s*([0-9]+\.[0-9]+\.[0-9]+[^\s#]*)',
+    [System.Text.RegularExpressions.RegexOptions]::Multiline
+)
+if (-not $versionMatch.Success) {
+    Write-Error "Impossible de lire la version dans pubspec.yaml (ligne 'version: X.Y.Z')."
+}
+$AppVersion = $versionMatch.Groups[1].Value.Trim()
 Write-Host "Version (pubspec.yaml) : $AppVersion" -ForegroundColor Cyan
 
 Write-Host "Compilation Inno Setup : Offibox.iss" -ForegroundColor Cyan

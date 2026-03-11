@@ -19,6 +19,8 @@ Le fichier produit est : **`website\download\Offibox-Setup-<version>.exe`**.
 
 **Version :** elle est lue automatiquement depuis **`pubspec.yaml`** (ligne `version: 1.1.25`) à chaque build. Le script affiche `Version (pubspec.yaml) : 1.1.25` avant la compilation.
 
+**Historique des versions (menu hamburger) :** les textes affichés viennent des **releases GitHub** (corps/description de chaque release). Modifier la description d’une release sur GitHub (Releases → Edit) met à jour automatiquement l’onglet hamburger « Historique des versions » au prochain chargement. La date affichée dans « À propos » vient de `lib/generated/build_info.dart` (`kVersionDate`).
+
 ---
 
 ## 2. Mettre à jour la version
