@@ -10,10 +10,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padding:.5rem 0}
 .download-card{background:var(--white);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,.1);border:1px solid #e2e8f0;padding:1.5rem 2rem;text-align:center;width:50%;max-width:50%;min-width:280px;margin:0 auto}
-.download-badge{display:inline-block;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--offi-teal),var(--offi-teal-dark));color:var(--white);border-radius:16px;border:2px solid transparent;font-weight:600;font-size:1.1rem;text-decoration:none;box-shadow:0 4px 20px rgba(90,144,148,.35);transition:transform .2s,box-shadow .2s,background .25s,color .25s,border-color .25s}
+.download-badge{display:block;width:100%;box-sizing:border-box;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--offi-teal),var(--offi-teal-dark));color:var(--white);border-radius:16px;border:2px solid transparent;font-weight:600;font-size:1.1rem;text-decoration:none;box-shadow:0 4px 20px rgba(90,144,148,.35);transition:transform .2s,box-shadow .2s,background .25s,color .25s,border-color .25s}
 .download-badge:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(90,144,148,.45);background:var(--white);color:var(--offi-teal);border-color:var(--offi-teal)}
-.download-badge .badge-version{display:block;font-size:.9rem;opacity:.95;margin-bottom:.2rem}
-.download-badge .badge-platform{display:block;font-size:.8rem;opacity:.9;margin-top:.25rem}
+.download-badge .badge-title{display:block;margin-bottom:.25rem}
+.download-badge .badge-version-date{display:block;font-size:.8rem;opacity:.95;margin-bottom:.15rem}
+.download-badge .badge-date{font-style:italic;opacity:.9}
+.download-badge .badge-platform{display:block;font-size:.8rem;opacity:.9;margin-top:.2rem}
 .download-intro{margin-bottom:.75rem;font-size:1rem;color:var(--gray)}
 .download-card p{margin-top:.75rem;font-size:.9rem;color:var(--gray)}
 .download-popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;align-items:center;justify-content:center;padding:1rem}
@@ -29,8 +31,8 @@ body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padd
 <div class="download-card">
 <p class="download-intro">Vous pouvez également télécharger</p>
 <a href="#" id="download-badge" class="download-badge" target="_blank" rel="noopener">
-  <span class="badge-version" id="version-label">Version — chargement…</span>
-  <span>Offibox pour PC</span>
+  <span class="badge-title">Offibox pour PC</span>
+  <span class="badge-version-date"><span id="version-label">Version — chargement…</span> <span class="badge-date" id="release-date-label"></span></span>
   <span class="badge-platform" id="platform-label">Windows · 64 bits</span>
 </a>
 <p>Cliquez sur le bouton pour lancer le téléchargement de l'installateur Offibox (.exe)</p>
@@ -49,9 +51,15 @@ var G="https://api.github.com/repos/AlexandrePerrault/offibox/releases/latest";
 var R="https://github.com/AlexandrePerrault/offibox/releases/latest";
 var b=document.getElementById("download-badge");
 var v=document.getElementById("version-label");
-var p=document.getElementById("platform-label");
+var releaseDateEl=document.getElementById("release-date-label");
 var linkIci=document.getElementById("download-popup-link-ici");
-if(linkIci)linkIci.href=R;
+var moisFr=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+function formatDateRelease(iso){
+  if(!iso)return"";
+  var d=new Date(iso);
+  if(isNaN(d.getTime()))return"";
+  return d.getDate()+" "+moisFr[d.getMonth()]+" "+d.getFullYear();
+}
 var currentSetupUrl="", currentVer="";
 function setPlatformLabel(){
   var el=document.getElementById("platform-label");
@@ -82,7 +90,10 @@ var url=R;
 if(d&&d.assets&&d.assets.length){var w=d.assets.filter(function(a){return(a.name||"").toLowerCase().indexOf(".exe")!==-1});var x=w.filter(function(a){return(a.name||"").toLowerCase().indexOf("x64")!==-1})[0]||w[0];if(x&&x.browser_download_url){url=x.browser_download_url;currentSetupUrl=url;currentVer=ver;}}
 if(b)b.href=url;
 if(v)v.textContent="Version "+(ver||"—");
-}).catch(function(){if(b)b.href=R;if(v)v.textContent="Version —";});
+var dateStr=formatDateRelease(d&&d.published_at);
+if(releaseDateEl)releaseDateEl.textContent=dateStr?" — "+dateStr:"";
+if(linkIci)linkIci.href=(d&&d.html_url) ? d.html_url : R;
+}).catch(function(){if(b)b.href=R;if(v)v.textContent="Version —";if(releaseDateEl)releaseDateEl.textContent="";if(linkIci)linkIci.href=R;});
 var popup=document.getElementById("download-popup-overlay");
 function closePopup(){if(popup)popup.classList.remove("visible");}
 if(b){b.addEventListener("click",function(e){if(currentSetupUrl&&currentSetupUrl.indexOf(".exe")!==-1){e.preventDefault();if(popup)popup.classList.add("visible");var a=document.createElement("a");a.href=currentSetupUrl;a.download="Offibox-Setup-"+(currentVer||"latest")+".exe";a.style.display="none";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(closePopup,10000);}});}

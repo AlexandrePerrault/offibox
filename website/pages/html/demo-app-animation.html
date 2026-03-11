@@ -1,169 +1,730 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demo Offibox - Barre au repos, ouverture, recherche Imbruvica</title>
-<link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Spinnaker,sans-serif;background:#f1f5f9;min-height:100vh;padding:24px;display:flex;flex-direction:column;align-items:center}
-.demo-wrap{max-width:1200px;width:100%;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:visible;position:relative;min-height:320px}
-/* Barre alignée à droite : au repos = pill (logo seul), puis ouverture vers la gauche */
-.app-bar-outer{display:flex;justify-content:flex-end;padding:12px 12px 0;position:relative}
-.app-bar-container{width:80px;min-height:62px;border-radius:31px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:width .45s ease-out, border-radius .35s ease-out}
-.app-bar-container.expanded{width:92%;border-radius:15px;justify-content:flex-start}
-.bar-pill-only{display:flex;align-items:center;justify-content:center;gap:2px;flex-shrink:0;white-space:nowrap}
-.bar-pill-only .logo-offi{font-size:18px;font-weight:700;color:#5A9094}
-.bar-pill-only .logo-box{font-size:18px;font-weight:700;color:#334155}
-.bar-expanded-content{display:none;flex-direction:column;width:100%;min-width:0}
-.app-bar-container.expanded .bar-pill-only{display:none}
-.app-bar-container.expanded .bar-expanded-content{display:flex}
-.info-bar{height:38px;padding:0 8px;display:flex;align-items:center;gap:6px;background:#fff;border-radius:12px;margin:0 0 6px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.info-bar-date{height:19px;padding:2.5px 8px;background:#37474F;border-radius:8px;font-size:10px;font-weight:600;color:#fff}
-.info-bar-infos{height:19px;padding:2.5px 8px;background:#4E8A72;border-radius:8px;font-size:10px;font-weight:700;color:#fff}
-.info-bar-scroll{flex:1;overflow:hidden;min-width:0}.info-bar-scroll-inner{display:flex;align-items:center;gap:4px;animation:scroll 25s linear infinite}
-.ticker-bullet{color:#94a3b8;font-size:9px;padding:0 4px;flex-shrink:0}
-.ticker-badge{height:19px;padding:2.5px 8px;border-radius:8px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap;flex-shrink:0}
-.ticker-badge.ansm{background:#1565C0}.ticker-badge.dgs{background:#B71C1C}.ticker-badge.rappel{background:#8D6E63}.ticker-badge.journee{background:#8E44AD}.ticker-badge.infos{background:#4E8A72}
-.ticker-badge a{color:inherit;text-decoration:none}
-@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.search-bar-expanded{min-height:118px;background:transparent;padding:12px 0 8px}
-.search-input{width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:15px;margin-bottom:10px}
-.result-title{font-weight:700;margin-bottom:6px;font-size:13px;color:#334155}
-.result-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid #5A9094;background:#fff;color:#334155}
-.pill:hover{background:#5A9094;color:#fff}.pill .pdf-icon{width:16px;height:16px}
-.pdf-panel{margin:0 12px 12px;height:0;overflow:hidden;transition:height .4s ease-out;background:#fff;border-radius:15px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
-.pdf-panel.open{height:480px}
-.pdf-panel-toolbar{height:52px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0}
-.pdf-panel-close{width:28px;height:28px;border-radius:50%;background:#D32F2F;color:#fff;border:none;cursor:pointer;font-size:18px}
-.pdf-panel-content{height:428px;background:#f3f4f6;padding:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:auto}
-.pdf-placeholder{background:#fff;border-radius:8px;padding:48px;text-align:center;color:#64748b;max-width:640px}
-.pdf-demo-img{max-width:100%;max-height:100%;object-fit:contain;display:block;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-.pdf-demo-image-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%;max-height:100%}
-.fake-cursor{position:absolute;width:16px;height:16px;border-radius:50%;background:#111827;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.45);pointer-events:none;transform:translate(40px,140px);transition:transform .08s ease-out}
-.fake-cursor.click{transform:scale(.8)}
-.hidden{display:none!important}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Démo Offibox – Version HD fidèle à l’app</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --offi-teal: #5A9094;
+      --white: #ffffff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      background: #f8fafb;
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .demo-wrap {
+      max-width: 1200px;
+      width: 100%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+      overflow: visible;
+      position: relative;
+      min-height: 420px;
+    }
+    /* Au repos : barre compacte pour que le logo soit visible au départ */
+    .app-bar-outer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 20px 0 0;
+      position: relative;
+    }
+    .app-bar-container {
+      width: 60px;
+      height: 60px;
+      min-height: 60px;
+      border-radius: 22px;
+      background: var(--white);
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 4px 10px rgba(0,0,0,.14), 0 -1px 3px rgba(255,255,255,.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: width .45s ease-out, height .45s ease-out, min-height .45s ease-out, border-radius .35s ease-out;
+    }
+    .app-bar-container.expanded {
+      width: 92%;
+      min-height: 68px;
+      height: auto;
+      border-radius: 15px;
+      justify-content: flex-start;
+    }
+    .bar-pill-only {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      width: 60px;
+      height: 60px;
+    }
+    .bar-pill-only .logo-img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      display: block;
+    }
+    .bar-expanded-content {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      min-width: 0;
+    }
+    .app-bar-container.expanded .bar-pill-only { display: none; }
+    .app-bar-container.expanded .bar-expanded-content { display: flex; }
+
+    /* Barre d'infos (ticker) — fidèle OffiboxWindowUI (tickerBarHeight 38, tickerBarGap 6) */
+    .info-bar {
+      height: 38px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border-radius: 8px;
+      margin: 0 0 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .info-bar-toggle {
+      width: 27px;
+      height: 17px;
+      background: #34C759;
+      border-radius: 9px;
+      flex-shrink: 0;
+      border: 1.5px solid #fff;
+    }
+    .info-bar-date {
+      height: 19px;
+      padding: 2.5px 8px;
+      background: #37474F;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .info-bar-infos {
+      height: 19px;
+      padding: 2.5px 8px;
+      background: #4E8A72;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .info-bar-scroll {
+      flex: 1;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .info-bar-scroll-inner {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      animation: ticker-scroll 28s linear infinite;
+    }
+    .ticker-bullet { color: #94a3b8; font-size: 9px; padding: 0 4px; flex-shrink: 0; }
+    .ticker-badge {
+      height: 19px;
+      padding: 2.5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .ticker-badge.dgs   { background: #B71C1C; color: #fff; }
+    .ticker-badge.ansm  { background: #1565C0; color: #fff; }
+    .ticker-badge.rappel { background: #B71C1C; color: #fff; }
+    .ticker-badge.infos { background: #4E8A72; color: #fff; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Zone recherche + résultat */
+    .search-bar-expanded {
+      min-height: 118px;
+      background: transparent;
+      padding: 12px 0 8px;
+    }
+    .search-input {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+    .result-line {
+      display: none;
+    }
+    .result-line.visible { display: block; }
+    .result-line.visible .search-input { display: none; }
+    .result-product-line {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-bottom: 6px;
+      opacity: 0;
+      transition: opacity .25s ease-out;
+    }
+    .result-line.visible .result-product-line.show { opacity: 1; }
+    .result-picto-gelule {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .result-picto-gelule svg { width: 22px; height: 22px; }
+    .result-commonspan { font-size: 12px; color: #64748b; font-weight: 600; }
+    .result-title { font-weight: 700; font-size: 13px; color: #334155; }
+    .result-cip-line { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #334155; }
+    .result-cip-line .copy-icon { width: 16px; height: 16px; cursor: pointer; opacity: .85; flex-shrink: 0; }
+    .result-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid #3d6b5c;
+      background: #4E8A72;
+      color: #fff;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .pill:hover,
+    .pill:focus,
+    .pill.pill-active {
+      background: #fff;
+      color: #4E8A72;
+      border-color: #4E8A72;
+    }
+    .pill .pdf-icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Fenêtre type navigateur — pleine largeur de la barre */
+    .browser-panel {
+      margin: 8px 0 12px 0;
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    .browser-panel.visible { display: flex; }
+    .browser-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+      min-height: 44px;
+    }
+    .browser-toolbar .pdf-badge {
+      flex-shrink: 0;
+      width: 28px;
+      height: 24px;
+      background: #dc2626;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    .browser-toolbar .pdf-badge svg { width: 18px; height: 18px; }
+    .browser-toolbar .url-bar {
+      flex: 1;
+      font-size: 12px;
+      color: #334155;
+      word-break: break-all;
+      min-width: 0;
+    }
+    .browser-toolbar a.url-bar {
+      color: var(--offi-teal);
+      text-decoration: none;
+    }
+    .browser-toolbar a.url-bar:hover { text-decoration: underline; }
+    .browser-frame-wrap {
+      width: 100%;
+      height: 380px;
+      background: #f8fafc;
+    }
+    .browser-frame-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Panneau PDF sous la barre — pleine largeur de la fenêtre démo */
+    .pdf-panel {
+      margin: 0 0 12px 0;
+      width: 100%;
+      height: 0;
+      overflow: hidden;
+      transition: height .4s ease-out;
+      background: #fff;
+      border-radius: 0 0 15px 15px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+    .pdf-panel.open { height: 520px; }
+    .pdf-panel-toolbar {
+      height: 52px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .pdf-panel-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #D32F2F;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .pdf-panel-content {
+      height: 468px;
+      background: #f3f4f6;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+    }
+    .pdf-demo-image-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .pdf-demo-img {
+      width: 100%;
+      max-width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      object-position: top center;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .pdf-placeholder {
+      background: #fff;
+      border-radius: 8px;
+      padding: 48px;
+      text-align: center;
+      color: #64748b;
+      max-width: 640px;
+    }
+    .hidden { display: none !important; }
+
+    /* Rond qui mime la souris et le clic — plus petit */
+    .fake-cursor {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--offi-teal);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+      pointer-events: none;
+      z-index: 100;
+      transition: transform .12s ease-out;
+    }
+    .fake-cursor.click {
+      transform: scale(0.7);
+      box-shadow: 0 0 0 3px rgba(90,144,148,.4);
+    }
+  </style>
 </head>
 <body>
-<div class="demo-wrap">
-<div class="app-bar-outer">
-  <div class="app-bar-container" id="app-bar-container">
-    <div class="bar-pill-only">
-      <span class="logo-offi">Offi</span><span class="logo-box">box</span>
-    </div>
-    <div class="bar-expanded-content">
-      <div class="info-bar">
-        <div style="width:27px;height:17px;background:#34C759;border-radius:9px;flex-shrink:0"></div>
-        <div class="info-bar-date" id="info-bar-date">10/03/2026  12:00:00</div>
-        <div class="info-bar-infos">INFOS</div>
-        <div class="info-bar-scroll"><div class="info-bar-scroll-inner" id="ticker-scroll-inner">
-          <span class="ticker-badge rappel">Dernier rappel (10/03/2026) : Produit X – Labo Y</span><span class="ticker-bullet">•</span>
-          <span class="ticker-badge ansm">ANSM – Informations de sécurité</span><span class="ticker-bullet">•</span>
-          <span class="ticker-badge dgs">DGS-Urgent</span><span class="ticker-bullet">•</span>
-          <span class="ticker-badge rappel">Dernier rappel (10/03/2026) : Produit X – Labo Y</span><span class="ticker-bullet">•</span>
-          <span class="ticker-badge ansm">ANSM – Informations de sécurité</span><span class="ticker-bullet">•</span>
-          <span class="ticker-badge dgs">DGS-Urgent</span><span class="ticker-bullet">•</span>
-        </div></div>
-      </div>
-      <div class="search-bar-expanded">
-        <input type="text" class="search-input" id="search-input" placeholder="Rechercher…" readonly>
-        <div class="result-line hidden" id="result-line">
-          <div class="result-title">IMBRUVICA 140 mg, gélule – ibrutinib – JANSSEN-CILAG</div>
-          <div class="result-badges">
-            <span class="pill">RCP</span><span class="pill">Fiche MEDDISPAR</span>
-            <span class="pill" id="pill-fiche-pro"><svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg> fiche à destination des professionnels de santé OMÉDIT</span>
+  <div class="demo-wrap" id="demo-wrap">
+    <div class="app-bar-outer">
+      <div class="app-bar-container" id="app-bar-container">
+        <div class="bar-pill-only" id="bar-pill">
+          <img src="assets/icons/logo_offibox.png" alt="Offibox" class="logo-img">
+        </div>
+        <div class="bar-expanded-content">
+          <div class="info-bar">
+            <div class="info-bar-toggle"></div>
+            <div class="info-bar-date" id="info-bar-date"></div>
+            <div class="info-bar-infos">INFOS</div>
+            <div class="info-bar-scroll">
+              <div class="info-bar-scroll-inner" id="ticker-inner">
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge ansm">ANSM – Informations de sécurité</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge rappel">Rappel produit</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge ansm">ANSM – Informations de sécurité</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge rappel">Rappel produit</span>
+                <span class="ticker-bullet">•</span>
+              </div>
+            </div>
+          </div>
+          <div class="search-bar-expanded">
+            <input type="text" class="search-input" id="search-input" placeholder="Rechercher…" readonly>
+            <div class="result-line" id="result-line">
+              <div class="result-product-line" id="result-product-line">
+                <div class="result-picto-gelule" id="result-picto-gelule" title="Gélule">
+                  <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="12" rx="9" ry="5" fill="url(#gelule-gradient)"/><path d="M12 7v10" stroke="#1f2937" stroke-width="1.2"/><defs><linearGradient id="gelule-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#FCD34D"/><stop offset="50%" stop-color="#FCD34D"/><stop offset="50%" stop-color="#DC2626"/><stop offset="100%" stop-color="#DC2626"/></linearGradient></defs></svg>
+                </div>
+                <span class="result-commonspan" id="result-commonspan">ibrutinib</span>
+                <span class="result-title" id="result-title">IMBRUVICA 140 mg, gélule – ibrutinib – JANSSEN-CILAG</span>
+                <span class="result-cip-line"><span>CIP 3400936672874</span><svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Copier"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+              </div>
+              <div class="result-badges">
+                <span class="pill" id="pill-rcp" title="Résumé des caractéristiques du produit">
+                  <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+                  </svg>
+                  RCP
+                </span>
+                <span class="pill" id="pill-meddispar" title="Fiche MEDDISPAR">
+                  <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+                  </svg>
+                  Fiche MEDDISPAR
+                </span>
+                <span class="pill" id="pill-fiche-patient" title="Fiche à destination des patients OMÉDIT">
+                  <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+                  </svg>
+                  fiche à destination des patients OMÉDIT
+                </span>
+                <span class="pill" id="pill-fiche-pro" title="Fiche à destination des professionnels de santé OMÉDIT">
+                  <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+                  </svg>
+                  fiche à destination des professionnels de santé OMÉDIT
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-<div class="pdf-panel" id="pdf-panel">
-  <div class="pdf-panel-toolbar"><button type="button" class="pdf-panel-close" id="pdf-panel-close">×</button><span style="font-size:13px;color:#64748b">Source : fiche VOC professionnels de santé – OMÉDIT</span></div>
-  <div class="pdf-panel-content">
-    <div class="pdf-demo-image-wrap" id="pdf-demo-image-wrap">
-      <img id="demo-fiche-voc-img" class="pdf-demo-img" src="demo-fiche-voc.jpg" alt="Capture fiche VOC (démo)">
-      <a id="pdf-link" href="#" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline;font-size:13px">Ouvrir la fiche dans un nouvel onglet</a>
+    <div class="browser-panel" id="browser-panel">
+      <div class="browser-toolbar">
+        <span class="pdf-badge hidden" id="browser-pdf-badge" title="Document PDF"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></span>
+        <a id="browser-url-bar" class="url-bar" href="#" target="_blank" rel="noopener noreferrer"></a>
+      </div>
+      <div class="browser-frame-wrap">
+        <iframe id="browser-frame" title="Aperçu"></iframe>
+      </div>
     </div>
-    <div class="pdf-placeholder hidden" id="pdf-placeholder">
-      <p style="margin-bottom:12px;color:#334155;font-size:14px">Aperçu PDF (démo) – Dans l'app, la fiche VOC s'affiche ici.</p>
-      <a href="#" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline;font-size:13px">Ouvrir la fiche dans un nouvel onglet</a>
+    <div class="pdf-panel" id="pdf-panel">
+      <div class="pdf-panel-toolbar">
+        <button type="button" class="pdf-panel-close" id="pdf-panel-close">×</button>
+        <span style="font-size:13px;color:#64748b">Source : fiche VOC professionnels de santé – OMÉDIT</span>
+      </div>
+      <div class="pdf-panel-content">
+        <div class="pdf-demo-image-wrap" id="pdf-demo-image-wrap">
+          <img id="demo-fiche-voc-img" class="pdf-demo-img" src="demo-fiche-voc.jpg" alt="Fiche VOC (démo)">
+          <a id="pdf-link" href="https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline;font-size:13px">Ouvrir la fiche dans un nouvel onglet</a>
+        </div>
+        <div class="pdf-placeholder hidden" id="pdf-placeholder">
+          <p style="margin-bottom:12px;color:#334155;font-size:14px">Aperçu PDF (démo) – Dans l'app, la fiche VOC s'affiche ici.</p>
+          <a id="pdf-placeholder-link" href="https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline;font-size:13px">Ouvrir la fiche dans un nouvel onglet</a>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-</div>
-<script>
-(function(){
-var pdfUrl='https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf';
-var q='imbruvica', s=120, i=0;
-var barContainer=document.getElementById('app-bar-container');
-var input=document.getElementById('search-input');
-var resultLine=document.getElementById('result-line');
-var pill=document.getElementById('pill-fiche-pro');
-var panel=document.getElementById('pdf-panel');
-var pdfLink=document.getElementById('pdf-link');
-var pdfPlaceholder=document.getElementById('pdf-placeholder');
-var pdfDemoImageWrap=document.getElementById('pdf-demo-image-wrap');
-var demoFicheImg=document.getElementById('demo-fiche-voc-img');
-pdfLink.href=pdfUrl;
-if(pdfPlaceholder){var phLink=pdfPlaceholder.querySelector('a');if(phLink)phLink.href=pdfUrl;}
-demoFicheImg.onerror=function(){if(pdfDemoImageWrap)pdfDemoImageWrap.classList.add('hidden');if(pdfPlaceholder)pdfPlaceholder.classList.remove('hidden');};
-var demoWrap=document.querySelector('.demo-wrap');
-var cursor=document.createElement('div');
-cursor.className='fake-cursor';
-demoWrap.appendChild(cursor);
 
-function expandBar(){
-  barContainer.classList.add('expanded');
-}
-function type(){
-  if(i<=q.length){
-    input.value=q.slice(0,i);
-    i++;
-    if(i<=q.length) setTimeout(type,s);
-    else setTimeout(function(){ resultLine.classList.remove('hidden'); }, 300);
-  }
-}
-function animateCursorToPillAndClick(){
-  var wrapRect=demoWrap.getBoundingClientRect();
-  var pillRect=pill.getBoundingClientRect();
-  var startX=wrapRect.left+wrapRect.width*0.2;
-  var startY=wrapRect.top+200;
-  var targetX=pillRect.left+pillRect.width*0.4;
-  var targetY=pillRect.top+pillRect.height*0.4;
-  var duration=900;
-  var startTime=null;
-  function step(ts){
-    if(!startTime) startTime=ts;
-    var t=(ts-startTime)/duration;
-    if(t>1) t=1;
-    var x=startX+(targetX-startX)*t;
-    var y=startY+(targetY-startY)*t;
-    cursor.style.transform='translate('+(x-wrapRect.left)+'px,'+(y-wrapRect.top)+'px)';
-    if(t<1) window.requestAnimationFrame(step);
-    else{
-      cursor.classList.add('click');
-      pill.click();
-      setTimeout(function(){ cursor.classList.remove('click'); }, 180);
+  <script>
+  (function() {
+    var pdfUrl = 'https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf';
+    var wrap = document.getElementById('demo-wrap');
+    var barContainer = document.getElementById('app-bar-container');
+    var barPill = document.getElementById('bar-pill');
+    var searchInput = document.getElementById('search-input');
+    var resultLine = document.getElementById('result-line');
+    var pillFichePro = document.getElementById('pill-fiche-pro');
+    var pdfPanel = document.getElementById('pdf-panel');
+    var pdfClose = document.getElementById('pdf-panel-close');
+    var browserPanel = document.getElementById('browser-panel');
+    var browserUrlBar = document.getElementById('browser-url-bar');
+    var browserFrame = document.getElementById('browser-frame');
+    var browserPdfBadge = document.getElementById('browser-pdf-badge');
+    var pillRcp = document.getElementById('pill-rcp');
+    var pillFichePatient = document.getElementById('pill-fiche-patient');
+    var pillMeddispar = document.getElementById('pill-meddispar');
+    var infoDate = document.getElementById('info-bar-date');
+    var demoImg = document.getElementById('demo-fiche-voc-img');
+    var pdfImageWrap = document.getElementById('pdf-demo-image-wrap');
+    var pdfPlaceholder = document.getElementById('pdf-placeholder');
+
+    if (infoDate) {
+      function updateDate() {
+        var d = new Date();
+        var day = ('0' + d.getDate()).slice(-2);
+        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+        var year = d.getFullYear();
+        var h = ('0' + d.getHours()).slice(-2);
+        var m = ('0' + d.getMinutes()).slice(-2);
+        var s = ('0' + d.getSeconds()).slice(-2);
+        infoDate.textContent = day + '/' + month + '/' + year + '  ' + h + ':' + m + ':' + s;
+      }
+      updateDate();
+      setInterval(updateDate, 1000);
     }
-  }
-  window.requestAnimationFrame(step);
-}
 
-pill.onclick=function(){ panel.classList.add('open'); };
-document.getElementById('pdf-panel-close').onclick=function(){ panel.classList.remove('open'); };
+    document.getElementById('pdf-link').href = pdfUrl;
+    if (pdfPlaceholder) {
+      var phLink = pdfPlaceholder.querySelector('#pdf-placeholder-link');
+      if (phLink) phLink.href = pdfUrl;
+    }
+    demoImg.onerror = function() {
+      if (pdfImageWrap) pdfImageWrap.classList.add('hidden');
+      if (pdfPlaceholder) pdfPlaceholder.classList.remove('hidden');
+    };
 
-// 1) Boîte seule (logo) au repos pendant 4 s
-// 2) Déploiement de la barre vers la gauche (~450 ms)
-setTimeout(expandBar, 4000);
-// 3) Une fois l’ouverture terminée (~450 ms), lancer la saisie "imbruvica"
-setTimeout(function(){ type(); }, 4000 + 500);
-// 4) Après apparition du résultat, animation souris → clic fiche pro
-setTimeout(function(){ animateCursorToPillAndClick(); }, 4000 + 500 + (q.length+1)*s + 1000);
-})();
-</script>
+    // Rond qui mime la souris (centré sur x,y)
+    var cursor = document.createElement('div');
+    cursor.className = 'fake-cursor';
+    wrap.appendChild(cursor);
+    var cursorRadius = 7; /* 14px / 2 */
+    function setCursorPos(x, y) {
+      cursor.style.left = (x - cursorRadius) + 'px';
+      cursor.style.top = (y - cursorRadius) + 'px';
+    }
+
+    function animateCursor(fromX, fromY, toX, toY, duration, onEnd) {
+      var startTime = null;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var t = Math.min((ts - startTime) / duration, 1);
+        var x = fromX + (toX - fromX) * t;
+        var y = fromY + (toY - fromY) * t;
+        setCursorPos(x, y);
+        if (t < 1) requestAnimationFrame(step);
+        else if (onEnd) onEnd();
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Courbe de Bézier quadratique pour un déplacement non linéaire du curseur
+    function animateCursorCurved(fromX, fromY, toX, toY, duration, onEnd) {
+      var ctrlX = (fromX + toX) / 2 + 45;
+      var ctrlY = Math.min(fromY, toY) - 35;
+      var startTime = null;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var t = Math.min((ts - startTime) / duration, 1);
+        var u = 1 - t;
+        var x = u * u * fromX + 2 * u * t * ctrlX + t * t * toX;
+        var y = u * u * fromY + 2 * u * t * ctrlY + t * t * toY;
+        setCursorPos(x, y);
+        if (t < 1) requestAnimationFrame(step);
+        else if (onEnd) onEnd();
+      }
+      requestAnimationFrame(step);
+    }
+
+    function cursorClick(callback) {
+      cursor.classList.add('click');
+      setTimeout(function() {
+        cursor.classList.remove('click');
+        if (callback) callback();
+      }, 150);
+    }
+
+    function expandBar() {
+      barContainer.classList.add('expanded');
+    }
+
+    var query = 'imbruvica 140';
+    var typeSpeed = 90;
+    var typeIndex = 0;
+
+    function typeNext() {
+      if (typeIndex <= query.length) {
+        searchInput.value = query.slice(0, typeIndex);
+        typeIndex++;
+        if (typeIndex <= query.length) setTimeout(typeNext, typeSpeed);
+        else {
+          setTimeout(function() {
+            searchInput.value = '';
+            resultLine.classList.add('visible');
+            var productLine = document.getElementById('result-product-line');
+            if (productLine) setTimeout(function() { productLine.classList.add('show'); }, 150);
+          }, 350);
+        }
+      }
+    }
+
+    var rcpUrl = 'https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=68327487';
+    var meddisparUrl = 'https://www.meddispar.fr/medicament/imbruvica';
+    var fichePatientUrl = 'https://www.omedit-fiches-cancer.fr/fiches/imbruvica-ibrutinib';
+    var ficheProUrl = pdfUrl;
+
+    function showUrlInPanel(url, isPdf) {
+      if (!browserPanel || !browserUrlBar || !browserFrame) return;
+      browserUrlBar.href = url;
+      browserUrlBar.textContent = url;
+      browserFrame.src = url;
+      if (browserPdfBadge) {
+        if (isPdf) browserPdfBadge.classList.remove('hidden');
+        else browserPdfBadge.classList.add('hidden');
+      }
+      browserPanel.classList.add('visible');
+    }
+
+    function clearPillActive() {
+      if (pillRcp) pillRcp.classList.remove('pill-active');
+      if (pillMeddispar) pillMeddispar.classList.remove('pill-active');
+      if (pillFichePatient) pillFichePatient.classList.remove('pill-active');
+      if (pillFichePro) pillFichePro.classList.remove('pill-active');
+    }
+
+    function closeBarAndReset() {
+      if (pdfPanel) pdfPanel.classList.remove('open');
+      if (browserPanel) {
+        browserPanel.classList.remove('visible');
+        if (browserFrame) browserFrame.src = 'about:blank';
+      }
+      if (searchInput) searchInput.value = '';
+      if (resultLine) {
+        resultLine.classList.remove('visible');
+        var productLine = document.getElementById('result-product-line');
+        if (productLine) productLine.classList.remove('show');
+      }
+      clearPillActive();
+      if (barContainer) barContainer.classList.remove('expanded');
+    }
+
+    var runCount = 0;
+    var maxRuns = 5;
+
+    function runSequence() {
+      typeIndex = 0;
+      var r = wrap.getBoundingClientRect();
+      var startX = 80;
+      var startY = 50;
+      setCursorPos(startX, startY);
+
+      setTimeout(function() {
+        r = wrap.getBoundingClientRect();
+        var pillR = barPill.getBoundingClientRect();
+        var pillCenterX = pillR.left - r.left + pillR.width / 2;
+        var pillCenterY = pillR.top - r.top + pillR.height / 2;
+        animateCursorCurved(startX, startY, pillCenterX, pillCenterY, 1600, function() {
+          cursorClick(function() {
+            expandBar();
+            setTimeout(function() { typeNext(); }, 600);
+            var typeDuration = (query.length + 1) * typeSpeed + 800;
+            setTimeout(function() {
+              r = wrap.getBoundingClientRect();
+              var fromX = pillCenterX;
+              var fromY = pillCenterY + 90;
+
+              function moveToPill(pillEl, then) {
+                if (!pillEl) { if (then) then(); return; }
+                var rw = wrap.getBoundingClientRect();
+                var rect = pillEl.getBoundingClientRect();
+                var toX = rect.left - rw.left + rect.width / 2;
+                var toY = rect.top - rw.top + rect.height / 2;
+                animateCursorCurved(fromX, fromY, toX, toY, 1600, function() {
+                  fromX = toX;
+                  fromY = toY;
+                  if (then) then();
+                });
+              }
+
+              function afterClick(panelUrl, pillEl, isPdf, next) {
+                clearPillActive();
+                if (pillEl) pillEl.classList.add('pill-active');
+                showUrlInPanel(panelUrl, !!isPdf);
+                if (next) setTimeout(next, 4000);
+              }
+
+              // 1) RCP → 2) MEDDISPAR → 3) Fiche patient (PDF) → 4) Fiche pro (PDF), fenêtre type navigateur pleine largeur
+              moveToPill(pillRcp, function() {
+                cursorClick(function() {
+                  afterClick(rcpUrl, pillRcp, false, function() {
+                    moveToPill(pillMeddispar, function() {
+                      cursorClick(function() {
+                        afterClick(meddisparUrl, pillMeddispar, false, function() {
+                          moveToPill(pillFichePatient, function() {
+                            cursorClick(function() {
+                              afterClick(fichePatientUrl, pillFichePatient, true, function() {
+                                moveToPill(pillFichePro, function() {
+                                  cursorClick(function() {
+                                    afterClick(ficheProUrl, pillFichePro, true);
+                                    if (pdfPanel) pdfPanel.classList.add('open');
+                                    /* Fin de la démo : après 3 s, fermeture (effacement + repli barre + logo), puis boucle ou arrêt */
+                                    setTimeout(function() {
+                                      closeBarAndReset();
+                                      setTimeout(function() {
+                                        runCount++;
+                                        if (runCount < maxRuns) runSequence();
+                                      }, 450 + 1500);
+                                    }, 3000);
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            }, typeDuration);
+          });
+        });
+      }, 1500);
+    }
+
+    runSequence();
+    pdfClose.onclick = function() { pdfPanel.classList.remove('open'); };
+  })();
+  </script>
 </body>
 </html>

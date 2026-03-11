@@ -291,6 +291,21 @@
         var generatedPwd = randomPassword(12);
         window.OffiboxAuth.signUpWithEmailPassword(email, generatedPwd)
           .then(function() {
+            var saveData = typeof firebase !== 'undefined' && firebase.functions ? firebase.functions().httpsCallable('saveRegistrationData') : null;
+            var payload = {
+              nom: (document.getElementById('signup-nom') && document.getElementById('signup-nom').value) ? document.getElementById('signup-nom').value.trim() : '',
+              prenom: (document.getElementById('signup-prenom') && document.getElementById('signup-prenom').value) ? document.getElementById('signup-prenom').value.trim() : '',
+              profession: (document.getElementById('signup-profession') && document.getElementById('signup-profession').value) ? document.getElementById('signup-profession').value.trim() : '',
+              professionOther: (document.getElementById('signup-profession-other') && document.getElementById('signup-profession-other').value) ? document.getElementById('signup-profession-other').value.trim() : '',
+              pharmacy: (document.getElementById('signup-pharmacy') && document.getElementById('signup-pharmacy').value) ? document.getElementById('signup-pharmacy').value.trim() : '',
+              address: (document.getElementById('signup-address') && document.getElementById('signup-address').value) ? document.getElementById('signup-address').value.trim() : '',
+              zip: (document.getElementById('signup-zip') && document.getElementById('signup-zip').value) ? document.getElementById('signup-zip').value.trim() : '',
+              city: (document.getElementById('signup-city') && document.getElementById('signup-city').value) ? document.getElementById('signup-city').value.trim() : '',
+              groupement: (document.getElementById('signup-groupement') && document.getElementById('signup-groupement').value) ? document.getElementById('signup-groupement').value.trim() : ''
+            };
+            return saveData ? saveData(payload).catch(function() { return {}; }) : Promise.resolve();
+          })
+          .then(function() {
             var fn = typeof firebase !== 'undefined' && firebase.functions ? firebase.functions().httpsCallable('sendPasswordResetEmailFr') : null;
             return fn ? fn({ email: email }) : (OffiboxAuth.sendPasswordResetEmail ? OffiboxAuth.sendPasswordResetEmail(email) : Promise.resolve());
           })
