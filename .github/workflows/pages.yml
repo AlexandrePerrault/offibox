@@ -21,6 +21,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -56,6 +61,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Deploy to GitHub Pages
         id: deploy
         uses: actions/deploy-pages@v4
