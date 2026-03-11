@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Télécharger Offibox (PC)</title>
+<link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+<style>
+:root{--white:#fff;--offi-teal:#5A9094;--offi-teal-dark:#4a7a7e;--gray:#334155}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padding:.5rem 0}
+.download-card{background:var(--white);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);border:1px solid #e2e8f0;padding:1.5rem 2rem;text-align:center;max-width:420px;margin:0 auto}
+.download-badge{display:inline-block;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--offi-teal),var(--offi-teal-dark));color:var(--white);border-radius:12px;border:2px solid transparent;font-weight:600;font-size:1.1rem;text-decoration:none;box-shadow:0 4px 20px rgba(90,144,148,.35);transition:transform .2s,box-shadow .2s,background .25s,color .25s,border-color .25s}
+.download-badge:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(90,144,148,.45);background:var(--white);color:var(--offi-teal);border-color:var(--offi-teal)}
+.download-badge .version{display:block;font-size:.9rem;opacity:.95;margin-bottom:.25rem}
+.download-badge .platform{display:block;font-size:.8rem;opacity:.85;margin-top:.35rem}
+.download-card p{margin-top:.75rem;font-size:.9rem;color:var(--gray)}
+.download-popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.download-popup-overlay.visible{display:flex}
+.download-popup-box{background:#f0fdf4;border:1px solid #86efac;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.2);padding:1.5rem;max-width:420px;width:100%}
+.download-popup-box .popup-close{margin-top:1rem;padding:.5rem 1rem;background:var(--offi-teal);color:var(--white);border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:.9rem}
+.download-popup-box .popup-close:hover{background:var(--offi-teal-dark)}
+</style>
+</head>
+<body>
+<div class="download-card">
+<a href="#" id="download-badge" class="download-badge" target="_blank" rel="noopener">
+<span class="version" id="version-label">Offibox — chargement…</span>
+<span>Télécharger Offibox pour PC</span>
+<span class="platform" id="platform-label">Windows · 64 bits</span>
+</a>
+<p>Cliquez sur le bouton pour lancer le téléchargement du fichier .msi</p>
+</div>
+<div id="download-popup-overlay" class="download-popup-overlay" role="dialog" aria-modal="true">
+<div class="download-popup-box">
+<p style="font-weight:600;color:var(--gray);margin-bottom:.75rem">Téléchargement démarré</p>
+<p style="font-size:.9rem;color:var(--gray);margin-bottom:.5rem">Le fichier <strong id="download-filename">Offibox v1.1.x.msi</strong> se trouve dans le dossier Téléchargements de votre ordinateur. Double-cliquez pour l'exécuter.</p>
+<p style="font-size:.9rem;color:var(--gray);margin-bottom:.75rem">Si le téléchargement ne fonctionne pas, veuillez cliquer sur ce lien :</p>
+<a href="#" id="download-fallback" class="download-badge" style="font-size:.95rem;padding:.65rem 1.25rem">Télécharger le dernier MSI</a>
+<div><button type="button" class="popup-close" id="download-popup-close">Fermer</button></div>
+</div>
+</div>
+<script>
+(function(){
+var G="https://api.github.com/repos/AlexandrePerrault/offibox/releases/latest";
+var R="https://github.com/AlexandrePerrault/offibox/releases/latest";
+var b=document.getElementById("download-badge");
+var v=document.getElementById("version-label");
+var p=document.getElementById("platform-label");
+var currentMsiUrl="", currentVer="";
+if(p){var ua=navigator.userAgent||"";p.textContent=/Windows NT 11/.test(ua)?"Windows 11 · 64 bits":/Windows NT 10/.test(ua)?"Windows 10 · 64 bits":/Windows/i.test(ua)?"Windows · 64 bits":"64 bits";}
+fetch(G,{headers:{"Accept":"application/vnd.github.v3+json"}}).then(function(r){return r.json();}).then(function(d){
+var tag=(d&&d.tag_name)?d.tag_name.replace(/^v/i,""):"";
+var ver=tag?"v"+tag.split("-")[0]:"";
+var url=R;
+if(d&&d.assets&&d.assets.length){var w=d.assets.filter(function(a){return(a.name||"").toLowerCase().indexOf(".msi")!==-1});var x=w.filter(function(a){return(a.name||"").toLowerCase().indexOf("x64")!==-1})[0]||w[0];if(x&&x.browser_download_url){url=x.browser_download_url;currentMsiUrl=url;currentVer=ver;}}
+if(b)b.href=url;
+if(v)v.textContent="Offibox "+(ver||"télécharger");
+var fb=document.getElementById("download-fallback");if(fb)fb.href=url;
+var fn=document.getElementById("download-filename");if(fn)fn.textContent="Offibox "+(ver||"v1.1.x")+".msi";
+}).catch(function(){if(b)b.href=R;if(v)v.textContent="Offibox (télécharger)";});
+var popup=document.getElementById("download-popup-overlay");
+function closePopup(){if(popup)popup.classList.remove("visible");}
+if(b){b.addEventListener("click",function(e){if(currentMsiUrl&&currentMsiUrl.indexOf(".msi")!==-1){e.preventDefault();if(popup)popup.classList.add("visible");var a=document.createElement("a");a.href=currentMsiUrl;a.download="Offibox-Setup-"+(currentVer||"latest")+".msi";a.style.display="none";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(closePopup,10000);}});}
+var closeBtn=document.getElementById("download-popup-close");if(closeBtn)closeBtn.addEventListener("click",closePopup);
+if(popup)popup.addEventListener("click",function(e){if(e.target===popup)closePopup();});
+var fallbackBtn=document.getElementById("download-fallback");if(fallbackBtn)fallbackBtn.addEventListener("click",function(e){if(currentMsiUrl){e.preventDefault();var a=document.createElement("a");a.href=currentMsiUrl;a.download="";a.click();}});
+})();
+</script>
+</body>
+</html>
+

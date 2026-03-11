@@ -12,6 +12,7 @@ import 'package:offibox/auth/auth_state_provider.dart';
 import 'package:offibox/auth/login_page.dart';
 import 'package:offibox/auth/first_launch_check.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
+import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/core/filter_notifier.dart';
 import 'package:offibox/providers/offibox_providers.dart';
 import 'package:offibox/services/app_update_service.dart';
@@ -21,6 +22,7 @@ import 'package:offibox/window/widgets/about_dialog.dart';
 import 'package:offibox/ui/widgets/hamburger_menu.dart';
 import 'package:offibox/window/widgets/account_dialog.dart';
 import 'package:offibox/window/widgets/offibox_top_bar.dart';
+import 'package:offibox/system/window_click_through.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Écran selon l'état d'auth (login ou FirstLaunchCheck).
@@ -126,6 +128,73 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     } catch (_) {}
   }
 
+  void _showOpenOffiboxConfirmationDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      barrierLabel: 'Fermer la boîte de dialogue',
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius)),
+        contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+        actionsPadding: const EdgeInsets.fromLTRB(10, 2, 10, 8),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 260),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: 'Spinnaker',
+                color: OffiboxColors.darkGray,
+                height: 1.25,
+              ),
+              children: [
+                const TextSpan(text: 'Fermer '),
+                TextSpan(
+                  text: 'Offi',
+                  style: TextStyle(
+                    color: OffiboxColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    fontFamily: 'Spinnaker',
+                  ),
+                ),
+                const TextSpan(text: 'box et aller sur Offibox.fr ?'),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Non'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              Uri uri = Uri.parse('https://offibox.fr');
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                try {
+                  final token = await user.getIdToken();
+                  if (token != null && token.isNotEmpty) {
+                    uri = uri.replace(
+                        queryParameters: {'app_login_token': token});
+                  }
+                } catch (_) {}
+              }
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+              SystemNavigator.pop();
+            },
+            child: const Text('Oui'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _searchDebounce?.cancel();
@@ -207,6 +276,12 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       });
     }
     final showOnlyPill = !_expanded && (authAsync.valueOrNull != null);
+    // Sur Windows, écran de login = fenêtre entière cliquable (pas de région).
+    if (Platform.isWindows && authAsync.valueOrNull == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) clearWindowRegion();
+      });
+    }
     return Stack(
           fit: StackFit.expand,
           children: [
@@ -262,12 +337,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                     return (f?.urlPatient, f?.urlPro);
                   },
                   menuPopupKey: _menuPopupKey,
-                  onOpenOffibox: () async {
-                    final uri = Uri.parse('https://offibox.fr');
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
-                  },
+                  onOpenOffibox: () => _showOpenOffiboxConfirmationDialog(context),
                   onMinimize: () {},
                   onClose: () => SystemNavigator.pop(),
                   onShowAccount: authAsync.valueOrNull == null

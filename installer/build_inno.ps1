@@ -40,23 +40,43 @@ if (-not $iscc) {
     Write-Error "Inno Setup 6 (ISCC.exe) introuvable. Installez-le depuis https://jrsoftware.org/isinfo.php"
 }
 
-# Lire la version depuis pubspec.yaml (source unique)
+# Lire et incrémenter la version depuis pubspec.yaml (source unique)
 $pubspecPath = Join-Path $ProjectRoot "pubspec.yaml"
 if (-not (Test-Path $pubspecPath)) {
     Write-Error "pubspec.yaml introuvable à la racine du projet : $pubspecPath"
 }
 
 $pubspecContent = Get-Content $pubspecPath -Raw
+$versionRegex = '^\s*version:\s*([0-9]+)\.([0-9]+)\.([0-9]+)([^\s#]*)'
 $versionMatch = [regex]::Match(
     $pubspecContent,
-    '^\s*version:\s*([0-9]+\.[0-9]+\.[0-9]+[^\s#]*)',
+    $versionRegex,
     [System.Text.RegularExpressions.RegexOptions]::Multiline
 )
 if (-not $versionMatch.Success) {
     Write-Error "Impossible de lire la version dans pubspec.yaml (ligne 'version: X.Y.Z')."
 }
-$AppVersion = $versionMatch.Groups[1].Value.Trim()
-Write-Host "Version (pubspec.yaml) : $AppVersion" -ForegroundColor Cyan
+
+$major = [int]$versionMatch.Groups[1].Value
+$minor = [int]$versionMatch.Groups[2].Value
+$patch = [int]$versionMatch.Groups[3].Value
+$suffix = $versionMatch.Groups[4].Value
+
+$oldVersion = "$major.$minor.$patch$suffix"
+$newPatch = $patch + 1
+$AppVersion = "$major.$minor.$newPatch$suffix"
+
+Write-Host "Ancienne version (pubspec.yaml) : $oldVersion" -ForegroundColor Yellow
+Write-Host "Nouvelle version (pubspec.yaml) : $AppVersion" -ForegroundColor Cyan
+
+# Mettre à jour pubspec.yaml avec la nouvelle version
+$newContent = [regex]::Replace(
+    $pubspecContent,
+    $versionRegex,
+    "version: $AppVersion",
+    [System.Text.RegularExpressions.RegexOptions]::Multiline
+)
+Set-Content -Path $pubspecPath -Value $newContent -Encoding UTF8
 
 Write-Host "Compilation Inno Setup : Offibox.iss" -ForegroundColor Cyan
 Push-Location $PSScriptRoot

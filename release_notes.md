@@ -1,7 +1,3 @@
-Editez ce fichier avant chaque build avec `-PushToGitHub true`. Son contenu sera utilisé comme notes de la Release GitHub et affiché dans l’historique des versions de l’app.
-
----
-
 ## Offibox v1.1.24
 
 ### Dernières modifications
@@ -18,6 +14,3 @@ Editez ce fichier avant chaque build avec `-PushToGitHub true`. Son contenu sera
 - **Connexion Google** : documentation des APIs à activer (People API, Google Calendar API) et des Authorized redirect URIs en cas d’erreur 403.
 - **Flutter web** : connexion Google via `signInWithPopup` (Firebase Auth) pour éviter la dépréciation de `google_sign_in` sur le web.
 
----
-
-*Pensez à mettre à jour le numéro de version ci-dessus et la liste des modifications avant de lancer le build avec `-PushToGitHub true`.*

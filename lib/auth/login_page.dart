@@ -14,6 +14,7 @@ import 'package:offibox/auth/google_sign_in_helper.dart';
 import 'package:offibox/config/app_config.dart';
 import 'package:offibox/constants/app_update_config.dart';
 import 'package:offibox/constants/ui_constants.dart';
+import 'package:offibox/auth/login_demo_animation.dart';
 import 'package:offibox/ui/widgets/offibox_logo_complete.dart';
 import 'package:offibox/services/cerp_client_service.dart';
 import 'package:offibox/services/firestore_user_cache.dart';
@@ -463,7 +464,7 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         _buildOffiboxDescription3D(context),
         const SizedBox(height: 32),
-        _buildSourcesBanner(context),
+        const LoginDemoAnimation(),
       ],
     );
   }

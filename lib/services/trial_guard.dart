@@ -14,7 +14,24 @@ class TrialGuard {
     final data = await getUserDocCached(user.uid);
     if (data == null) return false;
 
-    return data['onboardingDone'] == true;
+    // Cas historique : flag explicite posé par l'app (ancien OnboardingPage).
+    if (data['onboardingDone'] == true) return true;
+
+    // Cas inscription via site web (inscription.html / validation.html) :
+    // on considère que l'onboarding est terminé dès qu'une fiche complète
+    // a été créée côté Firestore (prénom / nom / officine ou date
+    // d'activation d'abonnement).
+    final firstName = (data['firstName'] as String?)?.trim();
+    final lastName = (data['lastName'] as String?)?.trim();
+    final pharmacyName = (data['pharmacyName'] as String?)?.trim();
+    final hasProfile =
+        (firstName != null && firstName.isNotEmpty) ||
+        (lastName != null && lastName.isNotEmpty) ||
+        (pharmacyName != null && pharmacyName.isNotEmpty);
+
+    final hasSubscriptionStarted = data['subscriptionStartedAt'] != null;
+
+    return hasProfile || hasSubscriptionStarted;
   }
 
   /// Vérifie si la période d'essai est expirée (lecture via cache partagé).

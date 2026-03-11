@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <!-- Page connexion complète (formulaire + description). Version scindée pour inclusion ailleurs : login-form-part.html (colonne gauche), login-desc-part.html (colonne droite). -->
 <head>
@@ -61,18 +61,18 @@
     /* ----- Colonne gauche : formulaire ----- */
     .login-card {
       background: var(--white);
-      padding: 1.25rem 2rem;
+      padding: 2rem 2.5rem;
       border-radius: 16px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       border: 1px solid var(--gray-light);
-      min-height: 380px;
+      min-height: 420px;
       height: 100%;
       flex: 1;
       display: flex;
       flex-direction: column;
       width: 100%;
     }
-    .login-card h2 { font-size: 1.1rem; font-weight: 700; color: var(--gray); margin-bottom: 0.35rem; }
+    .login-card h2 { font-size: 1.1rem; font-weight: 700; color: var(--gray); margin-bottom: 0.35rem; text-align: center; }
     .login-card .subtitle { color: #64748b; font-size: 1.1rem; margin-bottom: 2rem; }
     .login-card .subtitle .offi { color: var(--offi-teal); font-weight: 600; }
     .btn-google {
@@ -151,10 +151,10 @@
     .login-desc-card {
       width: 100%;
       max-width: 480px;
-      min-height: 380px;
+      min-height: 420px;
       height: 100%;
       flex: 1;
-      padding: 1.25rem 2rem;
+      padding: 2rem 2.5rem;
       border-radius: 16px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       border: 1px solid #e2e8f0;
@@ -189,10 +189,10 @@
     .offibox-desc-list {
       list-style: none;
       padding-left: 0;
-      margin-bottom: 2.3rem;
+      margin-bottom: 0.75rem;
       color: var(--gray);
       font-size: 1.1rem;
-      line-height: 1.7;
+      line-height: 1.6;
       font-family: 'Spinnaker', sans-serif;
       opacity: 0;
       animation: list-fade-in 0.8s ease-out 0.15s forwards;
@@ -205,7 +205,7 @@
       display: flex;
       align-items: flex-start;
       gap: 0.65rem;
-      margin-bottom: 0.55rem;
+      margin-bottom: 0.75rem;
       opacity: 0;
       transform: translateY(6px);
       animation: line-fade-in 0.7s ease-out forwards;
@@ -238,7 +238,7 @@
     .offibox-desc-list li:nth-child(3) { animation-delay: 0.75s; }
     .offibox-desc-list li:nth-child(4) { animation-delay: 0.95s; }
     .offibox-desc-list li:nth-child(5) { animation-delay: 1.15s; }
-    .offibox-desc-list li:last-child { margin-bottom: 0; }
+    .offibox-desc-list li:last-child { margin-bottom: 0.75rem; }
     .offibox-desc-list .li-text-wrap { position: relative; }
     @keyframes line-fade-in {
       from { opacity: 0; transform: translateY(6px); }
@@ -337,8 +337,7 @@
     <div class="login-col">
       <div class="login-card">
         <h2>Connexion</h2>
-        <p class="subtitle">Accédez à votre compte <span class="offi">Offi</span>box</p>
-        <p class="legal-links-notice"><a href="politique-confidentialite.html">Politique de confidentialité</a> · <a href="conditions-utilisation.html">Conditions d'utilisation</a></p>
+        <p class="subtitle">Accédez à <span class="offi">Offi</span>box sur votre navigateur</p>
         <div id="auth-error" class="auth-error" role="alert"></div>
         <form id="login-form" action="#" method="post">
           <button type="button" class="btn-google" id="btn-google" aria-label="Se connecter avec Google">

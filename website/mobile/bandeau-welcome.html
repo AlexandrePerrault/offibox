@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue sur Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100vw; overflow-x: hidden; }
+    body { font-family: Spinnaker, sans-serif; background: #fff; padding: 0; display: flex; align-items: center; justify-content: center; }
+    .bandeau { width: 100%; max-width: 100%; padding: 1.25rem 0.75rem; text-align: center; overflow: hidden; background: #fff; }
+    .bandeau-inner { display: inline-block; max-width: 100%; font-size: clamp(0.95rem, 5vw, 1.35rem); font-weight: 600; line-height: 1.5; color: #334155; white-space: pre-wrap; word-wrap: break-word; }
+    .bandeau-inner .char { display: inline-block; opacity: 0; animation: fadeInChar 1s ease-out forwards; }
+    .bandeau-inner .char.space { min-width: 0.35em; }
+    .bandeau-inner .offi { color: #5A9094; }
+    @keyframes fadeInChar { from { opacity: 0; } to { opacity: 1; } }
+    .bandeau-inner-wrap { position: relative; display: inline-block; max-width: 100%; }
+    .sweep { position: absolute; top: 0; left: -50%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), rgba(255,255,255,0.5)); pointer-events: none; animation: sweep 0.9s ease-in-out 5.2s forwards; opacity: 0; }
+    @keyframes sweep { 0% { left: -50%; opacity: 1; } 100% { left: 100%; opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="bandeau">
+    <div class="bandeau-inner-wrap">
+      <p id="sentence" class="bandeau-inner" aria-label="Bienvenue sur Offibox"></p>
+      <div class="sweep" aria-hidden="true"></div>
+    </div>
+  </div>
+  <script>
+(function(){ var text = "Bienvenue sur Offibox"; var offiStart = text.indexOf("Offibox"); var offiIndices = offiStart !== -1 ? [offiStart, offiStart+1, offiStart+2, offiStart+3] : []; var el = document.getElementById("sentence"); var delay = 0; var step = 95; for (var i = 0; i < text.length; i++) { var span = document.createElement("span"); span.className = "char" + (offiIndices.indexOf(i) !== -1 ? " offi" : "") + (text[i] === " " ? " space" : ""); span.textContent = text[i]; span.style.animationDelay = (delay/1000) + "s"; delay += step; el.appendChild(span); } })();
+  </script>
+</body>
+</html>

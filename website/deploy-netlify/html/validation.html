@@ -334,6 +334,7 @@
       var GITHUB_RELEASES = 'https://github.com/AlexandrePerrault/offibox/releases/latest';
       var GITHUB_API_LATEST = 'https://api.github.com/repos/AlexandrePerrault/offibox/releases/latest';
       var OFFIBOX_WEB_APP_URL = 'https://alexandreperrault.github.io/offibox/';
+      var currentDownloadUrl = '';
       function baseUrl() {
         var o = window.location.origin || '';
         var p = window.location.pathname || '';
@@ -364,13 +365,21 @@
               })[0];
               if (winAsset && winAsset.browser_download_url) url = winAsset.browser_download_url;
             }
-            if (downloadPill) { downloadPill.textContent = label; downloadPill.href = url; }
-            if (downloadHereLink) downloadHereLink.href = url;
+            currentDownloadUrl = url;
+            if (downloadPill) { downloadPill.textContent = label; downloadPill.href = '#'; downloadPill.title = 'Télécharger Offibox pour PC'; }
+            if (downloadHereLink) { downloadHereLink.href = '#'; downloadHereLink.title = 'Télécharger Offibox'; }
           })
           .catch(function() {
-            if (downloadPill) { downloadPill.textContent = 'Offibox (télécharger)'; downloadPill.href = GITHUB_RELEASES; }
-            if (downloadHereLink) downloadHereLink.href = GITHUB_RELEASES;
+            currentDownloadUrl = GITHUB_RELEASES;
+            if (downloadPill) { downloadPill.textContent = 'Offibox (télécharger)'; downloadPill.href = '#'; downloadPill.title = 'Télécharger'; }
+            if (downloadHereLink) { downloadHereLink.href = '#'; downloadHereLink.title = 'Télécharger'; }
           });
+      }
+      if (downloadPill) {
+        downloadPill.addEventListener('click', function(e) { e.preventDefault(); if (currentDownloadUrl) window.open(currentDownloadUrl, '_blank', 'noopener'); });
+      }
+      if (downloadHereLink) {
+        downloadHereLink.addEventListener('click', function(e) { e.preventDefault(); if (currentDownloadUrl) window.open(currentDownloadUrl, '_blank', 'noopener'); });
       }
       function showValidation(user) {
         if (loadingMsg) loadingMsg.style.display = 'none';

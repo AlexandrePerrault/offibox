@@ -25,20 +25,25 @@ jobs:
       - name: Build Windows
         run: flutter build windows --release
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+      - name: Install Inno Setup 6
+        run: choco install innosetup -y
 
-      - name: Build MSI
-        run: dotnet build installer/Offibox.wixproj -c Release
-        env:
-          Configuration: Release
+      - name: Get version from pubspec.yaml
+        id: version
+        run: |
+          $v = (Get-Content pubspec.yaml | Select-String '^\s*version:\s*(.+)$').Matches.Groups[1].Value.Trim()
+          echo "VERSION=$v" >> $env:GITHUB_ENV
+          echo "Version: $v"
 
-      - name: Upload MSI to release
+      - name: Build installer (Inno Setup)
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $iscc "/DMyAppVersion=$env:VERSION" installer/Offibox.iss
+
+      - name: Upload EXE to release
         uses: softprops/action-gh-release@v2
         with:
-          files: website/download/*.msi
+          files: website/download/*.exe
           generate_release_notes: true
           draft: false
         env:

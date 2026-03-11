@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue Offibox – La boîte à outils de l'Officine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      padding: 0.75rem 1.25rem;
+      padding-left: max(1.25rem, env(safe-area-inset-left));
+      padding-right: max(1.25rem, env(safe-area-inset-right));
+    }
+    .bandeau {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      min-width: 0;
+      padding: 1.25rem 0;
+      text-align: center;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .bandeau-inner-wrap {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+    }
+    .bandeau-inner {
+      display: inline-block;
+      max-width: 100%;
+      font-size: clamp(0.9rem, 4.5vw, 1.25rem);
+      font-weight: 600;
+      line-height: 1.5;
+      color: #334155;
+      white-space: nowrap;
+    }
+    .bandeau-inner .block {
+      opacity: 0;
+      animation: fadeInBlock 1s ease-out forwards;
+    }
+    .bandeau-inner .block2 { animation-delay: 1.2s; }
+    .bandeau-inner .offi { color: #5A9094; }
+    @keyframes fadeInBlock {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .sweep {
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), rgba(255,255,255,0.5));
+      pointer-events: none;
+      animation: sweep 0.9s ease-in-out 3.5s forwards;
+      opacity: 0;
+    }
+    @keyframes sweep {
+      0% { left: -50%; opacity: 1; }
+      100% { left: 100%; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bandeau">
+    <div class="bandeau-inner-wrap">
+      <p class="bandeau-inner" aria-label="Bienvenue Offibox La boîte à outils de l'Officine">
+        <span class="block block1">Bienvenue <span class="offi">Offi</span>box</span><span class="block block2"> La boîte à outils de l'<span class="offi">Offi</span>cine</span>
+      </p>
+      <div class="sweep" aria-hidden="true"></div>
+    </div>
+  </div>
+</body>
+</html>

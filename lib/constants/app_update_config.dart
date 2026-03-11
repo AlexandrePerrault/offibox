@@ -14,6 +14,12 @@ class AppUpdateConfig {
   /// Les utilisateurs n’arrivent pas sur GitHub.
   static const String publicDownloadPageUrl = 'https://offibox.fr/download';
 
+  /// Page d'inscription Offibox (formulaire web) utilisée pour la première connexion
+  /// depuis le site et depuis l'application desktop.
+  /// URL par défaut : hébergement Filesusr documenté dans website/WIX-INTEGRATION.md.
+  static const String publicInscriptionPageUrl =
+      'https://www-offibox-fr.filesusr.com/html/inscription.html';
+
   /// Base URL pour l’installer Windows. Si défini, téléchargement depuis
   /// [publicDownloadBaseUrl]/[windowsInstallerName]-[version].msi au lieu de GitHub.
   static const String publicDownloadBaseUrl = 'https://offibox.fr/download';

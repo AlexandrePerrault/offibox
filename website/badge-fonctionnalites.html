@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Badge – Toutes les fonctionnalités</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.6rem 1.1rem;
+      border-radius: 9999px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #424242;
+      background: #ffffff;
+      border: 2px solid #78909C;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+    .badge-pill .arrow {
+      color: #424242;
+      transition: color 0.2s ease;
+    }
+    .badge-pill:hover {
+      background: #5A9094;
+      border-color: #5A9094;
+      color: #ffffff;
+    }
+    .badge-pill:hover .arrow {
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <a href="#" class="badge-pill" aria-label="Toutes les fonctionnalités">
+    toutes les fonctionnalités ici <span class="arrow" aria-hidden="true">→</span>
+  </a>
+</body>
+</html>

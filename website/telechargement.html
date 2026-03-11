@@ -15,12 +15,27 @@
     main { padding: 2rem; max-width: 720px; margin: 0 auto; }
     .page-title { font-size: 2rem; font-weight: 700; color: var(--gray); margin-bottom: 1rem; }
     .download-card { background: var(--white); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; padding: 2rem; text-align: center; margin-bottom: 2rem; }
-    .download-badge { display: inline-block; padding: 1rem 1.5rem; background: linear-gradient(135deg, var(--offi-teal) 0%, var(--offi-teal-dark) 100%); color: var(--white); border-radius: 12px; font-weight: 600; font-size: 1.1rem; text-decoration: none; box-shadow: 0 4px 20px rgba(90,144,148,0.35); transition: transform 0.2s, box-shadow 0.2s; margin-bottom: 1rem; }
-    .download-badge:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(90,144,148,0.45); color: var(--white); }
+    .download-badge { display: inline-block; padding: 1rem 1.5rem; background: linear-gradient(135deg, var(--offi-teal) 0%, var(--offi-teal-dark) 100%); color: var(--white); border-radius: 9999px; border: 2px solid transparent; font-weight: 600; font-size: 1.1rem; text-decoration: none; box-shadow: 0 4px 20px rgba(90,144,148,0.35); transition: transform 0.2s, box-shadow 0.2s, background 0.25s, color 0.25s, border-color 0.25s; margin-bottom: 1rem; }
+    .download-badge:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(90,144,148,0.45); background: var(--white); color: var(--offi-teal); border-color: var(--offi-teal); }
     .download-badge .version { display: block; font-size: 0.9rem; opacity: 0.95; margin-bottom: 0.25rem; }
     .download-badge .platform { display: block; font-size: 0.8rem; opacity: 0.85; margin-top: 0.35rem; }
     .plateformes-iframe-wrap { margin-top: 2rem; }
     .plateformes-iframe-wrap iframe { border: none; width: 100%; min-height: 120px; display: block; }
+    .nouveautes-section { margin-top: 2.5rem; }
+    .nouveautes-section h2 { font-size: 1.35rem; font-weight: 700; color: var(--gray); margin-bottom: 1rem; }
+    .release-block { background: var(--white); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+    .release-block h3 { font-size: 1.05rem; color: var(--offi-teal); margin-bottom: 0.75rem; font-weight: 600; }
+    .release-block .release-body { font-size: 0.9rem; line-height: 1.6; color: var(--gray); }
+    .release-block .release-body h3 { font-size: 0.95rem; margin: 0.75rem 0 0.35rem; color: var(--gray); }
+    .release-block .release-body ul { margin: 0.35rem 0; padding-left: 1.25rem; }
+    .release-block .release-body li { margin-bottom: 0.25rem; }
+    .nouveautes-loading { color: var(--gray); font-size: 0.9rem; }
+    .download-popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 9999; align-items: center; justify-content: center; padding: 1rem; }
+    .download-popup-overlay.visible { display: flex; }
+    .download-popup-box { background: var(--white); border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); border: 1px solid #86efac; padding: 1.5rem; max-width: 420px; width: 100%; }
+    .download-popup-box .popup-title { font-weight: 600; color: var(--gray); margin-bottom: 0.75rem; }
+    .download-popup-box .popup-close { margin-top: 1rem; padding: 0.5rem 1rem; background: var(--offi-teal); color: var(--white); border: none; border-radius: 9999px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+    .download-popup-box .popup-close:hover { background: var(--offi-teal-dark); }
   </style>
 </head>
 <body>
@@ -29,15 +44,30 @@
     <div class="download-card">
       <a href="#" id="download-badge" class="download-badge" target="_blank" rel="noopener">
         <span class="version" id="version-label">Offibox — chargement…</span>
-        <span>Télécharger pour Windows</span>
+        <span>Télécharger Offibox pour PC</span>
         <span class="platform" id="platform-label">Windows · 64 bits</span>
       </a>
-      <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray);">Cliquez sur le bouton pour lancer le téléchargement du fichier .msi</p>
+      <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray);">Cliquez sur le bouton pour lancer le téléchargement de l'installateur Windows (.exe)</p>
     </div>
+  <div id="download-popup-overlay" class="download-popup-overlay" role="dialog" aria-labelledby="download-popup-title" aria-modal="true">
+    <div class="download-popup-box" style="background: #f0fdf4; border: 1px solid #86efac;">
+      <p id="download-popup-title" class="popup-title">Téléchargement démarré</p>
+      <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">Le fichier <strong id="download-filename">Offibox-Setup-v1.1.x.exe</strong> se trouve dans le dossier Téléchargements de votre ordinateur. Double-cliquez pour l'exécuter.</p>
+      <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.75rem;">Si le téléchargement ne fonctionne pas, veuillez cliquer sur ce lien :</p>
+      <a href="#" id="download-fallback" class="download-badge" style="margin-bottom: 0; font-size: 0.95rem; padding: 0.65rem 1.25rem;">Télécharger l'installateur</a>
+      <div><button type="button" class="popup-close" id="download-popup-close">Fermer</button></div>
+    </div>
+  </div>
     <div class="plateformes-iframe-wrap">
       <iframe src="plateformes.html" title="Disponibilité mobile"></iframe>
     </div>
+    <section class="nouveautes-section" aria-labelledby="nouveautes-title">
+      <h2 id="nouveautes-title">Nouveautés</h2>
+      <p class="nouveautes-loading" id="nouveautes-loading">Chargement des dernières versions…</p>
+      <div id="nouveautes-list"></div>
+    </section>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     (function() {
       var GITHUB_API = 'https://api.github.com/repos/AlexandrePerrault/offibox/releases/latest';
@@ -53,6 +83,9 @@
         return '64 bits';
       }
       if (platformLabel) platformLabel.textContent = windowsLabel();
+      var currentDownloadUrl = '';
+      var currentVer = '';
+      var currentExt = 'exe';
       fetch(GITHUB_API, { headers: { 'Accept': 'application/vnd.github.v3+json' } })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -62,17 +95,89 @@
           if (data && data.assets && data.assets.length) {
             var win = data.assets.filter(function(a) {
               var n = (a.name || '').toLowerCase();
-              return n.indexOf('.msi') !== -1 || (n.indexOf('windows') !== -1 && (n.indexOf('.exe') !== -1 || n.indexOf('.msi') !== -1));
+              return n.indexOf('offibox-setup') !== -1 && (n.indexOf('.exe') !== -1 || n.indexOf('.msi') !== -1);
             });
-            var x64 = win.filter(function(a) { return (a.name || '').toLowerCase().indexOf('x64') !== -1; })[0] || win[0];
-            if (x64 && x64.browser_download_url) url = x64.browser_download_url;
+            var exeAsset = win.filter(function(a) { return (a.name || '').toLowerCase().indexOf('.exe') !== -1; })[0];
+            var msiAsset = win.filter(function(a) { return (a.name || '').toLowerCase().indexOf('.msi') !== -1; })[0];
+            var chosen = exeAsset || msiAsset;
+            if (chosen && chosen.browser_download_url) {
+              url = chosen.browser_download_url;
+              currentDownloadUrl = url;
+              currentVer = ver;
+              currentExt = (chosen.name || '').toLowerCase().indexOf('.exe') !== -1 ? 'exe' : 'msi';
+            }
           }
-          if (badge) { badge.href = url; }
+          if (badge) { badge.href = '#'; badge.title = 'Télécharger Offibox pour PC'; }
           if (versionLabel) versionLabel.textContent = 'Offibox ' + ver;
+          var fallback = document.getElementById('download-fallback');
+          if (fallback) { fallback.href = '#'; fallback.title = 'Télécharger l\'installateur'; }
+          var fnEl = document.getElementById('download-filename');
+          if (fnEl) fnEl.textContent = 'Offibox-Setup-' + (currentVer || 'latest') + '.' + currentExt;
         })
         .catch(function() {
-          if (badge) badge.href = GITHUB_RELEASES;
+          if (badge) { badge.href = '#'; badge.title = 'Télécharger Offibox'; }
           if (versionLabel) versionLabel.textContent = 'Offibox (télécharger)';
+        });
+      var popupOverlay = document.getElementById('download-popup-overlay');
+      function closeDownloadPopup() {
+        if (popupOverlay) popupOverlay.classList.remove('visible');
+      }
+      if (badge) {
+        badge.addEventListener('click', function(e) {
+          if (currentDownloadUrl) {
+            e.preventDefault();
+            if (popupOverlay) popupOverlay.classList.add('visible');
+            var a = document.createElement('a');
+            a.href = currentDownloadUrl;
+            a.download = 'Offibox-Setup-' + (currentVer || 'latest') + '.' + currentExt;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(closeDownloadPopup, 10000);
+          }
+        });
+      }
+      var closeBtn = document.getElementById('download-popup-close');
+      if (closeBtn) closeBtn.addEventListener('click', closeDownloadPopup);
+      if (popupOverlay) popupOverlay.addEventListener('click', function(e) { if (e.target === popupOverlay) closeDownloadPopup(); });
+      var fallbackBtn = document.getElementById('download-fallback');
+      if (fallbackBtn) fallbackBtn.addEventListener('click', function(e) { if (currentDownloadUrl) { e.preventDefault(); var a = document.createElement('a'); a.href = currentDownloadUrl; a.download = ''; a.click(); } });
+
+      // Nouveautés : liste des releases (Dernières modifications + Site web / téléchargement depuis release_notes.md)
+      // URL directe pour une version donnée : .../releases/download/vX.Y.Z/Offibox-Setup-X.Y.Z.exe (ou .msi)
+      var GITHUB_RELEASES_LIST = 'https://api.github.com/repos/AlexandrePerrault/offibox/releases?per_page=8';
+      var listEl = document.getElementById('nouveautes-list');
+      var loadingEl = document.getElementById('nouveautes-loading');
+      fetch(GITHUB_RELEASES_LIST, { headers: { 'Accept': 'application/vnd.github.v3+json' } })
+        .then(function(r) { return r.json(); })
+        .then(function(releases) {
+          if (loadingEl) loadingEl.style.display = 'none';
+          if (!listEl || !Array.isArray(releases) || releases.length === 0) return;
+          releases.forEach(function(rel) {
+            var tag = (rel && rel.tag_name) ? rel.tag_name : '';
+            var body = (rel && rel.body) ? rel.body : '';
+            body = body.replace(/^Editez ce fichier[^\n]*\n?/gm, '').replace(/^---\s*\n?/gm, '').replace(/\*Pensez à mettre[^*]*\*\.?\s*/g, '').trim();
+            if (!tag) return;
+            var block = document.createElement('div');
+            block.className = 'release-block';
+            var title = document.createElement('h3');
+            title.textContent = 'Version ' + tag.replace(/^v/, '');
+            block.appendChild(title);
+            var bodyDiv = document.createElement('div');
+            bodyDiv.className = 'release-body';
+            if (typeof marked !== 'undefined') {
+              bodyDiv.innerHTML = marked.parse(body);
+            } else {
+              bodyDiv.textContent = body;
+              bodyDiv.style.whiteSpace = 'pre-wrap';
+            }
+            block.appendChild(bodyDiv);
+            listEl.appendChild(block);
+          });
+        })
+        .catch(function() {
+          if (loadingEl) { loadingEl.textContent = 'Impossible de charger les nouveautés.'; }
         });
     })();
   </script>

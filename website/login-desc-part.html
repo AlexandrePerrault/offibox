@@ -1,4 +1,4 @@
-<!-- Partie description Offibox (colonne droite) – à inclure dans la version mobile ou autre page. Pas de script. -->
+﻿<!-- Partie description Offibox (colonne droite) – à inclure dans la version mobile ou autre page. Pas de script. -->
 <style>
   .login-desc-part :root,
   .login-desc-part { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
@@ -48,10 +48,10 @@
   .login-desc-part .offibox-desc-list {
     list-style: none;
     padding-left: 0;
-    margin-bottom: 2.3rem;
+    margin-bottom: 0.75rem;
     color: var(--gray);
     font-size: 1.1rem;
-    line-height: 1.7;
+    line-height: 1.6;
     font-family: 'Spinnaker', sans-serif;
     opacity: 0;
     animation: list-fade-in-desc 0.8s ease-out 0.15s forwards;
@@ -64,7 +64,7 @@
     display: flex;
     align-items: flex-start;
     gap: 0.65rem;
-    margin-bottom: 0.55rem;
+    margin-bottom: 0.75rem;
     opacity: 0;
     transform: translateY(6px);
     animation: line-fade-in-desc 0.7s ease-out forwards;
@@ -95,7 +95,7 @@
   .login-desc-part .offibox-desc-list li:nth-child(3) { animation-delay: 0.75s; }
   .login-desc-part .offibox-desc-list li:nth-child(4) { animation-delay: 0.95s; }
   .login-desc-part .offibox-desc-list li:nth-child(5) { animation-delay: 1.15s; }
-  .login-desc-part .offibox-desc-list li:last-child { margin-bottom: 0; }
+  .login-desc-part .offibox-desc-list li:last-child { margin-bottom: 0.75rem; }
   @keyframes line-fade-in-desc {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }

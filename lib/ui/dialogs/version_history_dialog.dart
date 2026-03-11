@@ -22,6 +22,10 @@ class _ReleaseItem {
 }
 
 /// Dialogue « Historique des versions » : récupère les releases GitHub et affiche les notes.
+/// Les textes affichés viennent du **corps (body)** de chaque release sur GitHub.
+/// Modifier la description d’une release sur GitHub (Releases → Edit) met à jour
+/// automatiquement l’onglet hamburger « Historique des versions » au prochain chargement.
+/// Il n’y a pas de fichier .rm ou local à éditer pour ces textes.
 class VersionHistoryDialog extends StatefulWidget {
   const VersionHistoryDialog({super.key});
 

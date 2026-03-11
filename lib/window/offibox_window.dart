@@ -50,6 +50,7 @@ import 'package:offibox/data/espace_pro_credentials.dart';
 import 'package:offibox/ui/dialogs/espace_pro_login_dialog.dart';
 import 'package:offibox/ui/dialogs/contact_dialog.dart';
 import 'package:offibox/ui/dialogs/version_history_dialog.dart';
+import 'package:offibox/system/window_click_through.dart';
 import 'package:offibox/ui/screens/espace_pro_webview_screen.dart';
 import 'package:offibox/services/pdf_preloader.dart';
 import 'package:offibox/services/journees_mondiales.dart';
@@ -154,7 +155,7 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
       return;
     }
     if (show) {
-      await markNewsShown();
+      await markNewsShown(entry);
       setState(() {
         _newsPopupEntry = entry;
         _showNewsPopup = true;
@@ -575,7 +576,7 @@ void initState() {
         contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
         actionsPadding: const EdgeInsets.fromLTRB(10, 2, 10, 8),
         content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 200),
+          constraints: const BoxConstraints(maxWidth: 260),
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -596,7 +597,7 @@ void initState() {
                     fontFamily: 'Spinnaker',
                   ),
                 ),
-                const TextSpan(text: 'box ?'),
+                const TextSpan(text: 'box et aller sur Offibox.fr ?'),
               ],
             ),
           ),
@@ -616,10 +617,10 @@ void initState() {
                 _QuitDialogPill(
                   label: 'Oui',
                   atRestTeal: false,
-                  onTap: () {
+                  onTap: () async {
                     Navigator.of(ctx).pop();
-                    _close();
-                    _launchOffiboxWithOptionalToken();
+                    await _launchOffiboxWithOptionalToken();
+                    exit(0);
                   },
                 ),
               ],
@@ -927,6 +928,32 @@ Widget build(BuildContext context) {
       OffiboxWindowUI.barHeight +
       OffiboxWindowUI.gapBelowBar;
   final maxPanelH = screenH - topY - 20;
+  // Fenêtre transparente + clic à travers (Windows) : en mode pill, seule la barre est visible et cliquable.
+  if (Platform.isWindows) {
+    final expandedNow = expanded;
+    final barW = _barWidth(context);
+    final size = MediaQuery.sizeOf(context);
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!expandedNow) {
+        final left = size.width - OffiboxWindowUI.rightMargin - barW;
+        final top = OffiboxWindowUI.topMargin;
+        final regionHeight = OffiboxWindowUI.tickerBarHeight +
+            OffiboxWindowUI.tickerBarGap +
+            OffiboxWindowUI.barHeight +
+            16.0;
+        setWindowRegion(
+          (left * dpr).round(),
+          (top * dpr).round(),
+          (barW * dpr).round(),
+          (regionHeight * dpr).round(),
+        );
+      } else {
+        clearWindowRegion();
+      }
+    });
+  }
   final isSkeleton = effectiveResults.isEmpty && !_searchSettledEmpty(controller);
   if (isSkeleton && !_wasSkeleton) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1017,7 +1044,10 @@ Widget build(BuildContext context) {
           child: Container(
             width: double.infinity,
             height: double.infinity,
-            color: const Color(0xFF1A1A1A),
+            // Windows : fond noir = transparent (LWA_COLORKEY), bureau visible en arrière-plan ; barre et panneaux restent au premier plan.
+            color: Platform.isWindows
+                ? const Color(0xFF000000)
+                : const Color(0xFF1A1A1A),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
               child: Stack(
