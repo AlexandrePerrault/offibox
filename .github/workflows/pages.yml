@@ -36,6 +36,10 @@ jobs:
       - name: Build web (entry point main_web)
         run: flutter build web -t lib/main_web.dart --base-href /offibox/ --release
 
+      # Pages statiques (login, inscription, validation, démo) pour iframes Wix / app
+      - name: Copy static HTML to build
+        run: cp -r website/deploy-netlify/html build/web/html
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

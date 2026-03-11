@@ -16,9 +16,9 @@ class AppUpdateConfig {
 
   /// Page d'inscription Offibox (formulaire web) utilisée pour la première connexion
   /// depuis le site et depuis l'application desktop.
-  /// URL par défaut : hébergement Filesusr documenté dans website/WIX-INTEGRATION.md.
+  /// Hébergée sur GitHub Pages (gratuit) ; voir website/deploy-netlify/README.md.
   static const String publicInscriptionPageUrl =
-      'https://www-offibox-fr.filesusr.com/html/inscription.html';
+      'https://alexandreperrault.github.io/offibox/html/inscription.html';
 
   /// Base URL pour l’installer Windows. Si défini, téléchargement depuis
   /// [publicDownloadBaseUrl]/[windowsInstallerName]-[version].msi au lieu de GitHub.

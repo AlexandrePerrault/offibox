@@ -1,42 +1,37 @@
-# Déployer les pages Offibox (Netlify) pour les iframes Wix
+# Déployer les pages Offibox (login, inscription, validation) pour iframes Wix
 
-Ce dossier contient les 3 pages à héberger pour les iframes Wix : **login**, **inscription**, **validation**.
+Ce dossier contient les pages à héberger : **login**, **inscription**, **validation**, **démo**, etc.
 
-## Structure
+## Option recommandée : GitHub Pages (gratuit)
 
-```
-deploy-netlify/
-  html/
-    login-wix.html
-    inscription.html
-    validation.html
-  README.md  (ce fichier)
-```
+Les fichiers de `html/` sont déployés automatiquement sur **GitHub Pages** à chaque push sur `main`/`master` (workflow `.github/workflows/pages.yml`). Aucun coût, aucun compte Netlify nécessaire.
 
-## Étapes Netlify
+### URL de base (une fois Pages activé)
 
-1. **Compte** : allez sur [app.netlify.com](https://app.netlify.com) et connectez-vous (ou créez un compte gratuit).
-2. **Nouveau site** : **Add new site** → **Deploy manually**.
-3. **Upload** : glissez-déposez **tout le dossier `deploy-netlify`** (ou seulement le contenu : dossier `html` + ce README) dans la zone « Drag and drop your site output folder ».
-4. **URL** : Netlify vous donne une URL du type `https://quelque-chose-123.netlify.app`.
-5. **Vérifier** : ouvrez dans le navigateur :
-   - `https://VOTRE-SITE.netlify.app/html/login-wix.html`
-   - `https://VOTRE-SITE.netlify.app/html/inscription.html`
-   - `https://VOTRE-SITE.netlify.app/html/validation.html`
+- **Base** : `https://alexandreperrault.github.io/offibox/`
+- **Pages HTML** : `https://alexandreperrault.github.io/offibox/html/`
 
-## Mettre à jour les iframes dans Wix
+### Activer GitHub Pages
 
-Dans l’éditeur Wix, pour chaque **embed / code personnalisé** qui affiche une de ces pages, remplacez l’URL de base :
+1. Sur le dépôt GitHub : **Settings** → **Pages**.
+2. **Source** : choisir **GitHub Actions** (pas "Deploy from a branch").
+3. Après un push sur `main`, le workflow déploie ; le site est disponible sous quelques minutes.
 
-- **Avant** : `https://www-offibox-fr.filesusr.com/html/`
-- **Après** : `https://VOTRE-SITE.netlify.app/html/`
+### Vérifier
 
-### Snippets iframe à coller dans Wix
+- `https://alexandreperrault.github.io/offibox/html/login-wix.html`
+- `https://alexandreperrault.github.io/offibox/html/inscription.html`
+- `https://alexandreperrault.github.io/offibox/html/validation.html`
+- `https://alexandreperrault.github.io/offibox/html/demo-app-animation.html`
+
+### Iframes Wix (snippets)
+
+Remplacez l’URL de base dans vos iframes par : `https://alexandreperrault.github.io/offibox/html/`
 
 **Connexion :**
 ```html
 <iframe 
-  src="https://VOTRE-SITE.netlify.app/html/login-wix.html" 
+  src="https://alexandreperrault.github.io/offibox/html/login-wix.html" 
   width="100%" 
   height="700" 
   style="border: none; min-height: 700px;"
@@ -47,7 +42,7 @@ Dans l’éditeur Wix, pour chaque **embed / code personnalisé** qui affiche un
 **Inscription :**
 ```html
 <iframe 
-  src="https://VOTRE-SITE.netlify.app/html/inscription.html" 
+  src="https://alexandreperrault.github.io/offibox/html/inscription.html" 
   width="100%" 
   height="700" 
   style="border: none; min-height: 700px;"
@@ -55,10 +50,10 @@ Dans l’éditeur Wix, pour chaque **embed / code personnalisé** qui affiche un
 </iframe>
 ```
 
-**Validation (après connexion) :**
+**Validation :**
 ```html
 <iframe 
-  src="https://VOTRE-SITE.netlify.app/html/validation.html" 
+  src="https://alexandreperrault.github.io/offibox/html/validation.html" 
   width="100%" 
   height="700" 
   style="border: none; min-height: 700px;"
@@ -66,15 +61,37 @@ Dans l’éditeur Wix, pour chaque **embed / code personnalisé** qui affiche un
 </iframe>
 ```
 
-Remplacez `VOTRE-SITE` par le sous-domaine réel donné par Netlify (ex. `offibox-pages` → `https://offibox-pages.netlify.app`).
+### Firebase / Google
 
-## Firebase / Google
+Ajoutez le domaine GitHub Pages dans :
 
-Pensez à ajouter le domaine Netlify dans :
+- **Firebase Console** → Authentication → Authorized domains : `alexandreperrault.github.io`
+- **Google Cloud Console** → Credentials → Authorized JavaScript origins : `https://alexandreperrault.github.io`
 
-- **Firebase Console** → Authentication → Authorized domains : `VOTRE-SITE.netlify.app`
-- **Google Cloud Console** → Credentials → Authorized JavaScript origins : `https://VOTRE-SITE.netlify.app`
+### Mises à jour
 
-## Mises à jour ultérieures
+Modifiez les fichiers dans `deploy-netlify/html/`, commitez et poussez sur `main`. Le workflow déploie automatiquement.
 
-Après modification des fichiers dans `website/`, recopiez-les dans `deploy-netlify/html/` puis refaites un **Deploy** sur Netlify (glisser-déposer à nouveau le dossier ou déployer via Git si vous avez connecté le dépôt).
+---
+
+## Alternative : Netlify
+
+Si vous préférez Netlify (manuel ou connecté au dépôt) :
+
+1. [app.netlify.com](https://app.netlify.com) → **Add new site** → **Deploy manually**.
+2. Glissez-déposez le contenu de `deploy-netlify` (dossier `html` + README).
+3. URL type : `https://VOTRE-SITE.netlify.app/html/...`
+4. Dans Firebase / Google, ajoutez `VOTRE-SITE.netlify.app` en domaine autorisé.
+
+## Structure
+
+```
+deploy-netlify/
+  html/
+    login-wix.html
+    inscription.html
+    validation.html
+    demo-app-animation.html
+    ...
+  README.md
+```
