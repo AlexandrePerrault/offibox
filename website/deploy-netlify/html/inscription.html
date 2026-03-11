@@ -98,6 +98,23 @@
       transition: border-color 0.2s;
     }
     .form-group input:focus { outline: none; border-color: var(--offi-teal); box-shadow: 0 0 0 3px rgba(90, 144, 148, 0.15); }
+    .form-group select {
+      width: 100%; padding: 0.75rem 1rem; font-size: 1rem;
+      border: 1px solid var(--gray-light); border-radius: 8px;
+      background: var(--white); color: var(--gray);
+      transition: border-color 0.2s; cursor: pointer;
+    }
+    .form-group select:focus { outline: none; border-color: var(--offi-teal); box-shadow: 0 0 0 3px rgba(90, 144, 148, 0.15); }
+    .form-group.profession-other-wrap { display: none; margin-top: -0.75rem; }
+    .form-group.profession-other-wrap.visible { display: block; }
+    .label-info {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1.15em; height: 1.15em; border-radius: 50%;
+      background: #e2e8f0; color: #64748b; font-size: 0.7rem;
+      font-weight: 600; font-style: italic; cursor: help;
+      margin-left: 0.35rem; vertical-align: middle; line-height: 1;
+    }
+    .label-info:hover { background: rgba(90, 144, 148, 0.2); color: var(--offi-teal); }
     .form-row-inline { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
     .form-row-inline .form-group { margin-bottom: 0; }
     .btn-submit {
@@ -151,6 +168,29 @@
       <h2>Créer un compte</h2>
       <div id="signup-auth-error" class="auth-error" role="alert"></div>
       <form id="signup-form" action="#" method="post">
+        <div class="form-row form-row-inline">
+          <div class="form-group" style="flex:1;">
+            <label for="signup-nom">Nom</label>
+            <input type="text" id="signup-nom" name="signup-nom" placeholder="Votre nom" autocomplete="family-name">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label for="signup-prenom">Prénom</label>
+            <input type="text" id="signup-prenom" name="signup-prenom" placeholder="Votre prénom" autocomplete="given-name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="signup-profession">Profession</label>
+          <select id="signup-profession" name="signup-profession" required>
+            <option value="">Choisir…</option>
+            <option value="pharmacien">Pharmacien</option>
+            <option value="preparateur">Préparateur en pharmacie</option>
+            <option value="autre">Autre : préciser</option>
+          </select>
+        </div>
+        <div class="form-group profession-other-wrap" id="profession-other-wrap">
+          <label for="signup-profession-other">Précisez votre profession</label>
+          <input type="text" id="signup-profession-other" name="signup-profession-other" placeholder="Ex. Assistant en pharmacie, stagiaire…">
+        </div>
         <div class="form-group">
           <label for="signup-pharmacy">Nom de la pharmacie</label>
           <input type="text" id="signup-pharmacy" name="signup-pharmacy" placeholder="Nom de l'officine" autocomplete="organization">
@@ -171,8 +211,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="signup-groupement">Groupement</label>
-          <input type="text" id="signup-groupement" name="signup-groupement" placeholder="Groupement">
+          <label for="signup-groupement">Groupement <span class="label-info" title="Renseigner votre groupement vous permettra de bénéficier de fonctionnalités spécifiques" aria-label="Info">i</span></label>
+          <input type="text" id="signup-groupement" name="signup-groupement" placeholder="Optionnel">
         </div>
         <div class="form-group">
           <label for="signup-email">Adresse e-mail</label>
@@ -222,6 +262,18 @@
         return (o + dir).replace(/([^/])$/, '$1/');
       }
 
+      (function professionOther() {
+        var sel = document.getElementById('signup-profession');
+        var wrap = document.getElementById('profession-other-wrap');
+        if (!sel || !wrap) return;
+        function toggle() {
+          wrap.classList.toggle('visible', sel.value === 'autre');
+          var other = document.getElementById('signup-profession-other');
+          if (other) other.required = sel.value === 'autre';
+        }
+        sel.addEventListener('change', toggle);
+        toggle();
+      })();
       if (signupForm) signupForm.addEventListener('submit', function(e) {
         e.preventDefault();
         if (!window.OffiboxAuth || typeof window.OffiboxAuth.signUpWithEmailPassword !== 'function') {

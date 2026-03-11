@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #0f172a; --text: #f8fafc; --text-muted: #94a3b8; --white: #ffffff; --offi-teal: #5A9094; --accent: #38bdf8; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: Spinnaker, sans-serif; }
+    body { background: #f8fafb; display: flex; flex-direction: column; }
+    nav { flex-shrink: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); padding: 0.75rem 1.5rem; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo img { height: 32px; width: auto; display: block; }
+    .nav-links { display: flex; align-items: center; gap: 1rem; }
+    .nav-links a { color: var(--text); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links .btn-outline { color: var(--text); border: 1px solid rgba(248,250,252,0.3); padding: 0.4rem 1rem; border-radius: 9999px; font-weight: 500; }
+    .nav-links .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-user-email { color: var(--text-muted); font-size: 0.85rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .app-bar { flex-shrink: 0; background: var(--offi-teal); padding: 0.6rem 1.5rem; opacity: 0; animation: bar-fade-in 0.5s ease-out forwards; }
+    @keyframes bar-fade-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .app-bar-inner { max-width: 1200px; margin: 0 auto; color: var(--white); font-size: 0.95rem; font-weight: 500; }
+    .app-frame-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .app-frame-wrap iframe { flex: 1; width: 100%; border: none; display: block; }
+    #auth-loading { padding: 3rem; text-align: center; color: #64748b; }
+    @media (max-width: 430px) {
+      nav { padding: 0.5rem 1rem; }
+      .nav-inner { flex-wrap: wrap; gap: 0.5rem; }
+      .nav-links { flex-wrap: wrap; gap: 0.5rem; font-size: 0.85rem; }
+      .nav-user-email { max-width: 120px; }
+      .app-bar { padding: 0.5rem 1rem; }
+      .app-bar-inner { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="auth-loading">Vérification de l'accès…</div>
+  <div id="app-content" style="display: none; flex-direction: column; height: 100%;">
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo"><img src="assets/icons/logo_offibox.png" alt="Offibox"></a>
+        <div class="nav-links">
+          <a href="index.html">Accueil</a>
+          <span class="nav-user-email" id="nav-user-email"></span>
+          <a href="https://github.com/AlexandrePerrault/offibox/releases/latest" class="btn-outline" target="_blank" rel="noopener">Télécharger</a>
+          <a href="#" id="nav-signout" class="btn-outline">Se déconnecter</a>
+        </div>
+      </div>
+    </nav>
+    <div class="app-bar"><div class="app-bar-inner">Offibox - Application</div></div>
+    <div class="app-frame-wrap"><iframe id="app-iframe" title="Application Offibox" src="about:blank"></iframe></div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script>(function(){if(typeof firebase==="undefined")return;var c={apiKey:"AIzaSyA3eizSKEwkUnH1Y5Xcum3fVgczGgPAFkk",authDomain:"offibox-prod.firebaseapp.com",projectId:"offibox-prod",storageBucket:"offibox-prod.firebasestorage.app",messagingSenderId:"264737328165",appId:"1:264737328165:web:d8744f8fc1c188d9ddc3cc",measurementId:"G-E1FP98K8WE"};if(!firebase.apps.length)firebase.initializeApp(c);})();</script>
+  <script>(function(){var a=firebase.auth();window.OffiboxAuth={getCurrentUser:function(){return a.currentUser;},onAuthStateChanged:function(cb){return a.onAuthStateChanged(cb);},signOut:function(){return a.signOut();}};})();</script>
+  <script>
+  (function(){
+    var OFFIBOX_WEB_APP_URL="https://alexandreperrault.github.io/offibox/";
+    if(!window.OffiboxAuth){window.location.href="login-wix.html";return;}
+    window.OffiboxAuth.onAuthStateChanged(function(user){
+      if(!user||!user.uid){window.location.href="login-wix.html";return;}
+      window.location.href=OFFIBOX_WEB_APP_URL;
+    });
+  })();
+  </script>
+</body>
+</html>

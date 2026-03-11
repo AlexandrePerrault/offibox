@@ -10,7 +10,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padding:.5rem 0}
 .download-card{background:var(--white);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);border:1px solid #e2e8f0;padding:1.5rem 2rem;text-align:center;max-width:420px;margin:0 auto}
-.download-badge{display:inline-block;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--offi-teal),var(--offi-teal-dark));color:var(--white);border-radius:9999px;border:2px solid transparent;font-weight:600;font-size:1.1rem;text-decoration:none;box-shadow:0 4px 20px rgba(90,144,148,.35);transition:transform .2s,box-shadow .2s,background .25s,color .25s,border-color .25s}
+.download-badge{display:inline-block;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--offi-teal),var(--offi-teal-dark));color:var(--white);border-radius:12px;border:2px solid transparent;font-weight:600;font-size:1.1rem;text-decoration:none;box-shadow:0 4px 20px rgba(90,144,148,.35);transition:transform .2s,box-shadow .2s,background .25s,color .25s,border-color .25s}
 .download-badge:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(90,144,148,.45);background:var(--white);color:var(--offi-teal);border-color:var(--offi-teal)}
 .download-badge .version{display:block;font-size:.9rem;opacity:.95;margin-bottom:.25rem}
 .download-badge .platform{display:block;font-size:.8rem;opacity:.85;margin-top:.35rem}
@@ -18,8 +18,17 @@ body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padd
 .download-popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;align-items:center;justify-content:center;padding:1rem}
 .download-popup-overlay.visible{display:flex}
 .download-popup-box{background:#f0fdf4;border:1px solid #86efac;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.2);padding:1.5rem;max-width:420px;width:100%}
-.download-popup-box .popup-close{margin-top:1rem;padding:.5rem 1rem;background:var(--offi-teal);color:var(--white);border:none;border-radius:9999px;cursor:pointer;font-weight:600;font-size:.9rem}
+.download-popup-box .popup-close{margin-top:1rem;padding:.5rem 1rem;background:var(--offi-teal);color:var(--white);border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:.9rem}
 .download-popup-box .popup-close:hover{background:var(--offi-teal-dark)}
+@media (max-width:430px){
+  body{padding:.5rem 0}
+  .download-card{max-width:100%;padding:1.25rem 1rem;border-radius:12px}
+  .download-badge{padding:.875rem 1.25rem;font-size:1rem}
+  .download-badge .version{font-size:.85rem}
+  .download-badge .platform{font-size:.75rem}
+  .download-popup-overlay{padding:.75rem}
+  .download-popup-box{padding:1.25rem 1rem;border-radius:12px}
+}
 </style>
 </head>
 <body>
