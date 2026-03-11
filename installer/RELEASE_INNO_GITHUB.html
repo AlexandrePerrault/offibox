@@ -11,7 +11,7 @@
     h3 { font-size: 1.05rem; margin-top: 1em; }
     code, pre { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.95em; }
     pre { padding: 12px; overflow-x: auto; white-space: pre-wrap; }
-    ul { padding-left: 1.4em; }
+    ul, ol { padding-left: 1.4em; }
     li { margin-bottom: 0.35em; }
     a { color: #0d6efd; }
     hr { border: none; border-top: 1px solid #ddd; margin: 1.5em 0; }
@@ -27,28 +27,29 @@
 .\build_inno.ps1</code></pre>
   <p>Sans refaire le build Flutter (dossier Release déjà à jour) :</p>
   <pre><code>.\build_inno.ps1 -SkipFlutter</code></pre>
-  <p>Le fichier produit est : <strong><code>website\download\Offibox-Setup-1.1.25.exe</code></strong> (version lue depuis <code>#define MyAppVersion</code> dans <code>Offibox.iss</code>).</p>
+  <p>Le fichier produit est : <strong><code>website\download\Offibox-Setup-&lt;version&gt;.exe</code></strong>.</p>
+  <p><strong>Version :</strong> elle est lue automatiquement depuis <strong><code>pubspec.yaml</code></strong> (ligne <code>version: 1.1.25</code>) à chaque build. Le script affiche <code>Version (pubspec.yaml) : 1.1.25</code> avant la compilation.</p>
 
   <hr>
 
-  <h2>2. Mettre à jour la version (si besoin)</h2>
-  <p>Pour une nouvelle version (ex. 1.1.26) :</p>
-  <ol>
-    <li><strong>installer/Offibox.iss</strong> : modifier <code>#define MyAppVersion "1.1.25"</code> → <code>"1.1.26"</code>.</li>
-    <li><strong>pubspec.yaml</strong> : modifier <code>version: 1.1.25</code> → <code>1.1.26</code>.</li>
-    <li>Relancer <code>.\build_inno.ps1</code> pour obtenir <code>Offibox-Setup-1.1.26.exe</code>.</li>
-  </ol>
+  <h2>2. Mettre à jour la version</h2>
+  <p>Une seule modification à faire : <strong><code>pubspec.yaml</code></strong> à la racine du projet.</p>
+  <p>Exemple pour passer en 1.1.26 :</p>
+  <pre><code>version: 1.1.26</code></pre>
+  <p>Puis relancer <code>.\build_inno.ps1</code>. Le .exe généré sera <strong>Offibox-Setup-1.1.26.exe</strong>.</p>
+  <p>Vous n'avez pas à modifier <code>Offibox.iss</code> : la version est injectée par le script et par la CI à partir de <code>pubspec.yaml</code>.</p>
 
   <hr>
 
   <h2>3. Push du code et création de la release sur GitHub</h2>
+  <p>Branche par défaut du dépôt : <strong>master</strong> (utiliser <code>git push origin master</code>).</p>
 
   <h3>Option A : Vous uploadez le .exe à la main</h3>
   <pre><code># À la racine du projet offibox
 git add .
 git status
 git commit -m "Release 1.1.25 - Installateur Inno Setup"
-git push origin main</code></pre>
+git push origin master</code></pre>
   <p>Créer le tag et le pousser :</p>
   <pre><code>git tag v1.1.25
 git push origin v1.1.25</code></pre>
@@ -57,16 +58,16 @@ git push origin v1.1.25</code></pre>
     <li>Aller dans <strong>Releases</strong> → <strong>Draft a new release</strong>.</li>
     <li>Choisir le tag <strong>v1.1.25</strong>.</li>
     <li>Titre : <code>v1.1.25</code> ou <code>Offibox 1.1.25</code>.</li>
-    <li>Dans “Attach binaries”, ajouter le fichier <strong><code>website\download\Offibox-Setup-1.1.25.exe</code></strong> (depuis votre PC).</li>
+    <li>Dans "Attach binaries", ajouter le fichier <strong><code>website\download\Offibox-Setup-1.1.25.exe</code></strong> (depuis votre PC).</li>
     <li>Publier la release.</li>
   </ol>
 
   <h3>Option B : La CI crée la release avec le .exe (recommandé)</h3>
-  <p>Le workflow <code>.github/workflows/release.yml</code> est configuré pour : au <strong>push d'un tag v*</strong>, build Windows + Inno Setup puis création de la release avec le <strong>.exe</strong> en pièce jointe.</p>
+  <p>Le workflow <code>.github/workflows/release.yml</code> : au <strong>push d'un tag v*</strong>, build Windows + Inno Setup (version lue dans <code>pubspec.yaml</code>) puis création de la release avec le <strong>.exe</strong> en pièce jointe.</p>
   <pre><code># À la racine du projet
 git add .
 git commit -m "Release 1.1.25 - Installateur Inno Setup"
-git push origin main
+git push origin master
 
 git tag v1.1.25
 git push origin v1.1.25</code></pre>
@@ -89,13 +90,13 @@ git push origin v1.1.25</code></pre>
     <li><strong>Installateur Windows</strong> : passage à <strong>Inno Setup 6</strong> (fichier .exe) à la place du MSI WiX.</li>
     <li><strong>Comportement</strong> : même installation par utilisateur (sans admin), même options (icône bureau, lancement au démarrage, lancement à la fin), même clés de registre.</li>
     <li><strong>Interface</strong> : assistant en français, licence EULA (License.rtf), style d'assistant moderne.</li>
-    <li><strong>Build</strong> : script <code>installer\build_inno.ps1</code> (Flutter build windows + ISCC). Prérequis : <a href="https://jrsoftware.org/isinfo.php">Inno Setup 6</a>.</li>
+    <li><strong>Build</strong> : script <code>installer\build_inno.ps1</code> (Flutter build windows + ISCC). La <strong>version</strong> est lue depuis <strong>pubspec.yaml</strong> à chaque build. Prérequis : <a href="https://jrsoftware.org/isinfo.php">Inno Setup 6</a>.</li>
     <li><strong>Site</strong> : page téléchargement privilégie le .exe si présent dans les assets de la release GitHub.</li>
     <li><strong>Menu hamburger</strong> : « Ouvrir offibox.fr » affiche « Fermer Offibox et aller sur Offibox.fr ? » ; sur Oui, l'app se ferme et le site s'ouvre dans le navigateur.</li>
     <li><strong>Erreur d'installation</strong> : le fichier asset <code>logo APPEXokkk.jpg</code> (espace dans le nom) a été renommé en <code>logo_APPEXokkk.jpg</code> pour éviter l'erreur d'écriture lors de l'installation.</li>
   </ul>
   <p>Vous pouvez copier/coller le bloc ci-dessus dans la description de la release GitHub.</p>
 
-  <p style="margin-top:2em; font-size:0.9em; color:#666;">Pour obtenir un PDF : ouvrez ce fichier dans un navigateur, puis Fichier → Imprimer → Enregistrer au format PDF.</p>
+  <p style="margin-top:2em; font-size:0.9em; color:#666;">Pour obtenir un PDF : Fichier → Imprimer → Enregistrer au format PDF.</p>
 </body>
 </html>
