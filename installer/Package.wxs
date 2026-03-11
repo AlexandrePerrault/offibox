@@ -1,15 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml Version="1.1.25" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <!-- Language="1036" = français : interface de l'installateur en français -->
   <Package Id="Offibox.Msi"
            Name="Offibox"
            Manufacturer="Offibox"
-           Version="1.1.24"
+           Version="1.1.25"
            UpgradeCode="B7B3E8A2-9F4C-4D1E-8A5B-2C6D9E1F3A4B"
            Language="1036">
     <MajorUpgrade DowngradeErrorMessage="Une version plus récente d'Offibox est déjà installée." />
     <MediaTemplate EmbedCab="yes" />
+
+    <!-- Licence EULA en français + bannière/dialogue (remplacer wix/bitmap/*.bmp par votre logo en BMP) -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="wix/bitmap/bannrbmp.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="wix/bitmap/dlgbmp.bmp" />
 
     <!-- Options proposées à l'utilisateur (1 = coché par défaut) -->
     <Property Id="CREATEDESKTOPSHORTCUT" Value="1" />
@@ -18,12 +23,13 @@
     <!-- UI : choix du dossier d'installation (WixUI_InstallDir) -->
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLDIR" />
 
-    <!-- Dialogue personnalisé : icône bureau + lancer au démarrage (après InstallDirDlg) -->
+    <!-- Dialogue personnalisé : logo + icône bureau + lancer au démarrage (après InstallDirDlg, dernier panneau avant installation) -->
     <UI>
       <Dialog Id="OptionsDlg" Width="370" Height="270" Title="[ProductName] - Options">
-        <Control Id="OptionsTitle" Type="Text" X="15" Y="6" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="Choisissez les options d'installation." />
+        <Control Id="OptionsTitle" Type="Text" X="15" Y="6" Width="220" Height="15" Transparent="yes" NoPrefix="yes" Text="Choisissez les options d'installation." />
+        <Control Id="OptionsLogoBmp" Type="Bitmap" X="245" Y="15" Width="110" Height="55" BinaryKey="OptionsLogoBmp" />
         <Control Id="CheckboxDesktop" Type="CheckBox" X="20" Y="40" Width="330" Height="30" Property="CREATEDESKTOPSHORTCUT" CheckBoxValue="1" Text="Créer une icône sur le bureau" />
-        <Control Id="CheckboxStartup" Type="CheckBox" X="20" Y="75" Width="330" Height="30" Property="LAUNCHATSTARTUP" CheckBoxValue="1" Text="Lancer Offibox au démarrage de Windows" />
+        <Control Id="CheckboxStartup" Type="CheckBox" X="20" Y="75" Width="330" Height="30" Property="LAUNCHATSTARTUP" CheckBoxValue="1" Text="Lancer Offibox au démarrage de Windows (recommandé)" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Retour">
           <Publish Event="NewDialog" Value="InstallDirDlg" Order="2" />
         </Control>
@@ -55,6 +61,11 @@
       <ComponentRef Id="RegistryLaunchAtStartup" />
     </Feature>
   </Package>
+
+  <!-- Logo du panneau Options (remplacer wix/bitmap/dlgbmp.bmp par votre logo en BMP) -->
+  <Fragment>
+    <Binary Id="OptionsLogoBmp" SourceFile="wix/bitmap/dlgbmp.bmp" />
+  </Fragment>
 
   <Fragment>
     <Component Id="StartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890">
