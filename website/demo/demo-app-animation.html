@@ -545,7 +545,7 @@
     <div class="app-bar-outer">
       <div class="app-bar-container" id="app-bar-container">
         <div class="bar-pill-only" id="bar-pill">
-          <img src="../../assets/icons/logo_offibox.png" alt="Offibox" class="logo-img">
+          <img id="demo-logo-img" data-src="../assets/icons/logo_offibox.png" alt="Offibox" class="logo-img" referrerpolicy="no-referrer" src="">
         </div>
         <div class="bar-expanded-content">
           <div class="info-bar">
@@ -594,14 +594,14 @@
                   </svg>
                   Fiche MEDDISPAR
                 </span>
-                <span class="pill" id="pill-fiche-patient" title="Fiche à destination des patients OMÉDIT">
+                <span class="pill" id="pill-fiche-patient" title="Fiche à destination des patients (OMÉDIT)">
                   <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
                   </svg>
-                  fiche à destination des patients OMÉDIT
+                  fiche à destination des patients (OMÉDIT)
                 </span>
-                <span class="pill pill-fiche-pro" id="pill-fiche-pro" title="Fiche à destination des professionnels de santé OMÉDIT">
+                <span class="pill pill-fiche-pro" id="pill-fiche-pro" title="Fiche à destination des professionnels de santé (OMÉDIT)">
                   <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
@@ -614,7 +614,7 @@
                 <span class="result-outils-badge">OUTILS MÉTIER</span>
                 <span class="result-title">TROD angine (page Offibox)</span>
               </div>
-              <!-- Images TROD : placer les 6 JPG dans ce dossier (website/demo/) — voir TROD_ANGINE_IMAGES_README.md -->
+              <!-- Images TROD : intégration directe des 6 JPG distants -->
               <div class="result-hover-pills" id="result-hover-pills">
                 <span class="hover-pill" id="pill-trod-1" title="https://www.ameli.fr/finistere/content/compte-rendu-prise-en-charge-de-l-angine-l-officine" data-label="compte-rendu" data-image="trod-compte-rendu.jpg">compte-rendu</span>
                 <span class="hover-pill" id="pill-trod-2" title="https://www.ameli.fr/finistere/content/prise-en-charge-de-l-angine-l-officine" data-label="logigramme AMELI" data-image="trod-logigramme-ameli.jpg">logigramme AMELI</span>
@@ -634,7 +634,7 @@
       <div class="browser-frame-wrap">
         <iframe id="browser-frame" title="Aperçu"></iframe>
         <div class="demo-content-img-wrap" id="browser-image-wrap">
-          <img id="browser-content-img" alt="Aperçu" src="">
+          <img id="browser-content-img" alt="Aperçu" src="" referrerpolicy="no-referrer" crossorigin="anonymous">
           <div class="browser-doc-toolbar" id="browser-doc-toolbar">
             <span class="doc-toolbar-btn" title="Télécharger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger</span>
             <span class="doc-toolbar-btn" title="Imprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Imprimer</span>
@@ -650,7 +650,7 @@
       </div>
       <div class="pdf-panel-content">
         <div class="pdf-demo-image-wrap" id="pdf-demo-image-wrap">
-          <img id="demo-fiche-voc-img" class="pdf-demo-img" src="demo-fiche-voc.jpg" alt="Fiche VOC (démo)">
+          <img id="demo-fiche-voc-img" class="pdf-demo-img" data-src="demo-fiche-voc.jpg" alt="Fiche VOC (démo)" referrerpolicy="no-referrer" src="">
           <a id="pdf-link" href="https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline;font-size:13px">Ouvrir la fiche dans un nouvel onglet</a>
         </div>
         <div class="pdf-placeholder hidden" id="pdf-placeholder">
@@ -682,6 +682,21 @@
   (function() {
     var pdfUrl = 'https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf';
     var wrap = document.getElementById('demo-wrap');
+
+    var docBase = (function() {
+      var href = window.location.href;
+      var lastSlash = href.lastIndexOf('/');
+      return lastSlash >= 0 ? href.slice(0, lastSlash + 1) : href + '/';
+    })();
+    function assetUrl(relativePath) {
+      if (!relativePath) return '';
+      try { return new URL(relativePath, docBase).href; } catch (e) { return relativePath; }
+    }
+
+    var logoImg = document.getElementById('demo-logo-img');
+    if (logoImg && logoImg.getAttribute('data-src')) logoImg.src = assetUrl(logoImg.getAttribute('data-src'));
+    var demoFicheVocImg = document.getElementById('demo-fiche-voc-img');
+    if (demoFicheVocImg && demoFicheVocImg.getAttribute('data-src')) demoFicheVocImg.src = assetUrl(demoFicheVocImg.getAttribute('data-src'));
     var barContainer = document.getElementById('app-bar-container');
     var barPill = document.getElementById('bar-pill');
     var searchInput = document.getElementById('search-input');
@@ -884,12 +899,11 @@
       setTimeout(speak, d(600));
     }
 
-    var imageBase = '../assets/images/';
     var demoImages = {
-      rcp: imageBase + 'base-donnees-publique_medicaments.gouv.jpg',
-      meddispar: imageBase + 'www_meddispar%20(2).jpg',
-      fichePatient: imageBase + 'IMBRUVICA%20ibrutinib%20Comprim%C3%A9%20et%20G%C3%A9lule%20V6%20Patient_page-0001.jpg',
-      fichePro: imageBase + 'IMBRUVICA%20ibrutinib%20Comprim%C3%A9%20et%20G%C3%A9lule%20V6%20Pro_page-0001.jpg'
+      rcp: assetUrl('../assets/images/base-donnees-publique_medicaments.gouv.jpg'),
+      meddispar: assetUrl('../assets/images/www_meddispar%20(2).jpg'),
+      fichePatient: assetUrl('../assets/images/IMBRUVICA%20ibrutinib%20Comprim%C3%A9%20et%20G%C3%A9lule%20V6%20Patient_page-0001.jpg'),
+      fichePro: assetUrl('../assets/images/IMBRUVICA%20ibrutinib%20Comprim%C3%A9%20et%20G%C3%A9lule%20V6%20Pro_page-0001.jpg')
     };
     var demoLabels = {
       rcp: 'RCP – Base de données publique des médicaments',
@@ -974,6 +988,7 @@
         }
         var isPdf = pill.querySelector('.pdf-icon') !== null;
         var imagePath = pill.getAttribute('data-image') || '';
+        if (imagePath) imagePath = assetUrl(imagePath);
         clickTrodPill(pill, label, isPdf, imagePath, next);
       }
       next();
