@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:offibox/data/bdm_parser.dart';
 import 'package:offibox/data/data_sources.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 import 'package:offibox/utils/normalize.dart';
 
 /// Charge le CSV composition-bdm (CIS;COMPOSITION), normalise les compositions
 /// et retourne une map DCI normalisée → liste de CIS.
 /// Permet de lier une molécule tapée (ex. daridorexant) aux CIS, puis via BDM au princeps.
 Future<Map<String, List<String>>> loadCompositionBdm() async {
-  final response = await http.get(Uri.parse(COMPOSITION_BDM_URL));
+  final response = await OffiboxDataFetch.get(COMPOSITION_BDM_URL);
   if (response.statusCode != 200) return {};
 
   String decoded;
@@ -48,7 +49,7 @@ Future<Map<String, List<String>>> loadCompositionBdm() async {
 /// Charge le CSV composition-bdm (CIS;COMPOSITION) et retourne une map CIS → texte de la colonne B.
 /// Utilisé pour le badge « composition » en ligne 2 (sauf pour les génériques, CIS en col 4 de génériques 2026).
 Future<Map<String, String>> loadCompositionByCis() async {
-  final response = await http.get(Uri.parse(COMPOSITION_BDM_URL));
+  final response = await OffiboxDataFetch.get(COMPOSITION_BDM_URL);
   if (response.statusCode != 200) return {};
 
   String decoded;

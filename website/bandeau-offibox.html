@@ -27,10 +27,15 @@
       max-width: 100%;
       padding: 2rem 1.5rem;
       text-align: center;
-      overflow: hidden;
+      overflow: visible;
       background: #ffffff;
     }
-    .bandeau-inner-wrap { position: relative; display: inline-block; }
+    .bandeau-inner-wrap {
+      position: relative;
+      display: inline-block;
+      transform: scale(1.2);
+      transform-origin: center center;
+    }
     .bandeau-inner {
       display: inline-block;
       max-width: 100%;

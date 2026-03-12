@@ -1,6 +1,10 @@
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/search_result.dart';
+
+import 'offiboxdata_fetch.dart';
 import 'package:offibox/models/source_type.dart';
 
 /// Laboratoires de secours si le CSV est vide ou échoue (pour que VIATRIS etc. restent visibles).
@@ -38,17 +42,19 @@ List<SearchResult> get defaultLaboratoiresFallback => [
 ];
 
 Future<List<SearchResult>> parseLaboratoires(String url) async {
-  final response = await http.get(Uri.parse(url));
+  try {
+    final response = await OffiboxDataFetch.get(url);
 
-  if (response.statusCode != 200) {
-    throw Exception('Erreur chargement LABORATOIRES.csv');
-  }
+    if (response.statusCode != 200) {
+      if (kDebugMode) debugPrint('[Offibox] Laboratoires non disponibles (HTTP ${response.statusCode})');
+      return [];
+    }
 
-  final body = response.body.replaceAll('\uFEFF', '').trim();
-  final lines = const LineSplitter().convert(body);
-  final results = <SearchResult>[];
+    final body = response.body.replaceAll('\uFEFF', '').trim();
+    final lines = const LineSplitter().convert(body);
+    final results = <SearchResult>[];
 
-  for (int i = 1; i < lines.length; i++) {
+    for (int i = 1; i < lines.length; i++) {
     final row = lines[i]
         .split(';')
         .map((e) => e.replaceAll('"', '').trim())
@@ -107,7 +113,11 @@ Future<List<SearchResult>> parseLaboratoires(String url) async {
     );
   }
 
-  return results;
+    return results;
+  } catch (e) {
+    if (kDebugMode) debugPrint('[Offibox] Laboratoires erreur: $e');
+    return [];
+  }
 }
 
 String? _v(List<String> row, int index) {

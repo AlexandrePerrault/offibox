@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:offibox/ui/widgets/hover_pill_button.dart';
+import 'package:offibox/constants/offibox_icons.dart';
 
 /// Fenêtre sous la barre quand un laboratoire avec catalogue (col. G) est sélectionné.
 /// Deux choix en HoverPill : Télécharger PDF | Rechercher sur le catalogue (+15 % hauteur).
@@ -33,8 +34,8 @@ class CataloguePanelBelowBar extends StatelessWidget {
               expand: true,
               height: _pillHeight,
               label: 'Télécharger le catalogue',
-              iconWidget: SvgPicture.asset(
-                'assets/icons/pdf_red.svg',
+              iconWidget: SvgPicture.network(
+                kPdfRedIconUrl,
                 width: 20,
                 height: 20,
                 fit: BoxFit.contain,

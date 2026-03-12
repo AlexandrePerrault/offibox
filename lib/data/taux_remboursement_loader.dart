@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:offibox/data/data_sources.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 
 /// Charge le CSV taux de remboursement (CIS ; taux).
 /// Retourne une map CIS (chiffres) → libellé affichable (ex. "65 %").
@@ -8,7 +9,7 @@ Future<Map<String, String>> loadTauxRemboursementByCis() async {
   const url = TAUX_REMBOURSEMENT_CIS_URL;
   if (url.isEmpty) return {};
 
-  final res = await http.get(Uri.parse(url));
+  final res = await OffiboxDataFetch.get(url);
   if (res.statusCode != 200) return {};
 
   final lines = res.body.split(RegExp(r'\r?\n'));

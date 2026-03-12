@@ -18,6 +18,9 @@ import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 
+const String _kCodesActesPlusInfosUrl =
+    'https://www.ameli.fr/finistere/pharmacien/exercice-professionnel/remunerations/honoraires-actes-pharmaciens';
+
 class ResultLine1 extends StatelessWidget {
   final SearchResult item;
   final String label;
@@ -349,16 +352,12 @@ class ResultLine1 extends StatelessWidget {
       spans.addAll(buildMedicinePictos(item));
 
       // BDM : badges STUPS / EXCEPTION / SURV / OTC/Libre accès / PIH / HOP toujours après la gélule, avant le libellé (ligne 1).
-        final cip13Digits = item.cip13?.replaceAll(RegExp(r'\D'), '');
-        final bool showNrBadge = item.source == SourceType.bdm &&
-            (tauxRemboursement == null || tauxRemboursement!.trim().isEmpty) &&
-            (hospitalCip13Set != null && cip13Digits != null && cip13Digits.length == 13 && !hospitalCip13Set!.contains(cip13Digits));
       // Badge OTC/Libre accès retiré : on n’affiche que NR (non remboursé) pour les BDM hors liste hospitalière et sans taux.
       if (item.source == SourceType.bdm &&
           (item.isStupefiant == true ||
               item.isException == true ||
               item.isSurveillanceParticuliere == true ||
-              showNrBadge ||
+              item.isOtc == true ||
               item.isPih == true ||
               item.hospitalOnly == true)) {
         spans.add(const TextSpan(text: ' '));
@@ -374,8 +373,8 @@ class ResultLine1 extends StatelessWidget {
           spans.add(surveillanceSquareSpan());
           spans.add(const TextSpan(text: ' '));
         }
-        if (showNrBadge) {
-          spans.add(nrSquareSpan());
+        if (item.isOtc == true) {
+          spans.add(otcSquareSpan());
           spans.add(const TextSpan(text: ' '));
         }
         if (item.isPih == true) {
@@ -484,7 +483,14 @@ class ResultLine1 extends StatelessWidget {
           spans.add(keywordPlusAndOutilsMetierSpan());
           return spans;
         }
-        final hasKeywordIcon = item.iconUrl != null && item.iconUrl!.trim().isNotEmpty;
+        // Logo uniquement si la cellule icône du CSV a un vrai chemin (pas vide ni placeholder)
+        final _icon = item.iconUrl?.trim() ?? '';
+        final hasKeywordIcon = _icon.isNotEmpty &&
+            (_icon.toLowerCase().contains('assets/') ||
+                _icon.contains('.png') ||
+                _icon.contains('.svg') ||
+                _icon.contains('.webp') ||
+                _icon.contains('.jpg'));
         final urlColC = item.url?.trim();
         final libelleColB = (item.commentaire ?? item.label).trim().toUpperCase();
 
@@ -551,7 +557,7 @@ class ResultLine1 extends StatelessWidget {
         if (hasKeywordIcon) {
           spans.add(const TextSpan(text: ' '));
           spans.add(keywordLogoWrappedSpan(
-            iconAssetPath: item.iconUrl!.trim(),
+            iconAssetPath: _icon,
             tooltip: 'Outils métier',
           ),);
         }
@@ -582,6 +588,14 @@ class ResultLine1 extends StatelessWidget {
             disableBold: false,
           );
           spans.addAll(highlightSpans);
+          spans.add(
+            pillSpan(
+              label: 'PLUS D\'INFOS',
+              icon: Icons.open_in_new,
+              tooltip: 'Voir les détails de rémunération sur Ameli',
+              onTap: () => onOpenUrl(_kCodesActesPlusInfosUrl),
+            ),
+          );
         }
       }
 
@@ -1058,16 +1072,12 @@ void _buildBdmFastPathSpans({
       spans.add(const TextSpan(text: ' '));
     }
   }
-  // BDM : badges STUPS / EXCEPTION / SURV / OTC/Libre accès / PIH / HOP après la gélule, avant le libellé (ligne 1).
-  final cip13DigitsFast = item.cip13?.replaceAll(RegExp(r'\D'), '');
-  final bool showNrBadgeFast = item.source == SourceType.bdm &&
-      (tauxRemboursement == null || tauxRemboursement.trim().isEmpty) &&
-      (hospitalCip13Set != null && cip13DigitsFast != null && cip13DigitsFast.length == 13 && !hospitalCip13Set!.contains(cip13DigitsFast));
+  // BDM : badges STUPS / EXCEPTION / SURV / OTC Libre accès (ANSM) / PIH / HOP après la gélule (ligne 1). Badge NR supprimé.
   if (item.source == SourceType.bdm &&
       (item.isStupefiant == true ||
           item.isException == true ||
           item.isSurveillanceParticuliere == true ||
-          showNrBadgeFast ||
+          item.isOtc == true ||
           item.isPih == true ||
           item.hospitalOnly == true)) {
     spans.add(const TextSpan(text: ' '));
@@ -1083,8 +1093,8 @@ void _buildBdmFastPathSpans({
       spans.add(surveillanceSquareSpan());
       spans.add(const TextSpan(text: ' '));
     }
-    if (showNrBadgeFast) {
-      spans.add(nrSquareSpan());
+    if (item.isOtc == true) {
+      spans.add(otcSquareSpan());
       spans.add(const TextSpan(text: ' '));
     }
     if (item.isPih == true) {

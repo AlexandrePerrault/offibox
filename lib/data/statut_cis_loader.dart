@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:offibox/data/data_sources.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 import 'package:offibox/utils/normalize.dart';
 
 /// Normalise le libellé STATUT (CSV statut CIS 2026 : ? = é/è/à mal encodé).
@@ -89,7 +90,7 @@ String _normalizeStatut(String raw) {
 /// Charge le CSV statut CIS (CIS;STATUT), normalise les libellés,
 /// retourne une map CIS → liste de STATUT (un même CIS peut avoir plusieurs lignes).
 Future<Map<String, List<String>>> loadStatutsByCis() async {
-  final res = await http.get(Uri.parse(STATUT_CIS_2026_URL));
+  final res = await OffiboxDataFetch.get(STATUT_CIS_2026_URL);
   if (res.statusCode != 200) return {};
 
   final body = res.body;

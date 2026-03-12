@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:offibox/data/data_sources.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 
 /// Une entrée actualité (news.csv) pour la popup sous la barre et le bandeau de démo.
 class NewsEntry {
@@ -34,11 +35,10 @@ class NewsEntry {
 /// On suppose que la ligne la plus récente est en haut du fichier (après l’en‑tête).
 Future<NewsEntry?> fetchLatestNews() async {
   try {
-    final uri = Uri.parse(NEWS_CSV_URL);
-    final response = await http.get(uri);
+    final response = await OffiboxDataFetch.get(NEWS_CSV_URL);
     if (response.statusCode != 200) {
       if (kDebugMode) {
-        debugPrint('[Offibox] ⚠ news.csv HTTP ${response.statusCode}');
+        debugPrint('[Offibox] Actualités non disponibles (HTTP ${response.statusCode})');
       }
       return null;
     }

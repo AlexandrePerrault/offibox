@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:offibox/data/data_sources.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 
 /// Ensembles CIP13 pour les badges EXCEPTION et OTC/Libre accès en ligne 1.
 class ExceptionOtcSets {
@@ -36,7 +37,7 @@ Future<ExceptionOtcSets> loadExceptionOtcSets() async {
   }
 
   // 2) OTC/Libre accès : liste médication officinale ANSM (CIP13 = col D du XLS, exporté en CSV)
-  final otcRes = await http.get(Uri.parse(LISTE_MEDICATION_OFFICINALE_CIP13_URL));
+  final otcRes = await OffiboxDataFetch.get(LISTE_MEDICATION_OFFICINALE_CIP13_URL);
   if (otcRes.statusCode == 200 && otcRes.body.trim().isNotEmpty) {
     final lines = const LineSplitter().convert(otcRes.body);
     for (final line in lines) {

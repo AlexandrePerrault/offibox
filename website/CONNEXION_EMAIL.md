@@ -22,3 +22,10 @@ Pour que le lien dans l’e-mail pointe vers **notre** page (avec champ « Confi
 ## Client déjà connecté (appli desktop)
 
 Si le client a déjà une session (connecté une fois), l’appli démarre **sans demander de connexion**. À côté de la date de mise à jour dans la barre, s’affiche **« licence jusqu'au JJ/MM/AAAA »** (date de fin d’essai ou de licence).
+
+## Licence 15 jours, barre et version web
+
+- **Durée d’essai** : 15 jours à compter de la première connexion (web ou app). Géré par `TrialGuard` (Firestore `users/{uid}` : `trialEndsAt`, `plan`).
+- **Barre déployée (app et web)** : à côté de « mis à jour le JJ/MM/AAAA » s’affiche **« licence jusqu'au JJ/MM/AAAA »** (en mode trial ; plan pro = pas d’affichage ou illimité).
+- **Version web** : même affichage dans la barre (écran connecté) ; limite de **5 connexions web simultanées** par compte (sessions dans `users/{uid}/web_sessions`, timeout 3 min).
+- **Page de connexion (navigateur)** : option **« Rester connecté »** (persistance Firebase LOCAL vs SESSION) ; **e-mail mémorisé** dans le navigateur (localStorage `offibox_login_email`) pour pré-remplir au prochain passage. Le mot de passe peut être mémorisé par le navigateur (autocomplete).

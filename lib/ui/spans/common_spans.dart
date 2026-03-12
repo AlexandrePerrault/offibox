@@ -13,6 +13,7 @@ import 'package:offibox/models/search_result.dart';
 import 'package:offibox/ui/widgets/hover_pill_button.dart';
 import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/utils/open_url.dart';
+import 'package:offibox/constants/offibox_icons.dart';
 
 /// 🎨 COULEUR OFFIBOX
 const Color offiboxTeal = Color(0xFF5A9094);
@@ -263,8 +264,8 @@ WidgetSpan pdfIconSpan() {
     alignment: PlaceholderAlignment.middle,
     child: Padding(
       padding: const EdgeInsets.only(right: 6),
-      child: SvgPicture.asset(
-        'assets/icons/pdf_red.svg',
+      child: SvgPicture.network(
+        kPdfRedIconUrl,
         width: 20,
         height: 20,
       ),
@@ -858,8 +859,8 @@ String _normalizeAssetPath(String path) => path.trim().replaceAll(r'\', '/');
 /// Chemin avec extension remplacée par .webp (fallback pour assets/images).
 String _assetPathToWebp(String path) {
   final lower = path.toLowerCase();
-  if (lower.endsWith('.png')) return path.substring(0, path.length - 4) + '.webp';
-  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return path.substring(0, path.length - (lower.endsWith('.jpeg') ? 5 : 4)) + '.webp';
+  if (lower.endsWith('.png')) return '${path.substring(0, path.length - 4)}.webp';
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return '${path.substring(0, path.length - (lower.endsWith('.jpeg') ? 5 : 4))}.webp';
   return path;
 }
 

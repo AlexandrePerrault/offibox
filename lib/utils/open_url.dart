@@ -30,7 +30,7 @@ Future<void> _openInDefaultBrowser(String url) async {
     );
     return;
   } catch (e) {
-    debugPrint('⛔ launchUrl échoué : $url — $e');
+    if (kDebugMode) debugPrint('⛔ launchUrl échoué : $url — $e');
   }
 
   // Secours Windows : ouvrir via le shell → navigateur par défaut (Chrome, Edge, etc.)
@@ -38,7 +38,7 @@ Future<void> _openInDefaultBrowser(String url) async {
     try {
       await Process.run('cmd', ['/c', 'start', '', url], runInShell: false);
     } catch (e2) {
-      debugPrint('⛔ Fallback Windows échoué : $url — $e2');
+      if (kDebugMode) debugPrint('⛔ Fallback Windows échoué : $url — $e2');
     }
   }
 }
@@ -58,7 +58,7 @@ Future<void> openUrl(String rawUrl, {bool forceExternal = false}) async {
   final isTel  = clean.startsWith('tel:');
 
   if (!isHttp && !isMail && !isTel) {
-    debugPrint('⛔ URL invalide : [$clean]');
+    if (kDebugMode) debugPrint('⛔ URL invalide : [$clean]');
     return;
   }
 
@@ -78,10 +78,10 @@ Future<void> openUrl(String rawUrl, {bool forceExternal = false}) async {
   }
 
   final ok = await canLaunchUrl(uri);
-  debugPrint('🌐 canLaunchUrl($clean) = $ok');
+  if (kDebugMode) debugPrint('🌐 canLaunchUrl($clean) = $ok');
 
   if (!ok) {
-    debugPrint('⛔ Impossible d’ouvrir : $clean');
+    if (kDebugMode) debugPrint('⛔ Impossible d’ouvrir : $clean');
     return;
   }
 

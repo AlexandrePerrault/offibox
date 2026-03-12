@@ -12,6 +12,7 @@ import 'package:offibox/utils/open_url.dart';
 import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/ui/widgets/offibox_tooltip.dart';
+import 'package:offibox/constants/offibox_icons.dart';
 
 /// Taille d'affichage pour les logos "Source :". Véto = 52 ; LPP = 52 × 0,7 (−30 %) ; e-pansement = 52 * 1.5 (plus lisible).
 const double _sourceLogoSize = 52;
@@ -26,7 +27,7 @@ const String _bdmSourceLabel = 'Base de Données Publique des Médicaments, ANSM
 const String _bdmSourceTooltip = 'Base de données publique des médicaments';
 /// Source OMÉDIT pour les fiches VOC (voie orale cancer) affichées sur certains médicaments.
 const String _omeditVocSourceUrl = 'https://www.omedit-fiches-cancer.fr/';
-const String _omeditVocSourceTooltip = 'OMÉDIT – fiches VOC (voie orale cancer)';
+const String _omeditVocSourceTooltip = '(OMEDIT) – fiches VOC (voie orale cancer)';
 const String _vetoSourceUrl = 'https://www.anses.fr/fr/content/lagence-nationale-du-medicament-veterinaire-missions-et-actions';
 const String _vetoSourceAsset = 'assets/icons/anses-small.svg';
 const String _dmSourceUrl = 'https://www.e-pansement.fr/';
@@ -138,18 +139,17 @@ Widget build(BuildContext context) {
   if (!isInjected &&
       item.source == SourceType.bdm &&
       (vocPatientUrl != null && vocPatientUrl!.isNotEmpty || vocProUrl != null && vocProUrl!.isNotEmpty)) {
-    const String pdfRedLogoAsset = 'assets/icons/pdf_red.svg';
     if (vocPatientUrl != null && vocPatientUrl!.trim().isNotEmpty) {
       final url = vocPatientUrl!.trim();
       vocPills.add(
         HoverPillButton(
-          label: 'fiche à destination des patients OMÉDIT',
+          label: 'fiche à destination des patients (OMEDIT)',
           icon: Icons.person_outline,
           tooltip: url,
           onTap: () => openUrlFn(url),
           maxLabelWidth: 380,
           trailingWidget: SvgPicture.asset(
-            pdfRedLogoAsset,
+            kPdfRedIconUrl,
             width: 16,
             height: 16,
             fit: BoxFit.contain,
@@ -162,13 +162,13 @@ Widget build(BuildContext context) {
       if (vocPills.isNotEmpty) vocPills.add(const SizedBox(width: 6));
       vocPills.add(
         HoverPillButton(
-          label: 'fiche à destination des professionnels de santé OMÉDIT',
+          label: 'fiche à destination des professionnels de santé (OMEDIT)',
           icon: Icons.medical_services_outlined,
           tooltip: url,
           onTap: () => openUrlFn(url),
           maxLabelWidth: 380,
           trailingWidget: SvgPicture.asset(
-            pdfRedLogoAsset,
+            kPdfRedIconUrl,
             width: 16,
             height: 16,
             fit: BoxFit.contain,
@@ -619,7 +619,7 @@ Widget build(BuildContext context) {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Text('OMÉDIT', style: commaStyle),
+                  const Text('(OMEDIT)', style: commaStyle),
                 ],
               ),
             ),

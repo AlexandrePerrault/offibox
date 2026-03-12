@@ -118,6 +118,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             DataColumn(label: Text('Plan', style: TextStyle(fontWeight: FontWeight.bold))),
                             DataColumn(label: Text('Statut licence', style: TextStyle(fontWeight: FontWeight.bold))),
                             DataColumn(label: Text('Fin essai', style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold))),
                           ],
                           rows: _users.map((u) {
                             return DataRow(
@@ -149,6 +150,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                     style: const TextStyle(fontFamily: 'Spinnaker'),
                                   ),
                                 ),
+                                DataCell(
+                                  u.plan == 'pro'
+                                      ? const SizedBox.shrink()
+                                      : _ExtendTrialButton(
+                                          uid: u.uid,
+                                          email: u.email,
+                                          onDone: _load,
+                                        ),
+                                ),
                               ],
                             );
                           }).toList(),
@@ -157,6 +167,32 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     ],
                   ),
                 ),
+    );
+  }
+}
+
+class _ExtendTrialButton extends StatelessWidget {
+  const _ExtendTrialButton({
+    required this.uid,
+    required this.email,
+    required this.onDone,
+  });
+
+  final String uid;
+  final String? email;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        // TODO: appeler une Cloud Function pour prolonger l'essai (uid)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Prolonger essai: ${email ?? uid}')),
+        );
+        onDone();
+      },
+      child: const Text('Prolonger'),
     );
   }
 }

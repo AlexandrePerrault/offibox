@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:offibox/data/data_sources.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 
 /// Entrée CIP13 → libellé (colonne E) et dosage (colonne C) du CSV BDM_CIP_QUANTITE.
 /// Source : https://github.com/AlexandrePerrault/offiboxdata/blob/main/BDM_CIP_QUANTITE.csv
@@ -28,7 +29,7 @@ class BdmLibelleCache {
   Future<void> load() async {
     if (_loaded) return;
     try {
-      final response = await http.get(Uri.parse(BDM_CIP_QUANTITE_URL));
+      final response = await OffiboxDataFetch.get(BDM_CIP_QUANTITE_URL);
       if (response.statusCode != 200) return;
 
       String decoded;

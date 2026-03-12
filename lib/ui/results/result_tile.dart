@@ -280,7 +280,16 @@ class ResultLabelHelper {
           }
         }
       }
-      return stripGuillemets(displayLabel.trim().toUpperCase());
+      displayLabel = displayLabel.trim();
+      // Retirer le nom du laboratoire en fin de libellé (ex. "… – JANSSEN-CILAG")
+      final lab = item.laboratory.trim();
+      if (lab.isNotEmpty) {
+        displayLabel = displayLabel.replaceFirst(
+          RegExp(r'\s*[-–]\s*' + RegExp.escape(lab) + r'\s*$', caseSensitive: false),
+          '',
+        ).trim();
+      }
+      return stripGuillemets(displayLabel.toUpperCase());
     }
     if (item.source == SourceType.amc) return 'Mutuelle ${stripGuillemets(displayLabel.trim())}';
     // 📘 LPP : afficher le libellé quand présent (recherche par code ou libellé)

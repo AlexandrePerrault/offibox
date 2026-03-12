@@ -1,6 +1,7 @@
 import 'dart:convert'; // LineSplitter
 import 'package:http/http.dart' as http;
 import '../models/veto_item.dart';
+import 'offiboxdata_fetch.dart';
 
 /// ─────────────────────────────────────────────
 /// 🧼 Nettoyage strict des libellés vétérinaires
@@ -34,7 +35,7 @@ String cleanVetoLabel(String raw) {
 /// 🐾 PARSER VÉTÉRINAIRE
 /// ─────────────────────────────────────────────
 Future<List<VetoItem>> parseVeto(String url) async {
-  final response = await http.get(Uri.parse(url));
+  final response = await OffiboxDataFetch.get(url);
   if (response.statusCode != 200) return const [];
 
   final lines = const LineSplitter().convert(response.body);

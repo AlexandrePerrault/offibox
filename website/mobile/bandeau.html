@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Offibox - Bandeau sources (mobile)</title>
+  <!-- Logos depuis GitHub (dépôt assets/icons). -->
   <script>
     window.OFFIBOX_BANDEAU_BASE = 'https://raw.githubusercontent.com/AlexandrePerrault/offibox/refactor/search-engine';
   </script>
@@ -110,7 +111,7 @@
       var iconsPath = base ? (base.replace(/\/$/, '') + '/assets/icons/') : '../assets/icons/';
       document.querySelectorAll('.sources-wheel-item img[data-src]').forEach(function(img) {
         var name = img.getAttribute('data-src');
-        img.src = iconsPath + name;
+        img.src = (name && (name.indexOf('http://') === 0 || name.indexOf('https://') === 0)) ? name : (iconsPath + name);
         img.onerror = function() { this.style.visibility = 'hidden'; };
       });
     })();

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:google_fonts/google_fonts.dart';
 import 'package:offibox/app/offibox_web_app.dart';
 import 'package:offibox/firebase_options.dart';
 
@@ -10,6 +11,8 @@ import 'package:offibox/firebase_options.dart';
 /// Utilise OffiboxWebApp (login + écran connecté) pour ne pas importer les modules desktop manquants sur certaines branches.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Charger les polices depuis le réseau pour éviter "Unable to load asset: AssetManifest.bin" (web ou build incomplet)
+  GoogleFonts.config.allowRuntimeFetching = true;
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

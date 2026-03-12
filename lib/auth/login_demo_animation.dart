@@ -33,7 +33,7 @@ class LoginDemoAnimation extends StatefulWidget {
 
 class _LoginDemoAnimationState extends State<LoginDemoAnimation> {
   Future<NewsEntry?>? _newsFuture;
-  DateTime _dateTime = DateTime.now();
+  final DateTime _dateTime = DateTime.now();
 
   @override
   void initState() {

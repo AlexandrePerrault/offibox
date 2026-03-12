@@ -22,7 +22,7 @@ Les fichiers de `html/` sont copiés vers le build et déployés automatiquement
 - `https://alexandreperrault.github.io/offibox/html/login-wix.html`
 - `https://alexandreperrault.github.io/offibox/html/inscription.html`
 - `https://alexandreperrault.github.io/offibox/html/validation.html`
-- `https://alexandreperrault.github.io/offibox/html/demo-app-animation.html`
+- `https://alexandreperrault.github.io/offibox/website/demo/demo-app-animation.html`
 
 ### Iframes Wix (snippets)
 
@@ -75,12 +75,16 @@ Modifiez les fichiers dans `website/pages/html/`, commitez et poussez sur `maste
 ## Structure
 
 ```
-website/pages/
-  html/
-    login-wix.html
-    inscription.html
-    validation.html
+website/
+  demo/                          # Démonstrations (animation app, JPG démo)
     demo-app-animation.html
-    ...
-  README.md
+    demo-fiche-voc.jpg
+    TROD_ANGINE_IMAGES_README.md
+  pages/
+    html/
+      login-wix.html
+      inscription.html
+      validation.html
+      ...
+    README.md
 ```

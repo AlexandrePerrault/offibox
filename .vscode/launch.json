@@ -5,6 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "dart",
+            "request": "launch",
+            "name": "Flutter (avec token offiboxdata)",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=OFFIBOXDATA_GITHUB_TOKEN=${env:OFFIBOXDATA_GITHUB_TOKEN}"
+            ]
+        },
+        {
+            "type": "dart",
+            "request": "launch",
+            "name": "Flutter (sans token)",
+            "program": "lib/main.dart"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",

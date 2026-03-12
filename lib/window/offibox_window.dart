@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:offibox/services/device_service.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
@@ -33,6 +34,7 @@ import 'package:offibox/services/google_calendar_desktop_auth.dart';
 import 'package:offibox/config/google_oauth_config.dart';
 import 'package:offibox/config/app_config.dart';
 import 'package:offibox/utils/open_url.dart';
+import 'package:offibox/services/annuaire_ps_count_service.dart';
 import 'package:offibox/window/widgets/about_dialog.dart';
 import 'package:offibox/window/widgets/account_dialog.dart';
 import 'package:offibox/window/widgets/ideas_box_panel.dart';
@@ -51,7 +53,7 @@ import 'package:offibox/data/espace_pro_credentials.dart';
 import 'package:offibox/ui/dialogs/espace_pro_login_dialog.dart';
 import 'package:offibox/ui/dialogs/contact_dialog.dart';
 import 'package:offibox/ui/dialogs/version_history_dialog.dart';
-import 'package:offibox/system/window_click_through.dart';
+import 'package:offibox/system/window_click_through_stub.dart' if (dart.library.io) 'package:offibox/system/window_click_through.dart';
 import 'package:offibox/ui/screens/espace_pro_webview_screen.dart';
 import 'package:offibox/services/pdf_preloader.dart';
 import 'package:offibox/services/journees_mondiales.dart';
@@ -192,6 +194,9 @@ Future<void> _registerDeviceIfNeeded() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return;
 
+  // En mode debug (flutter run) : pas de vérification limite 5 PC (évite le blocage en dev)
+  if (kDebugMode) return;
+
   // Admins (ex. offibox@offibox.fr) : pas de limite 5 appareils
   if (AdminService.isDeviceLimitExempt(user.email)) return;
 
@@ -205,24 +210,55 @@ Future<void> _registerDeviceIfNeeded() async {
     );
 
   } catch (e) {
-
-    debugPrint('❌ Device limit reached: $e');
-
+    if (kDebugMode) debugPrint('❌ Device limit reached: $e');
     if (!mounted) return;
 
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text('Limite atteinte'),
-        content: const Text(
-          'Vous avez atteint la limite de 5 appareils pour cette licence.',
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius)),
+        contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+        actionsPadding: const EdgeInsets.fromLTRB(10, 2, 10, 12),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 80,
+              height: 80,
+              child: Image.asset(
+                'assets/icons/logo_offibox_installer.png',
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Text(
+                  AppConfig.appName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Spinnaker',
+                    color: OffiboxColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Vous avez atteint la limite de 5 Postes connectés',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                fontFamily: 'Spinnaker',
+                color: OffiboxColors.darkGray,
+                height: 1.3,
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              if (mounted) Navigator.of(context).pop();
+              if (ctx.mounted) Navigator.of(ctx).pop();
             },
             child: const Text('Se déconnecter'),
           ),
@@ -941,9 +977,8 @@ Widget build(BuildContext context) {
           : 0) +
       OffiboxWindowUI.barHeight +
       OffiboxWindowUI.gapBelowBar;
-  final maxPanelH = screenH - topY - 20;
-  // Fenêtre transparente + clic à travers (Windows) : en mode pill, seule la barre est visible et cliquable.
-  if (Platform.isWindows) {
+  // Fenêtre transparente + clic à travers (Windows) : en mode pill, seule la barre est visible et cliquable. En debug (flutter run), désactivé pour un affichage optimal.
+  if (Platform.isWindows && !kDebugMode) {
     final expandedNow = expanded;
     final barW = _barWidth(context);
     final size = MediaQuery.sizeOf(context);
@@ -991,6 +1026,8 @@ Widget build(BuildContext context) {
           : 0) +
       expandedBarH +
       OffiboxWindowUI.gapBelowBar;
+  /// Hauteur max pour le panneau de résultats (sous la barre déployée).
+  final maxResultsPanelH = screenH - topYBelowExpandedBarXls - 20;
   final isPdfHitResult = selectedResult != null &&
       selectedResult.source == SourceType.catalogue &&
       selectedResult.catalogueUrl != null &&
@@ -1058,9 +1095,9 @@ Widget build(BuildContext context) {
           child: Container(
             width: double.infinity,
             height: double.infinity,
-            // Windows : fond noir = transparent (LWA_COLORKEY), bureau visible en arrière-plan ; barre et panneaux restent au premier plan.
+            // Windows : fond noir = transparent (LWA_COLORKEY) en release ; en debug (flutter run) fond opaque pour un affichage lisible.
             color: Platform.isWindows
-                ? const Color(0xFF000000)
+                ? (kDebugMode ? const Color(0xFF1A1A1A) : const Color(0xFF000000))
                 : const Color(0xFF1A1A1A),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
@@ -1408,8 +1445,12 @@ Widget build(BuildContext context) {
       onShowAbout: () async {
         final controller = ref.read(offiboxControllerProvider);
         final packageInfo = await PackageInfo.fromPlatform();
+        final annuairePsCount = await getAnnuairePsCount();
         if (!context.mounted) return;
-        final countsByFamily = countByFamilyForAbout(controller.allResults);
+        final countsByFamily = countByFamilyForAbout(
+          controller.allResults,
+          annuairePsCount: annuairePsCount,
+        );
         showDialog<void>(
           context: context,
           barrierLabel: 'Fermer',
@@ -1628,14 +1669,14 @@ Widget build(BuildContext context) {
             ),
 
           // ───────────────────────────
-          // RESULTS PANEL (sous les panneaux document pour que XLS/PDF/Word/Web reçoivent les clics en priorité)
+          // RESULTS PANEL : toujours sous la barre déployée (topYBelowExpandedBarXls)
           // ───────────────────────────
           if (expanded &&
               _hasQuery &&
               controller.selectedResult == null &&
               !_showIdeasPanel)
             Positioned(
-              top: topY,
+              top: topYBelowExpandedBarXls,
               right: OffiboxWindowUI.rightMargin,
               width: _barWidth(context),
               child: SizedBox(
@@ -1646,7 +1687,7 @@ Widget build(BuildContext context) {
                         : effectiveResults.length > 20
                             ? (21 * 78.0 + 24)
                             : effectiveResults.length * 78.0)
-                        .clamp(96.0, maxPanelH),
+                        .clamp(96.0, maxResultsPanelH),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 100),
                   child: effectiveResults.isEmpty

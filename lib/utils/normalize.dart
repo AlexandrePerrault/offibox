@@ -23,6 +23,9 @@ String normalizeLooseKeepSpaces(String input) {
       .trim();
 }
 
+/// Clé normalisée pour lookup princeps (ex. génériques 2026).
+String normalizePrincepsKey(String input) => normalizeLooseKeepSpaces(input);
+
 /// Enlève les guillemets (", «, ») du texte affiché.
 String stripGuillemets(String input) {
   if (input.isEmpty) return input;

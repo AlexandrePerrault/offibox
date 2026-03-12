@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'offiboxdata_fetch.dart';
+
 /// CSV officiel : colonne F = CIP7 hospitaliers
 const String CIP_HOSPITALIERS_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/stup%C3%A9fiants%2Bhopital%202026.csv';
 
 Future<Set<String>> loadCipHospitaliers() async {
-  final res = await http.get(Uri.parse(CIP_HOSPITALIERS_URL));
+  final res = await OffiboxDataFetch.get(CIP_HOSPITALIERS_URL);
   if (res.statusCode != 200) return {};
 
   final lines = const LineSplitter().convert(res.body);

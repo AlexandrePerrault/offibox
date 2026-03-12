@@ -20,6 +20,16 @@ Le fichier `android/app/google-services.json` (cles Firebase) **ne doit pas etre
 - **Windows (MSI)** : après `flutter build windows`, lancer `.\build_msi.ps1`. Pour que l’installateur gère l’option « Lancer au démarrage », builder avec `--dart-define=FLUTTER_BUILD_WINDOWS=true`. Voir `installer\README.md`.
 - **Linux** : build possible uniquement sur une machine Linux. Voir [docs/BUILD_LINUX.md](docs/BUILD_LINUX.md).
 
+## Repo offiboxdata privé (token GitHub)
+
+Si le dépôt **offiboxdata** (CSV, HTML, données) est en mode privé, passer un token (PAT) à chaque build / run pour que l’app puisse charger les données. **Même token pour Windows et Web.**
+
+- **Run :** `flutter run --dart-define=OFFIBOXDATA_GITHUB_TOKEN=xxx` (remplacer `xxx` par ton token `ghp_...` ou `github_pat_...`).
+- **Build Windows :** `flutter build windows --dart-define=OFFIBOXDATA_GITHUB_TOKEN=xxx`
+- **Build Web :** `flutter build web --dart-define=OFFIBOXDATA_GITHUB_TOKEN=xxx`
+
+Les ressources chargées via l’app (CSV, HTML, etc. depuis `raw.githubusercontent.com/.../offiboxdata/...`) utilisent ce token. Créer un PAT : GitHub → Settings (compte) → Developer settings → Personal access tokens (scope **repo**).
+
 ## PDF (pdfrx)
 
 Le visualiseur de catalogues PDF utilise **pdfrx**. Sur **Windows**, le mode Développeur peut être requis pour que le build réussisse (pdfrx utilise des symlinks). Activer : Paramètres → Confidentialité et sécurité → Pour les développeurs → **Mode développeur**.

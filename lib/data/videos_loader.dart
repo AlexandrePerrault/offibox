@@ -4,14 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'data_sources.dart';
+import 'offiboxdata_fetch.dart';
 
 /// Charge le CSV videos (col B = CIP13, col C = URL). Retourne CIP13 normalisé (chiffres seulement) → URL.
 Future<Map<String, String>> loadVideosByCip13() async {
   final map = <String, String>{};
   try {
-    final response = await http.get(Uri.parse(VIDEOS_CSV_URL));
+    final response = await OffiboxDataFetch.get(VIDEOS_CSV_URL);
     if (response.statusCode != 200) {
-      if (kDebugMode) debugPrint('[Offibox] ⚠ Videos: HTTP ${response.statusCode}');
+      if (kDebugMode) debugPrint('[Offibox] Vidéos non disponibles (HTTP ${response.statusCode})');
       return map;
     }
     final lines = const LineSplitter().convert(response.body);
@@ -30,7 +31,7 @@ Future<Map<String, String>> loadVideosByCip13() async {
       }
     }
   } catch (e) {
-    if (kDebugMode) debugPrint('[Offibox] ⚠ Videos erreur: $e');
+    if (kDebugMode) debugPrint('[Offibox] Vidéos erreur: $e');
   }
   return map;
 }

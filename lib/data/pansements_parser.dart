@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/pansement_item.dart';
+import 'offiboxdata_fetch.dart';
 
 // ─────────────────────────────────────────────
 // 🧼 Nettoyage STRICT des libellés pansements
@@ -27,7 +28,7 @@ String cleanPansementLabel(String raw) {
 // 🩹 PARSER PANSEMENTS
 // ─────────────────────────────────────────────
 Future<List<PansementItem>> parsePansements(String url) async {
-  final response = await http.get(Uri.parse(url));
+  final response = await OffiboxDataFetch.get(url);
 
   if (response.statusCode != 200) {
     return [];

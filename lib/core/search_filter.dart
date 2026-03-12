@@ -103,7 +103,8 @@ class SearchFilter {
 
   /// Applique ce filtre à une liste de résultats (sans modifier l'original).
   /// Si [genericCipSet] est fourni, le sous-filtre « Génériques » ne garde que les BDM dont le CIP13 est dans ce set (fichier generiques_ansm.csv).
-  /// Si [cisArretCommercialisation] est fourni, les médicaments NSFP dont le CIS est dans ce set restent affichés (badge « arrêt de commercialisation »).
+  /// Quand [hideNsfp] est true, tous les produits NSFP/arrêté sont masqués (sans exception).
+  /// Les deux sources (BDM col NSFP + CIS_CIP_Dispo_Spec arrêt commercialisation) servent à recenser les produits arrêtés.
   List<SearchResult> applyTo(
     List<SearchResult> results, {
     Set<String>? genericCipSet,
@@ -114,12 +115,7 @@ class SearchFilter {
       out = out.where((r) => !disabledSources.contains(r.source)).toList();
     }
     if (hideNsfp) {
-      out = out.where((r) {
-        if (!r.isNsfpEffective) return true;
-        final cisKey = r.cis?.replaceAll(RegExp(r'\D'), '').trim();
-        if (cisKey == null || cisKey.isEmpty) return false;
-        return cisArretCommercialisation?.contains(cisKey) == true;
-      }).toList();
+      out = out.where((r) => r.nsfp != true).toList();
     }
     if (hideHospitalOnly) {
       out = out.where((r) => r.hospitalOnly != true).toList();

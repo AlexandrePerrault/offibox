@@ -167,7 +167,7 @@ class CatalogueCartDialog extends StatelessWidget {
               'code7': e.key,
               'quantity': e.value,
               'unitPriceEur': cart.unitPriceFor(e.key),
-            })
+            },)
         .toList();
   }
 

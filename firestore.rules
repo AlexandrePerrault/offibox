@@ -13,6 +13,12 @@ service cloud.firestore {
         allow read, write: if request.auth != null
                            && request.auth.uid == userId;
       }
+
+      // 🔐 WEB SESSIONS (limite 5 connexions web simultanées par utilisateur)
+      match /web_sessions/{sessionId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
     }
   }
 }

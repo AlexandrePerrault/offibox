@@ -4,10 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:offibox/utils/normalize.dart';
 import 'package:offibox/data/bdm_parser.dart';
 import 'package:offibox/data/composition_bdm_loader.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 
 /// CSV ANSM normalisé (DCI; princeps_nom; princeps_cip; cip13)
 const String GENERIQUES_URL =
-    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/refs/heads/main/generiques_ansm.csv';
+    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/generiques_ansm.csv';
 
 const String BDM_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/BDM_MASTER2026.csv';
@@ -47,7 +48,7 @@ String _normalizeCsvField(String s) {
 // Utilisé pour le filtre « Génériques » et la liste des laboratoires.
 // =====================================================
 Future<Set<String>> loadGenericCipSet() async {
-  final response = await http.get(Uri.parse(GENERIQUES_URL));
+  final response = await OffiboxDataFetch.get(GENERIQUES_URL);
   if (response.statusCode != 200) return {};
 
   final lines = const LineSplitter().convert(response.body);
@@ -74,7 +75,7 @@ Future<Set<String>> loadGenericCipSet() async {
 // 1️⃣ CIP GÉNÉRIQUE → PRINCEPS
 // =====================================================
 Future<Map<String, String>> loadGeneriquesByCip() async {
-  final response = await http.get(Uri.parse(GENERIQUES_URL));
+  final response = await OffiboxDataFetch.get(GENERIQUES_URL);
   if (response.statusCode != 200) return {};
 
   final lines = const LineSplitter().convert(response.body);
@@ -259,7 +260,7 @@ Future<Map<String, String>> loadGeneriques2026DciToGenericName() async {
 // 2️⃣ PRINCEPS → NOM GÉNÉRIQUE (DCI) DEPUIS LE CSV ANSM
 // =====================================================
 Future<Map<String, String>> loadPrincepsToGenericName() async {
-  final response = await http.get(Uri.parse(GENERIQUES_URL));
+  final response = await OffiboxDataFetch.get(GENERIQUES_URL);
   if (response.statusCode != 200) return {};
 
   final lines = const LineSplitter().convert(response.body);
@@ -358,7 +359,7 @@ String _firstWordNorm(String label) {
 // clé = normalizePrincepsKey(princeps)
 // =====================================================
 Future<Map<String, String>> loadPrincepsToGenericCip() async {
-  final response = await http.get(Uri.parse(GENERIQUES_URL));
+  final response = await OffiboxDataFetch.get(GENERIQUES_URL);
   if (response.statusCode != 200) return {};
 
   final lines = const LineSplitter().convert(response.body);
@@ -393,7 +394,7 @@ Future<Map<String, String>> loadPrincepsToGenericCip() async {
 
 // ignore: unused_element - Réservé pour usage futur.
 Future<Map<String, String>> _loadBdmLabelByCip() async {
-  final response = await http.get(Uri.parse(BDM_URL));
+  final response = await OffiboxDataFetch.get(BDM_URL);
   if (response.statusCode != 200) return {};
 
   final lines = const LineSplitter().convert(response.body);

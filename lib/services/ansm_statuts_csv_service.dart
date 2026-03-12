@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:offibox/data/offiboxdata_fetch.dart';
+
 /// Page officielle ANSM disponibilités médicaments (source prioritaire pour la dernière info).
 /// Le tableau de la page est équivalent aux données du bouton "Exporter" (XLS) ; si une URL
 /// d'export directe (ex. XLS/XLSX) est connue, elle pourra être utilisée en priorité ici.
@@ -82,7 +84,7 @@ class AnsmStatutsCsvService {
     if (fromPage != null) return fromPage;
     // Fallback : CSV offiboxdata (statuts ansm).
     try {
-      final response = await http.get(Uri.parse(_statutsAnsmCsvUrl));
+      final response = await OffiboxDataFetch.get(_statutsAnsmCsvUrl);
       if (response.statusCode != 200) return null;
       return _parseFirstDataRow(response.body);
     } catch (_) {

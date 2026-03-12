@@ -32,6 +32,12 @@ class AppUpdateService {
     }
 
     try {
+      final customUrl = AppUpdateConfig.customLatestVersionUrl.trim();
+      if (customUrl.isNotEmpty) {
+        final info = await _checkViaCustomUrl(customUrl);
+        return info;
+      }
+
       final response = await http.get(
         Uri.parse(AppUpdateConfig.latestReleaseUrl),
       ).timeout(const Duration(seconds: 10));
@@ -64,7 +70,7 @@ class AppUpdateService {
       final baseUrl = AppUpdateConfig.publicDownloadBaseUrl.trim();
       if (baseUrl.isNotEmpty) {
         final base = baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';
-        downloadUrl = '${base}${AppUpdateConfig.windowsInstallerName}-$versionStr${AppUpdateConfig.windowsAssetExtension}';
+        downloadUrl = '$base${AppUpdateConfig.windowsInstallerName}-$versionStr${AppUpdateConfig.windowsAssetExtension}';
       } else {
         for (final a in assets) {
           final map = a as Map<String, dynamic>;
@@ -118,6 +124,31 @@ class AppUpdateService {
       if (l < c) return false;
     }
     return latest.length > current.length;
+  }
+
+  /// Détection de MAJ via un JSON hébergé sur ton site (pas GitHub).
+  /// Réponse attendue : { "version": "1.1.26", "download_url": "https://offibox.fr/download/Offibox-Setup-1.1.26.exe" }
+  static Future<AppUpdateInfo?> _checkViaCustomUrl(String url) async {
+    try {
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) return null;
+      final json = jsonDecode(response.body) as Map<String, dynamic>?;
+      if (json == null) return null;
+      final version = json['version'] as String?;
+      final downloadUrl = json['download_url'] as String?;
+      if (version == null || version.isEmpty || downloadUrl == null || downloadUrl.isEmpty) return null;
+      final latestVersion = _normalizeVersion(version);
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = _normalizeVersion(packageInfo.version);
+      if (!_isNewer(latestVersion, currentVersion)) return null;
+      final versionStr = version.replaceFirst(RegExp(r'^v'), '').trim();
+      if (Platform.isIOS) {
+        return AppUpdateInfo(version: versionStr, downloadUrl: AppUpdateConfig.iosUpdateUrl, isIos: true);
+      }
+      return AppUpdateInfo(version: versionStr, downloadUrl: downloadUrl.trim());
+    } catch (_) {
+      return null;
+    }
   }
 }
 

@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
 import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/utils/normalize.dart';
+
+import 'offiboxdata_fetch.dart';
 
 /// Extrait la ville du nom du centre (ex. "Centre d'Amiens" → "Amiens", "Centre de Clermont-Ferrand" → "Clermont-Ferrand").
 String extractVilleFromNom(String nom) {
@@ -144,8 +147,11 @@ SearchResult fromCeipAddictovigilanceRow(List<dynamic> row) {
 }
 
 Future<List<SearchResult>> parseCeipAddictovigilance(String url) async {
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode != 200) throw Exception('Erreur HTTP CEIP-A');
+  final response = await OffiboxDataFetch.get(url);
+  if (response.statusCode != 200) {
+    if (kDebugMode) debugPrint('[Offibox] CEIP-A non disponible (HTTP ${response.statusCode})');
+    return [];
+  }
 
   var text = utf8.decode(response.bodyBytes, allowMalformed: true);
   if (text.contains('\uFFFD') || (text.contains('?') && text.contains('H?'))) {
@@ -171,8 +177,11 @@ Future<List<SearchResult>> parseCeipAddictovigilance(String url) async {
 /// Charge le CSV depuis l'URL (virgule, guillemets).
 /// Tente UTF-8 puis Latin-1 si le texte contient des caractères de remplacement (mojibake).
 Future<List<SearchResult>> parsePharmacovigilance(String url) async {
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode != 200) throw Exception('Erreur HTTP pharmacovigilance');
+  final response = await OffiboxDataFetch.get(url);
+  if (response.statusCode != 200) {
+    if (kDebugMode) debugPrint('[Offibox] Pharmacovigilance non disponible (HTTP ${response.statusCode})');
+    return [];
+  }
 
   var text = utf8.decode(response.bodyBytes, allowMalformed: true);
   if (text.contains('\uFFFD') || (text.contains('?') && text.contains('Besan'))) {
@@ -216,24 +225,32 @@ SearchResult fromCentresAntiPoisonRow(List<dynamic> row) {
 }
 
 Future<List<SearchResult>> parseCentresAntiPoison(String url) async {
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode != 200) throw Exception('Erreur HTTP centres anti poison');
-  var text = utf8.decode(response.bodyBytes, allowMalformed: true);
-  if (text.contains('\uFFFD')) text = latin1.decode(response.bodyBytes);
-  text = text.replaceAll('\uFEFF', '').trim();
-  final rows = const CsvToListConverter(
-    fieldDelimiter: ',',
-    textDelimiter: '"',
-    eol: '\n',
-    shouldParseNumbers: false,
-  ).convert(text);
-  final results = <SearchResult>[];
-  for (var i = 1; i < rows.length; i++) {
-    try {
-      results.add(fromCentresAntiPoisonRow(rows[i]));
-    } catch (_) {}
+  try {
+    final response = await OffiboxDataFetch.get(url);
+    if (response.statusCode != 200) {
+      if (kDebugMode) debugPrint('[Offibox] Centres anti poison non disponibles (HTTP ${response.statusCode})');
+      return [];
+    }
+    var text = utf8.decode(response.bodyBytes, allowMalformed: true);
+    if (text.contains('\uFFFD')) text = latin1.decode(response.bodyBytes);
+    text = text.replaceAll('\uFEFF', '').trim();
+    final rows = const CsvToListConverter(
+      fieldDelimiter: ',',
+      textDelimiter: '"',
+      eol: '\n',
+      shouldParseNumbers: false,
+    ).convert(text);
+    final results = <SearchResult>[];
+    for (var i = 1; i < rows.length; i++) {
+      try {
+        results.add(fromCentresAntiPoisonRow(rows[i]));
+      } catch (_) {}
+    }
+    return results;
+  } catch (e) {
+    if (kDebugMode) debugPrint('[Offibox] Centres anti poison erreur: $e');
+    return [];
   }
-  return results;
 }
 
 // ——— CHU ———
@@ -259,8 +276,11 @@ SearchResult fromChuRow(List<dynamic> row) {
 }
 
 Future<List<SearchResult>> parseChu(String url) async {
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode != 200) throw Exception('Erreur HTTP CHU');
+  final response = await OffiboxDataFetch.get(url);
+  if (response.statusCode != 200) {
+    if (kDebugMode) debugPrint('[Offibox] CHU non disponibles (HTTP ${response.statusCode})');
+    return [];
+  }
   var text = utf8.decode(response.bodyBytes, allowMalformed: true);
   if (text.contains('\uFFFD')) text = latin1.decode(response.bodyBytes);
   text = text.replaceAll('\uFEFF', '').trim();

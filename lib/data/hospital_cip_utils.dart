@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:offibox/data/data_sources.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 
 /// Source unique : stupéfiants+hopital 202026.csv
 /// Stupéfiants (badge S/AS) = col 0 ; hospitaliers = col 6 (1-based) = index 5 = CIP7 ; PIH = col 7 (index 6) ; surveillance = col 9 (index 8).
@@ -146,7 +147,7 @@ Future<Set<String>> loadCipSurveillanceParticuliere() async {
 /// Charge la liste des CIP13 hospitaliers depuis CIP hospitaliers.csv (une colonne : en-tête puis un CIP13 par ligne).
 /// Utilisé pour le badge « non remboursé » : tout produit qui n'est pas dans cette liste et sans taux (col I CIS_CIP_bdpm) affiche le badge.
 Future<Set<String>> loadCip13HospitaliersFromCsv() async {
-  final res = await http.get(Uri.parse(CIP_HOSPITALIERS_URL));
+  final res = await OffiboxDataFetch.get(CIP_HOSPITALIERS_URL);
   if (res.statusCode != 200) return {};
   final lines = const LineSplitter().convert(res.body);
   final set = <String>{};

@@ -95,6 +95,10 @@ class SearchResult with _$SearchResult {
     String? badge3Url,
     String? badge4Name,
     String? badge4Url,
+    String? badge5Name,
+    String? badge5Url,
+    String? badge6Name,
+    String? badge6Url,
 
     // 🟢🟠🔴 ANSM
     String? ansmStatut,

@@ -28,6 +28,12 @@ if ($doBump) {
 Write-Host "Recensement Annuaire PS (data.gouv.fr)..." -ForegroundColor Cyan
 $p = Start-Process -FilePath "dart" -ArgumentList "run","scripts/update_annuaire_ps_count.dart" -WorkingDirectory $ProjectRoot -Wait -PassThru -NoNewWindow
 if ($p.ExitCode -ne 0) { Write-Host "ATTENTION: script annuaire PS a echoue (code $($p.ExitCode)), valeur par defaut conservee." -ForegroundColor Yellow }
+
+# Mettre à jour la date de version (kVersionDate) depuis le dernier commit Git
+Write-Host "Mise a jour de kVersionDate (build_info.dart) depuis git log..." -ForegroundColor Cyan
+$p = Start-Process -FilePath "dart" -ArgumentList "run","scripts/update_build_info.dart" -WorkingDirectory $ProjectRoot -Wait -PassThru -NoNewWindow
+if ($p.ExitCode -ne 0) { Write-Host "ATTENTION: script update_build_info.dart a echoue (code $($p.ExitCode)), date existante conservee." -ForegroundColor Yellow }
+
 Write-Host "Build Windows..." -ForegroundColor Cyan
 $p = Start-Process -FilePath "flutter" -ArgumentList "build","windows" -WorkingDirectory $ProjectRoot -Wait -PassThru -NoNewWindow
 if ($p.ExitCode -ne 0) { Write-Host "ERREUR: flutter build windows a echoue (code $($p.ExitCode))" -ForegroundColor Red; exit $p.ExitCode }

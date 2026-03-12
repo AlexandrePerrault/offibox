@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'data_sources.dart';
+import 'offiboxdata_fetch.dart';
 
 /// Une entrée fiches VOC (OMÉDIT) : médicament, URL fiche patient, URL fiche pro.
 class VocFicheEntry {
@@ -22,9 +23,9 @@ class VocFicheEntry {
 Future<List<VocFicheEntry>> loadFichesVoc() async {
   final list = <VocFicheEntry>[];
   try {
-    final response = await http.get(Uri.parse(FICHES_VOC_CSV_URL));
+    final response = await OffiboxDataFetch.get(FICHES_VOC_CSV_URL);
     if (response.statusCode != 200) {
-      if (kDebugMode) debugPrint('[Offibox] ⚠ Fiches VOC: HTTP ${response.statusCode}');
+      if (kDebugMode) debugPrint('[Offibox] Fiches VOC non disponibles (HTTP ${response.statusCode})');
       return list;
     }
     final body = utf8.decode(response.bodyBytes);

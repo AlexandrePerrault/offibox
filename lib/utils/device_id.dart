@@ -9,5 +9,10 @@ Future<String> getDeviceId() async {
     return info.deviceId;
   }
 
+  if (Platform.isLinux) {
+    final info = await deviceInfo.linuxInfo;
+    return info.machineId ?? 'linux-unknown';
+  }
+
   throw UnsupportedError('Platform not supported');
 }

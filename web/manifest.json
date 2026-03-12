@@ -1,12 +1,12 @@
 {
-    "name": "offibox",
-    "short_name": "offibox",
+    "name": "Offibox – La boîte à outils de l'officine",
+    "short_name": "Offibox",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#5A9094",
+    "theme_color": "#5A9094",
+    "description": "Offibox PWA : tournez le téléphone en paysage pour lire la barre horizontalement.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

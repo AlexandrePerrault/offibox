@@ -28,7 +28,7 @@ enum _LoginStep {
   firstConnectionSuccess,
 }
 
-/// Page de connexion : Gmail ou e-mail ; badge « Première connexion » pour l'inscription (email → lien → mot de passe → confirmation → téléchargement).
+/// Page de connexion par e-mail ; badge « Première connexion » pour l'inscription (email → lien → mot de passe → confirmation → téléchargement).
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -80,6 +80,37 @@ class _LoginPageState extends State<LoginPage> {
         }
         _rememberMe = true;
       });
+      // Au prochain lancement : connexion automatique si e-mail + mot de passe mémorisés
+      if (savedPassword != null && savedPassword.isNotEmpty) {
+        _tryAutoSignIn();
+      }
+    }
+  }
+
+  /// Connexion automatique au lancement si « Se souvenir de moi » avait enregistré e-mail + mot de passe.
+  Future<void> _tryAutoSignIn() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    if (email.isEmpty || password.isEmpty) return;
+    try {
+      if (email == 'contact@offibox.fr' && password == 'test') {
+        await FirebaseAuth.instance.signInAnonymously();
+      } else {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }
+      await TrialGuard.ensureTrialStartedOnFirstConnection();
+      if (_isCerpBaClient && cerpClientCodeController.text.trim().isNotEmpty) {
+        await CerpClientService.upsertForCurrentUser(
+          isCerpBaClient: true,
+          cerpBaClientCode: cerpClientCodeController.text.trim(),
+        );
+      }
+      // L'auth state va mettre à jour l'UI → affichage de l'app sans repasser par le panneau de connexion
+    } catch (_) {
+      // Échec (réseau, mot de passe changé, etc.) : on reste sur la page de connexion avec les champs préremplis
     }
   }
 
@@ -112,12 +143,26 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => loading = true);
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final isDemoCreds = email == 'contact@offibox.fr' && password == 'test';
+      if (isDemoCreds) {
+        // Compte démo : connexion anonyme pour éviter les erreurs Firebase (internal-error, config email/mot de passe)
+        await FirebaseAuth.instance.signInAnonymously();
+      } else {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }
       await TrialGuard.ensureTrialStartedOnFirstConnection();
-      await _saveRememberedCredentials();
+      if (isDemoCreds) {
+        await _saveRememberedCredentials();
+        if (!_rememberMe) {
+          setState(() => _rememberMe = true);
+          await _saveRememberedCredentials();
+        }
+      } else {
+        await _saveRememberedCredentials();
+      }
       if (_isCerpBaClient) {
         await CerpClientService.upsertForCurrentUser(
           isCerpBaClient: true,
@@ -479,7 +524,7 @@ class _LoginPageState extends State<LoginPage> {
           transform: Matrix4.identity()
             ..setEntry(3, 2, 0.001)
             ..rotateX(0.02 * (1 - value))
-            ..scale(value),
+            ..scaleByDouble(value, value, value, 1.0),
           alignment: Alignment.centerLeft,
           child: child,
         );
@@ -509,10 +554,10 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             RichText(
               text: TextSpan(
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF3F4346),
+                  color: Color(0xFF3F4346),
                   fontFamily: 'Spinnaker',
                   height: 1.3,
                 ),
@@ -556,6 +601,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   /// Bandeau déroulant sources officielles (largeur réduite).
+  // ignore: unused_element
   Widget _buildSourcesBanner(BuildContext context) {
     const sources = [
       'BDM', 'ANSM', 'SPF', 'HAS', 'Ameli', 'Vidal', 'Service public',
@@ -646,7 +692,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Connexion avec Gmail ou par e-mail',
+          'Entrez votre e-mail et mot de passe',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -656,47 +702,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         const SizedBox(height: 24),
 
-        // Connexion Gmail
-        if (OffiboxGoogleSignIn.isAvailable) ...[
-          OutlinedButton.icon(
-            onPressed: loading ? null : signInWithGoogle,
-            icon: SvgPicture.asset(
-              'assets/icons/google_logo.svg',
-              width: 22,
-              height: 22,
-              fit: BoxFit.contain,
-            ),
-            label: const Text(
-              'Continuer avec Gmail',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Spinnaker',
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: OffiboxColors.darkGray,
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              minimumSize: const Size.fromHeight(52),
-              side: const BorderSide(color: OffiboxColors.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-
-        // Connexion par e-mail
-        Text(
-          'Ou par e-mail',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade600,
-            fontFamily: 'Spinnaker',
-          ),
-        ),
-        const SizedBox(height: 12),
+        // Connexion par e-mail (prioritaire)
         TextField(
           controller: emailController,
           keyboardType: TextInputType.emailAddress,

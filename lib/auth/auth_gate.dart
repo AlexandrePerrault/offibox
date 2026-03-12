@@ -18,11 +18,12 @@ import 'package:offibox/providers/offibox_providers.dart';
 import 'package:offibox/services/app_update_service.dart';
 import 'package:offibox/services/google_calendar_desktop_auth.dart';
 import 'package:offibox/ui/widgets/debug_banner.dart';
+import 'package:offibox/services/annuaire_ps_count_service.dart';
 import 'package:offibox/window/widgets/about_dialog.dart';
 import 'package:offibox/ui/widgets/hamburger_menu.dart';
 import 'package:offibox/window/widgets/account_dialog.dart';
 import 'package:offibox/window/widgets/offibox_top_bar.dart';
-import 'package:offibox/system/window_click_through.dart';
+import 'package:offibox/system/window_click_through_stub.dart' if (dart.library.io) 'package:offibox/system/window_click_through.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Écran selon l'état d'auth (login ou FirstLaunchCheck).
@@ -134,7 +135,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       barrierLabel: 'Fermer la boîte de dialogue',
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius)),
+            borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),),
         contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
         actionsPadding: const EdgeInsets.fromLTRB(10, 2, 10, 8),
         content: ConstrainedBox(
@@ -148,8 +149,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                 color: OffiboxColors.darkGray,
                 height: 1.25,
               ),
-              children: [
-                const TextSpan(text: 'Fermer '),
+              children: const [
+                TextSpan(text: 'Fermer '),
                 TextSpan(
                   text: 'Offi',
                   style: TextStyle(
@@ -159,7 +160,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                     fontFamily: 'Spinnaker',
                   ),
                 ),
-                const TextSpan(text: 'box et aller sur Offibox.fr ?'),
+                TextSpan(text: 'box et aller sur Offibox.fr ?'),
               ],
             ),
           ),
@@ -179,7 +180,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                   final token = await user.getIdToken();
                   if (token != null && token.isNotEmpty) {
                     uri = uri.replace(
-                        queryParameters: {'app_login_token': token});
+                        queryParameters: {'app_login_token': token},);
                   }
                 } catch (_) {}
               }
@@ -350,13 +351,17 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                         },
                   onShowAbout: () async {
                     final packageInfo = await PackageInfo.fromPlatform();
+                    final annuairePsCount = await getAnnuairePsCount();
                     if (!context.mounted) return;
                     showDialog<void>(
                       context: context,
                       builder: (_) => OffiboxAboutDialog(
                         version: packageInfo.version,
                         versionDate: kVersionDate,
-                        countsByFamily: countByFamilyForAbout(controller.allResults),
+                        countsByFamily: countByFamilyForAbout(
+                          controller.allResults,
+                          annuairePsCount: annuairePsCount,
+                        ),
                       ),
                     );
                   },
@@ -395,6 +400,8 @@ Ctrl+Q : Quitter
                           .read(offiboxControllerProvider)
                           .openResult(controller.selectedResult!)
                       : null,
+                  dataUpdateDate: kVersionDate,
+                  licenseEndDate: null,
                 ),
               ),
             ),

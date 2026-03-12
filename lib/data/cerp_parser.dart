@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import '../models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 
+import 'offiboxdata_fetch.dart';
+
 const String _kCoEtPharmCommanderUrl = 'https://www.coetpharm.com/';
 
 
@@ -68,7 +70,7 @@ Future<List<SearchResult>> parseSerp(String url) async {
   // - Affichage label + badge "PLUS D'INFOS" (clic => url)
   // ==========================================================================
   Future<List<SearchResult>> parseCerp(String url) async {
-    final response = await http.get(Uri.parse(url));
+    final response = await OffiboxDataFetch.get(url);
     if (response.statusCode != 200) return [];
 
     final lines = const LineSplitter().convert(response.body);
@@ -114,7 +116,7 @@ Future<List<SearchResult>> parseSerp(String url) async {
 /// - Ligne 2 : pills "commande" (coetpharm.com) + "conditions Co&Pharm" (PDF col 3)
 /// ==========================================================================
 Future<List<SearchResult>> parseCoetpharm2026(String url) async {
-  final response = await http.get(Uri.parse(url));
+  final response = await OffiboxDataFetch.get(url);
   if (response.statusCode != 200) return [];
 
   final results = <SearchResult>[];

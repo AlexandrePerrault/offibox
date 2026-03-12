@@ -3,11 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:offibox/utils/normalize.dart';
 
+import 'offiboxdata_fetch.dart';
+
 // ============================================================================
 // 📥 LOAD BDM
 // ============================================================================
 Future<List<Map<String, dynamic>>> parseBDM(String url) async {
-  final response = await http.get(Uri.parse(url));
+  final response = await OffiboxDataFetch.get(url);
   if (response.statusCode != 200) return [];
 
   // ✅ UTF-8 (export script) ou fallback Latin-1

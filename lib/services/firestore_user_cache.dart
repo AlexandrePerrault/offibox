@@ -35,7 +35,7 @@ class FirestoreUserCache {
 }
 
 class _Entry {
-  _Entry({this.data, required DateTime at}) : at = at;
+  _Entry({this.data, required this.at});
   final Map<String, dynamic>? data;
   final DateTime at;
 }

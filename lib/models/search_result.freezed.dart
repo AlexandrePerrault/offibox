@@ -83,7 +83,11 @@ mixin _$SearchResult {
   String? get badge3Name => throw _privateConstructorUsedError;
   String? get badge3Url => throw _privateConstructorUsedError;
   String? get badge4Name => throw _privateConstructorUsedError;
-  String? get badge4Url => throw _privateConstructorUsedError; // 🟢🟠🔴 ANSM
+  String? get badge4Url => throw _privateConstructorUsedError;
+  String? get badge5Name => throw _privateConstructorUsedError;
+  String? get badge5Url => throw _privateConstructorUsedError;
+  String? get badge6Name => throw _privateConstructorUsedError;
+  String? get badge6Url => throw _privateConstructorUsedError; // 🟢🟠🔴 ANSM
   String? get ansmStatut => throw _privateConstructorUsedError;
   String? get ansmDate => throw _privateConstructorUsedError;
   String? get ansmUrl => throw _privateConstructorUsedError;
@@ -153,6 +157,10 @@ abstract class $SearchResultCopyWith<$Res> {
       String? badge3Url,
       String? badge4Name,
       String? badge4Url,
+      String? badge5Name,
+      String? badge5Url,
+      String? badge6Name,
+      String? badge6Url,
       String? ansmStatut,
       String? ansmDate,
       String? ansmUrl});
@@ -223,6 +231,10 @@ class _$SearchResultCopyWithImpl<$Res, $Val extends SearchResult>
     Object? badge3Url = freezed,
     Object? badge4Name = freezed,
     Object? badge4Url = freezed,
+    Object? badge5Name = freezed,
+    Object? badge5Url = freezed,
+    Object? badge6Name = freezed,
+    Object? badge6Url = freezed,
     Object? ansmStatut = freezed,
     Object? ansmDate = freezed,
     Object? ansmUrl = freezed,
@@ -436,6 +448,22 @@ class _$SearchResultCopyWithImpl<$Res, $Val extends SearchResult>
           ? _value.badge4Url
           : badge4Url // ignore: cast_nullable_to_non_nullable
               as String?,
+      badge5Name: freezed == badge5Name
+          ? _value.badge5Name
+          : badge5Name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      badge5Url: freezed == badge5Url
+          ? _value.badge5Url
+          : badge5Url // ignore: cast_nullable_to_non_nullable
+              as String?,
+      badge6Name: freezed == badge6Name
+          ? _value.badge6Name
+          : badge6Name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      badge6Url: freezed == badge6Url
+          ? _value.badge6Url
+          : badge6Url // ignore: cast_nullable_to_non_nullable
+              as String?,
       ansmStatut: freezed == ansmStatut
           ? _value.ansmStatut
           : ansmStatut // ignore: cast_nullable_to_non_nullable
@@ -513,6 +541,10 @@ abstract class _$$SearchResultImplCopyWith<$Res>
       String? badge3Url,
       String? badge4Name,
       String? badge4Url,
+      String? badge5Name,
+      String? badge5Url,
+      String? badge6Name,
+      String? badge6Url,
       String? ansmStatut,
       String? ansmDate,
       String? ansmUrl});
@@ -581,6 +613,10 @@ class __$$SearchResultImplCopyWithImpl<$Res>
     Object? badge3Url = freezed,
     Object? badge4Name = freezed,
     Object? badge4Url = freezed,
+    Object? badge5Name = freezed,
+    Object? badge5Url = freezed,
+    Object? badge6Name = freezed,
+    Object? badge6Url = freezed,
     Object? ansmStatut = freezed,
     Object? ansmDate = freezed,
     Object? ansmUrl = freezed,
@@ -794,6 +830,22 @@ class __$$SearchResultImplCopyWithImpl<$Res>
           ? _value.badge4Url
           : badge4Url // ignore: cast_nullable_to_non_nullable
               as String?,
+      badge5Name: freezed == badge5Name
+          ? _value.badge5Name
+          : badge5Name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      badge5Url: freezed == badge5Url
+          ? _value.badge5Url
+          : badge5Url // ignore: cast_nullable_to_non_nullable
+              as String?,
+      badge6Name: freezed == badge6Name
+          ? _value.badge6Name
+          : badge6Name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      badge6Url: freezed == badge6Url
+          ? _value.badge6Url
+          : badge6Url // ignore: cast_nullable_to_non_nullable
+              as String?,
       ansmStatut: freezed == ansmStatut
           ? _value.ansmStatut
           : ansmStatut // ignore: cast_nullable_to_non_nullable
@@ -866,6 +918,10 @@ class _$SearchResultImpl extends _SearchResult {
       this.badge3Url,
       this.badge4Name,
       this.badge4Url,
+      this.badge5Name,
+      this.badge5Url,
+      this.badge6Name,
+      this.badge6Url,
       this.ansmStatut,
       this.ansmDate,
       this.ansmUrl})
@@ -1009,6 +1065,14 @@ class _$SearchResultImpl extends _SearchResult {
   final String? badge4Name;
   @override
   final String? badge4Url;
+  @override
+  final String? badge5Name;
+  @override
+  final String? badge5Url;
+  @override
+  final String? badge6Name;
+  @override
+  final String? badge6Url;
 // 🟢🟠🔴 ANSM
   @override
   final String? ansmStatut;
@@ -1019,7 +1083,7 @@ class _$SearchResultImpl extends _SearchResult {
 
   @override
   String toString() {
-    return 'SearchResult(label: $label, labelRaw: $labelRaw, source: $source, laboratory: $laboratory, cip13: $cip13, cis: $cis, cip7: $cip7, groupLabel: $groupLabel, departement: $departement, isPdf: $isPdf, nsfp: $nsfp, nsfpDate: $nsfpDate, url: $url, rcpVetoUrl: $rcpVetoUrl, meddisparUrl: $meddisparUrl, lppCode: $lppCode, lppLibelle: $lppLibelle, lppTarif: $lppTarif, lppPrixUnitaireReglemente: $lppPrixUnitaireReglemente, lppMontantMaxRemboursement: $lppMontantMaxRemboursement, liste1: $liste1, liste2: $liste2, isStupefiant: $isStupefiant, isException: $isException, isOtc: $isOtc, hospitalOnly: $hospitalOnly, isPih: $isPih, isSurveillanceParticuliere: $isSurveillanceParticuliere, isMds: $isMds, biosimilaireOf: $biosimilaireOf, isBioreferent: $isBioreferent, isGeneric: $isGeneric, princepsName: $princepsName, genericName: $genericName, iconUrl: $iconUrl, phone: $phone, fax: $fax, email: $email, mssanteEmail: $mssanteEmail, catalogueUrl: $catalogueUrl, commentaire: $commentaire, address: $address, website: $website, keywordAppearanceDate: $keywordAppearanceDate, badge1Name: $badge1Name, badge1Url: $badge1Url, badge2Name: $badge2Name, badge2Url: $badge2Url, badge3Name: $badge3Name, badge3Url: $badge3Url, badge4Name: $badge4Name, badge4Url: $badge4Url, ansmStatut: $ansmStatut, ansmDate: $ansmDate, ansmUrl: $ansmUrl)';
+    return 'SearchResult(label: $label, labelRaw: $labelRaw, source: $source, laboratory: $laboratory, cip13: $cip13, cis: $cis, cip7: $cip7, groupLabel: $groupLabel, departement: $departement, isPdf: $isPdf, nsfp: $nsfp, nsfpDate: $nsfpDate, url: $url, rcpVetoUrl: $rcpVetoUrl, meddisparUrl: $meddisparUrl, lppCode: $lppCode, lppLibelle: $lppLibelle, lppTarif: $lppTarif, lppPrixUnitaireReglemente: $lppPrixUnitaireReglemente, lppMontantMaxRemboursement: $lppMontantMaxRemboursement, liste1: $liste1, liste2: $liste2, isStupefiant: $isStupefiant, isException: $isException, isOtc: $isOtc, hospitalOnly: $hospitalOnly, isPih: $isPih, isSurveillanceParticuliere: $isSurveillanceParticuliere, isMds: $isMds, biosimilaireOf: $biosimilaireOf, isBioreferent: $isBioreferent, isGeneric: $isGeneric, princepsName: $princepsName, genericName: $genericName, iconUrl: $iconUrl, phone: $phone, fax: $fax, email: $email, mssanteEmail: $mssanteEmail, catalogueUrl: $catalogueUrl, commentaire: $commentaire, address: $address, website: $website, keywordAppearanceDate: $keywordAppearanceDate, badge1Name: $badge1Name, badge1Url: $badge1Url, badge2Name: $badge2Name, badge2Url: $badge2Url, badge3Name: $badge3Name, badge3Url: $badge3Url, badge4Name: $badge4Name, badge4Url: $badge4Url, badge5Name: $badge5Name, badge5Url: $badge5Url, badge6Name: $badge6Name, badge6Url: $badge6Url, ansmStatut: $ansmStatut, ansmDate: $ansmDate, ansmUrl: $ansmUrl)';
   }
 
   @override
@@ -1110,6 +1174,10 @@ class _$SearchResultImpl extends _SearchResult {
             (identical(other.badge3Url, badge3Url) || other.badge3Url == badge3Url) &&
             (identical(other.badge4Name, badge4Name) || other.badge4Name == badge4Name) &&
             (identical(other.badge4Url, badge4Url) || other.badge4Url == badge4Url) &&
+            (identical(other.badge5Name, badge5Name) || other.badge5Name == badge5Name) &&
+            (identical(other.badge5Url, badge5Url) || other.badge5Url == badge5Url) &&
+            (identical(other.badge6Name, badge6Name) || other.badge6Name == badge6Name) &&
+            (identical(other.badge6Url, badge6Url) || other.badge6Url == badge6Url) &&
             (identical(other.ansmStatut, ansmStatut) || other.ansmStatut == ansmStatut) &&
             (identical(other.ansmDate, ansmDate) || other.ansmDate == ansmDate) &&
             (identical(other.ansmUrl, ansmUrl) || other.ansmUrl == ansmUrl));
@@ -1171,6 +1239,10 @@ class _$SearchResultImpl extends _SearchResult {
         badge3Url,
         badge4Name,
         badge4Url,
+        badge5Name,
+        badge5Url,
+        badge6Name,
+        badge6Url,
         ansmStatut,
         ansmDate,
         ansmUrl
@@ -1244,6 +1316,10 @@ abstract class _SearchResult extends SearchResult {
       final String? badge3Url,
       final String? badge4Name,
       final String? badge4Url,
+      final String? badge5Name,
+      final String? badge5Url,
+      final String? badge6Name,
+      final String? badge6Url,
       final String? ansmStatut,
       final String? ansmDate,
       final String? ansmUrl}) = _$SearchResultImpl;
@@ -1362,6 +1438,14 @@ abstract class _SearchResult extends SearchResult {
   String? get badge4Name;
   @override
   String? get badge4Url;
+  @override
+  String? get badge5Name;
+  @override
+  String? get badge5Url;
+  @override
+  String? get badge6Name;
+  @override
+  String? get badge6Url;
   @override // 🟢🟠🔴 ANSM
   String? get ansmStatut;
   @override

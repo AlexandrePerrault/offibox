@@ -124,7 +124,7 @@ class SelectedResultView extends StatelessWidget {
         item.labelRaw.toLowerCase().contains('inject');
     final double line2ToLine3Height = item.source == SourceType.veto
         ? (isVetoInjectable ? 0.0 : 2.0)
-        : 9.0;
+        : 14.0;
 
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
@@ -220,8 +220,8 @@ class SelectedResultView extends StatelessWidget {
 /// Retourne le chemin avec l'extension remplacée par .webp (pour fallback depuis .png / .jpg).
 String _assetPathToWebp(String path) {
   final lower = path.toLowerCase();
-  if (lower.endsWith('.png')) return path.substring(0, path.length - 4) + '.webp';
-  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return path.substring(0, path.length - (lower.endsWith('.jpeg') ? 5 : 4)) + '.webp';
+  if (lower.endsWith('.png')) return '${path.substring(0, path.length - 4)}.webp';
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return '${path.substring(0, path.length - (lower.endsWith('.jpeg') ? 5 : 4))}.webp';
   return path;
 }
 

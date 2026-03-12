@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
@@ -165,10 +164,7 @@ class HamburgerMenuState extends State<HamburgerMenu> {
         widget.onShowAbout?.call();
         break;
       case _HamburgerAction.googleAgenda:
-        widget.onOpenGoogleAgenda?.call();
-        break;
       case _HamburgerAction.connectGoogleAgenda:
-        widget.onConnectGoogleAgenda?.call();
         break;
     }
   }
@@ -187,7 +183,7 @@ class HamburgerMenuState extends State<HamburgerMenu> {
               child: wrapFade(const _MenuItemRow(
                 icon: Icons.account_circle_outlined,
                 label: 'Mon compte',
-              )),
+              ),),
             ),
           if (widget.onShowAccount != null) const PopupMenuDivider(height: 2.4),
           if (widget.onShowShortcuts != null)
@@ -208,31 +204,8 @@ class HamburgerMenuState extends State<HamburgerMenu> {
               isOffiboxFrLabel: true,
               useExternalLink: true,
               iconAssetPath: 'assets/icons/logo_offibox2.png',
-            )),
+            ),),
           ),
-          if (widget.isGoogleConnected)
-            PopupMenuItem<_HamburgerAction>(
-              value: _HamburgerAction.googleAgenda,
-              height: _itemHeight,
-              enabled: false,
-              child: wrapFade(const _MenuItemRow(
-                icon: Icons.event_note_outlined,
-                label: 'Agenda Google (connecté)',
-                isGreyed: true,
-              )),
-            ),
-          if (!widget.isGoogleConnected && widget.onConnectGoogleAgenda != null)
-            PopupMenuItem<_HamburgerAction>(
-              value: _HamburgerAction.connectGoogleAgenda,
-              height: _itemHeight,
-              enabled: widget.canConnectGoogleAgenda,
-              child: wrapFade(_MenuItemRow(
-                icon: Icons.event_note_outlined,
-                label: widget.canConnectGoogleAgenda
-                    ? 'Connecter l\'agenda Google'
-                    : 'Connecter l\'agenda Google (compte Gmail requis)',
-              )),
-            ),
           if (widget.onOpenIdBox != null)
             PopupMenuItem<_HamburgerAction>(
               value: _HamburgerAction.idBox,
@@ -241,7 +214,7 @@ class HamburgerMenuState extends State<HamburgerMenu> {
                 label: 'Id Box',
                 isIdBoxLabel: true,
                 iconAssetPath: 'assets/icons/ampoule_idees.jpg',
-              )),
+              ),),
             ),
           if (widget.onShowContact != null)
             PopupMenuItem<_HamburgerAction>(
@@ -250,7 +223,7 @@ class HamburgerMenuState extends State<HamburgerMenu> {
               child: wrapFade(const _MenuItemRow(
                 icon: Icons.alternate_email,
                 label: 'Formulaire de contact',
-              )),
+              ),),
             ),
           if (widget.onShowVersionHistory != null)
             PopupMenuItem<_HamburgerAction>(
@@ -545,18 +518,29 @@ class _MenuItemRowState extends State<_MenuItemRow> {
               else if (widget.icon != null)
                 SizedBox(
                   width: _iconSlotWidth,
-                  child: Center(
-                    child: Transform.rotate(
-                      angle: widget.rotateMinimize ? math.pi : 0,
-                      child: Icon(
-                        widget.icon,
-                        size: 20,
-                        color: widget.isGreyed
-                            ? _greyedColor
-                            : (_hovering ? Colors.white : HamburgerMenu._offiboxTeal),
-                      ),
-                    ),
-                  ),
+                  child: widget.rotateMinimize
+                      ? Center(
+                          child: Text(
+                            '−',
+                            style: TextStyle(
+                              fontSize: 22,
+                              height: 1.0,
+                              fontWeight: FontWeight.w300,
+                              color: widget.isGreyed
+                                  ? _greyedColor
+                                  : (_hovering ? Colors.white : HamburgerMenu._offiboxTeal),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(
+                            widget.icon,
+                            size: 20,
+                            color: widget.isGreyed
+                                ? _greyedColor
+                                : (_hovering ? Colors.white : HamburgerMenu._offiboxTeal),
+                          ),
+                        ),
                 ),
               const SizedBox(width: 6),
               widget.isOffiboxFrLabel

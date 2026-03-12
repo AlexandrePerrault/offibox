@@ -50,8 +50,8 @@ export const registerDevice = onCall(callableOptions, async (request) => {
     const userData = userSnap.data() || {};
 
     const email = auth.token?.email?.toLowerCase();
-    const isAdmin = ADMIN_EMAILS.includes(email ?? "");
-    const maxDevices: number = isAdmin ? 999 : (userData.maxDevices ?? 5);
+    const exemptFromDeviceLimit = DEVICE_LIMIT_EXEMPT_EMAILS.includes(email ?? "");
+    const maxDevices: number = exemptFromDeviceLimit ? 999 : (userData.maxDevices ?? 5);
     const currentCount: number = userData.devicesCount ?? 0;
 
     const deviceSnap = await tx.get(deviceRef);
@@ -89,7 +89,16 @@ export const registerDevice = onCall(callableOptions, async (request) => {
   return { success: true };
 });
 
-/** Emails exemptés de la limite de 5 appareils */
+/** Emails exemptés de la limite de 5 appareils (app desktop + version en ligne + dev) */
+const DEVICE_LIMIT_EXEMPT_EMAILS = [
+  "offibox17@gmail.com",
+  "offibox@gmail.com",
+  "offibox@offibox.fr",
+  "contact@offibox.fr",
+  "perraultalexandre78@gmail.com",
+];
+
+/** Emails ayant accès au tableau de bord admin (getAdminUsers, etc.) */
 const ADMIN_EMAILS = ["offibox17@gmail.com", "offibox@gmail.com"];
 
 export const getAdminUsers = onCall(callableOptions, async (request) => {
@@ -134,6 +143,9 @@ export const getAdminUsers = onCall(callableOptions, async (request) => {
 
   return { users };
 });
+
+// Option B : données clients (inscription) + export CSV admin
+export { saveRegistrationData, exportClientsCsv } from "./clients";
 
 // Fax (Telnyx) — catalogue équipement CERP (décommenter quand fax.ts est présent)
 // export { sendCerpEquipmentFax } from "./fax";

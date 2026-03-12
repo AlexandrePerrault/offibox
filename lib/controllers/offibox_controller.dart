@@ -371,6 +371,10 @@ class OffiboxController extends ChangeNotifier {
         bySource[r.source] = (bySource[r.source] ?? 0) + 1;
       }
       debugPrint('[Offibox] Données chargées par source: $bySource');
+      final total = allResults.length;
+      if (total <= 5 || (bySource.length == 1 && (bySource[SourceType.catalogue] ?? 0) == total)) {
+        debugPrint('[Offibox] → Affichage limité : les messages "non disponible (HTTP 404)" indiquent que les CSV du repo GitHub (offiboxdata) n’ont pas été chargés. Vérifier la connexion, que le repo contient bien les fichiers (LABORATOIRES.csv, BDM_MASTER2026.csv, outils_metier.csv, etc.), ou restaurer les données depuis votre sauvegarde.');
+      }
     }
 
     final cataloguePdfs = allResults
@@ -522,6 +526,10 @@ class OffiboxController extends ChangeNotifier {
         bySource[r.source] = (bySource[r.source] ?? 0) + 1;
       }
       debugPrint('[Offibox] Données chargées par source: $bySource');
+      final total = allResults.length;
+      if (total <= 5 || (bySource.length == 1 && (bySource[SourceType.catalogue] ?? 0) == total)) {
+        debugPrint('[Offibox] → Affichage limité : les messages "non disponible (HTTP 404)" indiquent que les CSV du repo GitHub (offiboxdata) n’ont pas été chargés. Vérifier la connexion, que le repo contient bien les fichiers (LABORATOIRES.csv, BDM_MASTER2026.csv, outils_metier.csv, etc.), ou restaurer les données depuis votre sauvegarde.');
+      }
     }
 
     final cataloguePdfs = allResults
@@ -1011,7 +1019,7 @@ Future<void> openResult(SearchResult item) async {
 
   // ⛔ Sécurité absolue : pas d’ouverture si non sélectionné
   if (selectedResult != item) {
-    debugPrint('⛔ openResult bloqué : item non sélectionné');
+    if (kDebugMode) debugPrint('⛔ openResult bloqué : item non sélectionné');
     return;
   }
 

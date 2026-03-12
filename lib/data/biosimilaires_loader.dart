@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:offibox/utils/normalize.dart';
+import 'package:offibox/data/offiboxdata_fetch.dart';
 
 /// CSV biosimilaires 2026 — chargé depuis [offiboxdata](https://github.com/AlexandrePerrault/offiboxdata).
 ///
@@ -86,7 +87,7 @@ List<List<String>> _parseCsvFull(String body, String separator) {
 /// biosimilaireByCip :
 /// CIP13 (col D) → PRINCEPS normalisé (col B)
 Future<Map<String, String>> loadBiosimilairesByCip() async {
-  final response = await http.get(Uri.parse(_biosimilaires2026Url));
+  final response = await OffiboxDataFetch.get(_biosimilaires2026Url);
   if (response.statusCode != 200) return {};
 
   final body = response.body;
@@ -115,7 +116,7 @@ Future<Map<String, String>> loadBiosimilairesByCip() async {
 /// CIP13 (col D, index 3) → contenu colonne 5 (index 4) pour fenêtre « Infos dispensation » (badge, affichage avec puces).
 /// Les cellules de la colonne Conditions (col E) peuvent contenir des retours à la ligne ; elles sont entièrement lues.
 Future<Map<String, String>> loadBiosimilairesInfoByCip() async {
-  final response = await http.get(Uri.parse(_biosimilaires2026Url));
+  final response = await OffiboxDataFetch.get(_biosimilaires2026Url);
   if (response.statusCode != 200) return {};
 
   final body = response.body;

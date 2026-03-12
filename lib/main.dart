@@ -11,6 +11,7 @@ import 'package:protocol_handler/protocol_handler.dart';
 
 import 'package:window_manager/window_manager.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:offibox/config/app_config.dart';
 import 'app/offibox_app.dart';
@@ -23,6 +24,8 @@ import 'system/installer_autostart_stub.dart' if (AppConfig.flutterBuildWindows)
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Charger les polices Google (ex. Spinnaker) depuis le réseau pour éviter "Unable to load asset: AssetManifest.bin"
+  GoogleFonts.config.allowRuntimeFetching = true;
 
   if (Platform.isWindows) {
     // pdfrx : init explicite requise. Sur Windows, le mode Développeur peut être requis pour le build (symlinks).

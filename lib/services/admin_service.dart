@@ -66,11 +66,13 @@ class AdminService {
 
   static const String adminEmail = 'offibox17@gmail.com';
 
-  /// Emails exemptés de la limite de 5 appareils (admins Offibox)
+  /// Emails exemptés de la limite de 5 appareils (admins / démo / dev Offibox)
   static const List<String> _deviceLimitExempt = [
     'offibox17@gmail.com',
     'offibox@gmail.com',
     'offibox@offibox.fr',
+    'contact@offibox.fr',
+    'perraultalexandre78@gmail.com',
   ];
 
   static bool isAdmin(String? email) =>

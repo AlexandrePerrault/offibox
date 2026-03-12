@@ -1,5 +1,7 @@
+// ignore: unused_import - used by windows_autostart.dart on IO
 import 'package:offibox/config/app_config.dart';
-import 'package:offibox/system/windows_autostart.dart';
+// ignore: unused_import - one branch is used depending on dart.library.io
+import 'package:offibox/system/windows_autostart_stub.dart' if (dart.library.io) 'package:offibox/system/windows_autostart.dart';
 
 /// Apply autostart setting from installer (MSI writes choice to registry or we keep current state).
 void applyFromInstaller() {

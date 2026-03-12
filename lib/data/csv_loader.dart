@@ -22,9 +22,10 @@ Future<List<List<String>>> loadCsvFromUrl(String url) async {
     shouldParseNumbers: false,
   ).convert(text);
 
-  debugPrint('URL: $url');
-  debugPrint('→ lignes parsées: ${rows.length}');
-
+  if (kDebugMode) {
+    debugPrint('URL: $url');
+    debugPrint('→ lignes parsées: ${rows.length}');
+  }
   return rows
       .map((r) => r.map((c) => c.toString()).toList())
       .toList();

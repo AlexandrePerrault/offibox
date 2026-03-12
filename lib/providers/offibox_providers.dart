@@ -83,7 +83,7 @@ final clientProfileProvider = StreamProvider.autoDispose<ClientProfile?>((ref) {
   if (user == null) return Stream.value(null);
   final docRef = FirebaseFirestore.instance
       .collection('users')
-      .doc(user.uid) as DocumentReference<Map<String, dynamic>>;
+      .doc(user.uid);
   return documentSnapshotStream(docRef)
       .map((snap) => ClientProfile.fromUserDoc(user.uid, snap.data()));
 });

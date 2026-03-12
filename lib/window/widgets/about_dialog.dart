@@ -10,7 +10,46 @@ import 'package:offibox/utils/open_url.dart';
 /// URL officielle de la base de données publique des médicaments.
 const String kBdpmBaseUrl = 'http://base-donnees-publique.medicaments.gouv.fr';
 
-/// Texte des mentions légales / termes du contrat de licence (données BDPM).
+/// Mentions légales du site (offibox.fr) — aligné sur website/archive/mentions-legales.html.
+String getMentionsLegalesSiteText() => '''
+Éditeur du site et responsable de la publication
+
+Le site offibox.fr est édité par la société Offibox, représentée par Alexandre Perrault.
+
+Offibox
+13 rue de Gaulle
+17370 Saint-Trojan-les-Bains
+SIREN : 499 758 282
+SIRET : 499 758 282 00036
+
+Création du site
+
+Ce site a été créé avec Wix (https://www.wix.com).
+
+Hébergement
+
+L'hébergement du site est assuré par OVH Cloud.
+OVH SAS – 2 rue Kellermann – 59100 Roubaix – France.
+www.ovhcloud.com/fr/
+
+Propriété intellectuelle
+
+L'ensemble du contenu de ce site (textes, visuels, structure, marques et logos) est protégé par le droit d'auteur et le droit des marques. Toute reproduction ou utilisation non autorisée peut constituer une contrefaçon.
+
+Données personnelles
+
+Les données collectées via ce site sont traitées conformément au Règlement général sur la protection des données (RGPD) et à la loi « Informatique et Libertés ». Vous disposez d'un droit d'accès, de rectification et d'effacement de vos données. Pour toute demande, contactez l'éditeur aux coordonnées ci-dessus.
+
+Limitation de responsabilité
+
+Les informations diffusées sur ce site sont fournies à titre indicatif. Offibox s'efforce d'en assurer l'exactitude mais ne peut en garantir l'exhaustivité ou l'absence d'erreur. L'utilisation du site et des outils proposés relève de la responsabilité de l'utilisateur.
+
+Droit applicable
+
+Les présentes mentions légales sont régies par le droit français. En cas de litige, les tribunaux français seront seuls compétents.
+''';
+
+/// Texte des termes du contrat de licence (données BDPM) — accessible via un lien dans les mentions légales.
 String getMentionsLegalesBdpmText() => '''
 Termes du contrat de licence — Données BDPM
 
@@ -32,15 +71,17 @@ Le lien suivant vous permet d'accéder à un fichier décrivant le contenu, le f
 
 /// Familles affichées dans l'ordre (label, source).
 /// Une seule ligne « Annuaire » (pharmacovigilance + RPPS). Centres anti poison et CHU exclus. AMO = Organismes obligatoires (ex‑GIE Sésame Vitale).
+/// « Outils métier » = nombre de mots-clés (col 1) du CSV outils_metier.csv ; « Sites web » = nombre de mots-clés (col 1) du CSV sites_web.csv.
 const List<({String label, SourceType? source})> _aboutFamilies = [
+  // Ordre d'affichage dans l'À propos
   (label: 'Médicaments (BDM)', source: SourceType.bdm),
-  (label: 'Dispositifs médicaux', source: SourceType.dm),
   (label: 'Médicaments vétérinaires', source: SourceType.veto),
+  (label: 'Dispositifs médicaux', source: SourceType.dm),
   (label: 'codes LPP', source: SourceType.lpp),
   (label: 'Mutuelles (AMC)', source: SourceType.amc),
   (label: 'Organismes obligatoires (AMO)', source: SourceType.amo),
-  (label: 'Mots-clés', source: SourceType.keyword),
-  (label: 'Sites web', source: SourceType.siteWeb),
+  (label: 'Outils métier (mots-clés)', source: SourceType.keyword),
+  (label: 'Sites web (mots-clés)', source: SourceType.siteWeb),
   (label: 'Catalogues laboratoires', source: SourceType.catalogue),
 ];
 
@@ -65,6 +106,8 @@ bool _resultHasPdf(SearchResult r) {
   if (_isPdfUrl(r.badge2Url)) return true;
   if (_isPdfUrl(r.badge3Url)) return true;
   if (_isPdfUrl(r.badge4Url)) return true;
+  if (_isPdfUrl(r.badge5Url)) return true;
+  if (_isPdfUrl(r.badge6Url)) return true;
   return false;
 }
 
@@ -77,7 +120,12 @@ int countPdfDocuments(List<SearchResult> allResults) {
 }
 
 /// Compte les résultats par famille pour l'À propos. Un seul passage sur [allResults] pour limiter le coût.
-List<({String label, int count, String? countDisplay})> countByFamilyForAbout(List<SearchResult> allResults) {
+/// [annuairePsCount] : si fourni, utilisé pour la ligne Annuaire PS (sinon [kAnnuairePsTotalHorsAppli]).
+/// Recalculé au plus une fois par mois via l'API data.gouv.fr (voir [getAnnuairePsCount]).
+List<({String label, int count, String? countDisplay})> countByFamilyForAbout(
+  List<SearchResult> allResults, {
+  int? annuairePsCount,
+}) {
   final counts = <SourceType, int>{};
   int pdfCount = 0;
   for (final r in allResults) {
@@ -92,9 +140,10 @@ List<({String label, int count, String? countDisplay})> countByFamilyForAbout(Li
             countDisplay: null,
           ),)
       .toList();
+  final psCount = annuairePsCount ?? kAnnuairePsTotalHorsAppli;
   return [
     ...fromSources,
-    (label: 'Annuaire PS', count: kAnnuairePsTotalHorsAppli, countDisplay: null),
+    (label: 'Professionnels de santé indexés (Annuaire PS)', count: psCount, countDisplay: null),
     (label: 'Codes actes', count: kCodesActesCount, countDisplay: null),
     (label: 'PDF', count: pdfCount, countDisplay: null),
   ];
@@ -233,20 +282,20 @@ class OffiboxAboutDialog extends StatelessWidget {
   }
 }
 
-/// Ouvre le dialogue « Termes du contrat de licence » (données BDPM).
+/// Ouvre le dialogue « Mentions légales » (éditeur, hébergement, propriété intellectuelle, etc. — site offibox.fr).
 void _showMentionsLegalesDialog(BuildContext context) {
   final theme = Theme.of(context);
   showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Mentions légales — Termes du contrat de licence'),
+      title: const Text('Mentions légales'),
       contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
       content: SizedBox(
         width: 520,
         height: 420,
         child: SingleChildScrollView(
           child: SelectableText(
-            getMentionsLegalesBdpmText(),
+            getMentionsLegalesSiteText(),
             style: theme.textTheme.bodyMedium?.copyWith(
               height: 1.45,
               color: theme.colorScheme.onSurface,

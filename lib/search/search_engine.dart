@@ -2,6 +2,31 @@ import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/data/search_result_mapper.dart' as mapper;
 
+/// Préfixes de sels (normalisés, sans espace) : la recherche inversée DCI ne matche que sur la substance, pas sur le sel (citrate de..., chlorhydrate de...).
+const Set<String> _dciSaltPrefixes = {
+  'citrate', 'chlorhydrate', 'phosphate', 'dihydrogenephosphate', 'hydrogenophosphate',
+  'succinate', 'mesilate', 'maleate', 'tartrate', 'fumarate', 'sulfate', 'nitrate',
+  'stearate', 'acetate', 'hydrochlorure', 'hydrobromure', 'bromhydrate', 'iodhydrate',
+  'hemihydrate', 'monohydrate', 'dihydrate', 'hexahydrate', 'sodium', 'potassium',
+  'besilate', 'esilate', 'tosilate', 'teoclate', 'camsilate', 'malate', 'adipate',
+  'gluconate', 'lactobionate', 'orotate', 'pamoate', 'embonate', 'valerate', 'propionate',
+  'butyrate', 'caproate', 'palmitate', 'oleate', 'myristate', 'laurate', 'benzoate',
+  'mucate', 'tamate', 'cyclamate', 'saccharinate', 'edetate', 'diethionate', 'isethionate',
+  'meglumine', 'hemisuccinate', 'calcique', 'magnesique', 'zinc',
+};
+
+/// Retourne la DCI « substance » (sans préfixe de sel) pour le match. Ex. "citratedeclomifene" → "clomifene".
+String _baseDciFromKey(String key) {
+  final lower = key.toLowerCase();
+  for (final salt in _dciSaltPrefixes) {
+    final prefix = salt + 'de'; // clé sans espace : "citratede", "chlorhydratede"
+    if (lower.startsWith(prefix) && lower.length > prefix.length) {
+      return lower.substring(prefix.length);
+    }
+  }
+  return lower;
+}
+
 /// 🧠 Moteur de recherche Offibox
 /// ➜ PUR, SYNCHRONE, SANS UI
 class SearchEngine {
@@ -149,7 +174,7 @@ if (cached != null) {
     candidates = allResults;
   }
 }
-  // Recherche inversée par DCI : dès 3 caractères (molécule tapée → princeps affichés)
+  // Recherche inversée par DCI uniquement (substance, pas le sel : citrate de / chlorhydrate de ne matchent pas)
   final queryNorm = _normalize(query.replaceAll(RegExp(r'\s+'), ''));
   if (queryNorm.length >= 3 && _dciToCis.isNotEmpty) {
     final seen = <String>{};
@@ -158,7 +183,8 @@ if (cached != null) {
     }
     final toAdd = <SearchResult>[];
     for (final entry in _dciToCis.entries) {
-      if (!entry.key.startsWith(queryNorm) && entry.key != queryNorm) continue;
+      final baseDci = _baseDciFromKey(entry.key);
+      if (!baseDci.startsWith(queryNorm) && baseDci != queryNorm) continue;
       for (final cis in entry.value) {
         final list = _cisToBdmResults[cis];
         if (list == null) continue;
@@ -260,7 +286,7 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     candidates = allResults;
   }
 
-  // Recherche par DCI : dès 3 caractères (préfixe → princeps)
+  // Recherche par DCI uniquement (substance, pas le sel)
   if (queryNorm.length >= 3 && _dciToCis.isNotEmpty) {
     final seen = <String>{};
     for (final r in candidates) {
@@ -268,7 +294,8 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     }
     final toAdd = <SearchResult>[];
     for (final entry in _dciToCis.entries) {
-      if (!entry.key.startsWith(queryNorm) && entry.key != queryNorm) continue;
+      final baseDci = _baseDciFromKey(entry.key);
+      if (!baseDci.startsWith(queryNorm) && baseDci != queryNorm) continue;
       for (final cis in entry.value) {
         final list = _cisToBdmResults[cis];
         if (list == null) continue;
@@ -322,15 +349,17 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
   final label = r.labelNorm;
   final cip = r.cipNorm;
 
-  // 💊 Recherche inversée par DCI (dès 3 car.) : si la requête est un préfixe de DCI et ce BDM a ce CIS, accepter (princeps affiché)
+  // 💊 Recherche inversée par DCI uniquement (substance, pas le sel) : requête = préfixe de la base DCI, et libellé contient la requête.
   if (queryNorm != null &&
       queryNorm.length >= 3 &&
       r.source == SourceType.bdm) {
     final cisKey = r.cis?.replaceAll(RegExp(r'\D'), '').trim() ?? '';
     if (cisKey.isNotEmpty) {
       for (final entry in _dciToCis.entries) {
-        if ((entry.key.startsWith(queryNorm) || entry.key == queryNorm) &&
+        final baseDci = _baseDciFromKey(entry.key);
+        if ((baseDci.startsWith(queryNorm) || baseDci == queryNorm) &&
             entry.value.any((c) => c == cisKey)) {
+          if (!label.contains(queryNorm)) return false;
           return true;
         }
       }
@@ -439,6 +468,19 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     }
     for (final t in tokens.skip(1)) {
       if (!label.contains(t) && !cip.contains(t)) return false;
+    }
+    return true;
+  }
+
+  // =================================================
+  // 🏷️ Outils métier / 🌐 Sites web — matcher sur label ET libellé (commentaire col B)
+  // Ex. "trod angine" doit matcher la ligne avec libellé "TROD ANGINE (PAGE OFFIBOX)"
+  // =================================================
+  if (r.source == SourceType.keyword || r.source == SourceType.siteWeb) {
+    final commentaireNorm = _normalize(r.commentaire ?? '');
+    final fullText = _normalize('$label $commentaireNorm');
+    for (final t in tokens) {
+      if (!fullText.contains(t)) return false;
     }
     return true;
   }

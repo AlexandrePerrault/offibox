@@ -695,13 +695,24 @@ class _FilterPanelState extends State<_FilterPanel> {
                 Divider(height: 16, color: Colors.grey.shade300),
                 _FilterListTile(
                   value: filter.hideNsfp,
-                  onChanged: (v) => filterNotifier.setHideNsfp(v ?? false),
+                  onChanged: (v) {
+                    filterNotifier.setHideNsfp(v ?? false);
+                    // Réappliquer le filtre tout de suite pour afficher ou masquer les NSFP
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      controller.applyFilter(ref.read(searchFilterProvider));
+                    });
+                  },
                   title: 'Masquer NSFP',
                   onShowSelection: showSelection,
                 ),
                 _FilterListTile(
                   value: filter.hideHospitalOnly,
-                  onChanged: (v) => filterNotifier.setHideHospitalOnly(v ?? false),
+                  onChanged: (v) {
+                    filterNotifier.setHideHospitalOnly(v ?? false);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      controller.applyFilter(ref.read(searchFilterProvider));
+                    });
+                  },
                   title: 'Masquer hospitalier seul',
                   onShowSelection: showSelection,
                 ),

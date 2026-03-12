@@ -15,7 +15,7 @@ class ContactDialog extends StatefulWidget {
   const ContactDialog({super.key, this.maxWidth, this.onClose});
 
   /// Affiche le formulaire dans un panneau (sous la barre, largeur = [maxWidth], avec [onClose]).
-  ContactDialog.asPanel({
+  const ContactDialog.asPanel({
     super.key,
     required this.maxWidth,
     required this.onClose,

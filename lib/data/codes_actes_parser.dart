@@ -5,9 +5,11 @@ import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/utils/normalize.dart';
 
+import 'offiboxdata_fetch.dart';
+
 /// CSV codes actes pharmacie : Col 0 = Code Acte, Col 1 = Libellé, Col 2 = Tarif. Séparateur ;, guillemets.
 Future<List<SearchResult>> parseCodesActesPharmacie(String url) async {
-  final response = await http.get(Uri.parse(url));
+  final response = await OffiboxDataFetch.get(url);
   if (response.statusCode != 200) return [];
 
   final lines = const LineSplitter().convert(response.body);

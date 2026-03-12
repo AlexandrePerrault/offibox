@@ -13,7 +13,7 @@ import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/ui/statuts/ansm_helpers.dart';
 import 'package:offibox/utils/date_formatters.dart';
-import 'package:offibox/utils/normalize.dart';
+import 'package:offibox/utils/normalize.dart' hide normalizePrincepsKey;
 import 'package:offibox/data/ansm_rappels_loader.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/utils/ansm_rappel_match.dart';
@@ -21,8 +21,8 @@ import 'package:offibox/ui/results/plus_infos_badge.dart';
 import 'package:offibox/ui/results/result_line_3_actions.dart';
 import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/ui/widgets/pharmaradio_flash_panel_below_bar.dart' show kPharmaradioFlashInfoUrl;
+import 'package:offibox/constants/offibox_icons.dart';
 import 'package:offibox/ui/spans/common_spans.dart';
-import 'package:offibox/utils/normalize.dart' show normalizePrincepsKey;
 
 /// URLs des calendriers vaccinaux (badges pour les médicaments dont le libellé contient "vaccin").
 const String kCalendrierVaccinal2025Url =
@@ -131,10 +131,10 @@ bool _isWordUrl(String url) {
   return path.endsWith('.doc') || path.endsWith('.docx') || path.endsWith('.odt');
 }
 
-/// Logo PDF rouge (assets/icons/pdf_red.svg) pour le badge "document" et fiches VOC.
+/// Logo PDF rouge (hébergé sur GitHub) pour le badge "document" et fiches VOC.
 Widget _pdfIconWidget() {
-  return SvgPicture.asset(
-    'assets/icons/pdf_red.svg',
+  return SvgPicture.network(
+    kPdfRedIconUrl,
     width: 16,
     height: 16,
     fit: BoxFit.contain,
@@ -334,9 +334,9 @@ class ResultLine2Code extends StatelessWidget {
     return item.url?.trim().isNotEmpty ?? false;
   }
 
-  // 🏷️ Mots-clés : ligne 2 = HoverPill(s) nom col C/D, E/F, G/H
+  // 🏷️ Mots-clés : ligne 2 = HoverPill(s) col F/G, H/I, J/K, L/M, N/O, P/Q
   if (item.source == SourceType.keyword) {
-    return (item.badge1Url ?? item.badge2Url ?? item.badge3Url ?? item.url)?.trim().isNotEmpty ?? false;
+    return (item.badge1Url ?? item.badge2Url ?? item.badge3Url ?? item.badge4Url ?? item.badge5Url ?? item.badge6Url ?? item.url)?.trim().isNotEmpty ?? false;
   }
 
   // 📋 Codes actes : pas de ligne 2 (tout en ligne 1 : Code — Libellé — Tarif)
@@ -344,16 +344,19 @@ class ResultLine2Code extends StatelessWidget {
     return false;
   }
 
-  // 🌐 Sites web : ligne 2 = HoverPill(s) col E/F, G/H, I/J uniquement
+  // 🌐 Sites web : ligne 2 = HoverPill(s) col F/G, H/I, J/K, L/M, N/O, P/Q
   if (item.source == SourceType.siteWeb) {
     return (item.badge1Name != null && item.badge1Url != null && item.badge1Name!.trim().isNotEmpty && item.badge1Url!.trim().isNotEmpty) ||
         (item.badge2Name != null && item.badge2Url != null && item.badge2Name!.trim().isNotEmpty && item.badge2Url!.trim().isNotEmpty) ||
-        (item.badge3Name != null && item.badge3Url != null && item.badge3Name!.trim().isNotEmpty && item.badge3Url!.trim().isNotEmpty);
+        (item.badge3Name != null && item.badge3Url != null && item.badge3Name!.trim().isNotEmpty && item.badge3Url!.trim().isNotEmpty) ||
+        (item.badge4Name != null && item.badge4Url != null && item.badge4Name!.trim().isNotEmpty && item.badge4Url!.trim().isNotEmpty) ||
+        (item.badge5Name != null && item.badge5Url != null && item.badge5Name!.trim().isNotEmpty && item.badge5Url!.trim().isNotEmpty) ||
+        (item.badge6Name != null && item.badge6Url != null && item.badge6Name!.trim().isNotEmpty && item.badge6Url!.trim().isNotEmpty);
   }
 
   // 🏭 Catalogues laboratoires : ligne 2 = HoverPill(s) Espace pro, Catalogue, etc. (F, G, H, I/J, K/L)
   if (item.source == SourceType.catalogue) {
-    return (item.badge1Url ?? item.badge2Url ?? item.badge3Url ?? item.badge4Url)?.trim().isNotEmpty ?? false;
+    return (item.badge1Url ?? item.badge2Url ?? item.badge3Url ?? item.badge4Url ?? item.badge5Url ?? item.badge6Url)?.trim().isNotEmpty ?? false;
   }
 
   return item.cip13 != null || item.cis != null;
@@ -719,6 +722,18 @@ Widget build(BuildContext context) {
       if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
       addPill(item.badge3Name!, item.badge3Url!, isYouTube: _isYouTubeUrl(item.badge3Url!));
     }
+    if (item.badge4Name != null && item.badge4Url != null) {
+      if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
+      addPill(item.badge4Name!, item.badge4Url!, isYouTube: _isYouTubeUrl(item.badge4Url!));
+    }
+    if (item.badge5Name != null && item.badge5Url != null) {
+      if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
+      addPill(item.badge5Name!, item.badge5Url!, isYouTube: _isYouTubeUrl(item.badge5Url!));
+    }
+    if (item.badge6Name != null && item.badge6Url != null) {
+      if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
+      addPill(item.badge6Name!, item.badge6Url!, isYouTube: _isYouTubeUrl(item.badge6Url!));
+    }
     // Fallback : si aucune pill et qu'on a url ligne 1 (YouTube ou PDF/Word/tableur uniquement)
     if (pills.isEmpty && urlLigne1 != null && urlLigne1.isNotEmpty) {
       if (_isYouTubeUrl(urlLigne1)) {
@@ -895,6 +910,24 @@ Widget build(BuildContext context) {
         addPill(item.badge3Name!.trim(), item.badge3Url!.trim(), isYouTube: _isYouTubeUrl(item.badge3Url!));
       }
     }
+    if (item.badge4Name != null && item.badge4Url != null && item.badge4Name!.trim().isNotEmpty && item.badge4Url!.trim().isNotEmpty) {
+      if (!skipSiteInternetPill(item.badge4Name!.trim())) {
+        if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
+        addPill(item.badge4Name!.trim(), item.badge4Url!.trim(), isYouTube: _isYouTubeUrl(item.badge4Url!));
+      }
+    }
+    if (item.badge5Name != null && item.badge5Url != null && item.badge5Name!.trim().isNotEmpty && item.badge5Url!.trim().isNotEmpty) {
+      if (!skipSiteInternetPill(item.badge5Name!.trim())) {
+        if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
+        addPill(item.badge5Name!.trim(), item.badge5Url!.trim(), isYouTube: _isYouTubeUrl(item.badge5Url!));
+      }
+    }
+    if (item.badge6Name != null && item.badge6Url != null && item.badge6Name!.trim().isNotEmpty && item.badge6Url!.trim().isNotEmpty) {
+      if (!skipSiteInternetPill(item.badge6Name!.trim())) {
+        if (pills.isNotEmpty) pills.add(const SizedBox(width: 6));
+        addPill(item.badge6Name!.trim(), item.badge6Url!.trim(), isYouTube: _isYouTubeUrl(item.badge6Url!));
+      }
+    }
     if (siteWebLibelleRow != null || pills.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: resultLineGap),
@@ -1003,6 +1036,14 @@ Widget build(BuildContext context) {
     if (item.badge4Name != null && item.badge4Url != null) {
       if (cataloguePills.isNotEmpty) cataloguePills.add(const SizedBox(width: 6));
       addCataloguePill(item.badge4Name!, item.badge4Url!);
+    }
+    if (item.badge5Name != null && item.badge5Url != null) {
+      if (cataloguePills.isNotEmpty) cataloguePills.add(const SizedBox(width: 6));
+      addCataloguePill(item.badge5Name!, item.badge5Url!);
+    }
+    if (item.badge6Name != null && item.badge6Url != null) {
+      if (cataloguePills.isNotEmpty) cataloguePills.add(const SizedBox(width: 6));
+      addCataloguePill(item.badge6Name!, item.badge6Url!);
     }
     if (cataloguePills.isNotEmpty) {
       return Padding(
@@ -1213,7 +1254,7 @@ Widget build(BuildContext context) {
           if (vocLineChildren.isNotEmpty) vocLineChildren.add(const SizedBox(width: 6));
           final url = vocPatientUrl!.trim();
           vocLineChildren.add(HoverPillButton(
-            label: 'fiche à destination des patients OMÉDIT',
+            label: 'fiche à destination des patients (OMEDIT)',
             icon: Icons.person_outline,
             tooltip: url,
             maxLabelWidth: maxLabelWidth,
@@ -1231,7 +1272,7 @@ Widget build(BuildContext context) {
           if (vocLineChildren.isNotEmpty) vocLineChildren.add(const SizedBox(width: 6));
           final url = vocProUrl!.trim();
           vocLineChildren.add(HoverPillButton(
-            label: 'fiche à destination des professionnels de santé OMÉDIT',
+            label: 'fiche à destination des professionnels de santé (OMEDIT)',
             icon: Icons.medical_services_outlined,
             tooltip: url,
             maxLabelWidth: maxLabelWidth,
@@ -1481,7 +1522,7 @@ Widget build(BuildContext context) {
           if (vocLineChildren.isNotEmpty) vocLineChildren.add(SizedBox(width: spacingBetweenBadges));
           final url = vocPatientUrl!.trim();
           vocLineChildren.add(HoverPillButton(
-            label: 'fiche à destination des patients OMÉDIT',
+            label: 'fiche à destination des patients (OMEDIT)',
             icon: Icons.person_outline,
             tooltip: url,
             maxLabelWidth: maxLabelWidth,
@@ -1499,7 +1540,7 @@ Widget build(BuildContext context) {
           if (vocLineChildren.isNotEmpty) vocLineChildren.add(SizedBox(width: spacingBetweenBadges));
           final url = vocProUrl!.trim();
           vocLineChildren.add(HoverPillButton(
-            label: 'fiche à destination des professionnels de santé OMÉDIT',
+            label: 'fiche à destination des professionnels de santé (OMEDIT)',
             icon: Icons.medical_services_outlined,
             tooltip: url,
             maxLabelWidth: maxLabelWidth,
@@ -1931,7 +1972,7 @@ class _RappelDeLotBadge extends StatelessWidget {
 /// Badge rose "princeps : [nom]" pour les génériques (ex. princeps : Stilnox). Clic → répertoire ANSM génériques.
 class _GeneriqueEqualsBadge extends StatelessWidget {
   const _GeneriqueEqualsBadge({
-    super.key,
+    super.key, // ignore: unused_element - allow callers to pass key
     required this.princepsDisplayName,
     this.tooltipFullPrinceps,
     this.dciForTap = '',
@@ -2071,7 +2112,7 @@ String shortGenericDisplayForBadge(String genericName) {
 /// Ligne 2 princeps : badge rose clair ": DCI : avec la composition [composition]" (même style que l’ancien badge princeps).
 class _PrincepsLine2Widget extends StatelessWidget {
   const _PrincepsLine2Widget({
-    super.key,
+    super.key, // ignore: unused_element - allow callers to pass key
     required this.dci,
     this.onDciTap,
   });

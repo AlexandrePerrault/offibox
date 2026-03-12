@@ -10,7 +10,7 @@ Après déploiement (push sur `master`), les pages du dossier `website/` sont di
 - https://alexandreperrault.github.io/offibox/website/app.html
 - https://alexandreperrault.github.io/offibox/website/badge-fonctionnalites.html
 - https://alexandreperrault.github.io/offibox/website/bandeau-offibox.html
-- https://alexandreperrault.github.io/offibox/website/demo-app-animation.html
+- https://alexandreperrault.github.io/offibox/website/demo/demo-app-animation.html
 - https://alexandreperrault.github.io/offibox/website/diagnostic-google-auth.html
 - https://alexandreperrault.github.io/offibox/website/footer-offibox-bloc.html
 - https://alexandreperrault.github.io/offibox/website/inscription.html
@@ -43,7 +43,7 @@ Après déploiement (push sur `master`), les pages du dossier `website/` sont di
 - https://alexandreperrault.github.io/offibox/html/app-embed.html
 - https://alexandreperrault.github.io/offibox/html/app.html
 - https://alexandreperrault.github.io/offibox/html/conditions-utilisation.html
-- https://alexandreperrault.github.io/offibox/html/demo-app-animation.html
+- https://alexandreperrault.github.io/offibox/website/demo/demo-app-animation.html
 - https://alexandreperrault.github.io/offibox/html/inscription.html
 - https://alexandreperrault.github.io/offibox/html/login-wix.html
 - https://alexandreperrault.github.io/offibox/html/plateformes.html

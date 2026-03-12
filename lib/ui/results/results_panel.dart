@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/constants/ui_constants.dart';
@@ -7,6 +8,7 @@ import 'package:offibox/models/search_result.dart';
 import 'package:offibox/models/source_type.dart';
 import 'package:offibox/services/ansm_last_rappel_service.dart';
 import 'package:offibox/ui/results/result_tile.dart';
+import 'package:offibox/ui/spans/offibox_ui_helpers.dart';
 import 'package:offibox/utils/open_url.dart';
 
 /// Ouvre une URL de manière sécurisée (utilisé par ResultTile). Déclenche onBeforeOpenLink.
@@ -18,7 +20,7 @@ Future<void> openUrlSafe(String url) async {
       .replaceAll('\n', '')
       .trim();
   if (!clean.startsWith('http') && !clean.startsWith('tel:')) {
-    debugPrint('⛔ URL invalide ignorée : [$clean]');
+    if (kDebugMode) debugPrint('⛔ URL invalide ignorée : [$clean]');
     return;
   }
   await openUrl(clean);
@@ -29,22 +31,32 @@ const _offiboxTealLight = Color(0xFF5A9094);
 const _kMaxInitialResults = 12;
 const double _kCacheExtent = 1200.0;
 
-/// Ligne compacte style Google pour un résultat Outils métier ou Site web (icône + libellé, premier élément mis en avant).
+/// Ligne compacte style Google pour un résultat Outils métier ou Site web (icône + libellé avec surbrillance, premier élément mis en avant).
 class _CompactToolsWebTile extends StatelessWidget {
   const _CompactToolsWebTile({
     required this.item,
     required this.label,
+    required this.searchQuery,
     required this.isFirst,
     required this.onTap,
   });
 
   final SearchResult item;
   final String label;
+  final String searchQuery;
   final bool isFirst;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final spans = searchQuery.trim().length >= 2
+        ? highlightText(
+            context: context,
+            text: label,
+            searchQuery: searchQuery,
+            disableBold: true,
+          )
+        : [TextSpan(text: label, style: TextStyle(fontSize: 14, color: Colors.grey.shade800))];
     return Material(
       color: isFirst ? const Color(0xFFF1F3F4) : Colors.white,
       child: InkWell(
@@ -75,13 +87,16 @@ class _CompactToolsWebTile extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  label,
+                child: RichText(
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade800,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade800,
+                      fontFamily: 'Spinnaker',
+                    ),
+                    children: spans,
                   ),
                 ),
               ),
@@ -310,6 +325,7 @@ class _ResultsPanelState extends State<ResultsPanel> {
                     child: _CompactToolsWebTile(
                       item: item,
                       label: ResultLabelHelper.displayLabel(item),
+                      searchQuery: widget.query,
                       isFirst: index == 0,
                       onTap: () {
                         if (isSingleResult && widget.onOpenSingle != null) {

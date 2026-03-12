@@ -12,6 +12,7 @@ import 'package:offibox/models/veto_item.dart';
 import 'amc_mapper.dart';
 import 'cerp_parser.dart';
 import 'data_sources.dart';
+import 'offiboxdata_fetch.dart';
 import 'laboratoires_parser.dart';
 import 'pharmacovigilance_parser.dart';
 import 'pansements_parser.dart';
@@ -31,9 +32,9 @@ String normalizeAmoLabel(String label) {
 Future<List<SearchResult>> _loadAmcAmo() async {
   final results = <SearchResult>[];
   try {
-    final response = await http.get(Uri.parse(AMC_URL));
+    final response = await OffiboxDataFetch.get(AMC_URL);
     if (response.statusCode != 200) {
-      if (kDebugMode) debugPrint('[Offibox] ⚠ Mutuelles: HTTP ${response.statusCode}');
+      if (kDebugMode) debugPrint('[Offibox] Mutuelles non disponibles (HTTP ${response.statusCode})');
       return results;
     }
     final lines = const LineSplitter().convert(response.body);
@@ -52,10 +53,10 @@ Future<List<SearchResult>> _loadAmcAmo() async {
       } catch (_) {}
     }
     if (kDebugMode && results.isEmpty) {
-      debugPrint('[Offibox] ⚠ Mutuelles (AMO/AMC) vides - vérifier format mutuelles_2026.csv');
+      debugPrint('[Offibox] Mutuelles (AMO/AMC) vides - vérifier format mutuelles_2026.csv');
     }
   } catch (e) {
-    if (kDebugMode) debugPrint('[Offibox] ⚠ Mutuelles erreur: $e');
+    if (kDebugMode) debugPrint('[Offibox] Mutuelles erreur: $e');
   }
   return results;
 }
@@ -63,17 +64,44 @@ Future<List<SearchResult>> _loadAmcAmo() async {
 Future<List<SearchResult>> loadExtraData() async {
   final results = <SearchResult>[];
 
-  // Chargement en parallèle de toutes les URL (DM, Veto, Labos, CERP, Mutuelles, CRPV, Centres anti poison, CHU, CEIP-A)
+  // Chargement en parallèle ; chaque parse est protégé pour ne jamais faire crasher loadExtraData (404, réseau, etc.)
   final extra = await Future.wait([
-    parsePansements(PANSEMENTS_URL),
-    parseVeto(VETO_URL),
-    parseLaboratoires(LABORATOIRES_URL),
-    parseCoetpharm2026(COETPHARM_2026_URL),
-    _loadAmcAmo(),
-    parsePharmacovigilance(PHARMACOVIGILANCE_URL),
-    parseCentresAntiPoison(CENTRES_ANTI_POISON_URL),
-    parseChu(CHU_URL),
-    parseCeipAddictovigilance(CEIP_ADDICTOVIGILANCE_URL),
+    parsePansements(PANSEMENTS_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] Pansements: $e');
+      return <PansementItem>[];
+    }),
+    parseVeto(VETO_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] Veto: $e');
+      return <VetoItem>[];
+    }),
+    parseLaboratoires(LABORATOIRES_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] Laboratoires: $e');
+      return <SearchResult>[];
+    }),
+    parseCoetpharm2026(COETPHARM_2026_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] Coetpharm: $e');
+      return <SearchResult>[];
+    }),
+    _loadAmcAmo().catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] AMC/AMO: $e');
+      return <SearchResult>[];
+    }),
+    parsePharmacovigilance(PHARMACOVIGILANCE_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] Pharmacovigilance: $e');
+      return <SearchResult>[];
+    }),
+    parseCentresAntiPoison(CENTRES_ANTI_POISON_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] Centres anti poison: $e');
+      return <SearchResult>[];
+    }),
+    parseChu(CHU_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] CHU: $e');
+      return <SearchResult>[];
+    }),
+    parseCeipAddictovigilance(CEIP_ADDICTOVIGILANCE_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] CEIP-A: $e');
+      return <SearchResult>[];
+    }),
   ]);
 
   try {

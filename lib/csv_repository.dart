@@ -19,7 +19,7 @@ class CsvRepository {
 
     for (final url in csvUrls) {
       final res = await http.get(Uri.parse(url));
-      debugPrint('URL: $url → ${res.bodyBytes.length} bytes');
+      if (kDebugMode) debugPrint('URL: $url → ${res.bodyBytes.length} bytes');
 
       if (res.statusCode != 200) continue;
 
@@ -50,7 +50,7 @@ class CsvRepository {
       }
     }
 
-    debugPrint('📦 Lignes chargées : ${_rows.length}');
+    if (kDebugMode) debugPrint('📦 Lignes chargées : ${_rows.length}');
   }
 
   List<SearchResult> searchMedicaments(String query, {int limit = 20}) {
