@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>URLs Offibox — Web et version PC</title>
+  <style>
+    :root { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.5; color: #222; max-width: 800px; margin: 0 auto; padding: 1rem 2rem; }
+    h1 { font-size: 1.5rem; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 0.25rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.25rem; }
+    h3 { font-size: 1rem; margin-top: 1rem; }
+    p { margin: 0.5rem 0; }
+    ul { margin: 0.5rem 0; padding-left: 1.5rem; }
+    table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
+    th, td { border: 1px solid #333; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #f0f0f0; font-weight: 600; }
+    a { color: #0066cc; word-break: break-all; }
+    hr { border: none; border-top: 1px solid #ccc; margin: 1.25rem 0; }
+    .no-print { margin-bottom: 1rem; }
+    @media print {
+      body { padding: 0.5rem 1rem; }
+      .no-print { display: none !important; }
+      a { color: #000; }
+      th { background: #e8e8e8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <p><strong>Imprimer / PDF :</strong> Ctrl+P (ou Cmd+P) puis choisir « Enregistrer au format PDF » ou « Microsoft Print to PDF ».</p>
+  </div>
+
+  <h1>URLs Offibox — Web (offibox-web) et version PC</h1>
+  <p><strong>offibox-web</strong> = version <strong>web embarquée</strong> de l’app pour les clients qui veulent utiliser Offibox en navigateur (sans installer la version PC). Elle doit rester <strong>publique</strong> pour que GitHub Pages la serve à tout le monde.</p>
+
+  <h2>Ce que le push vers offibox-web contient</h2>
+  <p>Quand tu lances <code>.\installer\deploy_web_offibox_web.ps1 -PushTo "C:\...\offibox-web" -DoGitPush</code>, le dépôt <strong>offibox-web</strong> reçoit :</p>
+  <ul>
+    <li><strong>App Flutter web</strong> (build avec <code>base-href /offibox-web/</code>)</li>
+    <li><strong>Dossier <code>website/</code></strong> (copie de <code>website/</code> du projet)</li>
+    <li><strong>Dossier <code>html/</code></strong> (copie de <code>website/pages/html/</code>)</li>
+  </ul>
+  <p>La <strong>version PC (.exe)</strong> n’est <strong>pas</strong> dans offibox-web. Elle est soit sur GitHub Releases (dépôt offibox), soit sur ton site (offibox.fr/download).</p>
+
+  <hr>
+
+  <h2>URLs — Dépôt offibox-web (GitHub Pages)</h2>
+  <p>Base : <strong>https://alexandreperrault.github.io/offibox-web/</strong></p>
+  <table>
+    <thead>
+      <tr><th>Type</th><th>URL</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>App web (accueil)</td><td><a href="https://alexandreperrault.github.io/offibox-web/">https://alexandreperrault.github.io/offibox-web/</a></td></tr>
+      <tr><td>Dossier website</td><td><a href="https://alexandreperrault.github.io/offibox-web/website/">https://alexandreperrault.github.io/offibox-web/website/</a></td></tr>
+      <tr><td>Dossier html</td><td><a href="https://alexandreperrault.github.io/offibox-web/html/">https://alexandreperrault.github.io/offibox-web/html/</a></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Exemples de pages (website/)</h3>
+  <ul>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/telechargement.html">https://alexandreperrault.github.io/offibox-web/website/telechargement.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/telechargement-pc.html">https://alexandreperrault.github.io/offibox-web/website/telechargement-pc.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/inscription.html">https://alexandreperrault.github.io/offibox-web/website/inscription.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/validation.html">https://alexandreperrault.github.io/offibox-web/website/validation.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/login-wix.html">https://alexandreperrault.github.io/offibox-web/website/login-wix.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/app.html">https://alexandreperrault.github.io/offibox-web/website/app.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/demo/demo-app-animation.html">https://alexandreperrault.github.io/offibox-web/website/demo/demo-app-animation.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/plateformes.html">https://alexandreperrault.github.io/offibox-web/website/plateformes.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/projet-offibox.html">https://alexandreperrault.github.io/offibox-web/website/projet-offibox.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/bandeau-offibox.html">https://alexandreperrault.github.io/offibox-web/website/bandeau-offibox.html</a></li>
+    <li>(+ autres .html dans website/, website/mobile/, website/archive/)</li>
+  </ul>
+
+  <h3>Exemples de pages (html/)</h3>
+  <ul>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/login-wix.html">https://alexandreperrault.github.io/offibox-web/html/login-wix.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/inscription.html">https://alexandreperrault.github.io/offibox-web/html/inscription.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/validation.html">https://alexandreperrault.github.io/offibox-web/html/validation.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/telechargement.html">https://alexandreperrault.github.io/offibox-web/html/telechargement.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/telechargement-pc.html">https://alexandreperrault.github.io/offibox-web/html/telechargement-pc.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/website/demo/demo-app-animation.html">https://alexandreperrault.github.io/offibox-web/website/demo/demo-app-animation.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/app.html">https://alexandreperrault.github.io/offibox-web/html/app.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/plateformes.html">https://alexandreperrault.github.io/offibox-web/html/plateformes.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/conditions-utilisation.html">https://alexandreperrault.github.io/offibox-web/html/conditions-utilisation.html</a></li>
+    <li><a href="https://alexandreperrault.github.io/offibox-web/html/definir-mot-de-passe.html">https://alexandreperrault.github.io/offibox-web/html/definir-mot-de-passe.html</a></li>
+  </ul>
+
+  <hr>
+
+  <h2>Version PC (installateur Windows)</h2>
+  <p>Elle n’est <strong>pas</strong> poussée vers offibox-web. Elle est :</p>
+  <table>
+    <thead>
+      <tr><th>Source</th><th>URL</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Ton site (recommandé si dépôt privé)</td><td><a href="https://offibox.fr/download">https://offibox.fr/download</a> (page) et <code>latest.json</code> + <code>Offibox-Setup-X.Y.Z.exe</code></td></tr>
+      <tr><td>GitHub Releases (dépôt offibox, si public)</td><td><a href="https://github.com/AlexandrePerrault/offibox/releases/latest">https://github.com/AlexandrePerrault/offibox/releases/latest</a></td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Récap</h2>
+  <ul>
+    <li><strong>Push offibox-web</strong> = app web + pages <code>website/</code> + pages <code>html/</code> → visibles sur <code>https://alexandreperrault.github.io/offibox-web/</code>.</li>
+    <li><strong>Version PC</strong> = à déposer toi-même sur offibox.fr/download (et mettre à jour <code>latest.json</code>) ou à publier en release sur le dépôt offibox.</li>
+  </ul>
+</body>
+</html>

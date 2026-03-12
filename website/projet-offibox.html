@@ -8,31 +8,78 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
   <style>
-    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; --hover-pill: #f59e0b; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Spinnaker', sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; background: var(--white); color: var(--gray); padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; }
-    .legal-wrap { width: 100%; max-width: 680px; margin: 0 auto; }
-    .legal-header { text-align: center; margin-bottom: 2rem; }
-    .legal-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--gray); }
+    body { font-family: 'Spinnaker', sans-serif; font-size: 16px; line-height: 1.75; min-height: 100vh; background: var(--white); color: var(--gray); padding: 2.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; }
+    .legal-wrap { width: 100%; max-width: 720px; margin: 0 auto; }
+    .legal-header { text-align: center; margin-bottom: 2.25rem; }
+    .legal-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--gray); }
     .legal-header .brand { color: var(--offi-teal); font-weight: 600; }
-    .legal-card { background: var(--white); padding: 2rem 2.25rem; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid var(--gray-light); }
-    .legal-card h2 { font-size: 1.05rem; font-weight: 700; color: var(--offi-teal); margin: 1.75rem 0 0.5rem; padding-bottom: 0.35rem; }
-    .legal-card h2:first-child { margin-top: 0; }
-    .legal-card p { margin-bottom: 0.85rem; color: var(--gray); font-size: 0.95rem; }
+    .legal-card { background: var(--white); padding: 2.2rem 2.4rem; border-radius: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.08); border: 1px solid var(--gray-light); }
+    .legal-card p { margin-bottom: 1rem; color: var(--gray); font-size: 0.97rem; text-indent: 1.5em; text-align: justify; }
+    .legal-card p.no-indent { text-indent: 0; }
+    .intro-line { opacity: 0; transform: translateY(8px); animation: intro-fade 0.7s ease-out forwards; }
+    .intro-line:nth-of-type(1) { animation-delay: 0.1s; }
+    .intro-line:nth-of-type(2) { animation-delay: 0.3s; }
+    .intro-line:nth-of-type(3) { animation-delay: 0.5s; }
+    .intro-line:nth-of-type(4) { animation-delay: 0.7s; }
+    .intro-line:nth-of-type(5) { animation-delay: 0.9s; }
+    @keyframes intro-fade { to { opacity: 1; transform: translateY(0); } }
     .legal-card a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
     .legal-card a:hover { text-decoration: underline; }
     .projet-stats { margin: 1.5rem 0; padding-left: 0.5rem; border-left: 3px solid var(--offi-teal); }
-    .projet-stats .stat-line { opacity: 0; transform: translateY(8px); animation: stat-fade-in 1s ease-out forwards; }
+    .projet-stats .stat-line { opacity: 0; transform: translateY(8px); animation: stat-fade-in 1s ease-out forwards; display: flex; align-items: flex-start; gap: 0.45rem; }
     .projet-stats .stat-line:nth-child(1) { animation-delay: 0.4s; }
     .projet-stats .stat-line:nth-child(2) { animation-delay: 1s; }
     .projet-stats .stat-line:nth-child(3) { animation-delay: 1.6s; }
     .projet-stats .stat-line:nth-child(4) { animation-delay: 2.2s; }
     @keyframes stat-fade-in { to { opacity: 1; transform: translateY(0); } }
     .projet-stats .stat-line { margin-bottom: 0.5rem; font-size: 1rem; color: var(--gray); }
+    .stat-bullet {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 999px;
+      background: var(--offi-teal);
+      margin-top: 0.4rem;
+      opacity: 0;
+      animation: bullet-fade-in 0.6s ease-out forwards;
+    }
+    .stat-line:nth-child(2) .stat-bullet { animation-delay: 0.4s; }
+    .stat-line:nth-child(3) .stat-bullet { animation-delay: 0.8s; }
+    @keyframes bullet-fade-in {
+      from { opacity: 0; transform: scale(0.7); }
+      to { opacity: 1; transform: scale(1); }
+    }
     .projet-stats .stat-number { font-weight: 700; color: var(--offi-teal); font-size: 1.1em; }
-    .stat-number-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 2.8em; padding: 0.25rem 0.6rem; background: var(--offi-teal); color: var(--white); font-weight: 800; font-size: 1.15em; border-radius: 10px; box-shadow: 0 2px 8px rgba(90,144,148,0.35); margin-right: 0.25rem; letter-spacing: 0.02em; }
-    .badge-fonctionnalites { display: inline-flex; align-items: center; gap: 0.5rem; margin: 1.5rem 0; padding: 0.85rem 1.5rem; background: var(--offi-teal); color: var(--white); font-weight: 600; font-size: 1rem; border-radius: 12px; text-decoration: none; transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(90,144,148,0.3); }
-    .badge-fonctionnalites:hover { background: var(--white); color: var(--offi-teal); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(90,144,148,0.25); outline: 2px solid var(--offi-teal); outline-offset: 2px; }
+    .stat-number-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 4.2em; padding: 0.45rem 0.9rem;
+      background: var(--offi-teal); color: var(--white);
+      font-weight: 800; font-size: 1.5em;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(90,144,148,0.35);
+      margin-right: 0.4rem; letter-spacing: 0.02em;
+      box-sizing: border-box;
+    }
+    .offibox-pill-heading { display: inline-flex; align-items: center; padding: 0.3rem 0.9rem; border-radius: 999px; background: var(--hover-pill); color: var(--white); font-weight: 700; font-size: 0.98rem; margin-top: 1.75rem; margin-bottom: 0.75rem; }
+    .badge-fonctionnalites { display: inline-flex; align-items: center; gap: 0.5rem; margin: 1.5rem 0; padding: 0.85rem 1.5rem; background: var(--white); color: var(--offi-teal); font-weight: 600; font-size: 1rem; border-radius: 12px; text-decoration: none; transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(90,144,148,0.18); border: 2px solid var(--offi-teal); }
+    .badge-fonctionnalites:hover { background: var(--offi-teal); color: var(--white); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(90,144,148,0.3); }
+    .summary-box { margin-top: 1.75rem; padding: 1rem 1.3rem; border-radius: 14px; border: 1px solid var(--offi-teal); background: #f8fafc; font-size: 0.96rem; }
+    .summary-box p { margin-bottom: 0.8rem; }
+    .summary-box p:last-child { margin-bottom: 0; }
+    .signature-wrap { margin-top: 2rem; text-align: right; }
+    .signature-badge {
+      display: inline-block;
+      padding: 0.7rem 1.4rem;
+      border-radius: 14px;
+      background: #e9f6f5;
+      border: 1px solid var(--offi-teal);
+      box-shadow: 0 4px 16px rgba(90,144,148,0.25);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--gray);
+      text-align: center;
+    }
     .back-link { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 2rem; margin-right: 0.5rem; padding: 0.6rem 1.2rem; background: var(--white); border: 2px solid var(--offi-teal); border-radius: 12px; color: var(--offi-teal); font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: background 0.2s, color 0.2s; }
     .back-link:hover { background: var(--offi-teal); color: var(--white); }
   </style>
@@ -43,42 +90,79 @@
       <h1>Le projet <span class="brand">Offi</span>box</h1>
     </header>
     <main class="legal-card">
-      <p>Au cours de mes 17 années passées comme titulaire d'officine, je me suis rendu compte que les sources d'information nécessaires au quotidien en pharmacie sont multiples et très évolutives. Par ailleurs, les nouvelles missions confiées aux pharmaciens exigent une mise à jour régulière de ces informations.</p>
-      <p>De plus, la transmission de l'information au sein de l'équipe n'est pas toujours simple, malgré les nombreux canaux disponibles (messageries internes, mails, cahier de liaison, etc.).</p>
-      <p>À partir de ce constat, l'idée de créer une boîte à outils digitale pour les officines a germé. Je me suis alors lancé le défi de développer un outil capable de centraliser un maximum d'informations utiles au quotidien.</p>
-      <p>Après près d'un an de développement et une phase de test, Offibox voit le jour en 2026 : un outil créé par un pharmacien, destiné à l'ensemble de l'équipe officinale, dont l'objectif principal est de garantir une information officielle, fiable et à jour.</p>
-      <h2>Aujourd'hui, Offibox, c'est :</h2>
-      <div class="projet-stats">
-        <div class="stat-line"><span class="stat-number-badge" aria-hidden="true"><span id="stat-count">—</span></span> liens et entrées indexés (données raw GitHub offiboxdata, hors catalogues laboratoires)</div>
-        <div class="stat-line">Médicaments BDM, présentations LPP, pansements, outils métier, sites web, vidéos, annuaires.</div>
-        <div class="stat-line">Données mises à jour régulièrement.</div>
-        <div class="stat-line">Un accès unique pour toute l'équipe officinale.</div>
+      <p class="intro-line">Au cours de mes 17 années passées comme titulaire d'Officine, je me suis rendu compte que les sources d'information nécessaires au quotidien en pharmacie étaient multiples et en constante évolution (nouvelles missions, modification de la législation, nouveaux médicaments).</p>
+      <p class="intro-line">De plus, la transmission de l'information au sein de l'équipe n'est pas toujours simple, malgré les nombreux canaux à notre disposition (messageries internes, cahier de liaison, appli… etc.).</p>
+      <p class="intro-line">Partant de ce constat, l'idée de créer une boîte à outils digitale pour les officines m’est venue progressivement. Je me suis alors lancé le défi de développer un outil capable de centraliser un maximum d'informations utiles au quotidien.</p>
+      <p class="intro-line"><span class="brand">Offi</span>box voit le jour en 2026 après près d'un an de développement et une phase de test : un outil créé par un pharmacien, destiné à l'ensemble de l'équipe officinale, dont l'objectif principal est de garantir une information neutre, fiable et constamment à jour.</p>
+      <p class="intro-line"><span class="brand">Offi</span>box n’est pas un nouveau LGO, c’est une barre de recherche simple d’utilisation, facilement accessible et discrète. Son but est simple : accéder plus rapidement à l’information et ainsi faire gagner du temps à toute l’équipe officinale.</p>
+      <div class="offibox-pill-heading">Aujourd'hui, <span class="brand">Offi</span>box, c'est :</div>
+      <div class="projet-stats" id="stats-zone">
+        <div class="stat-line">
+          <span class="stat-number-badge" aria-hidden="true"><span id="stat-count">—</span></span>
+          <span>liens et entrées indexés (médicaments issus de la BDM, LPP, dispositifs médicaux, outils métier, sites web, vidéos, annuaires, catalogues laboratoires…)</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-bullet" aria-hidden="true"></span>
+          <span>Des données mises à jour quotidiennement (alertes ANSM, retraits de lot, DGS-Urgent… et connectées aux produits).</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-bullet" aria-hidden="true"></span>
+          <span>Des outils complémentaires : lecteur de QR code, vidéos de démonstration, cahier de liaison digital.</span>
+        </div>
       </div>
-      <p style="margin-top: 1.25rem;">
-        <a href="https://www.offibox.fr/fonctionnalités" class="badge-fonctionnalites" target="_blank" rel="noopener noreferrer">Voir toutes les fonctionnalités →</a>
-      </p>
-      <p style="margin-top: 1.5rem;">Offibox est un outil réactif, sourcé et évolutif, conçu pour s'adapter aux nouvelles législations ainsi qu'aux futures missions des pharmaciens d'officine.</p>
+      <div class="summary-box">
+        <p class="no-indent">En résumé : un outil évolutif, conçu pour s’adapter aux nouvelles législations, ainsi qu'aux futures missions des pharmaciens d'officine.</p>
+        <p class="no-indent">
+          <a href="https://www.offibox.fr/fonctionnalités" class="badge-fonctionnalites" target="_blank" rel="noopener noreferrer">Voir toutes les fonctionnalités →</a>
+        </p>
+      </div>
+      <div class="signature-wrap">
+        <span class="signature-badge">
+          Alexandre Perrault, Docteur en Pharmacie<br>
+          Fondateur d’<span class="brand">Offi</span>box
+        </span>
+      </div>
     </main>
     <p style="text-align: center;">
       <a href="login-wix.html" class="back-link">Retour à l'accueil</a>
-      <a href="mentions-legales.html" class="back-link">Mentions légales</a>
-      <a href="politique-confidentialite.html" class="back-link">Politique de confidentialité</a>
     </p>
   </div>
   <script>
   (function(){
     var el = document.getElementById('stat-count');
-    if (!el) return;
-    var count = 58790; // Total lignes (raw GitHub offiboxdata) : BDM_MASTER, PANSEMENTS, LPP, outils_metier, sites_web, videos, codes_actes, pharmacovigilance, centres_anti_poison, chu, ceip — hors catalogues labo
+    var zone = document.getElementById('stats-zone');
+    if (!el || !zone) return;
+    var count = 58790;
     var duration = 5200;
     var steps = 52;
     var stepDuration = duration / steps;
-    var current = 0;
     var step = Math.ceil(count / steps);
-    var stepIndex = 0;
+    var started = false;
     function formatNum(n) { return n.toLocaleString('fr-FR'); }
-    function tick() { stepIndex++; current = Math.min(current + step, count); el.textContent = formatNum(current); if (stepIndex < steps) setTimeout(tick, stepDuration); else el.textContent = formatNum(count); }
-    setTimeout(tick, 1000);
+    function runCounter() {
+      if (started) return;
+      started = true;
+      var current = 0;
+      var stepIndex = 0;
+      function tick() {
+        stepIndex++;
+        current = Math.min(current + step, count);
+        el.textContent = formatNum(current);
+        if (stepIndex < steps) setTimeout(tick, stepDuration);
+        else el.textContent = formatNum(count);
+      }
+      tick();
+    }
+    if (typeof IntersectionObserver !== 'undefined') {
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (e.isIntersecting) { runCounter(); }
+        });
+      }, { rootMargin: '0px', threshold: 0.2 });
+      obs.observe(zone);
+    } else {
+      runCounter();
+    }
   })();
   </script>
 </body>

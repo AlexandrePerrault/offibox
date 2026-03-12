@@ -6,7 +6,8 @@
   <title>Offibox - Bandeau sources officielles</title>
   <!-- Quand vous copiez/collez ce code ailleurs (Wix, autre page), changez l'URL ci-dessous : mettez l’URL de base de votre site (ex. https://www.offibox.fr) où les dossiers assets/icons sont accessibles. Laissez vide '' pour ouvrir en fichier local. -->
   <script>
-    window.OFFIBOX_BANDEAU_BASE = 'https://raw.githubusercontent.com/AlexandrePerrault/offibox/refactor/search-engine';
+    // Icônes servies depuis GitHub (branche master du dépôt offibox)
+    window.OFFIBOX_BANDEAU_BASE = 'https://raw.githubusercontent.com/AlexandrePerrault/offibox/master';
   </script>
   <style>
     :root { --white: #ffffff; --offi-teal: #5A9094; }
@@ -112,7 +113,8 @@
       var iconsPath = base ? (base.replace(/\/$/, '') + '/assets/icons/') : '../assets/icons/';
       document.querySelectorAll('.sources-wheel-item img[data-src]').forEach(function(img) {
         var name = img.getAttribute('data-src');
-        img.src = iconsPath + name;
+        // URL complète (ex. Wix static.wixstatic.com/media/...) utilisée telle quelle
+        img.src = (name && (name.indexOf('http://') === 0 || name.indexOf('https://') === 0)) ? name : (iconsPath + name);
         img.onerror = function() { this.style.visibility = 'hidden'; };
       });
     })();

@@ -3,32 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Release Inno Setup - GitHub</title>
+  <title>Générer l'installateur Inno Setup et publier sur GitHub – Offibox</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; max-width: 700px; margin: 0 auto; padding: 24px; }
-    h1 { font-size: 1.5rem; margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
-    h2 { font-size: 1.2rem; margin-top: 1.5em; }
-    h3 { font-size: 1.05rem; margin-top: 1em; }
-    code, pre { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.95em; }
-    pre { padding: 12px; overflow-x: auto; white-space: pre-wrap; }
-    ul, ol { padding-left: 1.4em; }
-    li { margin-bottom: 0.35em; }
-    a { color: #0d6efd; }
-    hr { border: none; border-top: 1px solid #ddd; margin: 1.5em 0; }
-    @media print { body { padding: 16px; } pre { white-space: pre-wrap; } }
+    :root { --offi-teal: #5A9094; --text: #1e293b; --text-muted: #475569; --border: #e2e8f0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      line-height: 1.5;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+      background: #fff;
+    }
+    .logo-wrap { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid var(--offi-teal); }
+    .logo-wrap img { max-height: 64px; width: auto; object-fit: contain; }
+    h1 { font-size: 1.5rem; color: var(--offi-teal); margin-bottom: 20px; font-weight: 700; }
+    h2 { font-size: 1.2rem; color: var(--text); margin: 24px 0 12px; font-weight: 600; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.05rem; margin: 16px 0 8px; font-weight: 600; }
+    p, li { margin-bottom: 8px; color: var(--text); }
+    ul, ol { padding-left: 1.5em; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    strong { color: var(--text); }
+    code, pre { font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9em; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    pre { display: block; padding: 12px 14px; overflow-x: auto; white-space: pre; margin: 10px 0; border: 1px solid var(--border); }
+    pre code { padding: 0; background: none; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95rem; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; }
+    th { background: var(--offi-teal); color: #fff; font-weight: 600; }
+    tr:nth-child(even) { background: #f8fafc; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    a { color: var(--offi-teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .no-print { margin-top: 8px; font-size: 0.9rem; color: var(--text-muted); }
+    @media print {
+      body { padding: 20px 16px; max-width: 100%; }
+      .logo-wrap { margin-bottom: 16px; padding-bottom: 12px; }
+      .logo-wrap img { max-height: 52px; }
+      h1 { font-size: 1.35rem; margin-bottom: 14px; }
+      h2 { margin: 18px 0 10px; font-size: 1.1rem; }
+      pre, table { break-inside: avoid; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body>
+  <div class="logo-wrap">
+    <img src="../assets/icons/logo_offibox_installer.png" alt="Offibox" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+    <span style="display:none; font-size:1.5rem; font-weight:700; color: var(--offi-teal);">Offibox</span>
+  </div>
+
   <h1>Générer l'installateur Inno Setup et publier sur GitHub</h1>
 
-  <h2>1. Générer le .exe en local</h2>
+  <h2>Procédure complète (build → déploiement GitHub)</h2>
+  <p>À faire <strong>à la racine du projet</strong> (<code>C:\...\offibox</code>) dans PowerShell.</p>
+  <table>
+    <thead><tr><th>Étape</th><th>Commande / action</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1. Build Flutter</strong></td><td><code>flutter build windows --release</code></td></tr>
+      <tr><td><strong>2. Installateur + incrément version</strong></td><td><code>cd installer</code> puis <code>.\build_inno.ps1 -SkipFlutter</code> puis <code>cd ..</code></td></tr>
+      <tr><td><strong>3. Commit &amp; push</strong></td><td><code>git add ...</code> puis <code>git commit -m "Release X.Y.Z - Installateur Inno Setup"</code> puis <code>git push origin master</code></td></tr>
+      <tr><td><strong>4. Tag &amp; push (déclenche la CI)</strong></td><td><code>git tag vX.Y.Z</code> puis <code>git push origin vX.Y.Z</code> (X.Y.Z = version dans pubspec après étape 2)</td></tr>
+      <tr><td><strong>5. Attendre la CI</strong></td><td>GitHub Actions → Release → 2–5 min → release créée avec le .exe</td></tr>
+    </tbody>
+  </table>
+  <p><strong>URLs une fois la release publiée</strong> (remplacer <code>X.Y.Z</code> par la version, ex. <code>1.1.26</code>) :</p>
+  <ul>
+    <li><strong>Page release :</strong> <code>https://github.com/AlexandrePerrault/offibox/releases/tag/vX.Y.Z</code></li>
+    <li><strong>Lien direct du setup :</strong> <code>https://github.com/AlexandrePerrault/offibox/releases/download/vX.Y.Z/Offibox-Setup-X.Y.Z.exe</code></li>
+    <li><strong>Dernière release :</strong> <code>https://github.com/AlexandrePerrault/offibox/releases/latest</code></li>
+  </ul>
+
+  <hr>
+
+  <h2>1. Générer le .exe en local (et optionnellement le build web)</h2>
+  <p><strong>Script tout-en-un (PC + Web) :</strong> dans <code>installer</code> vous pouvez lancer <code>.\build_pc_and_web.ps1</code> pour enchaîner le build Windows + Inno Setup puis le build web. Voir les options ci-dessous.</p>
   <p>Dans un terminal PowerShell à la <strong>racine du projet</strong> ou dans <code>installer</code> :</p>
   <pre><code>cd installer
 .\build_inno.ps1</code></pre>
   <p>Sans refaire le build Flutter (dossier Release déjà à jour) :</p>
   <pre><code>.\build_inno.ps1 -SkipFlutter</code></pre>
   <p>Le fichier produit est : <strong><code>website\download\Offibox-Setup-&lt;version&gt;.exe</code></strong>.</p>
-  <p><strong>Version :</strong> elle est lue automatiquement depuis <strong><code>pubspec.yaml</code></strong> (ligne <code>version: 1.1.25</code>) à chaque build. Le script affiche <code>Version (pubspec.yaml) : 1.1.25</code> avant la compilation.</p>
+  <p><strong>Version :</strong> à chaque exécution, le script <strong>incrémente le patch</strong> dans <strong><code>pubspec.yaml</code></strong> (ex. 1.1.25 → 1.1.26), met à jour le fichier, puis compile. Il affiche « Ancienne version » et « Nouvelle version » avant la compilation.</p>
+  <p><strong>Historique des versions (menu hamburger) :</strong> les textes affichés viennent des <strong>releases GitHub</strong> (corps/description de chaque release). Modifier la description d'une release sur GitHub (Releases → Edit) met à jour automatiquement l'onglet hamburger « Historique des versions » au prochain chargement. La date affichée dans « À propos » vient de <code>lib/generated/build_info.dart</code> (<code>kVersionDate</code>).</p>
 
   <hr>
 
@@ -78,14 +135,72 @@ git push origin v1.1.25</code></pre>
   <h2>4. URL du .exe sur GitHub</h2>
   <p>Une fois la release publiée (à la main ou par la CI) :</p>
   <ul>
-    <li><strong>Page de la release :</strong><br><code>https://github.com/AlexandrePerrault/offibox/releases/tag/v1.1.25</code></li>
-    <li><strong>Lien direct de téléchargement du .exe :</strong><br><code>https://github.com/AlexandrePerrault/offibox/releases/download/v1.1.25/Offibox-Setup-1.1.25.exe</code></li>
+    <li><strong>Page de la release :</strong> <code>https://github.com/AlexandrePerrault/offibox/releases/tag/v1.1.25</code></li>
+    <li><strong>Lien direct de téléchargement du .exe :</strong> <code>https://github.com/AlexandrePerrault/offibox/releases/download/v1.1.25/Offibox-Setup-1.1.25.exe</code></li>
   </ul>
   <p>Remplacer <strong>1.1.25</strong> par la version concernée (ex. 1.1.26 → <code>v1.1.26</code> et <code>Offibox-Setup-1.1.26.exe</code>).</p>
 
   <hr>
 
-  <h2>5. Modifications effectuées (pour les notes de release)</h2>
+  <h2>5. Erreur MSB8066 / « flutter_assemble » s'arrête (code 1)</h2>
+  <p>Si <code>flutter build windows</code> échoue avec une erreur du type <strong>MSB8066</strong> ou <strong>la build personnalisée de 'flutter_assemble.rule' s'est arrêtée. Code 1</strong> :</p>
+  <ol>
+    <li><strong>Nettoyer et réessayer</strong>
+      <pre><code>cd C:\Users\perra\Documents\projets_flutter\offibox
+flutter clean
+flutter pub get
+flutter build windows</code></pre>
+      Si ça passe, relancez ensuite <code>.\installer\build_inno.ps1 -SkipFlutter</code>.</li>
+    <li><strong>Vérifier l'environnement</strong>
+      <pre><code>flutter doctor -v</code></pre>
+      Vérifiez que <strong>Visual Studio 2022</strong> (ou Build Tools) avec la charge « Développement Desktop en C++ » et <strong>Windows 10/11 SDK</strong> est bien détecté.</li>
+    <li><strong>Problème connu Firebase / CMake</strong><br>
+      Si des messages parlent de <strong>Firebase C++ SDK</strong> ou <strong>CMake deprecation</strong> : lancer une première fois <code>flutter build windows</code> jusqu'à l'échec (le SDK Firebase est alors extrait). Puis exécuter le correctif : à la racine du projet, <code>.\windows\patch_firebase_cmake.ps1</code>. Relancer <code>flutter build windows</code>.</li>
+    <li><strong>Script de correction build Firebase (ZIP / extraction)</strong><br>
+      Si l'erreur mentionne <strong>ZIP decompression failed</strong> ou <strong>firebase_firestore.lib manquant</strong>, à la racine du projet :
+      <pre><code>.\fix_firebase_build.ps1</code></pre>
+      Ce script nettoie, retélécharge le SDK Firebase si besoin, puis relance le build.</li>
+    <li><strong>Autres pistes</strong> : désactiver temporairement l'antivirus pendant le build ; vérifier l'espace disque ; fermer Visual Studio / autres processus qui pourraient verrouiller des fichiers dans <code>build\</code>.</li>
+  </ol>
+
+  <hr>
+
+  <h2>6. Erreur 403 « Resource not accessible by integration »</h2>
+  <p>Si le workflow Release échoue avec <strong>403</strong> et le message lié à <strong>generate release notes</strong> :</p>
+  <ul>
+    <li>Le workflow utilise désormais <code>generate_release_notes: false</code> : l'API de génération automatique des release notes n'est pas accessible avec le <code>GITHUB_TOKEN</code> par défaut. La description de la release est un court texte fixe.</li>
+    <li>Vérifier aussi : <strong>Settings</strong> → <strong>Actions</strong> → <strong>General</strong> → <strong>Workflow permissions</strong> = <strong>« Read and write permissions »</strong> (pas « Read repository contents only »).</li>
+  </ul>
+
+  <hr>
+
+  <h2>7. Vérifier que le setup .exe est sur GitHub</h2>
+  <ul>
+    <li><strong>Page des releases :</strong> <a href="https://github.com/AlexandrePerrault/offibox/releases">https://github.com/AlexandrePerrault/offibox/releases</a></li>
+    <li><strong>Dernière release :</strong> <a href="https://github.com/AlexandrePerrault/offibox/releases/latest">https://github.com/AlexandrePerrault/offibox/releases/latest</a></li>
+    <li>Le .exe est attaché à chaque release (ex. <strong>Offibox-Setup-1.1.25.exe</strong> pour le tag <strong>v1.1.25</strong>).</li>
+    <li>Lien direct de téléchargement : <code>https://github.com/AlexandrePerrault/offibox/releases/download/vX.Y.Z/Offibox-Setup-X.Y.Z.exe</code></li>
+  </ul>
+
+  <hr>
+
+  <h2>8. Signature numérique du setup (optionnel)</h2>
+  <p>Pour que Windows et SmartScreen ne bloquent pas le téléchargement (« Windows a protégé votre ordinateur »), vous pouvez <strong>signer le .exe</strong> dans la CI avec un certificat Code Signing.</p>
+  <ol>
+    <li><strong>Certificat</strong> : obtenir un certificat Code Signing (DigiCert, Sectigo, etc.) au format <strong>.pfx</strong>.</li>
+    <li><strong>Secrets du dépôt</strong> : dans le dépôt GitHub → <strong>Settings</strong> → <strong>Secrets and variables</strong> → <strong>Actions</strong>, ajouter :
+      <ul>
+        <li><strong>OFFIBOX_SIGNING_CERT_BASE64</strong> : contenu du fichier .pfx encodé en <strong>base64</strong>. Sous PowerShell : <code>[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\chemin\to\votre-cert.pfx"))</code> — copier le résultat dans la valeur du secret.</li>
+        <li><strong>OFFIBOX_SIGNING_PASSWORD</strong> : mot de passe du fichier .pfx.</li>
+      </ul>
+    </li>
+    <li><strong>Obtenir un .exe signé</strong> : <strong>Option A</strong> — pousser un nouveau tag (ex. <code>git tag v1.1.26</code> puis <code>git push origin v1.1.26</code>). Le workflow build + signe + uploade le .exe. <strong>Option B</strong> — pour re-signer une release existante, aller dans <strong>Actions</strong> → ouvrir l'exécution du workflow <strong>Release</strong> du tag concerné → <strong>Re-run all jobs</strong>. Le .exe sera reconstruit, signé et ré-uploadé.</li>
+    <li>Si les secrets sont absents, l'étape « Sign setup (optional) » affiche « Secrets de signature non configurés, skip. » et le .exe est publié <strong>non signé</strong>.</li>
+  </ol>
+
+  <hr>
+
+  <h2>9. Modifications effectuées (pour les notes de release)</h2>
   <ul>
     <li><strong>Installateur Windows</strong> : passage à <strong>Inno Setup 6</strong> (fichier .exe) à la place du MSI WiX.</li>
     <li><strong>Comportement</strong> : même installation par utilisateur (sans admin), même options (icône bureau, lancement au démarrage, lancement à la fin), même clés de registre.</li>
@@ -93,10 +208,68 @@ git push origin v1.1.25</code></pre>
     <li><strong>Build</strong> : script <code>installer\build_inno.ps1</code> (Flutter build windows + ISCC). La <strong>version</strong> est lue depuis <strong>pubspec.yaml</strong> à chaque build. Prérequis : <a href="https://jrsoftware.org/isinfo.php">Inno Setup 6</a>.</li>
     <li><strong>Site</strong> : page téléchargement privilégie le .exe si présent dans les assets de la release GitHub.</li>
     <li><strong>Menu hamburger</strong> : « Ouvrir offibox.fr » affiche « Fermer Offibox et aller sur Offibox.fr ? » ; sur Oui, l'app se ferme et le site s'ouvre dans le navigateur.</li>
-    <li><strong>Erreur d'installation</strong> : le fichier asset <code>logo APPEXokkk.jpg</code> (espace dans le nom) a été renommé en <code>logo_APPEXokkk.jpg</code> pour éviter l'erreur d'écriture lors de l'installation.</li>
+    <li><strong>Erreur d'installation</strong> : le fichier asset <code>logo APPEXokkk.jpg</code> a été renommé en <code>logo_APPEXokkk.jpg</code> pour éviter l'erreur d'écriture lors de l'installation.</li>
   </ul>
   <p>Vous pouvez copier/coller le bloc ci-dessus dans la description de la release GitHub.</p>
 
-  <p style="margin-top:2em; font-size:0.9em; color:#666;">Pour obtenir un PDF : Fichier → Imprimer → Enregistrer au format PDF.</p>
+  <hr>
+
+  <h2>10. Build et push web vers le dépôt offibox-web (GitHub Pages)</h2>
+  <p>Le dépôt <strong>offibox-web</strong> contient uniquement le <strong>build</strong> de l'app (artefacts Flutter web). L'URL est : <code>https://&lt;owner&gt;.github.io/offibox-web/</code>. Le <code>base-href</code> doit être <strong><code>/offibox-web/</code></strong>.</p>
+
+  <h3>Build web (commande)</h3>
+  <p>À la racine du projet :</p>
+  <pre><code>flutter build web -t lib/main_web.dart --base-href /offibox-web/ --release</code></pre>
+  <p>Optionnel : copier les pages HTML et le site dans le build (comme la CI) :</p>
+  <pre><code># Après le build
+Copy-Item -Path website\pages\html -Destination build\web\html -Recurse -Force
+Copy-Item -Path website -Destination build\web\website -Recurse -Force</code></pre>
+
+  <h3>Push vers offibox-web (méthode manuelle)</h3>
+  <ol>
+    <li>Cloner le dépôt <strong>offibox-web</strong> à côté d'offibox : <code>git clone https://github.com/AlexandrePerrault/offibox-web.git</code></li>
+    <li>Après le build ci-dessus, copier <strong>tout le contenu</strong> de <code>build\web\</code> dans le clone (en écrasant, sauf le dossier <code>.git</code>).</li>
+    <li>Dans le clone offibox-web :
+      <pre><code>cd C:\chemin\vers\offibox-web
+git add .
+git status
+git commit -m "Deploy web (build avec assets/images fix)"
+git push origin main</code></pre>
+    </li>
+  </ol>
+
+  <h3>Script automatisé</h3>
+  <p>Le script <strong><code>installer\deploy_web_offibox_web.ps1</code></strong> fait le build avec le bon <code>base-href</code>, copie <code>html</code> et <code>website</code>, et peut copier le résultat dans un clone et pousser :</p>
+  <pre><code>cd installer
+.\deploy_web_offibox_web.ps1
+# Ou avec copie + push :
+.\deploy_web_offibox_web.ps1 -PushTo "C:\Users\perra\Documents\projets_flutter\offibox-web" -DoGitPush</code></pre>
+  <p>Remplacer <code>C:\...\offibox-web</code> par le chemin réel de votre clone du dépôt <strong>offibox-web</strong>. La branche par défaut du dépôt est <strong>main</strong>.</p>
+
+  <h3>Script unique PC + Web : build_pc_and_web.ps1</h3>
+  <p>Dans <code>installer</code> :</p>
+  <pre><code>.\build_pc_and_web.ps1</code></pre>
+  <p>Enchaîne : build Windows + Inno Setup (.exe) puis build web (<code>build\web\</code> avec base-href <code>/offibox-web/</code>).</p>
+  <table>
+    <thead><tr><th>Option</th><th>Effet</th></tr></thead>
+    <tbody>
+      <tr><td><code>-SkipFlutter</code></td><td>Ne pas refaire <code>flutter build windows</code> (dossier Release déjà à jour)</td></tr>
+      <tr><td><code>-SkipPc</code></td><td>Build web uniquement</td></tr>
+      <tr><td><code>-SkipWeb</code></td><td>Build PC (exe) uniquement</td></tr>
+      <tr><td><code>-PushWebTo "C:\...\offibox-web"</code></td><td>Copie le contenu de <code>build\web</code> dans le clone offibox-web</td></tr>
+      <tr><td><code>-DoGitPush</code></td><td>Avec <code>-PushWebTo</code> : fait <code>git add</code>, <code>commit</code>, <code>push origin main</code> dans le clone</td></tr>
+    </tbody>
+  </table>
+  <p>Exemple (tout : PC + web + push vers offibox-web) :</p>
+  <pre><code>.\build_pc_and_web.ps1 -PushWebTo "C:\Users\perra\Documents\projets_flutter\offibox-web" -DoGitPush</code></pre>
+
+  <h3>Script tout-en-un + liste des URLs : push_build_web_pc_and_urls.ps1</h3>
+  <p>Enchaîne <strong>build PC</strong>, <strong>build web</strong>, <strong>envoi</strong> du build (dont dossiers <code>website/</code> et <code>html/</code>) vers le clone offibox-web, puis affiche <strong>toutes les URLs</strong> (app, HTML website, HTML html, build PC).</p>
+  <pre><code>cd installer
+.\push_build_web_pc_and_urls.ps1 -PushWebTo "C:\Users\perra\Documents\projets_flutter\offibox-web" -DoGitPush</code></pre>
+  <p>Options : <code>-SkipFlutter</code>, <code>-SkipPc</code>, <code>-SkipWeb</code>. Sans <code>-PushWebTo</code>, seul le build est fait puis les URLs sont affichées (avec <code>-GitHubPagesBase "https://.../offibox-web"</code> si besoin).</p>
+  <p>En sortie : URL de base GitHub Pages, URL de l'app Flutter web, URLs des pages <code>website/*.html</code> et <code>html/*.html</code>, chemin local du .exe et lien vers les Releases GitHub.</p>
+
+  <p class="no-print" style="margin-top:24px;">Document généré à partir de installer/RELEASE_INNO_GITHUB.md — Offibox.<br>Pour obtenir un PDF : ouvrir ce fichier dans un navigateur, puis <strong>Fichier → Imprimer → Enregistrer au format PDF</strong>.</p>
 </body>
 </html>

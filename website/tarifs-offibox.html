@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarifs Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --white: #ffffff;
+      --gray: #334155;
+      --gray-soft: #64748b;
+      --bg-soft: #f8fafc;
+      --offi-teal: #5A9094;
+      --hover-pill: #f59e0b;
+      --border-soft: #e2e8f0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100vw; overflow-x: hidden; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #e5f7f5 0, #ffffff 50%);
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.5rem;
+    }
+    .pricing-shell {
+      width: 100%;
+      max-width: 960px;
+    }
+    .hero-bandeau {
+      text-align: center;
+      margin-bottom: 2.25rem;
+    }
+    .hero-panel {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 0.9rem 1.4rem;
+      border-radius: 18px;
+      background: #e9f6f5;
+      border: 1px solid rgba(90,144,148,0.35);
+      box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+    }
+    .hero-panel .bandeau-inner-wrap { position: relative; display: inline-block; width: 100%; }
+    .hero-panel .bandeau-inner {
+      display: inline-block;
+      width: 100%;
+      font-size: clamp(1.05rem, 3vw, 1.5rem);
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--gray);
+    }
+    .hero-panel .bandeau-inner .block {
+      opacity: 0;
+      animation: heroFadeInBlock 1s ease-out forwards;
+    }
+    .hero-panel .bandeau-inner .block2 { animation-delay: 1.2s; display: block; margin-top: 0.2rem; font-size: 0.95em; color: var(--gray-soft); }
+    .hero-panel .bandeau-inner .offi { color: var(--offi-teal); }
+    .hero-panel .bandeau-inner .dot { color: var(--offi-teal); font-weight: 700; }
+    @keyframes heroFadeInBlock {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .hero-panel .hero-sweep {
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(233,246,245,0.85), rgba(233,246,245,0.5));
+      pointer-events: none;
+      animation: heroSweep 0.9s ease-in-out 3.5s forwards;
+      opacity: 0;
+      border-radius: 999px;
+    }
+    @keyframes heroSweep {
+      0% { left: -50%; opacity: 1; }
+      100% { left: 100%; opacity: 1; }
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    @media (max-width: 720px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+      .hero-bandeau { margin-bottom: 1.75rem; }
+    }
+    .plan-card {
+      position: relative;
+      background: var(--white);
+      border-radius: 18px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 4px 6px rgba(15,23,42,0.05), 0 10px 20px rgba(15,23,42,0.08), 0 20px 40px rgba(15,23,42,0.06);
+      padding: 1.8rem 1.6rem 1.6rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow: hidden;
+      transition: box-shadow 0.25s ease, transform 0.25s ease;
+    }
+    .plan-card:hover {
+      box-shadow: 0 8px 12px rgba(15,23,42,0.07), 0 16px 32px rgba(15,23,42,0.1), 0 28px 56px rgba(15,23,42,0.08);
+      transform: translateY(-4px);
+    }
+    .plan-card.pro {
+      border-color: var(--offi-teal);
+      box-shadow: 0 4px 6px rgba(90,144,148,0.08), 0 12px 24px rgba(90,144,148,0.12), 0 24px 48px rgba(90,144,148,0.1);
+    }
+    .plan-card.pro:hover {
+      box-shadow: 0 8px 12px rgba(90,144,148,0.12), 0 20px 40px rgba(90,144,148,0.18), 0 32px 64px rgba(90,144,148,0.12);
+      transform: translateY(-4px);
+    }
+    .plan-ribbon {
+      position: absolute;
+      top: 1rem;
+      right: -2.5rem;
+      background: var(--offi-teal);
+      color: var(--white);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.3rem 2.7rem;
+      transform: rotate(18deg);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .plan-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--gray);
+    }
+    .plan-tagline {
+      font-size: 0.9rem;
+      color: var(--gray-soft);
+    }
+    .plan-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      margin-top: 0.3rem;
+    }
+    .plan-price {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--offi-teal);
+    }
+    .plan-price span.euro { font-size: 1rem; vertical-align: top; }
+    .plan-period {
+      font-size: 0.9rem;
+      color: var(--gray-soft);
+    }
+    .plan-note {
+      font-size: 0.85rem;
+      color: var(--gray-soft);
+      margin-top: 0.1rem;
+    }
+    .plan-limit {
+      font-size: 0.9rem;
+      color: var(--gray-soft);
+      margin-top: 0.35rem;
+    }
+    .plan-features {
+      list-style: none;
+      margin-top: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
+      min-height: 2.25rem;
+    }
+    .plan-features li span.bullet {
+      flex-shrink: 0;
+      width: 0.75rem;
+      height: 0.75rem;
+      min-width: 0.75rem;
+      min-height: 0.75rem;
+      border-radius: 999px;
+      background: var(--offi-teal);
+      margin-top: 0.35rem;
+    }
+    .plan-features li span.bullet.alt {
+      background: var(--hover-pill);
+    }
+    .plan-cta {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .btn-primary, .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.2rem;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+    }
+    .btn-primary {
+      background: var(--offi-teal);
+      color: var(--white);
+      border-color: var(--offi-teal);
+      box-shadow: 0 8px 20px rgba(90,144,148,0.35);
+    }
+    .btn-primary:hover {
+      background: var(--white);
+      color: var(--offi-teal);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(90,144,148,0.35);
+    }
+    .btn-secondary {
+      background: var(--white);
+      color: var(--offi-teal);
+      border-color: var(--offi-teal);
+    }
+    .btn-secondary:hover {
+      background: var(--offi-teal);
+      color: var(--white);
+    }
+    .cta-small {
+      font-size: 0.8rem;
+      color: var(--gray-soft);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="pricing-shell">
+    <header class="hero-bandeau">
+      <div class="hero-panel" aria-label="Choisissez le modèle Offibox adapté à votre officine, essai gratuit 15 jours sans engagement de durée">
+        <div class="bandeau-inner-wrap">
+          <p class="bandeau-inner">
+            <span class="block block1">Choisissez le modèle <span class="offi">Offi</span>box <span class="dot">•</span> adapté à votre officine</span>
+            <span class="block block2">Essai gratuit 15 jours. Sans engagement de durée.</span>
+          </p>
+          <div class="hero-sweep" aria-hidden="true"></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="pricing-grid" aria-label="Tarifs Offibox">
+      <!-- Plan Solo -->
+      <article class="plan-card" aria-label="Offibox Solo, 1 poste">
+        <h2 class="plan-name">Offibox Solo</h2>
+        <p class="plan-tagline">Idéal pour une officine qui démarre avec Offibox.</p>
+        <div class="plan-price-row">
+          <div class="plan-price"><span class="euro">€</span>19,90</div>
+          <div class="plan-period">par mois<br>pour 1 poste</div>
+        </div>
+        <p class="plan-note">Sans engagement de durée. Résiliable à tout moment.</p>
+        <ul class="plan-features">
+          <li><span class="bullet"></span><span>Accès à l’interface web (sur votre navigateur) et application PC (recommandée).</span></li>
+          <li><span class="bullet"></span><span>Accès complet à la barre de recherche Offibox sur un poste de l’officine.</span></li>
+          <li><span class="bullet"></span><span>Base unique : médicaments BDM, LPP, pansements, outils métier, sites officiels, annuaires…</span></li>
+          <li><span class="bullet"></span><span>Mises à jour quotidiennes (alertes ANSM, retraits de lot, DGS-Urgent… connectées aux produits).</span></li>
+          <li><span class="bullet"></span><span>Support par email pour vous aider à prendre en main l’outil.</span></li>
+          <li><span class="bullet"></span><span>Respect des règles de confidentialité (RGPD), sécurité des données et fiabilité des sources (sites et bases officielles).</span></li>
+        </ul>
+        <div class="plan-cta">
+          <a href="inscription.html" class="btn-primary">Démarrer l’essai 15 jours</a>
+          <p class="cta-small">Sans engagement de durée. Résiliable à tout moment. Passez ensuite automatiquement à 19,90 € / mois si vous continuez.</p>
+        </div>
+      </article>
+
+      <!-- Plan Equipe -->
+      <article class="plan-card pro" aria-label="Offibox Équipe, tous les postes">
+        <h2 class="plan-name">Offibox Équipe</h2>
+        <p class="plan-tagline">Pour diffuser la même information sur tous les postes.</p>
+        <div class="plan-price-row">
+          <div class="plan-price"><span class="euro">€</span>29,90</div>
+          <div class="plan-period">par mois<br>tous les postes</div>
+        </div>
+        <p class="plan-limit">Jusqu’à 15 postes par officine.</p>
+        <p class="plan-note">Sans engagement de durée. Idéal pour partager la même information dans toute l'équipe de la pharmacie.</p>
+        <ul class="plan-features">
+          <li><span class="bullet alt"></span><span>Accès à l’interface web (sur votre navigateur) et application PC (recommandée).</span></li>
+          <li><span class="bullet alt"></span><span>Offibox installé sur tous les postes de l’officine (jusqu’à 15).</span></li>
+          <li><span class="bullet alt"></span><span>Gain de temps au comptoir : moins de clics, moins d’onglets, accès direct aux sources officielles.</span></li>
+          <li><span class="bullet alt"></span><span>Meilleure transmission de l’information au sein de l’équipe (mêmes liens, mêmes fiches, mêmes rappels produits).</span></li>
+          <li><span class="bullet alt"></span><span>Accompagnement à l’installation de l’application sur les postes de l’officine.</span></li>
+          <li><span class="bullet alt"></span><span>Respect des règles de confidentialité (RGPD), sécurité des données et fiabilité des sources (sites et bases officielles).</span></li>
+        </ul>
+        <div class="plan-cta">
+          <a href="inscription.html" class="btn-primary">Démarrer l’essai 15 jours</a>
+          <p class="cta-small">Sans engagement de durée. Résiliable à tout moment. Après l’essai, 29,90 € / mois pour l’ensemble des postes de l’officine (limités à 15).</p>
+        </div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>
+

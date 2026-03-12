@@ -10,8 +10,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padding:.5rem 0}
 .download-card{background:var(--white);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,.1);border:1px solid #e2e8f0;padding:1.5rem 2rem;text-align:center;width:50%;max-width:50%;min-width:280px;margin:0 auto}
-.download-badge{display:block;width:100%;box-sizing:border-box;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--offi-teal),var(--offi-teal-dark));color:var(--white);border-radius:16px;border:2px solid transparent;font-weight:600;font-size:1.1rem;text-decoration:none;box-shadow:0 4px 20px rgba(90,144,148,.35);transition:transform .2s,box-shadow .2s,background .25s,color .25s,border-color .25s}
+.download-badge{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;width:100%;box-sizing:border-box;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--offi-teal),var(--offi-teal-dark));color:var(--white);border-radius:16px;border:2px solid transparent;font-weight:600;font-size:1.1rem;text-decoration:none;box-shadow:0 4px 20px rgba(90,144,148,.35);transition:transform .2s,box-shadow .2s,background .25s,color .25s,border-color .25s}
 .download-badge:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(90,144,148,.45);background:var(--white);color:var(--offi-teal);border-color:var(--offi-teal)}
+.download-badge:hover .win-icon{color:#0078D4}
+.download-badge .badge-inner{display:block;text-align:center}
+.download-badge .win-icon{display:inline-block;width:32px;height:32px;flex-shrink:0;color:inherit;transition:color .25s}
+.download-badge .win-icon svg{width:100%;height:100%;display:block}
 .download-badge .badge-title{display:block;margin-bottom:.25rem}
 .download-badge .badge-version-date{display:block;font-size:.8rem;opacity:.95;margin-bottom:.15rem}
 .download-badge .badge-date{font-style:italic;opacity:.9}
@@ -30,10 +34,13 @@ body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padd
 <body>
 <div class="download-card">
 <p class="download-intro">Vous pouvez également télécharger</p>
-<a href="#" id="download-badge" class="download-badge" target="_blank" rel="noopener">
-  <span class="badge-title">Offibox pour PC</span>
-  <span class="badge-version-date"><span id="version-label">Version — chargement…</span> <span class="badge-date" id="release-date-label"></span></span>
-  <span class="badge-platform" id="platform-label">Windows · 64 bits</span>
+<a href="#" id="download-badge" class="download-badge" target="_blank" rel="noopener" title="Télécharger l'installateur Offibox pour Windows">
+  <span class="win-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5L10.5 4.5V11H3V5.5ZM10.5 13V19.5L3 18.5V13H10.5ZM11.5 4.5L21 3V11H11.5V4.5ZM21 13H11.5V19.5L21 18.5V13Z"/></svg></span>
+  <span class="badge-inner">
+    <span class="badge-title">Offibox pour PC</span>
+    <span class="badge-version-date"><span id="version-label">Version — chargement…</span> <span class="badge-date" id="release-date-label"></span></span>
+    <span class="badge-platform" id="platform-label">Windows · 64 bits</span>
+  </span>
 </a>
 <p>Cliquez sur le bouton pour lancer le téléchargement de l'installateur Offibox (.exe)</p>
 </div>

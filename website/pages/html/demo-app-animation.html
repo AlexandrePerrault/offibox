@@ -35,12 +35,14 @@
       position: relative;
       min-height: 420px;
     }
-    /* Au repos : barre compacte pour que le logo soit visible au départ */
+    /* Logo à position fixe : même emplacement en local et au déploiement, ne bouge jamais */
     .app-bar-outer {
-      display: flex;
-      justify-content: flex-end;
-      padding: 20px 20px 0 0;
-      position: relative;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      left: auto;
+      padding: 0;
+      z-index: 10;
     }
     .app-bar-container {
       width: 60px;
@@ -106,6 +108,27 @@
       border-radius: 9px;
       flex-shrink: 0;
       border: 1.5px solid #fff;
+      position: relative;
+      box-shadow: 0 0 0 1px rgba(15,23,42,.18) inset;
+      transition: background .2s ease-out;
+    }
+    .info-bar-toggle::before {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: 2px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(15,23,42,.35);
+      transition: transform .2s ease-out;
+    }
+    .info-bar-toggle.off {
+      background: #cbd5e1;
+    }
+    .info-bar-toggle.off::before {
+      transform: translateX(8px);
     }
     .info-bar-date {
       height: 19px;
@@ -196,8 +219,41 @@
       align-items: center;
       justify-content: center;
     }
-    .result-picto-gelule svg { width: 22px; height: 22px; }
-    .result-commonspan { font-size: 12px; color: #64748b; font-weight: 600; }
+    .result-picto-gelule svg { width: 22px; height: 22px; display: block; }
+    /* Badges type PC (squareTagSpan) : PIH, SURV — mêmes couleurs que common_spans.dart */
+    .result-badge-pih {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #F57C00;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-family: 'Spinnaker', sans-serif;
+    }
+    .result-badge-surv {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #8E44AD;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-family: 'Spinnaker', sans-serif;
+    }
+    .result-commonspan {
+      font-size: 12px;
+      color: #475569;
+      font-weight: 600;
+      background: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
     .result-title { font-weight: 700; font-size: 13px; color: #334155; }
     .result-cip-line { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #334155; }
     .result-cip-line .copy-icon { width: 16px; height: 16px; cursor: pointer; opacity: .85; flex-shrink: 0; }
@@ -229,6 +285,47 @@
       border-color: #4E8A72;
     }
     .pill .pdf-icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Hover pills (outils métier) — style barre : teal #5A9094, blanc au survol */
+    .hover-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Spinnaker', sans-serif;
+      background: #5A9094;
+      color: #fff;
+      border: 2px solid #4a7a7e;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .hover-pill:hover,
+    .hover-pill.pill-active { background: #fff; color: #5A9094; border-color: #5A9094; }
+    .hover-pill .pdf-icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Bloc résultat type outils métier (TROD angine) */
+    .result-outils-metier { display: none; }
+    .result-outils-metier.show { display: flex; }
+    /* État résultat : Imbruvica seul ou TROD angine seul */
+    .result-line.result-state-imbruvica #result-product-line-2,
+    .result-line.result-state-imbruvica .result-hover-pills { display: none !important; }
+    .result-line.result-state-trod #result-product-line,
+    .result-line.result-state-trod .result-badges { display: none !important; }
+    .result-line.result-state-trod #result-product-line-2 { display: flex !important; }
+    .result-line.result-state-trod .result-hover-pills { display: flex !important; }
+    .result-outils-badge {
+      display: inline-flex;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #1B6B4F;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: 'Spinnaker', sans-serif;
+    }
+    .result-hover-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 
     /* Fenêtre type navigateur — pleine largeur de la barre */
     .browser-panel {
@@ -278,13 +375,28 @@
     .browser-toolbar a.url-bar:hover { text-decoration: underline; }
     .browser-frame-wrap {
       width: 100%;
-      height: 380px;
+      height: 520px;
       background: #f8fafc;
     }
-    .browser-frame-wrap iframe {
+    .browser-frame-wrap iframe,
+    .browser-frame-wrap .demo-content-img-wrap {
       width: 100%;
       height: 100%;
       border: none;
+    }
+    .browser-frame-wrap .demo-content-img-wrap {
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+    .browser-frame-wrap .demo-content-img-wrap.visible { display: flex; }
+    .browser-frame-wrap .demo-content-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
     }
 
     /* Panneau PDF sous la barre — pleine largeur de la fenêtre démo */
@@ -407,14 +519,13 @@
             <input type="text" class="search-input" id="search-input" placeholder="Rechercher…" readonly>
             <div class="result-line" id="result-line">
               <div class="result-product-line" id="result-product-line">
-                <div class="result-picto-gelule" id="result-picto-gelule" title="Gélule">
-                  <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="12" rx="9" ry="5" fill="url(#gelule-gradient)"/><path d="M12 7v10" stroke="#1f2937" stroke-width="1.2"/><defs><linearGradient id="gelule-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#FCD34D"/><stop offset="50%" stop-color="#FCD34D"/><stop offset="50%" stop-color="#DC2626"/><stop offset="100%" stop-color="#DC2626"/></linearGradient></defs></svg>
-                </div>
+                <span class="result-badge-pih" title="Prescription initiale hospitalière">PIH</span>
+                <span class="result-badge-surv" title="Médicament nécessitant une surveillance particulière">SURV</span>
+                <span class="result-title" id="result-title">IMBRUVICA 140 mg, gélule</span>
                 <span class="result-commonspan" id="result-commonspan">ibrutinib</span>
-                <span class="result-title" id="result-title">IMBRUVICA 140 mg, gélule – ibrutinib – JANSSEN-CILAG</span>
                 <span class="result-cip-line"><span>CIP 3400936672874</span><svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Copier"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
               </div>
-              <div class="result-badges">
+              <div class="result-badges" id="result-badges">
                 <span class="pill" id="pill-rcp" title="Résumé des caractéristiques du produit">
                   <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -436,13 +547,20 @@
                   </svg>
                   fiche à destination des patients OMÉDIT
                 </span>
-                <span class="pill" id="pill-fiche-pro" title="Fiche à destination des professionnels de santé OMÉDIT">
-                  <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
-                  </svg>
-                  fiche à destination des professionnels de santé OMÉDIT
-                </span>
+              </div>
+              <!-- Bloc résultat 2 : TROD angine — raw outils_metier.csv : B="TROD angine (page Offibox)", F/G=compte-rendu, H/I=logigramme AMELI, J/K=reco HAS enfant (PDF), L/M=reco HAS adulte (PDF), N/O=Bon adulte (PDF), P/Q=Bon enfant (PDF). -->
+              <div id="result-product-line-2" class="result-product-line result-outils-metier" style="flex-wrap: wrap; align-items: center; gap: 8px 12px;">
+                <span class="result-outils-badge">OUTILS MÉTIER</span>
+                <span class="result-title">TROD angine (page Offibox)</span>
+              </div>
+              <!-- Images TROD : placer les 6 JPG dans le même dossier (website/pages/html/) — voir TROD_ANGINE_IMAGES_README.md -->
+              <div class="result-hover-pills" id="result-hover-pills">
+                <span class="hover-pill" id="pill-trod-1" title="https://www.ameli.fr/finistere/content/compte-rendu-prise-en-charge-de-l-angine-l-officine" data-label="compte-rendu" data-image="trod-compte-rendu.jpg">compte-rendu</span>
+                <span class="hover-pill" id="pill-trod-2" title="https://www.ameli.fr/finistere/content/prise-en-charge-de-l-angine-l-officine" data-label="logigramme AMELI" data-image="trod-logigramme-ameli.jpg">logigramme AMELI</span>
+                <span class="hover-pill" id="pill-trod-3" title="https://www.has-sante.fr/upload/docs/application/pdf/2016-11/v1-fm_rhino-angine_enfant_cd-171116.pdf" data-label="recommandation HAS (enfant)" data-image="trod-reco-has-enfant.jpg"><svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>recommandation HAS (enfant)</span>
+                <span class="hover-pill" id="pill-trod-4" title="https://www.has-sante.fr/upload/docs/application/pdf/2016-11/v1-fm_rhino-angine_adulte_cd-171116.pdf" data-label="recommandation HAS (adulte)" data-image="trod-reco-has-adulte.jpg"><svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>recommandation HAS (adulte)</span>
+                <span class="hover-pill" id="pill-trod-5" title="https://www.offibox.fr/_files/ugd/a6f194_27069eb3981b4773979e82af49a676b0.pdf" data-label="Bon de prise en charge adulte" data-image="trod-bon-prise-en-charge-adulte.jpg"><svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>Bon de prise en charge adulte</span>
+                <span class="hover-pill" id="pill-trod-6" title="https://www.offibox.fr/_files/ugd/a6f194_bb08e13497094e41b70b5a942b3da220.pdf" data-label="Bon de prise en charge enfant" data-image="trod-bon-prise-en-charge-enfant.jpg"><svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>Bon de prise en charge enfant</span>
               </div>
             </div>
           </div>
@@ -456,6 +574,9 @@
       </div>
       <div class="browser-frame-wrap">
         <iframe id="browser-frame" title="Aperçu"></iframe>
+        <div class="demo-content-img-wrap" id="browser-image-wrap">
+          <img id="browser-content-img" alt="Aperçu" src="">
+        </div>
       </div>
     </div>
     <div class="pdf-panel" id="pdf-panel">
@@ -477,6 +598,15 @@
   </div>
 
   <script>
+  /*
+   * Si cette démo est affichée dans une iframe, elle envoie sa hauteur au parent
+   * pour que l’iframe puisse être redimensionnée (éviter d’empiéter sur les autres contenus).
+   * Sur la page qui contient l’iframe, ajoutez :
+   *   window.addEventListener('message', function(e) {
+   *     if (e.data && e.data.type === 'offibox-demo-resize' && typeof e.data.height === 'number')
+   *       document.getElementById('votre-iframe').style.height = e.data.height + 'px';
+   *   });
+   */
   (function() {
     var pdfUrl = 'https://www.omedit-fiches-cancer.fr/media-files/37293/imbruvica-ibrutinib-comprime-et-gelule-v6-pro.pdf';
     var wrap = document.getElementById('demo-wrap');
@@ -484,7 +614,6 @@
     var barPill = document.getElementById('bar-pill');
     var searchInput = document.getElementById('search-input');
     var resultLine = document.getElementById('result-line');
-    var pillFichePro = document.getElementById('pill-fiche-pro');
     var pdfPanel = document.getElementById('pdf-panel');
     var pdfClose = document.getElementById('pdf-panel-close');
     var browserPanel = document.getElementById('browser-panel');
@@ -498,6 +627,25 @@
     var demoImg = document.getElementById('demo-fiche-voc-img');
     var pdfImageWrap = document.getElementById('pdf-demo-image-wrap');
     var pdfPlaceholder = document.getElementById('pdf-placeholder');
+    var infoToggle = document.querySelector('.info-bar-toggle');
+    var runCount = 0;
+
+    /* Envoi de la hauteur au parent pour adapter l’iframe (éviter d’empiéter sur les autres iframes) */
+    var resizeTimeout;
+    function notifyParentHeight() {
+      if (window.self === window.top) return;
+      var h = document.documentElement.scrollHeight;
+      window.parent.postMessage({ type: 'offibox-demo-resize', height: h }, '*');
+    }
+    function scheduleNotifyParentHeight() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(notifyParentHeight, 100);
+    }
+    if (wrap && typeof ResizeObserver !== 'undefined') {
+      var ro = new ResizeObserver(scheduleNotifyParentHeight);
+      ro.observe(wrap);
+    }
+    setTimeout(notifyParentHeight, 200);
 
     if (infoDate) {
       function updateDate() {
@@ -576,57 +724,222 @@
 
     function expandBar() {
       barContainer.classList.add('expanded');
+      setTimeout(scheduleNotifyParentHeight, 500);
     }
 
-    var query = 'imbruvica 140';
-    var typeSpeed = 90;
-    var typeIndex = 0;
+    var typeSpeed = 100;
+    var query1 = 'imbruvica';
+    var query2 = 'trod angine';
 
-    function typeNext() {
-      if (typeIndex <= query.length) {
-        searchInput.value = query.slice(0, typeIndex);
-        typeIndex++;
-        if (typeIndex <= query.length) setTimeout(typeNext, typeSpeed);
-        else {
-          setTimeout(function() {
-            searchInput.value = '';
-            resultLine.classList.add('visible');
-            var productLine = document.getElementById('result-product-line');
-            if (productLine) setTimeout(function() { productLine.classList.add('show'); }, 150);
-          }, 350);
+    function typewriter(text, onChar, onComplete) {
+      var i = 0;
+      function tick() {
+        if (i <= text.length) {
+          if (onChar) onChar(text.slice(0, i));
+          i++;
+          if (i <= text.length) setTimeout(tick, typeSpeed);
+          else if (onComplete) setTimeout(onComplete, 320);
         }
       }
+      tick();
     }
 
-    var rcpUrl = 'https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=68327487';
-    var meddisparUrl = 'https://www.meddispar.fr/medicament/imbruvica';
-    var fichePatientUrl = 'https://www.omedit-fiches-cancer.fr/fiches/imbruvica-ibrutinib';
-    var ficheProUrl = pdfUrl;
+    // Effacement façon "machine à écrire" (suppression caractère par caractère)
+    function deleteWriter(text, onChar, onComplete) {
+      var i = text.length;
+      function tick() {
+        if (i >= 0) {
+          if (onChar) onChar(text.slice(0, i));
+          i--;
+          if (i >= 0) setTimeout(tick, typeSpeed * 0.7);
+          else if (onComplete) setTimeout(onComplete, 260);
+        }
+      }
+      tick();
+    }
 
-    function showUrlInPanel(url, isPdf) {
-      if (!browserPanel || !browserUrlBar || !browserFrame) return;
-      browserUrlBar.href = url;
-      browserUrlBar.textContent = url;
-      browserFrame.src = url;
+    function showImbruvicaResult() {
+      searchInput.style.display = 'none';
+      resultLine.classList.add('visible');
+      resultLine.classList.remove('result-state-trod');
+      resultLine.classList.add('result-state-imbruvica');
+      var productLine = document.getElementById('result-product-line');
+      if (productLine) setTimeout(function() { productLine.classList.add('show'); }, 120);
+      scheduleNotifyParentHeight();
+    }
+
+    function showTrodResult() {
+      searchInput.style.display = 'none';
+      resultLine.classList.add('visible');
+      resultLine.classList.remove('result-state-imbruvica');
+      resultLine.classList.add('result-state-trod');
+      var line2 = document.getElementById('result-product-line-2');
+      if (line2) line2.classList.add('show');
+      scheduleNotifyParentHeight();
+    }
+
+    function hideResultShowInput() {
+      resultLine.classList.remove('visible');
+      resultLine.classList.remove('result-state-imbruvica');
+      resultLine.classList.remove('result-state-trod');
+      var productLine = document.getElementById('result-product-line');
+      if (productLine) productLine.classList.remove('show');
+      var line2 = document.getElementById('result-product-line-2');
+      if (line2) line2.classList.remove('show');
+      searchInput.value = '';
+      searchInput.style.display = '';
+      scheduleNotifyParentHeight();
+    }
+
+    function speakCompletedThreeTimesThenStop() {
+      var count = 0;
+      var maxCount = 3;
+      var synth = window.speechSynthesis;
+      function speak() {
+        if (count >= maxCount) return;
+        var u = new SpeechSynthesisUtterance('Completed');
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        u.onend = function() {
+          count++;
+          if (count < maxCount) setTimeout(speak, 400);
+        };
+        synth.speak(u);
+      }
+      setTimeout(speak, 600);
+    }
+
+    var imageBase = '../../assets/images/';
+    var demoImages = {
+      rcp: imageBase + 'base-donnees-publique_medicaments.gouv.jpg',
+      meddispar: imageBase + 'www_meddispar%20(2).jpg',
+      fichePatient: imageBase + 'IMBRUVICA%20ibrutinib%20Comprim%C3%A9%20et%20G%C3%A9lule%20V6%20Patient_page-0001.jpg',
+      fichePro: imageBase + 'IMBRUVICA%20ibrutinib%20Comprim%C3%A9%20et%20G%C3%A9lule%20V6%20Pro_page-0001.jpg'
+    };
+    var demoLabels = {
+      rcp: 'RCP – Base de données publique des médicaments',
+      meddispar: 'MEDDISPAR – Fiche médicament',
+      fichePatient: 'Fiche patient – IMBRUVICA (OMÉDIT)',
+      fichePro: 'Fiche professionnels – IMBRUVICA (OMÉDIT)'
+    };
+
+    function showUrlInPanel(imagePath, label, isPdf) {
+      if (!browserPanel || !browserUrlBar) return;
+      if (browserFrame) { browserFrame.src = 'about:blank'; browserFrame.style.display = 'none'; }
+      var imgWrap = document.getElementById('browser-image-wrap');
+      var contentImg = document.getElementById('browser-content-img');
+      if (imgWrap && contentImg) {
+        if (imagePath) {
+          contentImg.src = imagePath;
+          contentImg.style.display = '';
+          imgWrap.classList.add('visible');
+          imgWrap.style.display = 'flex';
+        } else {
+          contentImg.src = '';
+          contentImg.style.display = 'none';
+          imgWrap.classList.add('visible');
+          imgWrap.style.display = 'flex';
+        }
+      }
+      browserUrlBar.href = '#';
+      browserUrlBar.textContent = label || '';
       if (browserPdfBadge) {
         if (isPdf) browserPdfBadge.classList.remove('hidden');
         else browserPdfBadge.classList.add('hidden');
       }
       browserPanel.classList.add('visible');
+      scheduleNotifyParentHeight();
     }
 
     function clearPillActive() {
       if (pillRcp) pillRcp.classList.remove('pill-active');
       if (pillMeddispar) pillMeddispar.classList.remove('pill-active');
       if (pillFichePatient) pillFichePatient.classList.remove('pill-active');
-      if (pillFichePro) pillFichePro.classList.remove('pill-active');
+    }
+
+    function clearTrodPillActive() {
+      var pills = document.querySelectorAll('#result-hover-pills .hover-pill');
+      for (var i = 0; i < pills.length; i++) pills[i].classList.remove('pill-active');
+    }
+
+    // Clic sur un badge TROD : même logique qu'Imbruvica — panneau sous la barre avec JPG (data-image) ou libellé seul
+    function clickTrodPill(pillEl, label, isPdf, imagePath, onDone) {
+      if (!pillEl || !onDone) return;
+      var c = getCenterInWrap(pillEl);
+      var curX = parseFloat(cursor.style.left || '0') + cursorRadius;
+      var curY = parseFloat(cursor.style.top || '0') + cursorRadius;
+      animateCursorCurved(curX, curY, c.x, c.y, 700, function() {
+        cursorClick(function() {
+          clearTrodPillActive();
+          pillEl.classList.add('pill-active');
+          showUrlInPanel(imagePath || '', 'TROD angine – ' + label, !!isPdf);
+          setTimeout(onDone, 1200);
+        });
+      });
+    }
+
+    // Enchaîne survol + clic sur chaque badge TROD ; affiche le JPG (data-image) dans la fenêtre sous la barre, comme Imbruvica
+    function runTrodPillsSequence(onAllDone) {
+      var container = document.getElementById('result-hover-pills');
+      if (!container) { if (onAllDone) onAllDone(); return; }
+      var pills = container.querySelectorAll('.hover-pill');
+      var index = 0;
+      function next() {
+        if (index >= pills.length) {
+          if (onAllDone) onAllDone();
+          return;
+        }
+        var pill = pills[index++];
+        var label = pill.getAttribute('data-label');
+        if (!label) {
+          var text = pill.textContent || '';
+          text = text.replace(/\s+/g, ' ').trim();
+          label = text || ('Badge ' + index);
+        }
+        var isPdf = pill.querySelector('.pdf-icon') !== null;
+        var imagePath = pill.getAttribute('data-image') || '';
+        clickTrodPill(pill, label, isPdf, imagePath, next);
+      }
+      next();
+    }
+
+    function fullReset() {
+      if (pdfPanel) pdfPanel.classList.remove('open');
+      if (browserPanel) {
+        browserPanel.classList.remove('visible');
+        var imgWrap = document.getElementById('browser-image-wrap');
+        var contentImg = document.getElementById('browser-content-img');
+        if (imgWrap) { imgWrap.classList.remove('visible'); imgWrap.style.display = 'none'; }
+        if (contentImg) contentImg.src = '';
+      }
+      if (searchInput) { searchInput.value = ''; searchInput.style.display = ''; }
+      if (resultLine) {
+        resultLine.classList.remove('visible');
+        resultLine.classList.remove('result-state-imbruvica');
+        resultLine.classList.remove('result-state-trod');
+        var pl = document.getElementById('result-product-line');
+        if (pl) pl.classList.remove('show');
+        var pl2 = document.getElementById('result-product-line-2');
+        if (pl2) pl2.classList.remove('show');
+      }
+      clearPillActive();
+      clearTrodPillActive();
+      if (infoToggle) infoToggle.classList.remove('off');
+      if (barContainer) barContainer.classList.remove('expanded');
+      var logoCenter = getCenterInWrap(barPill);
+      setCursorPos(logoCenter.x - 40, logoCenter.y - 20);
+      scheduleNotifyParentHeight();
     }
 
     function closeBarAndReset() {
       if (pdfPanel) pdfPanel.classList.remove('open');
       if (browserPanel) {
         browserPanel.classList.remove('visible');
-        if (browserFrame) browserFrame.src = 'about:blank';
+        if (browserFrame) { browserFrame.src = 'about:blank'; browserFrame.style.display = ''; }
+        var imgWrap = document.getElementById('browser-image-wrap');
+        var contentImg = document.getElementById('browser-content-img');
+        if (imgWrap) { imgWrap.classList.remove('visible'); imgWrap.style.display = 'none'; }
+        if (contentImg) contentImg.src = '';
       }
       if (searchInput) searchInput.value = '';
       if (resultLine) {
@@ -636,90 +949,132 @@
       }
       clearPillActive();
       if (barContainer) barContainer.classList.remove('expanded');
+      setTimeout(scheduleNotifyParentHeight, 600);
     }
 
-    var runCount = 0;
-    var maxRuns = 5;
+    function getCenterInWrap(el) {
+      var wrapRect = wrap.getBoundingClientRect();
+      var rect = el.getBoundingClientRect();
+      return {
+        x: rect.left - wrapRect.left + rect.width / 2,
+        y: rect.top - wrapRect.top + rect.height / 2
+      };
+    }
+
+    // Simule le clic sur un "badge" (RCP, MEDDISPAR, fiches) avec affichage de l'aperçu JPG
+    function clickPillAndShow(pillEl, key, isPdf) {
+      if (!pillEl) return;
+      var c = getCenterInWrap(pillEl);
+      var currentX = parseFloat(cursor.style.left || '0') + cursorRadius;
+      var currentY = parseFloat(cursor.style.top || '0') + cursorRadius;
+      animateCursorCurved(currentX, currentY, c.x, c.y, 900, function() {
+        cursorClick(function() {
+          clearPillActive();
+          pillEl.classList.add('pill-active');
+          if (demoImages[key]) {
+            showUrlInPanel(demoImages[key], demoLabels[key] || '', !!isPdf);
+          }
+          if (key === 'fichePro' && pdfPanel) {
+            pdfPanel.classList.add('open');
+          }
+        });
+      });
+    }
 
     function runSequence() {
-      typeIndex = 0;
-      var r = wrap.getBoundingClientRect();
-      var startX = 80;
-      var startY = 50;
+      // 1) Positionner la souris juste à côté du logo (proche visuellement)
+      var logoCenter = getCenterInWrap(barPill);
+      var startX = logoCenter.x - 40;
+      var startY = logoCenter.y - 20;
       setCursorPos(startX, startY);
 
       setTimeout(function() {
-        r = wrap.getBoundingClientRect();
-        var pillR = barPill.getBoundingClientRect();
-        var pillCenterX = pillR.left - r.left + pillR.width / 2;
-        var pillCenterY = pillR.top - r.top + pillR.height / 2;
-        animateCursorCurved(startX, startY, pillCenterX, pillCenterY, 1600, function() {
+        // Clic sur le logo pour déployer la barre
+        var pillCenter = getCenterInWrap(barPill);
+        animateCursorCurved(startX, startY, pillCenter.x, pillCenter.y, 900, function() {
           cursorClick(function() {
             expandBar();
-            setTimeout(function() { typeNext(); }, 600);
-            var typeDuration = (query.length + 1) * typeSpeed + 800;
-            setTimeout(function() {
-              r = wrap.getBoundingClientRect();
-              var fromX = pillCenterX;
-              var fromY = pillCenterY + 90;
 
-              function moveToPill(pillEl, then) {
-                if (!pillEl) { if (then) then(); return; }
-                var rw = wrap.getBoundingClientRect();
-                var rect = pillEl.getBoundingClientRect();
-                var toX = rect.left - rw.left + rect.width / 2;
-                var toY = rect.top - rw.top + rect.height / 2;
-                animateCursorCurved(fromX, fromY, toX, toY, 1600, function() {
-                  fromX = toX;
-                  fromY = toY;
-                  if (then) then();
+            // Petit clic sur le bouton ON/OFF pour le rendre vivant
+            setTimeout(function() {
+              if (infoToggle) {
+                var tCenter = getCenterInWrap(infoToggle);
+                var curX = parseFloat(cursor.style.left || '0') + cursorRadius;
+                var curY = parseFloat(cursor.style.top || '0') + cursorRadius;
+                animateCursor(curX, curY, tCenter.x, tCenter.y, 550, function() {
+                  cursorClick(function() {
+                    infoToggle.classList.toggle('off');
+                  });
                 });
               }
+            }, 400);
 
-              function afterClick(panelUrl, pillEl, isPdf, next) {
-                clearPillActive();
-                if (pillEl) pillEl.classList.add('pill-active');
-                showUrlInPanel(panelUrl, !!isPdf);
-                if (next) setTimeout(next, 4000);
-              }
+            // 2) Taper "imbruvica" dans la barre (machine à écrire)
+            setTimeout(function() {
+              typewriter(query1, function(val) { searchInput.value = val; }, function() {
+                showImbruvicaResult();
 
-              // 1) RCP → 2) MEDDISPAR → 3) Fiche patient (PDF) → 4) Fiche pro (PDF), fenêtre type navigateur pleine largeur
-              moveToPill(pillRcp, function() {
-                cursorClick(function() {
-                  afterClick(rcpUrl, pillRcp, false, function() {
-                    moveToPill(pillMeddispar, function() {
-                      cursorClick(function() {
-                        afterClick(meddisparUrl, pillMeddispar, false, function() {
-                          moveToPill(pillFichePatient, function() {
-                            cursorClick(function() {
-                              afterClick(fichePatientUrl, pillFichePatient, true, function() {
-                                moveToPill(pillFichePro, function() {
-                                  cursorClick(function() {
-                                    afterClick(ficheProUrl, pillFichePro, true);
-                                    if (pdfPanel) pdfPanel.classList.add('open');
-                                    /* Fin de la démo : après 3 s, fermeture (effacement + repli barre + logo), puis boucle ou arrêt */
-                                    setTimeout(function() {
-                                      closeBarAndReset();
-                                      setTimeout(function() {
-                                        runCount++;
-                                        if (runCount < maxRuns) runSequence();
-                                      }, 450 + 1500);
-                                    }, 3000);
-                                  });
-                                });
+                // 3) Séquence de clics sur les badges : RCP, MEDDISPAR, fiche patient
+                setTimeout(function() {
+                  clickPillAndShow(pillRcp, 'rcp', true);
+                  setTimeout(function() {
+                    clickPillAndShow(pillMeddispar, 'meddispar', false);
+                    setTimeout(function() {
+                      clickPillAndShow(pillFichePatient, 'fichePatient', true);
+
+                      // 4) Après les documents, revenir à la barre, effacer "imbruvica" façon machine à écrire
+                      setTimeout(function() {
+                        if (browserPanel) browserPanel.classList.remove('visible');
+                        if (pdfPanel) pdfPanel.classList.remove('open');
+                        resultLine.classList.remove('visible');
+                        searchInput.style.display = '';
+
+                        var currentText = query1;
+                        searchInput.value = currentText;
+                          deleteWriter(currentText, function(val) { searchInput.value = val; }, function() {
+                            // 5) Enchaîner avec "trod angine"
+                            typewriter(query2, function(val) { searchInput.value = val; }, function() {
+                              showTrodResult();
+                              // 6) Clics sur les badges TROD (ligne 2/3), même souris que pour Imbruvica
+                              runTrodPillsSequence(function() {
+                                runCount++;
+                                if (runCount < 2) {
+                                  // Refermer la barre avant de repartir sur le 2e cycle (visible pour l'utilisateur)
+                                  if (browserPanel) browserPanel.classList.remove('visible');
+                                  if (pdfPanel) pdfPanel.classList.remove('open');
+                                  if (barContainer) barContainer.classList.remove('expanded');
+                                  clearPillActive();
+                                  clearTrodPillActive();
+                                  if (resultLine) {
+                                    resultLine.classList.remove('visible');
+                                    resultLine.classList.remove('result-state-imbruvica');
+                                    resultLine.classList.remove('result-state-trod');
+                                    var pl = document.getElementById('result-product-line');
+                                    if (pl) pl.classList.remove('show');
+                                    var pl2 = document.getElementById('result-product-line-2');
+                                    if (pl2) pl2.classList.remove('show');
+                                  }
+                                  if (searchInput) { searchInput.value = ''; searchInput.style.display = ''; }
+                                  scheduleNotifyParentHeight();
+                                  setTimeout(function() {
+                                    fullReset();
+                                    setTimeout(function() { runSequence(); }, 600);
+                                  }, 800);
+                                } else {
+                                  speakCompletedThreeTimesThenStop();
+                                }
                               });
                             });
                           });
-                        });
-                      });
-                    });
-                  });
-                });
+                        }, 2200);
+                    }, 1800);
+                  }, 1800);
+                }, 1400);
               });
-            }, typeDuration);
+            }, 900);
           });
         });
-      }, 1500);
+      }, 900);
     }
 
     runSequence();

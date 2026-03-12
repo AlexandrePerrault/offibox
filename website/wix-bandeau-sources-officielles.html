@@ -2,9 +2,15 @@
   Bandeau "Sources officielles" pour Wix
   À coller dans Wix : Ajouter un élément → Intégrer du code → Code personnalisé → Coller ce bloc.
 
-  Icônes hébergées sur : https://github.com/AlexandrePerrault/offiboxdata/tree/icons
-  URLs raw : https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/
+  IMPORTANT : Les icônes doivent être servies depuis une URL publique.
+  Si les icônes ne s'affichent pas, c'est que https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/
+  renvoie 404 (dépôt privé ou branche absente). Définir OFFIBOX_ICONS_BASE ci-dessous sur l'URL de base
+  de vos icônes (ex. https://www.offibox.fr si les icônes sont en https://www.offibox.fr/assets/icons/).
+  Voir website/BANDEAU_ICONES_README.md
 -->
+<script>
+  window.OFFIBOX_ICONS_BASE = ''; // ex. 'https://www.offibox.fr' si icônes en /assets/icons/
+</script>
 <style>
   .offibox-wheel-section {
     background: #5A9094;
@@ -52,31 +58,42 @@
 <section class="offibox-wheel-section" aria-label="Sources officielles">
   <div class="offibox-wheel-wrap">
     <div class="offibox-wheel-track">
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/BDPM.jpeg');" title="Base de données sur le médicament"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/assurance%20maladie.svg');" title="Ameli"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo-has.png');" title="HAS"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo-ansm%20(1).jpg');" title="ANSM"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/anses-small.svg');" title="ANSES"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/meddispar.png');" title="Meddispar"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/e_pansement.png');" title="E-pansement"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/omedit.png');" title="OMédit"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/SPF.png');" title="Santé publique France"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo_hcsp_rouge.jpg');" title="Haut Conseil de la santé publique"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo-ars.svg');" title="Agences régionales de santé"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg');" title="Démarche qualité en officine"></div>
+      <div class="offibox-wheel-item" data-icon="BDPM.jpeg" title="Base de données sur le médicament"></div>
+      <div class="offibox-wheel-item" data-icon="assurance%20maladie.svg" title="Ameli"></div>
+      <div class="offibox-wheel-item" data-icon="logo-has.png" title="HAS"></div>
+      <div class="offibox-wheel-item" data-icon="logo-ansm%20(1).jpg" title="ANSM"></div>
+      <div class="offibox-wheel-item" data-icon="anses-small.svg" title="ANSES"></div>
+      <div class="offibox-wheel-item" data-icon="meddispar.png" title="Meddispar"></div>
+      <div class="offibox-wheel-item" data-icon="e_pansement.png" title="E-pansement"></div>
+      <div class="offibox-wheel-item" data-icon="omedit.png" title="OMédit"></div>
+      <div class="offibox-wheel-item" data-icon="SPF.png" title="Santé publique France"></div>
+      <div class="offibox-wheel-item" data-icon="logo_hcsp_rouge.jpg" title="Haut Conseil de la santé publique"></div>
+      <div class="offibox-wheel-item" data-icon="logo-ars.svg" title="Agences régionales de santé"></div>
+      <div class="offibox-wheel-item" data-icon="LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg" title="Démarche qualité en officine"></div>
       <!-- Dupliqué pour défilement infini -->
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/BDPM.jpeg');" title="Base de données sur le médicament"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/assurance%20maladie.svg');" title="Ameli"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo-has.png');" title="HAS"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo-ansm%20(1).jpg');" title="ANSM"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/anses-small.svg');" title="ANSES"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/meddispar.png');" title="Meddispar"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/e_pansement.png');" title="E-pansement"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/omedit.png');" title="OMédit"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/SPF.png');" title="Santé publique France"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo_hcsp_rouge.jpg');" title="Haut Conseil de la santé publique"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/logo-ars.svg');" title="Agences régionales de santé"></div>
-      <div class="offibox-wheel-item" style="background-image: url('https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg');" title="Démarche qualité en officine"></div>
+      <div class="offibox-wheel-item" data-icon="BDPM.jpeg" title="Base de données sur le médicament"></div>
+      <div class="offibox-wheel-item" data-icon="assurance%20maladie.svg" title="Ameli"></div>
+      <div class="offibox-wheel-item" data-icon="logo-has.png" title="HAS"></div>
+      <div class="offibox-wheel-item" data-icon="logo-ansm%20(1).jpg" title="ANSM"></div>
+      <div class="offibox-wheel-item" data-icon="anses-small.svg" title="ANSES"></div>
+      <div class="offibox-wheel-item" data-icon="meddispar.png" title="Meddispar"></div>
+      <div class="offibox-wheel-item" data-icon="e_pansement.png" title="E-pansement"></div>
+      <div class="offibox-wheel-item" data-icon="omedit.png" title="OMédit"></div>
+      <div class="offibox-wheel-item" data-icon="SPF.png" title="Santé publique France"></div>
+      <div class="offibox-wheel-item" data-icon="logo_hcsp_rouge.jpg" title="Haut Conseil de la santé publique"></div>
+      <div class="offibox-wheel-item" data-icon="logo-ars.svg" title="Agences régionales de santé"></div>
+      <div class="offibox-wheel-item" data-icon="LOGO_DEMARCHE_QUALITE_VERT_FONCE.jpg" title="Démarche qualité en officine"></div>
     </div>
   </div>
 </section>
+<script>
+(function() {
+  var base = (window.OFFIBOX_ICONS_BASE != null && (window.OFFIBOX_ICONS_BASE + '').trim() !== '')
+    ? (window.OFFIBOX_ICONS_BASE + '').replace(/\/$/, '') + '/assets/icons/'
+    : 'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/icons/';
+  document.querySelectorAll('.offibox-wheel-item[data-icon]').forEach(function(el) {
+    var name = el.getAttribute('data-icon');
+    if (name) el.style.backgroundImage = "url('" + base + name + "')";
+  });
+})();
+</script>

@@ -18,19 +18,26 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Offibox PWA – Tournez le téléphone en paysage pour lire la barre horizontalement.">
 
-  <!-- iOS meta tags & icons -->
+  <!-- iOS PWA : installation écran d'accueil, orientation libre -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="offibox">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Offibox">
+  <meta name="apple-mobile-web-app-orientation" content="any">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>offibox</title>
+  <title>Offibox</title>
   <link rel="manifest" href="manifest.json">
+  <!-- Spinnaker (Google Fonts) chargé par le navigateur pour éviter AssetManifest.bin / google_fonts au démarrage -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

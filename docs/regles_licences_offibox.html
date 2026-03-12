@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Règles licences et postes – Offibox</title>
+  <style>
+    :root {
+      --offi-teal: #5A9094;
+      --text: #1e293b;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      line-height: 1.5;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+      background: #fff;
+    }
+    .logo-wrap {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--offi-teal);
+    }
+    .logo-wrap img {
+      max-height: 64px;
+      width: auto;
+      object-fit: contain;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--offi-teal);
+      margin-bottom: 24px;
+      font-weight: 700;
+    }
+    h2 {
+      font-size: 1.15rem;
+      color: var(--text);
+      margin: 22px 0 10px;
+      font-weight: 600;
+    }
+    p, li {
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    ul li {
+      position: relative;
+      padding-left: 1.2em;
+    }
+    ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--offi-teal);
+      font-weight: bold;
+    }
+    strong { color: var(--text); }
+    .box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th {
+      background: var(--offi-teal);
+      color: #fff;
+      font-weight: 600;
+    }
+    tr:nth-child(even) { background: #f8fafc; }
+    .meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 28px;
+    }
+    .no-print { margin-top: 8px; }
+    @media print {
+      body { padding: 20px 16px; max-width: 100%; }
+      .logo-wrap { margin-bottom: 20px; padding-bottom: 14px; }
+      .logo-wrap img { max-height: 52px; }
+      h1 { font-size: 1.35rem; margin-bottom: 18px; }
+      h2 { margin: 18px 0 8px; font-size: 1.1rem; }
+      .box { break-inside: avoid; }
+      table { break-inside: avoid; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-wrap">
+    <img src="../assets/icons/logo_offibox_installer.png" alt="Offibox" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+    <span style="display:none; font-size:1.5rem; font-weight:700; color: var(--offi-teal);">Offibox</span>
+  </div>
+
+  <h1>Règles d’exemptions et nombre de postes</h1>
+  <p class="meta">Document basé sur les règles techniques Offibox (licences et appareils).</p>
+
+  <h2>1. Règle appliquée partout (desktop + version en ligne)</h2>
+  <ul>
+    <li>La limite est gérée côté <strong>Cloud Function</strong> <code>registerDevice</code> (Firebase).</li>
+    <li>Les comptes suivants sont <strong>exemptés</strong> de la limite (équivalent 999 postes), que ce soit depuis l’app desktop ou la version en ligne&nbsp;:
+      <ul style="margin-top:6px;">
+        <li><strong>contact@offibox.fr</strong></li>
+        <li><strong>offibox@offibox.fr</strong></li>
+        <li><strong>offibox@gmail.com</strong></li>
+        <li><strong>offibox17@gmail.com</strong></li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>2. Nombre de postes par compte</h2>
+  <p>Le nombre max de postes <strong>par compte</strong> est défini dans <strong>Firestore</strong>&nbsp;:</p>
+  <div class="box">
+    <p><strong>Collection</strong>&nbsp;: <code>users</code></p>
+    <p><strong>Document</strong>&nbsp;: <code>users/{uid}</code> (uid = identifiant Firebase Auth du compte)</p>
+    <p><strong>Champ</strong>&nbsp;: <code>maxDevices</code> (nombre, optionnel)</p>
+  </div>
+  <p><strong>Comportement&nbsp;:</strong></p>
+  <ul>
+    <li>Si <code>maxDevices</code> est <strong>absent</strong> → limite par défaut = <strong>5</strong> postes.</li>
+    <li>Si vous mettez <code>maxDevices: 10</code> (ou autre) sur un document <code>users/{uid}</code> → ce compte pourra enregistrer jusqu’à 10 appareils.</li>
+  </ul>
+  <p><strong>Où modifier&nbsp;:</strong></p>
+  <ol style="list-style: decimal; padding-left: 1.4em;">
+    <li><strong>Console Firebase</strong> — Firestore Database → collection <code>users</code> → document correspondant à l’email (uid) → ajouter ou modifier le champ <code>maxDevices</code>.</li>
+    <li><strong>Tableau de bord admin (futur)</strong> — Écran réservé à offibox17@gmail.com / offibox@gmail.com pour éditer <code>maxDevices</code> par client.</li>
+    <li><strong>Script ou Cloud Function</strong> — Mise à jour de <code>users/{uid}.maxDevices</code> (ex. à l’activation d’une licence ou depuis un back-office).</li>
+  </ol>
+  <p>En résumé&nbsp;: <strong>un email = un uid = un document <code>users/{uid}</code></strong>&nbsp;; le champ <strong><code>maxDevices</code></strong> contrôle le nombre de postes autorisés pour ce compte.</p>
+
+  <h2>3. Connexion depuis plusieurs endroits / partage d’identifiants</h2>
+  <ul>
+    <li>Chaque <strong>poste</strong> (PC, machine) est identifié par un <strong>deviceId</strong> unique. À chaque connexion avec le même compte, l’app enregistre cet appareil via <code>registerDevice</code>.</li>
+    <li>La limite (ex. 5) s’applique au <strong>nombre d’appareils distincts</strong> enregistrés pour ce compte, pas au nombre de connexions simultanées.</li>
+  </ul>
+  <p><strong>En pratique&nbsp;:</strong></p>
+  <ul>
+    <li><strong>Même personne, plusieurs PC</strong>&nbsp;: chaque PC = 1 appareil. 5 PC différents = 5 postes, 6ᵉ PC = blocage «&nbsp;limite de 5 postes&nbsp;» (sauf si <code>maxDevices</code> a été augmenté pour ce compte).</li>
+    <li><strong>Partage d’identifiant / mot de passe</strong>&nbsp;: si quelqu’un d’autre se connecte avec le même email/mot de passe, <strong>son PC compte comme un nouvel appareil</strong>. Partager ses identifiants = remplir les postes plus vite (voire bloquer le titulaire si 5 postes sont déjà enregistrés).</li>
+  </ul>
+  <p>Il n’y a pas de détection du «&nbsp;partage&nbsp;»&nbsp;: on compte uniquement les <strong>appareils différents</strong>. Pour limiter le partage&nbsp;: garder la limite à 5 (ou moins) et communiquer «&nbsp;5 postes max par compte&nbsp;», ou augmenter <code>maxDevices</code> pour certains contrats dans Firestore.</p>
+
+  <h2>4. Résumé</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Question</th>
+        <th>Réponse</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Même règle desktop + version en ligne&nbsp;?</strong></td>
+        <td>Oui. La Cloud Function <code>registerDevice</code> est la même&nbsp;; les emails exemptés ont 999 postes partout.</td>
+      </tr>
+      <tr>
+        <td><strong>Où contrôler le nombre de licences par email&nbsp;?</strong></td>
+        <td>Firestore <code>users/{uid}.maxDevices</code> (par défaut 5 si absent). Modifiable dans la console Firebase ou via un écran admin.</td>
+      </tr>
+      <tr>
+        <td><strong>Plusieurs connexions / partage de compte&nbsp;?</strong></td>
+        <td>On compte les <strong>appareils</strong> (postes) différents. Partager identifiant + mot de passe = chaque PC compte comme 1 poste.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="meta">Document généré à partir de docs/LICENCES_ET_APPAREILS.md — Offibox.</p>
+  <p class="meta no-print">Pour obtenir un PDF : ouvrir ce fichier dans un navigateur, puis <strong>Fichier → Imprimer → Enregistrer au format PDF</strong> (ou Imprimer → Cible : Enregistrer en PDF).</p>
+</body>
+</html>
