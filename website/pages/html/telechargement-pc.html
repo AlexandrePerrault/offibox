@@ -34,7 +34,7 @@ body{font-family:Spinnaker,sans-serif;font-size:17px;background:transparent;padd
 <body>
 <div class="download-card">
 <p class="download-intro">Vous pouvez également télécharger</p>
-<a href="#" id="download-badge" class="download-badge" target="_blank" rel="noopener" title="Télécharger l'installateur Offibox pour Windows">
+<a href="https://github.com/AlexandrePerrault/offibox/releases/latest" id="download-badge" class="download-badge" target="_blank" rel="noopener" title="Télécharger l'installateur Offibox pour Windows">
   <span class="win-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5L10.5 4.5V11H3V5.5ZM10.5 13V19.5L3 18.5V13H10.5ZM11.5 4.5L21 3V11H11.5V4.5ZM21 13H11.5V19.5L21 18.5V13Z"/></svg></span>
   <span class="badge-inner">
     <span class="badge-title">Offibox pour PC</span>
@@ -92,14 +92,25 @@ function setPlatformLabel(){
 setPlatformLabel();
 fetch(G,{headers:{"Accept":"application/vnd.github.v3+json"}}).then(function(r){return r.json();}).then(function(d){
 var tag=(d&&d.tag_name)?d.tag_name.replace(/^v/i,""):"";
-var ver=tag?"v"+tag.split("-")[0]:"";
+var verNum=tag?tag.split("-")[0]:""; var ver=verNum?"v"+verNum:"";
 var url=R;
-if(d&&d.assets&&d.assets.length){var w=d.assets.filter(function(a){return(a.name||"").toLowerCase().indexOf(".exe")!==-1});var x=w.filter(function(a){return(a.name||"").toLowerCase().indexOf("x64")!==-1})[0]||w[0];if(x&&x.browser_download_url){url=x.browser_download_url;currentSetupUrl=url;currentVer=ver;}}
+if(d&&d.assets&&d.assets.length){
+  var exeAssets=d.assets.filter(function(a){var n=(a.name||"").toLowerCase();return n.indexOf(".exe")!==-1&&n.indexOf("offibox-setup")!==-1;});
+  var exe=null;
+  if(verNum&&exeAssets.length){exe=exeAssets.filter(function(a){return(a.name||"").indexOf(verNum)!==-1;})[0];}
+  if(!exe&&exeAssets.length)exe=exeAssets[0];
+  if(!exe)exe=d.assets.filter(function(a){return(a.name||"").toLowerCase().indexOf(".exe")!==-1;})[0];
+  if(exe&&exe.browser_download_url){
+    var exeVerMatch=(exe.name||"").match(/Offibox-Setup-(\d+\.\d+\.\d+)/i);
+    if(verNum&&exeVerMatch&&exeVerMatch[1]===verNum){url=exe.browser_download_url;currentSetupUrl=url;currentVer=ver;}
+    else if(!verNum){url=exe.browser_download_url;currentSetupUrl=url;currentVer=ver;}
+  }
+}
 if(b)b.href=url;
-if(v)v.textContent="Version "+(ver||"—");
+if(v)v.textContent="Version "+(ver||verNum||"—");
 var dateStr=formatDateRelease(d&&d.published_at);
 if(releaseDateEl)releaseDateEl.textContent=dateStr?" — "+dateStr:"";
-if(linkIci)linkIci.href=(d&&d.html_url) ? d.html_url : R;
+if(linkIci)linkIci.href=currentSetupUrl||(d&&d.html_url)||R;
 }).catch(function(){if(b)b.href=R;if(v)v.textContent="Version —";if(releaseDateEl)releaseDateEl.textContent="";if(linkIci)linkIci.href=R;});
 var popup=document.getElementById("download-popup-overlay");
 function closePopup(){if(popup)popup.classList.remove("visible");}

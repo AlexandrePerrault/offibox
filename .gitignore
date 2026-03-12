@@ -62,3 +62,6 @@ installer/wix/Harvest.wxs
 
 # NuGet local (Windows build helper)
 tools/nuget.exe
+
+# Installateurs Windows (générés en local / CI, ne pas committer)
+website/download/*.exe

@@ -43,16 +43,20 @@ jobs:
         run: |
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { throw "ISCC introuvable: $iscc" }
+          $outDir = "website/download"
+          if (Test-Path $outDir) {
+            Get-ChildItem -Path $outDir -Filter "Offibox-Setup-*.exe" -ErrorAction SilentlyContinue | Remove-Item -Force
+          }
           & $iscc "/DMyAppVersion=$env:VERSION" installer/Offibox.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup a échoué (code $LASTEXITCODE)" }
 
       - name: Vérifier le .exe généré
         id: exe
         run: |
-          $exe = Get-ChildItem -Path website/download -Filter "Offibox-Setup-*.exe" -ErrorAction SilentlyContinue
-          if (-not $exe) { throw "Aucun Offibox-Setup-*.exe dans website/download - le build Inno a peut-être échoué." }
-          $exe | ForEach-Object { Write-Host "Fichier prêt: $($_.FullName)" }
-          echo "path=$($exe[0].FullName)" >> $env:GITHUB_OUTPUT
+          $expected = "website/download/Offibox-Setup-$env:VERSION.exe"
+          if (-not (Test-Path $expected)) { throw "Fichier attendu introuvable: $expected - le build Inno a peut-être échoué." }
+          Write-Host "Fichier prêt: $expected"
+          echo "path=$((Resolve-Path $expected).Path)" >> $env:GITHUB_OUTPUT
 
       # Signature numérique optionnelle : définir les secrets OFFIBOX_SIGNING_CERT_BASE64 (PFX en base64) et OFFIBOX_SIGNING_PASSWORD pour signer le .exe
       - name: Sign setup (optional)
@@ -74,7 +78,7 @@ jobs:
       - name: Upload EXE to release
         uses: softprops/action-gh-release@v2
         with:
-          files: website/download/Offibox-Setup-*.exe
+          files: website/download/Offibox-Setup-${{ env.VERSION }}.exe
           generate_release_notes: false
           draft: false
           overwrite_files: true
