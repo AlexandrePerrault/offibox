@@ -545,7 +545,7 @@
     <div class="app-bar-outer">
       <div class="app-bar-container" id="app-bar-container">
         <div class="bar-pill-only" id="bar-pill">
-          <img id="demo-logo-img" data-src="../assets/icons/logo_offibox.png" alt="Offibox" class="logo-img" referrerpolicy="no-referrer" src="">
+          <img id="demo-logo-img" data-src="../logo%20sans%20texte.png" alt="Offibox" class="logo-img" referrerpolicy="no-referrer" src="">
         </div>
         <div class="bar-expanded-content">
           <div class="info-bar">
@@ -634,7 +634,7 @@
       <div class="browser-frame-wrap">
         <iframe id="browser-frame" title="Aperçu"></iframe>
         <div class="demo-content-img-wrap" id="browser-image-wrap">
-          <img id="browser-content-img" alt="Aperçu" src="" referrerpolicy="no-referrer" crossorigin="anonymous">
+          <img id="browser-content-img" alt="Aperçu" src="" referrerpolicy="no-referrer">
           <div class="browser-doc-toolbar" id="browser-doc-toolbar">
             <span class="doc-toolbar-btn" title="Télécharger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger</span>
             <span class="doc-toolbar-btn" title="Imprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Imprimer</span>
@@ -919,8 +919,11 @@
       var contentImg = document.getElementById('browser-content-img');
       if (imgWrap && contentImg) {
         if (imagePath) {
+          contentImg.onerror = function() { this.style.background = '#fef3c7'; this.alt = 'Image non chargée (vérifier le chemin ou ouvrir via un serveur local)'; };
           contentImg.src = imagePath;
           contentImg.style.display = '';
+          contentImg.style.background = '';
+          contentImg.alt = 'Aperçu';
           imgWrap.classList.add('visible');
           imgWrap.style.display = 'flex';
         } else {
