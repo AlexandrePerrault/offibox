@@ -34,6 +34,10 @@ flutter:
 
 Les fichiers avec un espace dans le nom (ex. `logo text.png`) sont aussi listés explicitement si besoin. Après avoir ajouté une nouvelle icône dans `assets/icons/`, un `flutter pub get` suffit ; pas besoin de l’ajouter à la liste si `assets/icons/` est déjà inclus.
 
+## Bandeau du site (login, mobile)
+
+Les pages du site (`website/login-wix-bandeau.html`, `website/mobile/bandeau.html`) chargent les logos depuis ce dossier sur GitHub (URL raw). Pensez à **pousser le dossier `assets/icons`** sur le dépôt pour que les icônes s’affichent correctement sur le bandeau.
+
 ## Bonnes pratiques
 
 - Préférer des noms sans espaces (ex. `logo_text.png`) pour éviter les soucis sur certains systèmes.
