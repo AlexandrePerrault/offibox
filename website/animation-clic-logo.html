@@ -10,12 +10,13 @@
   <style>
     :root { --offi-teal: #5A9094; --gray: #334155; --white: #ffffff; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: auto; line-height: 1.3; }
     .hint-wrap {
       font-family: 'Spinnaker', sans-serif;
       font-size: 13px;
       color: var(--gray);
       text-align: center;
-      padding: 6px 10px;
+      padding: 3px 8px 2px;
       background: var(--white);
       border-radius: 10px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.06);
@@ -24,10 +25,17 @@
       opacity: 0;
       transform: translateY(4px);
       animation: hint-appear 1.2s ease-out 0.3s forwards;
+      cursor: pointer;
+      transition: opacity 0.35s ease-out;
+    }
+    .hint-wrap.hidden {
+      opacity: 0;
+      pointer-events: none;
+      animation: none;
     }
     .hint-wrap .arrow {
       display: inline-block;
-      margin-right: 6px;
+      margin-left: 6px;
       color: var(--offi-teal);
       font-size: 14px;
       animation: arrow-pulse 2s ease-in-out 1.5s infinite;
@@ -43,9 +51,22 @@
   </style>
 </head>
 <body>
-  <div class="hint-wrap">
-    <span class="arrow" aria-hidden="true">↓</span>
+  <div class="hint-wrap" id="hint" role="button" tabindex="0" aria-label="Masquer l’indication">
     <span>Cliquez sur le <span class="text-strong">logo</span> pour déployer la barre</span>
+    <span class="arrow" aria-hidden="true">↓</span>
   </div>
+  <script>
+    (function(){
+      var h = document.getElementById('hint');
+      if (!h) return;
+      function hide() {
+        h.classList.add('hidden');
+        try { sessionStorage.setItem('offibox-hint-hidden', '1'); } catch (e) {}
+      }
+      h.addEventListener('click', hide);
+      h.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); hide(); } });
+      try { if (sessionStorage.getItem('offibox-hint-hidden')) hide(); } catch (e) {}
+    })();
+  </script>
 </body>
 </html>
