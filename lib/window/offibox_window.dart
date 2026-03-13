@@ -89,8 +89,8 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   bool expanded = false;
 
   /// Marges réduites sur web pour rapprocher le logo du bandeau animation (iframe Wix).
-  double get _topMargin => kIsWeb ? _topMarginWeb : _topMargin;
-  double get _rightMargin => kIsWeb ? _rightMarginWeb : _rightMargin;
+  double get _topMargin => kIsWeb ? OffiboxWindowUI.topMarginWeb : OffiboxWindowUI.topMargin;
+  double get _rightMargin => kIsWeb ? OffiboxWindowUI.rightMarginWeb : OffiboxWindowUI.rightMargin;
   double get _menuBelowBarTop => _topMargin + OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap + OffiboxWindowUI.barHeightExpanded + OffiboxWindowUI.gapBelowBar;
 
   /// Convenience accessor used by the results panel layout.
@@ -727,7 +727,7 @@ void initState() {
         OffiboxWindowUI.gapBelowBar;
     final barW = _barWidth(context);
     final left = size.width - _rightMargin - barW + 12;
-    const top = topY + 4;
+    final top = topY + 4;
     final position = RelativeRect.fromLTRB(
       left,
       top,
