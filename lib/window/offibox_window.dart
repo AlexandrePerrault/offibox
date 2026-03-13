@@ -1042,7 +1042,7 @@ Widget build(BuildContext context) {
   };
 
   return Scaffold(
-    backgroundColor: const Color(0xFF1A1A1A),
+    backgroundColor: kIsWeb ? Colors.white : const Color(0xFF1A1A1A),
     body: Shortcuts(
       shortcuts: shortcuts,
       child: Actions(
@@ -1095,10 +1095,12 @@ Widget build(BuildContext context) {
           child: Container(
             width: double.infinity,
             height: double.infinity,
-            // Windows : fond noir = transparent (LWA_COLORKEY) en release ; en debug (flutter run) fond opaque pour un affichage lisible.
-            color: Platform.isWindows
-                ? (kDebugMode ? const Color(0xFF1A1A1A) : const Color(0xFF000000))
-                : const Color(0xFF1A1A1A),
+            // Web : fond blanc pour intégration iframe Wix. Windows : fond noir = transparent (LWA_COLORKEY) en release.
+            color: kIsWeb
+                ? Colors.white
+                : (Platform.isWindows
+                    ? (kDebugMode ? const Color(0xFF1A1A1A) : const Color(0xFF000000))
+                    : const Color(0xFF1A1A1A)),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(OffiboxWindowUI.borderRadius),
               child: Stack(

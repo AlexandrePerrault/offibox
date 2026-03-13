@@ -38,8 +38,18 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      # Token offiboxdata : secret OFFIBOXDATA_GITHUB_TOKEN (PAT GitHub, scope repo).
+      # Sans ce secret, le repo offiboxdata doit être public pour que la recherche web affiche des résultats.
       - name: Build web (entry point main_web)
-        run: flutter build web -t lib/main_web.dart --base-href /offibox/ --release --no-wasm-dry-run
+        env:
+          OFFIBOXDATA_TOKEN: ${{ secrets.OFFIBOXDATA_GITHUB_TOKEN }}
+        run: |
+          if [ -n "$OFFIBOXDATA_TOKEN" ]; then
+            flutter build web -t lib/main_web.dart --base-href /offibox/ --release --no-wasm-dry-run \
+              --dart-define=OFFIBOXDATA_GITHUB_TOKEN="$OFFIBOXDATA_TOKEN"
+          else
+            flutter build web -t lib/main_web.dart --base-href /offibox/ --release --no-wasm-dry-run
+          fi
 
       # Pages statiques (login, inscription, validation, démo) pour iframes Wix / app
       - name: Copy static HTML to build

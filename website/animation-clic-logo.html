@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cliquez pour déployer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --offi-teal: #5A9094; --gray: #334155; --white: #ffffff; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    .hint-wrap {
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 13px;
+      color: var(--gray);
+      text-align: center;
+      padding: 6px 10px;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid rgba(90,144,148,0.2);
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(4px);
+      animation: hint-appear 1.2s ease-out 0.3s forwards;
+    }
+    .hint-wrap .arrow {
+      display: inline-block;
+      margin-right: 6px;
+      color: var(--offi-teal);
+      font-size: 14px;
+      animation: arrow-pulse 2s ease-in-out 1.5s infinite;
+    }
+    .hint-wrap .text-strong { color: var(--offi-teal); font-weight: 600; }
+    @keyframes hint-appear {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes arrow-pulse {
+      0%, 100% { opacity: 1; transform: translateY(0); }
+      50% { opacity: 0.6; transform: translateY(-2px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="hint-wrap">
+    <span class="arrow" aria-hidden="true">↓</span>
+    <span>Cliquez sur le <span class="text-strong">logo</span> pour déployer la barre</span>
+  </div>
+</body>
+</html>

@@ -67,6 +67,10 @@
     .summary-box { margin-top: 1.75rem; padding: 1rem 1.3rem; border-radius: 14px; border: 1px solid var(--offi-teal); background: #f8fafc; font-size: 0.96rem; }
     .summary-box p { margin-bottom: 0.8rem; }
     .summary-box p:last-child { margin-bottom: 0; }
+    .term { color: var(--offi-teal); font-weight: 600; }
+    .badge-block { margin: 1.25rem 0; padding: 1.1rem 1.4rem; border-radius: 14px; background: #e8f4f4; border: 1px solid rgba(90,144,148,0.25); font-size: 0.96rem; }
+    .badge-block p { margin-bottom: 0.6rem; text-indent: 0; }
+    .badge-block p:last-child { margin-bottom: 0; }
     .signature-wrap { margin-top: 2rem; text-align: right; }
     .signature-badge {
       display: inline-block;
@@ -90,32 +94,37 @@
       <h1>Le projet <span class="brand">Offi</span>box</h1>
     </header>
     <main class="legal-card">
-      <p class="intro-line">Au cours de mes 17 années passées comme titulaire d'Officine, je me suis rendu compte que les sources d'information nécessaires au quotidien en pharmacie étaient multiples et en constante évolution (nouvelles missions, modification de la législation, nouveaux médicaments).</p>
-      <p class="intro-line">De plus, la transmission de l'information au sein de l'équipe n'est pas toujours simple, malgré les nombreux canaux à notre disposition (messageries internes, cahier de liaison, appli… etc.).</p>
-      <p class="intro-line">Partant de ce constat, l'idée de créer une boîte à outils digitale pour les officines m’est venue progressivement. Je me suis alors lancé le défi de développer un outil capable de centraliser un maximum d'informations utiles au quotidien.</p>
-      <p class="intro-line"><span class="brand">Offi</span>box voit le jour en 2026 après près d'un an de développement et une phase de test : un outil créé par un pharmacien, destiné à l'ensemble de l'équipe officinale, dont l'objectif principal est de garantir une information neutre, fiable et constamment à jour.</p>
-      <p class="intro-line"><span class="brand">Offi</span>box n’est pas un nouveau LGO, c’est une barre de recherche simple d’utilisation, facilement accessible et discrète. Son but est simple : accéder plus rapidement à l’information et ainsi faire gagner du temps à toute l’équipe officinale.</p>
-      <div class="offibox-pill-heading">Aujourd'hui, <span class="brand">Offi</span>box, c'est :</div>
-      <div class="projet-stats" id="stats-zone">
+      <p class="intro-line">En Officine, la recherche d’informations au quotidien est parfois <span class="term">fastidieuse</span> car les sources sont <span class="term">nombreuses</span>, pas toujours à jour et notre métier <span class="term">évolue constamment</span> (nouvelles missions, évolution de la législation…).</p>
+      <p class="intro-line"><span class="brand">Offi</span>box n’est pas un nouveau LGO, c’est une <span class="term">discrète barre de recherche</span>, <span class="term">simple d’utilisation</span>, et <span class="term">facilement accessible au comptoir</span>. L’application a été <span class="term">conçue</span> pour centraliser un maximum des informations nécessaires à l’équipe officinale, et ses objectifs sont multiples :</p>
+
+      <div class="badge-block intro-line">
+        <p><span class="term">Accéder plus rapidement à l’information</span> et ainsi faire gagner du temps à toute l’équipe officinale.</p>
+        <p>Vous garantir une information <span class="term">neutre</span>, <span class="term">fiable</span> et <span class="term">constamment à jour</span>.</p>
+        <p>C’est également un outil <span class="term">évolutif</span>, conçu pour s’adapter aux nouvelles législations, et ainsi qu’aux futures missions des pharmaciens d’officine.</p>
+      </div>
+
+      <p class="intro-line">Développé par un ex-pharmacien titulaire et après un an de développement et de test, <span class="brand">Offi</span>box voit le jour en 2026.</p>
+      <div class="offibox-pill-heading intro-line">Aujourd’hui, <span class="brand">Offi</span>box, c’est :</div>
+
+      <div class="badge-block projet-stats intro-line" id="stats-zone">
         <div class="stat-line">
           <span class="stat-number-badge" aria-hidden="true"><span id="stat-count">—</span></span>
-          <span>liens et entrées indexés (médicaments issus de la BDM, LPP, dispositifs médicaux, outils métier, sites web, vidéos, annuaires, catalogues laboratoires…)</span>
+          <span>liens et entrées indexés (fiches Médicaments enrichies issues de la BDM, LPP, pansements, outils métier, sites web, vidéos, annuaires…)</span>
         </div>
         <div class="stat-line">
           <span class="stat-bullet" aria-hidden="true"></span>
-          <span>Des données mises à jour quotidiennement (alertes ANSM, retraits de lot, DGS-Urgent… et connectées aux produits).</span>
+          <span>Des données mises à jour régulièrement (alertes ANSM, retraits de lot, DGS-Urgent… et connectées aux produits).</span>
         </div>
         <div class="stat-line">
           <span class="stat-bullet" aria-hidden="true"></span>
-          <span>Des outils complémentaires : lecteur de QR code, vidéos de démonstration, cahier de liaison digital.</span>
+          <span>Des outils (lecteur de QR code, vidéos de démonstration, cahier de liaison digital).</span>
         </div>
       </div>
-      <div class="summary-box">
-        <p class="no-indent">En résumé : un outil évolutif, conçu pour s’adapter aux nouvelles législations, ainsi qu'aux futures missions des pharmaciens d'officine.</p>
-        <p class="no-indent">
-          <a href="https://www.offibox.fr/fonctionnalités" class="badge-fonctionnalites" target="_blank" rel="noopener noreferrer">Voir toutes les fonctionnalités →</a>
-        </p>
-      </div>
+
+      <p class="no-indent intro-line" style="margin-top: 1.25rem;">
+        <a href="https://www.offibox.fr/fonctionnalités" class="badge-fonctionnalites" target="_blank" rel="noopener noreferrer">Voir toutes les fonctionnalités →</a>
+      </p>
+
       <div class="signature-wrap">
         <span class="signature-badge">
           Alexandre Perrault, Docteur en Pharmacie<br>

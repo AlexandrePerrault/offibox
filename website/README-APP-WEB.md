@@ -55,4 +55,4 @@ Tu peux t’inspirer de **`app-embed-example.html`** dans ce dossier : il conti
 
 Les données viennent toujours d’offiboxdata (comme en desktop) ; si le dépôt est privé, rebuild avec :
 
-`--dart-define=OFFIBOXDATA_GITHUB_TOKEN=xxx`
+En déploiement GitHub Pages : ajoutez un secret **Actions** nommé **OFFIBOXDATA_GITHUB_TOKEN** (valeur = PAT GitHub avec accès au repo offiboxdata), puis relancez le workflow. Sinon en local : `--dart-define=OFFIBOXDATA_GITHUB_TOKEN=votre_token`
