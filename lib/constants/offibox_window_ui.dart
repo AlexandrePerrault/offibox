@@ -28,6 +28,9 @@ class OffiboxWindowUI {
   // ───────────────────────────
   static const double rightMargin = 76;
   static const double topMargin = 76;
+  /// Web (iframe Wix) : marges réduites pour rapprocher le logo du bandeau animation.
+  static const double topMarginWeb = 12;
+  static const double rightMarginWeb = 16;
   static const double gapBelowBar = 8;
 
   /// Hauteur barre d'infos (ticker).

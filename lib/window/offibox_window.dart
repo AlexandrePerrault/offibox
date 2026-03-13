@@ -88,6 +88,11 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
     with WidgetsBindingObserver {
   bool expanded = false;
 
+  /// Marges réduites sur web pour rapprocher le logo du bandeau animation (iframe Wix).
+  double get _topMargin => kIsWeb ? _topMarginWeb : _topMargin;
+  double get _rightMargin => kIsWeb ? _rightMarginWeb : _rightMargin;
+  double get _menuBelowBarTop => _topMargin + OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap + OffiboxWindowUI.barHeightExpanded + OffiboxWindowUI.gapBelowBar;
+
   /// Convenience accessor used by the results panel layout.
   /// Using a getter avoids scope issues if the local variable is moved/refactored.
   List<SearchResult> get effectiveResults => ref.watch(effectiveResultsProvider);
@@ -717,11 +722,11 @@ void initState() {
       return;
     }
     final size = MediaQuery.sizeOf(context);
-    const topY = OffiboxWindowUI.topMargin +
+    final topY = _topMargin +
         OffiboxWindowUI.barHeight +
         OffiboxWindowUI.gapBelowBar;
     final barW = _barWidth(context);
-    final left = size.width - OffiboxWindowUI.rightMargin - barW + 12;
+    final left = size.width - _rightMargin - barW + 12;
     const top = topY + 4;
     final position = RelativeRect.fromLTRB(
       left,
@@ -971,7 +976,7 @@ Widget build(BuildContext context) {
   final screenH = MediaQuery.of(context).size.height;
   final effectiveResults = ref.watch(effectiveResultsProvider);
   // Sous la barre de recherche : inclure la barre d'infos (ticker) si déployée pour éviter le chevauchement
-  final topY = OffiboxWindowUI.topMargin +
+  final topY = _topMargin +
       (_infoBarExpanded
           ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap
           : 0) +
@@ -986,8 +991,8 @@ Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (!expandedNow) {
-        final left = size.width - OffiboxWindowUI.rightMargin - barW;
-        final top = OffiboxWindowUI.topMargin;
+        final left = size.width - _rightMargin - barW;
+        final top = _topMargin;
         final regionHeight = OffiboxWindowUI.tickerBarHeight +
             OffiboxWindowUI.tickerBarGap +
             OffiboxWindowUI.barHeight +
@@ -1020,7 +1025,7 @@ Widget build(BuildContext context) {
   final effectiveExpandedBarHeight = _effectiveExpandedBarHeight(selectedResult);
   final expandedBarH = effectiveExpandedBarHeight ?? OffiboxWindowUI.barHeightExpanded;
   /// PDF/Word/XLS/Web : sous la barre de résultats, sans empiéter (hauteur réelle barre + écart).
-  final topYBelowExpandedBarXls = OffiboxWindowUI.topMargin +
+  final topYBelowExpandedBarXls = _topMargin +
       (_infoBarExpanded
           ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap
           : 0) +
@@ -1126,7 +1131,7 @@ Widget build(BuildContext context) {
           if (_isGoogleConnected && todayCalendarEvents.isNotEmpty)
             CalendarReminderBubble(
               events: todayCalendarEvents,
-              topOffset: OffiboxWindowUI.topMargin + 4,
+              topOffset: _topMargin + 4,
               leftOffset: 20,
               barWidth: _barWidth(context),
             ),
@@ -1134,8 +1139,8 @@ Widget build(BuildContext context) {
           // TOP BAR
           // ───────────────────────────
           Positioned(
-            top: OffiboxWindowUI.topMargin,
-            right: OffiboxWindowUI.rightMargin,
+            top: _topMargin,
+            right: _rightMargin,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final w = _barWidth(context);
@@ -1189,11 +1194,11 @@ Widget build(BuildContext context) {
             });
           },
       barWidth: _barWidth(context),
-      barBottomY: OffiboxWindowUI.topMargin +
+      barBottomY: _topMargin +
           (_infoBarExpanded ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap : 0) +
           (expanded ? (effectiveExpandedBarHeight ?? OffiboxWindowUI.barHeightExpanded) : OffiboxWindowUI.barHeight),
-      barTopY: OffiboxWindowUI.topMargin,
-      rightMargin: OffiboxWindowUI.rightMargin,
+      barTopY: _topMargin,
+      rightMargin: _rightMargin,
       searchController: _searchController,
       searchFocus: _searchFocus,
       onSearchChanged: _onSearchChanged,
@@ -1617,8 +1622,8 @@ Widget build(BuildContext context) {
           // ───────────────────────────
           if (_showIdeasPanel && expanded)
             Positioned(
-              top: OffiboxWindowUI.menuBelowBarTop,
-              right: OffiboxWindowUI.rightMargin,
+              top: _menuBelowBarTop,
+              right: _rightMargin,
               child: IdeasBoxPanel(
                 barWidth: _barWidth(context),
                 onClose: () => setState(() => _showIdeasPanel = false),
@@ -1628,8 +1633,8 @@ Widget build(BuildContext context) {
           // Formulaire de contact sous la barre (largeur barre, apparition en fondu)
           if (_showContactPanel && expanded)
             Positioned(
-              top: OffiboxWindowUI.menuBelowBarTop,
-              right: OffiboxWindowUI.rightMargin,
+              top: _menuBelowBarTop,
+              right: _rightMargin,
               width: _barWidth(context),
               child: TweenAnimationBuilder<double>(
                 key: const ValueKey('contact-panel-fade'),
@@ -1652,7 +1657,7 @@ Widget build(BuildContext context) {
           // ───────────────────────────
           if (_showNewsPopup && _newsPopupEntry != null)
             Positioned(
-              top: OffiboxWindowUI.topMargin +
+              top: _topMargin +
                   (_infoBarExpanded
                       ? OffiboxWindowUI.tickerBarHeight + OffiboxWindowUI.tickerBarGap
                       : 0) +
@@ -1660,7 +1665,7 @@ Widget build(BuildContext context) {
                       ? (effectiveExpandedBarHeight ?? OffiboxWindowUI.barHeightExpanded)
                       : OffiboxWindowUI.barHeight) +
                   OffiboxWindowUI.gapBelowBar,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               child: NewsPopupCard(
                 entry: _newsPopupEntry!,
                 onClose: () => setState(() {
@@ -1679,7 +1684,7 @@ Widget build(BuildContext context) {
               !_showIdeasPanel)
             Positioned(
               top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               width: _barWidth(context),
               child: SizedBox(
                 height: effectiveResults.isEmpty
@@ -1825,7 +1830,7 @@ Widget build(BuildContext context) {
           if (expanded && _xlsPanelUrl != null)
             Positioned(
               top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               width: _barWidth(context),
               child: XlsPanelBelowBar(
                 xlsUrl: _xlsPanelUrl!,
@@ -1836,7 +1841,7 @@ Widget build(BuildContext context) {
           if (expanded && _wordPanelUrl != null)
             Positioned(
               top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               width: _barWidth(context),
               child: WordPanelBelowBar(
                 wordUrl: _wordPanelUrl!,
@@ -1847,7 +1852,7 @@ Widget build(BuildContext context) {
           if (expanded && _webPanelUrl != null)
             Positioned(
               top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               width: _barWidth(context),
               child: WebPanelBelowBar(
                 url: _webPanelUrl!,
@@ -1858,7 +1863,7 @@ Widget build(BuildContext context) {
           if (expanded && _imagePanelAssetPath != null)
             Positioned(
               top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               width: _barWidth(context),
               child: ImagePanelBelowBar(
                 assetPath: _imagePanelAssetPath!,
@@ -1869,7 +1874,7 @@ Widget build(BuildContext context) {
           if (expanded && _showMarginCalculatorPanel)
             Positioned(
               top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               width: _barWidth(context),
               child: MarginCalculatorPanel(
                 barWidth: _barWidth(context),
@@ -1879,7 +1884,7 @@ Widget build(BuildContext context) {
           if (expanded && (_pdfPanelUrl != null || (isPdfHitResult && selectedResult.catalogueUrl != null && !_hidePdfHitPanel)))
             Positioned(
               top: topYBelowExpandedBarXls,
-              right: OffiboxWindowUI.rightMargin,
+              right: _rightMargin,
               width: _barWidth(context),
               child: PdfPanelBelowBar(
                 pdfUrl: (_pdfPanelUrl ?? selectedResult!.catalogueUrl!).trim(),

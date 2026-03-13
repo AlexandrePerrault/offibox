@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/models/search_result.dart';
@@ -39,7 +40,7 @@ class OffiboxResultsPanel extends StatelessWidget {
 
     return Positioned(
       top: top,
-      right: OffiboxWindowUI.rightMargin,
+      right: kIsWeb ? OffiboxWindowUI.rightMarginWeb : OffiboxWindowUI.rightMargin,
       width: width,
       child: SizedBox(
         height: panelHeight,
