@@ -96,3 +96,14 @@ La page **https://www.offibox.fr/connected** est une page de votre site Wix (off
 
 - La **barre déployée** doit s’afficher **uniquement si la licence est active** (vérification côté Wix ou via votre logique métier / abonnement).
 - La logique « licence active » et l’affichage conditionnel de la barre se gèrent **sur Wix** (ou via un script qui interroge votre backend), pas dans les pages hébergées (Netlify / login-wix, inscription, validation).
+
+## 9. Iframe « parasite » (Bienvenue Offibox / bandeau hors cadre)
+
+Si vous voyez un texte **« Bienvenue Offibox La boîte à outils d’… »** au centre de la page ou un bandeau qui semble **hors cadre**, c’est en général une **deuxième iframe** sur la page Wix qui charge la page **bandeau** :
+
+- `https://alexandreperrault.github.io/offibox/website/bandeau-offibox.html`  
+- ou (mobile) `.../offibox/website/mobile/bandeau-offibox.html`
+
+**Solution automatique (déjà en place)** : ces pages détectent quand elles sont affichées **dans une iframe**. Dans ce cas, le bandeau est masqué (page blanche). Après déploiement du site (push + GitHub Pages), l’iframe parasite n’affichera plus le texte.
+
+**Pour supprimer l’iframe sur Wix** (optionnel) : dans l’éditeur Wix, cliquez sur **Ajouter** (+) → repérez les blocs **Intégrer** / **Code personnalisé** / **HTML** sur la page. Ouvrez chaque bloc et vérifiez si le code contient `bandeau-offibox` ou `bandeau`. Supprimez le bloc qui pointe vers la page bandeau, ou videz l’URL de l’iframe pour ne garder que l’iframe de l’**app** (`alexandreperrault.github.io/offibox/`).

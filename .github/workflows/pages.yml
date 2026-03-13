@@ -39,7 +39,14 @@ jobs:
         run: flutter pub get
 
       # Token offiboxdata : secret OFFIBOXDATA_GITHUB_TOKEN (PAT GitHub, scope repo).
-      # Sans ce secret, le repo offiboxdata doit être public pour que la recherche web affiche des résultats.
+      # Sans ce secret, les données du repo privé offiboxdata ne seront pas chargées sur la version web (404).
+      - name: Check OFFIBOXDATA token (web data)
+        run: |
+          if [ -z "${{ secrets.OFFIBOXDATA_GITHUB_TOKEN }}" ]; then
+            echo "::warning::OFFIBOXDATA_GITHUB_TOKEN non défini. Les données (CSV, catalogues) ne seront pas connectées sur la version web. Ajouter le secret dans Settings → Secrets and variables → Actions."
+          else
+            echo "Token offiboxdata présent : build web avec données connectées."
+          fi
       - name: Build web (entry point main_web)
         env:
           OFFIBOXDATA_TOKEN: ${{ secrets.OFFIBOXDATA_GITHUB_TOKEN }}

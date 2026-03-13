@@ -10,12 +10,13 @@
   <style>
     :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; --hover-pill: #f59e0b; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Spinnaker', sans-serif; font-size: 16px; line-height: 1.75; min-height: 100vh; background: var(--white); color: var(--gray); padding: 2.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; }
+    html, body { max-width: 100vw; overflow-x: hidden; background: #f8fafc; }
+    body { font-family: 'Spinnaker', sans-serif; font-size: 16px; line-height: 1.75; min-height: 100vh; color: var(--gray); padding: 2.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; }
     .legal-wrap { width: 100%; max-width: 720px; margin: 0 auto; }
     .legal-header { text-align: center; margin-bottom: 2.25rem; }
     .legal-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--gray); }
     .legal-header .brand { color: var(--offi-teal); font-weight: 600; }
-    .legal-card { background: var(--white); padding: 2.2rem 2.4rem; border-radius: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.08); border: 1px solid var(--gray-light); }
+    .legal-card { background: var(--white); padding: 2.2rem 2.4rem; border-radius: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.08); border: 1px solid var(--gray-light); max-width: 100%; }
     .legal-card p { margin-bottom: 1rem; color: var(--gray); font-size: 0.97rem; text-indent: 1.5em; text-align: justify; }
     .legal-card p.no-indent { text-indent: 0; }
     .intro-line { opacity: 0; transform: translateY(8px); animation: intro-fade 0.7s ease-out forwards; }

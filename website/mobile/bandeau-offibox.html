@@ -26,9 +26,15 @@
       .bandeau-inner { font-size: 1.35rem; white-space: nowrap; }
       .bandeau-inner .block2 { display: inline; margin-top: 0; }
     }
+    /* En iframe (ex. Wix) : masquer le bandeau pour éviter doublon / affichage hors cadre */
+    body.in-iframe .bandeau { display: none !important; }
+    body.in-iframe { min-height: 0; }
   </style>
 </head>
 <body>
+  <script>
+    (function(){ try { if (window.self !== window.top) document.body.classList.add('in-iframe'); } catch (e) { document.body.classList.add('in-iframe'); } })();
+  </script>
   <div class="bandeau">
     <div class="bandeau-inner-wrap">
       <p class="bandeau-inner" aria-label="Bienvenue sur Offibox La boîte à outils de l'Officine">

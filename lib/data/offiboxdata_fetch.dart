@@ -66,11 +66,12 @@ bool _loggedNoToken = false;
 Future<http.Response> _get(String url) async {
   if (isOffiboxDataRawUrl(url)) {
     if (_githubToken.isEmpty) {
-      if (kDebugMode && !_loggedNoToken) {
+      if (!_loggedNoToken) {
         _loggedNoToken = true;
         debugPrint(
-          '[Offibox] OffiboxData: token non défini → requêtes raw (repo privé = 404). '
-          'Lancer avec: flutter run --dart-define=OFFIBOXDATA_GITHUB_TOKEN=votre_token',
+          '[Offibox] OffiboxData: token non défini → repo privé = 404 pour tous les CSV. '
+          'Local: flutter run -t lib/main_web.dart --dart-define=OFFIBOXDATA_GITHUB_TOKEN=votre_PAT. '
+          'GitHub Pages: ajouter le secret OFFIBOXDATA_GITHUB_TOKEN dans Settings → Secrets → Actions, puis redéployer.',
         );
       }
     } else {
@@ -87,17 +88,20 @@ Future<http.Response> _get(String url) async {
           Uri.parse(apiUrl),
           headers: {
             'Authorization': auth,
-            'Accept': 'application/vnd.github.raw',
+            'Accept': 'application/vnd.github.raw+json',
             'X-GitHub-Api-Version': '2022-11-28',
           },
         );
         if (res.statusCode == 200) return res;
-        if (kDebugMode && res.statusCode == 404) {
-          final pathForLog = _rawUrlPathForLog(url);
-          debugPrint('[Offibox] OffiboxData: API 404 pour $pathForLog (fichier absent ou token sans accès Contents ?)');
-        }
-        if (kDebugMode && res.statusCode == 401) {
-          debugPrint('[Offibox] OffiboxData: API 401 Unauthorized. Vérifier : token valide, non expiré, avec accès au repo offiboxdata (scope repo ou Contents: Read). Réponse: ${res.body.length > 200 ? res.body.substring(0, 200) + "…" : res.body}');
+        final pathForLog = _rawUrlPathForLog(url);
+        if (kDebugMode) {
+          if (res.statusCode == 404) {
+            debugPrint('[Offibox] OffiboxData: API 404 pour $pathForLog (fichier absent ou token sans accès Contents ?)');
+          } else if (res.statusCode == 401) {
+            debugPrint('[Offibox] OffiboxData: API 401 Unauthorized. Vérifier : token valide, non expiré, avec accès au repo offiboxdata. Réponse: ${res.body.length > 200 ? res.body.substring(0, 200) + "…" : res.body}');
+          } else if (res.statusCode == 403 || res.statusCode == 422) {
+            debugPrint('[Offibox] OffiboxData: API ${res.statusCode} pour $pathForLog → ${res.body.length > 300 ? res.body.substring(0, 300) + "…" : res.body}');
+          }
         }
         if (res.statusCode != 404) return res;
       }
