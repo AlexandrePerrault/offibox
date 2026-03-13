@@ -89,9 +89,9 @@
       gap: 6px;
     }
     .pill-badge {
-      padding: 4px 8px;
+      padding: 2px 6px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       background: #e2e8f0;
       color: #0f172a;
@@ -165,16 +165,9 @@
             <input type="text" class="search-input" id="search-input" placeholder="Rechercher…" readonly>
             <div class="result-line" id="result-line">
               <div class="result-product-line" id="result-product-line">
-                <span class="result-title">IMBRUVICA 420&nbsp;mg gélule</span>
-                <span class="result-subtitle">Boîte de 90 · Janssen‑Cilag</span>
-                <span class="pill-badge primary">PIH</span>
-                <span class="pill-badge">Surveillance renforcée</span>
-              </div>
-              <div class="pill-row">
-                <span class="pill-badge" data-doc="rcp">RCP</span>
-                <span class="pill-badge" data-doc="meddispar">MEDDISPAR</span>
-                <span class="pill-badge" data-doc="fichePatient">Fiche patient</span>
-                <span class="pill-badge" data-doc="fichePro">Fiche pro</span>
+                <span class="pill-badge primary">OUTILS MÉTIER</span>
+                <span class="result-title">TROD angine</span>
+                <span class="result-subtitle">Compte‑rendu, logigramme AMELI, recommandations HAS, bons de prise en charge…</span>
               </div>
               <div class="preview-panel" id="preview-panel">
                 <div class="preview-title" id="preview-title">RCP – Imbruvica</div>
@@ -207,6 +200,32 @@
     var previewBox = document.getElementById('preview-box');
     var pillBadges = document.querySelectorAll('.pill-badge[data-doc]');
     var demoWrap = document.getElementById('demo-wrap');
+    var trodPreviews = [
+      {
+        label: 'compte-rendu',
+        image: 'https://alexandreperrault.github.io/offibox/website/demo/trod-compte-rendu.jpg'
+      },
+      {
+        label: 'logigramme AMELI',
+        image: 'https://alexandreperrault.github.io/offibox/website/demo/trod-logigramme-ameli.jpg'
+      },
+      {
+        label: 'recommandation HAS (enfant)',
+        image: 'https://alexandreperrault.github.io/offibox/website/demo/trod-reco-has-enfant.jpg'
+      },
+      {
+        label: 'recommandation HAS (adulte)',
+        image: 'https://alexandreperrault.github.io/offibox/website/demo/trod-reco-has-adulte.jpg'
+      },
+      {
+        label: 'Bon de prise en charge adulte',
+        image: 'https://alexandreperrault.github.io/offibox/website/demo/trod-bon-prise-en-charge-adulte.jpg'
+      },
+      {
+        label: 'Bon de prise en charge enfant',
+        image: 'https://alexandreperrault.github.io/offibox/website/demo/trod-bon-prise-en-charge-enfant.jpg'
+      }
+    ];
     var demoStarted = false;
     function updateDate() {
       if (!infoDate) return;
@@ -306,7 +325,7 @@
         {
           query: 'trod angine',
           title: 'TROD angine',
-          html: 'Compte‑rendu, logigrammes HAS, bons de prise en charge…'
+          html: ''
         },
         {
           query: 'législation stupéfiants',
@@ -323,8 +342,8 @@
           title: 'Viatris',
           html:
             '<div style=\"display:flex;align-items:center;justify-content:center;gap:8px;\">' +
-            '<img src=\"https://raw.githubusercontent.com/AlexandrePerrault/offibox/master/assets/icons/viatris.png\" ' +
-            'alt=\"Viatris\" style=\"height:28px;object-fit:contain;display:block;\" loading=\"lazy\">' +
+            '<img src=\"https://raw.githubusercontent.com/AlexandrePerrault/offibox/master/assets/icons/viatris.svg\" ' +
+            'alt=\"Viatris\" style=\"height:24px;object-fit:contain;display:block;\" loading=\"lazy\">' +
             '<span style=\"font-size:12px;font-weight:600;\">Laboratoire Viatris</span>' +
             '</div>'
         }
@@ -340,20 +359,57 @@
           function() {
             if (resultLine) resultLine.classList.add('visible');
             if (resultProductLine) resultProductLine.classList.add('show');
-            setPreviewCustom(stepData.title, stepData.html);
-            if (idx < steps.length) {
-              setTimeout(function() {
-                deleteWriter(
-                  stepData.query,
-                  function(val) { searchInput.value = val; },
-                  function() { setTimeout(nextStep, 350); }
-                );
-              }, 1600);
+            if (stepData.query === 'trod angine') {
+              runTrodPreviewSequence(function() {
+                setTimeout(function() {
+                  deleteWriter(
+                    stepData.query,
+                    function(val) { searchInput.value = val; },
+                    function() { setTimeout(nextStep, 350); }
+                  );
+                }, 400);
+              });
+            } else {
+              setPreviewCustom(stepData.title, stepData.html);
+              if (idx < steps.length) {
+                setTimeout(function() {
+                  deleteWriter(
+                    stepData.query,
+                    function(val) { searchInput.value = val; },
+                    function() { setTimeout(nextStep, 350); }
+                  );
+                }, 1600);
+              }
             }
           }
         );
       }
       nextStep();
+    }
+
+    function runTrodPreviewSequence(onDone) {
+      if (!previewPanel || !previewBox) {
+        if (onDone) onDone();
+        return;
+      }
+      var i = 0;
+      function step() {
+        if (i >= trodPreviews.length) {
+          if (onDone) onDone();
+          return;
+        }
+        var item = trodPreviews[i++];
+        var html =
+          '<div style=\"font-size:11px;margin-bottom:4px;font-weight:600;\">' +
+          'TROD angine – ' + item.label +
+          '</div>' +
+          '<img src=\"' + item.image + '\" alt=\"' + item.label + '\" ' +
+          'style=\"width:100%;max-height:120px;object-fit:contain;border-radius:8px;display:block;\" ' +
+          'loading=\"lazy\" referrerpolicy=\"no-referrer\">';
+        setPreviewCustom('TROD angine', html);
+        setTimeout(step, 1600);
+      }
+      step();
     }
 
     function startDemoOnce() {
