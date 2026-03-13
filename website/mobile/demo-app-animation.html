@@ -351,7 +351,9 @@
 
       var idx = 0;
       function nextStep() {
-        if (idx >= steps.length) return;
+        if (idx >= steps.length) {
+          return;
+        }
         var stepData = steps[idx++];
         typewriter(
           stepData.query,
@@ -370,6 +372,10 @@
                 }, 400);
               });
             } else {
+              // Pour les requêtes suivantes (législation, Freestyle, Viatris),
+              // on masque l'entête "OUTILS MÉTIER / TROD angine" pour ne garder que le panneau d'aperçu.
+              if (resultLine) resultLine.classList.remove('visible');
+              if (resultProductLine) resultProductLine.classList.remove('show');
               setPreviewCustom(stepData.title, stepData.html);
               if (idx < steps.length) {
                 setTimeout(function() {
@@ -379,6 +385,9 @@
                     function() { setTimeout(nextStep, 350); }
                   );
                 }, 1600);
+              } else {
+                // Dernière requête (viatris) : laisser visible puis fermer la barre et réduire la hauteur.
+                setTimeout(finishDemo, 1800);
               }
             }
           }
@@ -410,6 +419,16 @@
         setTimeout(step, 1600);
       }
       step();
+    }
+
+    function finishDemo() {
+      if (previewPanel) previewPanel.classList.remove('visible');
+      if (resultLine) resultLine.classList.remove('visible');
+      if (barContainer) {
+        barContainer.classList.remove('expanded');
+        barContainer.classList.remove('landscape-expanded');
+      }
+      if (demoWrap) demoWrap.style.minHeight = '160px';
     }
 
     function startDemoOnce() {
