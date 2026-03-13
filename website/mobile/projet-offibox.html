@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Le projet Offibox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; --hover-pill: #f59e0b; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { max-width: 100vw; overflow-x: hidden; background: #f8fafc; }
+    body { font-family: 'Spinnaker', sans-serif; font-size: 16px; line-height: 1.75; min-height: 100vh; color: var(--gray); padding: 1rem 1rem 2rem; display: flex; flex-direction: column; align-items: center; -webkit-tap-highlight-color: transparent; }
+    .legal-wrap { width: 100%; max-width: 720px; margin: 0 auto; }
+    .legal-header { text-align: center; margin-bottom: 1.5rem; }
+    .legal-header h1 { font-size: 1.35rem; font-weight: 700; color: var(--gray); }
+    .legal-header .brand { color: var(--offi-teal); font-weight: 600; }
+    .legal-card { background: var(--white); padding: 1.25rem 1.1rem; border-radius: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.08); border: 1px solid var(--gray-light); max-width: 100%; }
+    .legal-card p { margin-bottom: 1rem; color: var(--gray); font-size: 0.95rem; text-indent: 1.5em; text-align: justify; }
+    .legal-card p.no-indent { text-indent: 0; }
+    .intro-line { opacity: 0; transform: translateY(8px); animation: intro-fade 0.7s ease-out forwards; }
+    .intro-line:nth-of-type(1) { animation-delay: 0.1s; }
+    .intro-line:nth-of-type(2) { animation-delay: 0.3s; }
+    .intro-line:nth-of-type(3) { animation-delay: 0.5s; }
+    .intro-line:nth-of-type(4) { animation-delay: 0.7s; }
+    .intro-line:nth-of-type(5) { animation-delay: 0.9s; }
+    @keyframes intro-fade { to { opacity: 1; transform: translateY(0); } }
+    .legal-card a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+    .legal-card a:hover { text-decoration: underline; }
+    .projet-stats { margin: 1.25rem 0; padding-left: 0.5rem; border-left: 3px solid var(--offi-teal); }
+    .projet-stats .stat-line { opacity: 0; transform: translateY(8px); animation: stat-fade-in 1s ease-out forwards; display: flex; align-items: flex-start; gap: 0.45rem; }
+    .projet-stats .stat-line:nth-child(1) { animation-delay: 0.4s; }
+    .projet-stats .stat-line:nth-child(2) { animation-delay: 1s; }
+    .projet-stats .stat-line:nth-child(3) { animation-delay: 1.6s; }
+    .projet-stats .stat-line:nth-child(4) { animation-delay: 2.2s; }
+    @keyframes stat-fade-in { to { opacity: 1; transform: translateY(0); } }
+    .projet-stats .stat-line { margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--gray); }
+    .stat-bullet { width: 0.65rem; height: 0.65rem; border-radius: 999px; background: var(--offi-teal); margin-top: 0.4rem; opacity: 0; animation: bullet-fade-in 0.6s ease-out forwards; }
+    .stat-line:nth-child(2) .stat-bullet { animation-delay: 0.4s; }
+    .stat-line:nth-child(3) .stat-bullet { animation-delay: 0.8s; }
+    @keyframes bullet-fade-in { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+    .projet-stats .stat-number { font-weight: 700; color: var(--offi-teal); font-size: 1.1em; }
+    .stat-number-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 4.2em; padding: 0.45rem 0.9rem; background: var(--offi-teal); color: var(--white); font-weight: 800; font-size: 1.35em; border-radius: 12px; box-shadow: 0 2px 8px rgba(90,144,148,0.35); margin-right: 0.4rem; letter-spacing: 0.02em; box-sizing: border-box; }
+    .offibox-pill-heading { display: inline-flex; align-items: center; padding: 0.3rem 0.9rem; border-radius: 999px; background: var(--hover-pill); color: var(--white); font-weight: 700; font-size: 0.9rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    .badge-fonctionnalites { display: inline-flex; align-items: center; gap: 0.5rem; margin: 1.25rem 0; padding: 0.75rem 1.2rem; background: var(--white); color: var(--offi-teal); font-weight: 600; font-size: 0.95rem; border-radius: 12px; text-decoration: none; transition: background 0.2s, color 0.2s; box-shadow: 0 4px 12px rgba(90,144,148,0.18); border: 2px solid var(--offi-teal); }
+    .badge-fonctionnalites:hover { background: var(--offi-teal); color: var(--white); }
+    .fonctionnalites-wrap { text-align: center; }
+    .term { color: var(--offi-teal); font-weight: 600; }
+    .badge-block { margin: 1rem 0; padding: 1rem 1.2rem; border-radius: 14px; background: #e8f4f4; border: 1px solid rgba(90,144,148,0.25); font-size: 0.94rem; }
+    .badge-block p { margin-bottom: 0.6rem; text-indent: 0; }
+    .badge-block p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="legal-wrap">
+    <header class="legal-header">
+      <h1>Le projet <span class="brand">Offi</span>box</h1>
+    </header>
+    <main class="legal-card">
+      <p class="intro-line">En Officine, la recherche d'informations au quotidien est parfois <span class="term">fastidieuse</span> car les sources sont <span class="term">nombreuses</span>, pas toujours à jour et notre métier <span class="term">évolue constamment</span> (nouvelles missions, évolution de la législation…).</p>
+      <p class="intro-line"><span class="brand">Offi</span>box n'est pas un nouveau LGO, c'est une <span class="term">discrète barre de recherche</span>, <span class="term">simple d'utilisation</span>, et <span class="term">facilement accessible au comptoir</span>. L'application a été <span class="term">conçue</span> pour centraliser un maximum des informations nécessaires à l'équipe officinale, et ses objectifs sont multiples :</p>
+      <div class="badge-block intro-line">
+        <p><span class="term">Accéder plus rapidement à l'information</span> et ainsi faire gagner du temps à toute l'équipe officinale.</p>
+        <p>Vous garantir une information <span class="term">neutre</span>, <span class="term">fiable</span> et <span class="term">constamment à jour</span>.</p>
+        <p>C'est également un outil <span class="term">évolutif</span>, conçu pour s'adapter aux nouvelles législations, et ainsi qu'aux futures missions des pharmaciens d'officine.</p>
+      </div>
+      <p class="intro-line">Développé par un ex-pharmacien titulaire et après un an de développement et de test, <span class="brand">Offi</span>box voit le jour en 2026.</p>
+      <div class="offibox-pill-heading intro-line">Aujourd'hui, <span class="brand">Offi</span>box, c'est :</div>
+      <div class="badge-block projet-stats intro-line" id="stats-zone">
+        <div class="stat-line">
+          <span class="stat-number-badge" aria-hidden="true"><span id="stat-count">—</span></span>
+          <span>liens et entrées indexés (fiches Médicaments enrichies issues de la BDM, LPP, pansements, outils métier, sites web, vidéos, annuaires…)</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-bullet" aria-hidden="true"></span>
+          <span>Des données mises à jour régulièrement (alertes ANSM, retraits de lot, DGS-Urgent… et connectées aux produits).</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-bullet" aria-hidden="true"></span>
+          <span>Des outils : lecteur de QR code, vidéos de démonstration, cahier de liaison digital.</span>
+        </div>
+      </div>
+      <p class="no-indent intro-line fonctionnalites-wrap" style="margin-top: 1rem;">
+        <a href="https://www.offibox.fr/fonctionnalités" class="badge-fonctionnalites" target="_blank" rel="noopener noreferrer">Voir toutes les fonctionnalités →</a>
+      </p>
+    </main>
+  </div>
+  <script>
+  (function(){
+    var el = document.getElementById('stat-count');
+    var zone = document.getElementById('stats-zone');
+    if (!el || !zone) return;
+    var count = 58790;
+    var duration = 5200;
+    var steps = 52;
+    var stepDuration = duration / steps;
+    var step = Math.ceil(count / steps);
+    var started = false;
+    function formatNum(n) { return n.toLocaleString('fr-FR'); }
+    function runCounter() {
+      if (started) return;
+      started = true;
+      var current = 0;
+      var stepIndex = 0;
+      function tick() {
+        stepIndex++;
+        current = Math.min(current + step, count);
+        el.textContent = formatNum(current);
+        if (stepIndex < steps) setTimeout(tick, stepDuration);
+        else el.textContent = formatNum(count);
+      }
+      tick();
+    }
+    if (typeof IntersectionObserver !== 'undefined') {
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) runCounter(); });
+      }, { rootMargin: '0px', threshold: 0.2 });
+      obs.observe(zone);
+    } else { runCounter(); }
+  })();
+  </script>
+</body>
+</html>

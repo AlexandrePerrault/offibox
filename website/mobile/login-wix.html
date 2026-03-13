@@ -11,6 +11,7 @@
   <style>
     :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100vw; overflow-x: hidden; }
     body {
       font-family: 'Spinnaker', sans-serif;
       font-size: 16px;
@@ -30,8 +31,9 @@
       justify-content: center;
       gap: 1.5rem;
       width: 100%;
-      max-width: 1400px;
+      max-width: min(1400px, 100vw);
       margin: 0 auto;
+      min-width: 0;
     }
     @media (min-width: 901px) {
       .login-split {

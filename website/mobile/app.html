@@ -10,10 +10,10 @@
   <style>
     :root { --bg-dark: #0f172a; --text: #f8fafc; --text-muted: #94a3b8; --white: #ffffff; --offi-teal: #5A9094; --accent: #38bdf8; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; font-family: Spinnaker, sans-serif; }
+    html, body { width: 100%; max-width: 100vw; height: 100%; overflow-x: hidden; font-family: Spinnaker, sans-serif; }
     body { background: #f8fafb; display: flex; flex-direction: column; }
-    nav { flex-shrink: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); padding: 0.75rem 1.5rem; }
-    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    nav { flex-shrink: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); padding: 0.75rem 1rem; min-width: 0; }
+    .nav-inner { width: 100%; max-width: min(1200px, 100vw); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
     .nav-logo img { height: 32px; width: auto; display: block; }
     .nav-links { display: flex; align-items: center; gap: 1rem; }
     .nav-links a { color: var(--text); text-decoration: none; font-size: 0.9rem; font-weight: 500; }

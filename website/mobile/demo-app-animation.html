@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Démo Offibox – Mobile (paysage = barre étendue)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #0f172a; --text: #f8fafc; --text-muted: #94a3b8; --offi-teal: #5A9094; --white: #ffffff; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100vw; overflow-x: hidden; font-family: 'Spinnaker', sans-serif; background: transparent; min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+    .demo-wrap { width: 100%; max-width: 100vw; min-height: 320px; padding: 0.75rem; position: relative; }
+    .app-bar-outer { position: relative; width: 100%; max-width: 100%; display: flex; justify-content: flex-end; z-index: 10; }
+    .app-bar-container { position: relative; width: 56px; min-width: 56px; height: 56px; min-height: 56px; border-radius: 18px; background: var(--white); border: 1px solid rgba(0,0,0,.08); box-shadow: 0 4px 12px rgba(0,0,0,.12); display: flex; align-items: center; justify-content: center; overflow: hidden; transition: width .35s ease-out, min-height .35s ease-out, border-radius .3s ease-out; transform-origin: right center; }
+    .app-bar-container.expanded, .app-bar-container.landscape-expanded { width: 100%; min-height: 64px; height: auto; border-radius: 14px; justify-content: flex-start; flex-direction: row; align-items: stretch; }
+    @media (orientation: landscape) {
+      .demo-wrap { min-height: 220px; padding: 0.5rem; }
+      .app-bar-outer { justify-content: stretch; }
+      .app-bar-container { width: 100%; min-height: 60px; height: auto; border-radius: 14px; flex-direction: row; align-items: stretch; }
+      .app-bar-container .bar-expanded-content { display: flex !important; }
+    }
+    .bar-pill-only { position: absolute; right: 0; top: 0; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; -webkit-tap-highlight-color: transparent; }
+    .app-bar-container.expanded .bar-pill-only, .app-bar-container.landscape-expanded .bar-pill-only { position: absolute; }
+    .bar-pill-only .logo-img { width: 42px; height: 42px; object-fit: contain; display: block; }
+    .bar-expanded-content { display: none; flex-direction: column; flex: 1; min-width: 0; margin-right: 56px; padding: 6px 8px 8px; }
+    .app-bar-container.expanded .bar-expanded-content, .app-bar-container.landscape-expanded .bar-expanded-content { display: flex; }
+    .info-bar { height: 34px; padding: 0 6px; display: flex; align-items: center; gap: 4px; background: #fff; border-radius: 8px; margin: 0 0 6px; box-shadow: 0 1px 4px rgba(0,0,0,.06); flex-shrink: 0; }
+    .info-bar-toggle { width: 24px; height: 14px; background: #34C759; border-radius: 7px; flex-shrink: 0; border: 1.5px solid #fff; position: relative; }
+    .info-bar-toggle::before { content: ''; position: absolute; top: 1px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .2s ease-out; }
+    .info-bar-toggle.off { background: #cbd5e1; }
+    .info-bar-toggle.off::before { transform: translateX(6px); }
+    .info-bar-date { height: 18px; padding: 2px 6px; background: #37474F; border-radius: 6px; font-size: 9px; font-weight: 600; color: #fff; flex-shrink: 0; }
+    .info-bar-infos { height: 18px; padding: 2px 6px; background: #4E8A72; border-radius: 6px; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .info-bar-scroll { flex: 1; overflow: hidden; min-width: 0; }
+    .info-bar-scroll-inner { display: flex; align-items: center; gap: 2px; animation: ticker-scroll 25s linear infinite; }
+    .ticker-bullet { color: #94a3b8; font-size: 8px; padding: 0 2px; flex-shrink: 0; }
+    .ticker-badge { height: 18px; padding: 2px 6px; border-radius: 6px; font-size: 9px; font-weight: 700; color: #fff; white-space: nowrap; flex-shrink: 0; }
+    .ticker-badge.dgs { background: #B71C1C; }
+    .ticker-badge.ansm { background: #1565C0; }
+    .ticker-badge.rappel { background: #B71C1C; }
+    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .search-bar-expanded { min-height: 0; padding: 6px 0 0; }
+    .search-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; font-family: inherit; font-size: 14px; min-width: 0; }
+
+    /* Ligne de résultat + pills type app */
+    .result-line { display: none; margin-top: 6px; }
+    .result-line.visible { display: block; }
+    .result-product-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin-bottom: 6px;
+      opacity: 0;
+      transition: opacity .25s ease-out;
+      font-size: 13px;
+      color: #0f172a;
+    }
+    .result-product-line.show { opacity: 1; }
+    .result-title { font-weight: 600; }
+    .result-subtitle { font-size: 12px; color: var(--text-muted); }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pill-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .pill-badge.primary { background: #5A9094; color: #ffffff; }
+    .pill-badge.active { box-shadow: 0 0 0 2px rgba(90,144,148,0.4); }
+
+    /* Panneau d'aperçu document */
+    .preview-panel {
+      margin-top: 10px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 8px;
+      display: none;
+    }
+    .preview-panel.visible { display: block; }
+    .preview-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .preview-box {
+      height: 120px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      font-size: 12px;
+      text-align: center;
+      padding: 0 12px;
+    }
+
+    .hint-landscape { margin-top: 0.5rem; font-size: 11px; color: var(--text-muted); text-align: center; }
+    @media (orientation: landscape) { .hint-landscape { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap" id="demo-wrap">
+    <div class="app-bar-outer">
+      <div class="app-bar-container" id="app-bar-container">
+        <div class="bar-pill-only" id="bar-pill" role="button" aria-label="Ouvrir la barre">
+          <img id="demo-logo-img" data-src="../logo%20sans%20texte.png" alt="Offibox" class="logo-img" referrerpolicy="no-referrer" src="">
+        </div>
+        <div class="bar-expanded-content">
+          <div class="info-bar">
+            <div class="info-bar-toggle" id="info-toggle" role="button" aria-label="Infos on/off"></div>
+            <div class="info-bar-date" id="info-bar-date"></div>
+            <div class="info-bar-infos">INFOS</div>
+            <div class="info-bar-scroll">
+              <div class="info-bar-scroll-inner" id="ticker-inner">
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge ansm">ANSM – Informations de sécurité</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge rappel">Rappel produit</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge ansm">ANSM</span>
+                <span class="ticker-bullet">•</span>
+                <span class="ticker-badge rappel">Rappel produit</span>
+                <span class="ticker-bullet">•</span>
+              </div>
+            </div>
+          </div>
+          <div class="search-bar-expanded">
+            <input type="text" class="search-input" id="search-input" placeholder="Rechercher…" readonly>
+            <div class="result-line" id="result-line">
+              <div class="result-product-line" id="result-product-line">
+                <span class="result-title">IMBRUVICA 420&nbsp;mg gélule</span>
+                <span class="result-subtitle">Boîte de 90 · Janssen‑Cilag</span>
+                <span class="pill-badge primary">PIH</span>
+                <span class="pill-badge">Surveillance renforcée</span>
+              </div>
+              <div class="pill-row">
+                <span class="pill-badge" data-doc="rcp">RCP</span>
+                <span class="pill-badge" data-doc="meddispar">MEDDISPAR</span>
+                <span class="pill-badge" data-doc="fichePatient">Fiche patient</span>
+                <span class="pill-badge" data-doc="fichePro">Fiche pro</span>
+              </div>
+              <div class="preview-panel" id="preview-panel">
+                <div class="preview-title" id="preview-title">RCP – Imbruvica</div>
+                <div class="preview-box" id="preview-box">
+                  Aperçu du document (extrait PDF ou fiche) comme dans l’application.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="hint-landscape">Tournez l'appareil en paysage pour voir la barre étendue.</p>
+  </div>
+  <script>
+  (function() {
+    var docBase = (function() { var href = window.location.href; var lastSlash = href.lastIndexOf('/'); return lastSlash >= 0 ? href.slice(0, lastSlash + 1) : href + '/'; })();
+    function assetUrl(relativePath) { if (!relativePath) return ''; try { return new URL(relativePath, docBase).href; } catch (e) { return relativePath; } }
+    var logoImg = document.getElementById('demo-logo-img');
+    if (logoImg && logoImg.getAttribute('data-src')) logoImg.src = assetUrl(logoImg.getAttribute('data-src'));
+    var barContainer = document.getElementById('app-bar-container');
+    var barPill = document.getElementById('bar-pill');
+    var infoToggle = document.getElementById('info-toggle');
+    var infoDate = document.getElementById('info-bar-date');
+    var searchInput = document.getElementById('search-input');
+    var resultLine = document.getElementById('result-line');
+    var resultProductLine = document.getElementById('result-product-line');
+    var previewPanel = document.getElementById('preview-panel');
+    var previewTitle = document.getElementById('preview-title');
+    var previewBox = document.getElementById('preview-box');
+    var pillBadges = document.querySelectorAll('.pill-badge[data-doc]');
+    var demoStarted = false;
+    function updateDate() {
+      if (!infoDate) return;
+      var d = new Date();
+      infoDate.textContent = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear() + '  ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
+    }
+    updateDate();
+    setInterval(updateDate, 1000);
+    function isLandscape() { return window.matchMedia && window.matchMedia('(orientation: landscape)').matches; }
+    function applyOrientation() {
+      if (isLandscape()) {
+        barContainer.classList.add('landscape-expanded');
+        barContainer.classList.remove('expanded');
+      } else {
+        barContainer.classList.remove('landscape-expanded');
+      }
+    }
+
+    function typewriter(text, onUpdate, onDone) {
+      var i = 0;
+      function step() {
+        if (i <= text.length) {
+          onUpdate(text.slice(0, i));
+          i++;
+          setTimeout(step, 90);
+        } else if (onDone) {
+          onDone();
+        }
+      }
+      step();
+    }
+
+    function setPreview(docKey) {
+      if (!previewPanel || !previewTitle || !previewBox) return;
+      var title;
+      switch (docKey) {
+        case 'rcp':
+          title = 'RCP – Imbruvica';
+          break;
+        case 'meddispar':
+          title = 'MEDDISPAR – Imbruvica';
+          break;
+        case 'fichePatient':
+          title = 'Fiche patient – Imbruvica';
+          break;
+        case 'fichePro':
+          title = 'Fiche pro – Imbruvica';
+          break;
+        default:
+          title = 'Document Offibox';
+      }
+      previewTitle.textContent = title;
+      previewPanel.classList.add('visible');
+    }
+
+    function clearPillActive() {
+      pillBadges.forEach(function(el) { el.classList.remove('active'); });
+    }
+
+    pillBadges.forEach(function(el) {
+      el.addEventListener('click', function() {
+        clearPillActive();
+        el.classList.add('active');
+        setPreview(el.getAttribute('data-doc'));
+      });
+    });
+
+    function startDemoOnce() {
+      if (demoStarted || !searchInput) return;
+      demoStarted = true;
+      var query = 'imbruvica';
+      typewriter(
+        query,
+        function(val) { searchInput.value = val; },
+        function() {
+          if (resultLine) resultLine.classList.add('visible');
+          if (resultProductLine) {
+            setTimeout(function() { resultProductLine.classList.add('show'); }, 150);
+          }
+          var seq = ['rcp', 'meddispar', 'fichePatient', 'fichePro'];
+          var idx = 0;
+          function next() {
+            if (idx >= seq.length) return;
+            var key = seq[idx++];
+            var el = Array.prototype.find.call(pillBadges, function(p) {
+              return p.getAttribute('data-doc') === key;
+            });
+            if (el) {
+              clearPillActive();
+              el.classList.add('active');
+              setPreview(key);
+            }
+            setTimeout(next, 1400);
+          }
+          setTimeout(next, 500);
+        }
+      );
+    }
+
+    if (barPill) {
+      barPill.addEventListener('click', function() {
+        if (isLandscape()) return;
+        barContainer.classList.toggle('expanded');
+        if (barContainer.classList.contains('expanded')) {
+          startDemoOnce();
+        }
+      });
+    }
+
+    if (infoToggle) infoToggle.addEventListener('click', function() { infoToggle.classList.toggle('off'); });
+    if (window.matchMedia) window.matchMedia('(orientation: landscape)').addEventListener('change', applyOrientation);
+    window.addEventListener('orientationchange', function() { setTimeout(applyOrientation, 50); });
+    applyOrientation();
+  })();
+  </script>
+</body>
+</html>
