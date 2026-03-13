@@ -286,7 +286,7 @@ class _LoginPageState extends State<LoginPage> {
           _step = _LoginStep.firstConnectionSuccess;
           loading = false;
         });
-        _openDownloadPageAfterDelay();
+        if (!kIsWeb) _openDownloadPageAfterDelay();
       }
     } catch (e) {
       _showError(_authErrorMessage(e.toString()));
@@ -1190,7 +1190,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Vous allez être redirigé vers la page de téléchargement.',
+          'Vous pouvez continuer à utiliser Offibox sur cette page.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 15,
@@ -1198,42 +1198,8 @@ class _LoginPageState extends State<LoginPage> {
             fontFamily: 'Spinnaker',
           ),
         ),
-        const SizedBox(height: 32),
-        OutlinedButton.icon(
-          onPressed: _openDownloadPage,
-          icon: const Icon(Icons.download, size: 20),
-          label: Text(
-            Platform.isWindows
-                ? 'Télécharger — Windows ${_windowsVersionLabel()}'
-                : 'Ouvrir la page de téléchargement',
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Spinnaker',
-            ),
-          ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: OffiboxColors.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            side: const BorderSide(color: OffiboxColors.primary),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-          ),
-        ),
       ],
     );
-  }
-
-  String _windowsVersionLabel() {
-    try {
-      final v = Platform.operatingSystemVersion;
-      if (v.contains('10.0')) return '10';
-      if (v.contains('11') || v.contains('10.0.22')) return '11';
-      return 'Windows';
-    } catch (_) {
-      return 'Windows';
-    }
   }
 }
 

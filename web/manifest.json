@@ -2,12 +2,15 @@
     "name": "Offibox – La boîte à outils de l'officine",
     "short_name": "Offibox",
     "start_url": ".",
+    "scope": "/",
     "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone"],
     "background_color": "#5A9094",
     "theme_color": "#5A9094",
-    "description": "Offibox PWA : tournez le téléphone en paysage pour lire la barre horizontalement.",
+    "description": "Offibox PWA : tournez l'écran en paysage pour voir la barre d'outils.",
     "orientation": "any",
     "prefer_related_applications": false,
+    "categories": ["medical", "productivity"],
     "icons": [
         {
             "src": "icons/Icon-192.png",

@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'package:offibox/io_platform_stub.dart' if (dart.library.io) 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:offibox/window/window_manager_stub.dart' if (dart.library.io) 'package:window_manager/window_manager.dart';
 
 import 'package:offibox/app/offibox_app.dart';
 import 'package:offibox/constants/app_update_config.dart';

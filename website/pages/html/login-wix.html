@@ -375,7 +375,7 @@
           </div>
           <button type="submit" class="btn-submit" id="btn-submit">Se connecter</button>
         </form>
-        <p class="signup-link">Première connexion ? <a href="inscription.html" id="toggle-signup" class="signup-badge">Inscrivez-vous</a></p>
+        <p class="signup-link">Première connexion ? <a href="https://offibox.fr/inscription" id="toggle-signup" class="signup-badge" target="_blank" rel="noopener noreferrer">Inscrivez-vous</a></p>
       </div>
     </div>
 
@@ -485,7 +485,7 @@
       });
       if (toggleSignup) toggleSignup.addEventListener('click', function(e) {
         e.preventDefault();
-        window.location.href = 'inscription.html';
+        window.location.href = 'https://offibox.fr/inscription';
       });
       if (forgotLink) forgotLink.addEventListener('click', function(e) { e.preventDefault(); passwordResetForm.classList.add('visible'); });
       if (btnCancelReset) btnCancelReset.addEventListener('click', function() { passwordResetForm.classList.remove('visible'); document.getElementById('reset-email').value = ''; });

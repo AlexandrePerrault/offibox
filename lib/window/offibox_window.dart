@@ -4,7 +4,7 @@ import 'package:offibox/services/device_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:offibox/window/window_manager_stub.dart' if (dart.library.io) 'package:window_manager/window_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:offibox/window/copy_options.dart';
@@ -46,7 +46,7 @@ import 'package:offibox/ui/widgets/web_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/image_panel_below_bar.dart';
 import 'package:offibox/ui/widgets/margin_calculator_panel.dart';
 import 'package:offibox/services/news_popup_service.dart';
-import 'dart:io' show exit, Platform, Process;
+import 'package:offibox/io_platform_stub.dart' if (dart.library.io) 'dart:io' show exit, Platform, Process;
 import 'package:offibox/constants/catalogue_cart_config.dart';
 
 import 'package:offibox/data/espace_pro_credentials.dart';

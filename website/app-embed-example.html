@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offibox – App (barre intégrée)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --gray: #334155; --gray-light: #e2e8f0; --offi-teal: #5A9094; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Spinnaker', sans-serif; background: #f8fafc; color: var(--gray); min-height: 100vh; display: flex; flex-direction: column; }
+    .site-header {
+      padding: 0.75rem 1.5rem;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .site-header a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+    .site-header a:hover { text-decoration: underline; }
+    .embed-title { font-size: 1rem; color: var(--gray); }
+    /* Conteneur de l'app Flutter : la barre s'affiche à l'intérieur */
+    .app-embed-container {
+      flex: 1;
+      min-height: 70vh;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    .app-embed-container iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <span class="embed-title">Offibox – Barre et recherche</span>
+    <a href="projet-offibox.html">← Retour au projet</a>
+  </header>
+  <div class="app-embed-container">
+    <!--
+      Afficher la barre Offibox (app Flutter) sur le site :
+      1. Déployer le contenu de build/web (Flutter) sur un chemin, ex. /app/ ou https://app.offibox.fr/
+      2. Mettre ce même URL dans src ci-dessous.
+      En local : après "flutter run -d chrome -t lib/main_web.dart", utiliser par ex. http://localhost:XXXX
+    -->
+    <iframe
+      src="/app/"
+      title="Offibox – Barre d'outils"
+      allow="clipboard-read; clipboard-write">
+    </iframe>
+  </div>
+</body>
+</html>

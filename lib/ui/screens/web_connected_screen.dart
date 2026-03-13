@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:offibox/generated/build_info.dart';
 import 'package:offibox/services/trial_guard.dart';
 import 'package:offibox/services/web_session_guard.dart';
+import 'package:offibox/ui/screens/cahier_liaison_screen.dart';
 
 /// Écran version web une fois connecté : barre déployée avec « mis à jour le … » et « licence jusqu'au … ».
 /// Vérifie la limite de 5 connexions simultanées et affiche un message si dépassée.
@@ -138,6 +139,26 @@ class _WebConnectedScreenState extends State<WebConnectedScreen> {
                     ),
                   ],
                 ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Cahier de liaison partagé entre tous les postes de l'officine
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => const CahierLiaisonScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.book_outlined, size: 22),
+                label: const Text('Cahier de liaison (partagé entre les postes)'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF5A9094),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
               ),
             ),
             const SizedBox(height: 24),

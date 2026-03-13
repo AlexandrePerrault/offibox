@@ -4,14 +4,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:google_fonts/google_fonts.dart';
-import 'package:offibox/app/offibox_web_app.dart';
+import 'package:offibox/app/offibox_app.dart';
 import 'package:offibox/firebase_options.dart';
 
-/// Point d'entrée web : pas de dart:io, Hive, window_manager.
-/// Utilise OffiboxWebApp (login + écran connecté) pour ne pas importer les modules desktop manquants sur certaines branches.
+/// Point d'entrée web : même app que le desktop (barre + recherche + offiboxdata), avec stubs pour window_manager et dart:io.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Charger les polices depuis le réseau pour éviter "Unable to load asset: AssetManifest.bin" (web ou build incomplet)
   GoogleFonts.config.allowRuntimeFetching = true;
 
   await Firebase.initializeApp(
@@ -23,7 +21,7 @@ Future<void> main() async {
 
   runApp(
     const ProviderScope(
-      child: OffiboxWebApp(),
+      child: OffiboxApp(),
     ),
   );
 }

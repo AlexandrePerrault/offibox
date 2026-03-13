@@ -20,5 +20,16 @@ service cloud.firestore {
                            && request.auth.uid == userId;
       }
     }
+
+    // 🔐 CAHIER DE LIAISON (partagé par officine : même pharmacyNameNormalized = même groupe)
+    match /cahier_liaison/{groupId}/entries/{entryId} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.pharmacyNameNormalized == groupId;
+      allow create: if request.auth != null
+        && request.resource.data.authorUid == request.auth.uid
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.pharmacyNameNormalized == groupId;
+      allow update, delete: if request.auth != null
+        && resource.data.authorUid == request.auth.uid;
+    }
   }
 }

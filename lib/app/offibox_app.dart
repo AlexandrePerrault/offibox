@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:offibox/auth/auth_gate.dart';
 import 'package:offibox/auth/auth_state_provider.dart';
-import 'package:offibox/auth/offibox_protocol_listener_wrapper.dart';
+import 'package:offibox/auth/offibox_protocol_listener_wrapper_web.dart' if (dart.library.io) 'package:offibox/auth/offibox_protocol_listener_wrapper.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/ui/screens/ios_offibox_shell.dart';
 import 'package:offibox/ui/screens/login_screen.dart';
@@ -111,14 +111,8 @@ class _InitialRoute extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authStateProvider).valueOrNull;
-    if (kIsWeb) {
-      if (user == null) return const AuthGate();
-      return const Scaffold(
-        body: Center(
-          child: Text('Vous êtes connecté à Offibox (version web).'),
-        ),
-      );
-    }
+    // Web : barre uniquement, sans connexion (déploiement public iframe / Wix).
+    if (kIsWeb) return const OffiboxWindow();
     if (Platform.isWindows || Platform.isLinux) {
       if (user == null) {
         return const AuthGate();

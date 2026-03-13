@@ -39,7 +39,7 @@ jobs:
         run: flutter pub get
 
       - name: Build web (entry point main_web)
-        run: flutter build web -t lib/main_web.dart --base-href /offibox/ --release
+        run: flutter build web -t lib/main_web.dart --base-href /offibox/ --release --no-wasm-dry-run
 
       # Pages statiques (login, inscription, validation, démo) pour iframes Wix / app
       - name: Copy static HTML to build
