@@ -14,9 +14,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-/// Token GitHub (PAT) pour accéder au repo privé offiboxdata.
+/// Token GitHub (PAT) pour repo privé. Optionnel si offiboxdata est public (web utilise l'API sans token).
 /// Défini au build : --dart-define=OFFIBOXDATA_GITHUB_TOKEN=ghp_xxx
-/// Ne jamais committer le token dans le code.
 final String _githubToken = const String.fromEnvironment(
   'OFFIBOXDATA_GITHUB_TOKEN',
   defaultValue: '',
@@ -65,46 +64,49 @@ bool _loggedNoToken = false;
 
 Future<http.Response> _get(String url) async {
   if (isOffiboxDataRawUrl(url)) {
-    if (_githubToken.isEmpty) {
-      if (!_loggedNoToken) {
-        _loggedNoToken = true;
-        debugPrint(
-          '[Offibox] OffiboxData: token non défini → repo privé = 404 pour tous les CSV. '
-          'Local: flutter run -t lib/main_web.dart --dart-define=OFFIBOXDATA_GITHUB_TOKEN=votre_PAT. '
-          'GitHub Pages: ajouter le secret OFFIBOXDATA_GITHUB_TOKEN dans Settings → Secrets → Actions, puis redéployer.',
-        );
-      }
-    } else {
-      if (kDebugMode && !_loggedApiUsage) {
-        _loggedApiUsage = true;
-        debugPrint('[Offibox] OffiboxData: accès via API GitHub (token défini)');
-      }
+    // Web : toujours passer par l'API GitHub (CORS autorisé). raw.githubusercontent.com bloque les requêtes cross-origin.
+    // Repo public = API sans token OK. Repo privé = token requis (secret sur GitHub Actions).
+    final useApi = kIsWeb || _githubToken.isNotEmpty;
+    if (useApi) {
       final apiUrl = _rawUrlToApiUrl(url);
       if (apiUrl != null) {
-        final auth = _githubToken.startsWith('github_pat_')
-            ? 'Bearer $_githubToken'
-            : 'token $_githubToken';
-        final res = await http.get(
-          Uri.parse(apiUrl),
-          headers: {
-            'Authorization': auth,
-            'Accept': 'application/vnd.github.raw+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
-        );
+        if (kDebugMode && !_loggedApiUsage) {
+          _loggedApiUsage = true;
+          debugPrint(
+            _githubToken.isEmpty
+                ? '[Offibox] OffiboxData: accès via API GitHub (repo public, sans token)'
+                : '[Offibox] OffiboxData: accès via API GitHub (token défini)',
+          );
+        }
+        final headers = <String, String>{
+          'Accept': 'application/vnd.github.raw+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        };
+        if (_githubToken.isNotEmpty) {
+          headers['Authorization'] = _githubToken.startsWith('github_pat_')
+              ? 'Bearer $_githubToken'
+              : 'token $_githubToken';
+        }
+        final res = await http.get(Uri.parse(apiUrl), headers: headers);
         if (res.statusCode == 200) return res;
         final pathForLog = _rawUrlPathForLog(url);
         if (kDebugMode) {
           if (res.statusCode == 404) {
-            debugPrint('[Offibox] OffiboxData: API 404 pour $pathForLog (fichier absent ou token sans accès Contents ?)');
+            debugPrint('[Offibox] OffiboxData: API 404 pour $pathForLog (fichier absent ?)');
           } else if (res.statusCode == 401) {
-            debugPrint('[Offibox] OffiboxData: API 401 Unauthorized. Vérifier : token valide, non expiré, avec accès au repo offiboxdata. Réponse: ${res.body.length > 200 ? res.body.substring(0, 200) + "…" : res.body}');
+            debugPrint('[Offibox] OffiboxData: API 401 → repo privé : définir OFFIBOXDATA_GITHUB_TOKEN.');
           } else if (res.statusCode == 403 || res.statusCode == 422) {
             debugPrint('[Offibox] OffiboxData: API ${res.statusCode} pour $pathForLog → ${res.body.length > 300 ? res.body.substring(0, 300) + "…" : res.body}');
           }
         }
         if (res.statusCode != 404) return res;
       }
+    } else if (_githubToken.isEmpty && !_loggedNoToken) {
+      _loggedNoToken = true;
+      debugPrint(
+        '[Offibox] OffiboxData: token non défini (desktop). Repo privé = 404. '
+        'Build avec --dart-define=OFFIBOXDATA_GITHUB_TOKEN=votre_PAT',
+      );
     }
   }
   final uri = Uri.parse(url);
