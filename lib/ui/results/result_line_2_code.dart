@@ -1142,14 +1142,8 @@ Widget build(BuildContext context) {
             dciForTap: dciToTap,
             onDciTap: onDciTap,
           ),);
-          // On rajoute également le badge DCI classique (bleu) au clic car on veut garder le clic de la dci pour générique si possible
-          if (dciToTap.isNotEmpty) {
-            line2Children.add(const SizedBox(width: 6));
-            line2Children.add(_PrincepsLine2Widget(
-              dci: dciToTap,
-              onDciTap: onDciTap,
-            ),);
-          }
+          // Génériques : on n'affiche que le badge "princeps : [nom]" (pas de badge DCI type "CICLOPIROX 8%" à côté).
+          // Le clic sur le badge princeps garde la recherche DCI (dciForTap / onDciTap).
         }
       } else {
         // Princeps : on affiche la DCI (au clic), ET on affiche le premier générique connu (en rose) au lieu du badge DCI standard.

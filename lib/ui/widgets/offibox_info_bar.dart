@@ -356,8 +356,8 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
         '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
   }
 
-  /// Badge gris (date/heure) et badge INFOS : même hauteur que les infos qui défilent.
-  static double get _badgeHeight => OffiboxWindowUI.tickerBadgeHeight;
+  /// Badge gris (date/heure) et badge INFOS : même hauteur que la barre d'infos (version PC).
+  static double get _badgeHeight => OffiboxWindowUI.tickerBarHeight;
 
   @override
   Widget build(BuildContext context) {

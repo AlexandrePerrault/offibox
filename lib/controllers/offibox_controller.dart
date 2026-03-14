@@ -348,9 +348,10 @@ class OffiboxController extends ChangeNotifier {
     final extraRaw = extraResults[0] as List<SearchResult>;
     // Toujours copier : loadExtraData() retourne List.unmodifiable (removeWhere échouerait sinon)
     final extra = List<SearchResult>.from(extraRaw);
-    if (!AppConfig.cerpFeaturesEnabled) {
-      extra.removeWhere((r) => r.source == SourceType.cerp);
-    } else {
+    // CERP : en version PC standard (cerpFeaturesEnabled = false), on garde les résultats des CSV
+    // (Madouest, Co&Pharm) pour que la recherche par CIP/nom soit branchée. Seul le build CERP
+    // (cerpFeaturesEnabled = true) filtre selon le statut client CERP BA.
+    if (AppConfig.cerpFeaturesEnabled) {
       final cerpOk = await CerpClientService.isCurrentUserCerpBaValidated();
       if (!cerpOk) {
         extra.removeWhere((r) => r.source == SourceType.cerp);

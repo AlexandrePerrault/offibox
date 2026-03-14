@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Démo Offibox – Ouverture URL Qare (prescription / QR code)</title>
+  <title>Démo Offibox – Recherche médecin (Hermine Lambert)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
@@ -118,15 +118,7 @@
       margin: 0 0 6px;
       box-shadow: 0 1px 4px rgba(0,0,0,.06);
     }
-    .info-bar-toggle {
-      width: 27px;
-      height: 17px;
-      background: #34C759;
-      border-radius: 9px;
-      flex-shrink: 0;
-      border: 1.5px solid #fff;
-      box-shadow: 0 0 0 1px rgba(15,23,42,.18) inset;
-    }
+    .info-bar-toggle { width: 27px; height: 17px; background: #34C759; border-radius: 9px; flex-shrink: 0; border: 1.5px solid #fff; }
     .info-bar-date {
       height: 19px;
       padding: 2.5px 8px;
@@ -183,77 +175,69 @@
       border-radius: 10px;
       padding: 10px 14px;
       font-family: inherit;
-      font-size: 14px;
+      font-size: 15px;
       margin-bottom: 10px;
     }
-    .search-input.hidden { display: none; }
-
-    .browser-panel {
-      margin: 8px 0 12px 0;
-      width: 100%;
-      display: none;
-      flex-direction: column;
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 16px rgba(0,0,0,.08);
-      overflow: hidden;
-    }
-    .browser-panel.visible { display: flex; }
-    .browser-toolbar {
+    .result-line { display: none; }
+    .result-line.visible { display: block; }
+    .result-line.visible .search-input { display: none; }
+    .result-product-line {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: #f1f5f9;
-      border-bottom: 1px solid #e2e8f0;
-      min-height: 44px;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-bottom: 6px;
+      opacity: 0;
+      transition: opacity .25s ease-out;
     }
-    .browser-toolbar .url-bar {
-      flex: 1;
+    .result-line.visible .result-product-line.show { opacity: 1; }
+    .result-commonspan {
       font-size: 12px;
-      color: var(--offi-teal);
-      word-break: break-all;
-      min-width: 0;
-      text-decoration: none;
-    }
-    .browser-toolbar .url-bar:hover { text-decoration: underline; }
-    .browser-frame-wrap {
-      width: 100%;
-      min-height: 320px;
-      background: #f8fafc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px;
-      box-sizing: border-box;
-    }
-    .browser-frame-wrap .qare-screenshot {
-      max-width: 100%;
-      height: auto;
-      max-height: 520px;
-      object-fit: contain;
+      color: #475569;
+      font-weight: 600;
+      background: #f1f5f9;
+      padding: 2px 8px;
       border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      display: inline-block;
     }
-    .browser-frame-wrap iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .result-title { font-weight: 700; font-size: 13px; color: #334155; }
+    .result-medecin-badge {
+      display: inline-flex;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #1B6B4F;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: 'Spinnaker', sans-serif;
     }
-    .browser-frame-fallback {
-      display: none;
-      width: 100%;
-      height: 100%;
-      padding: 24px;
-      background: #f8fafc;
-      color: #64748b;
-      font-size: 13px;
-      box-sizing: border-box;
+    .result-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
     }
-    .browser-panel.iframe-blocked .browser-frame-wrap iframe { display: none; }
-    .browser-panel.iframe-blocked .browser-frame-fallback { display: block; }
-    .browser-frame-fallback a { color: var(--offi-teal); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid #4a7a7e;
+      background: var(--offi-teal);
+      color: #fff;
+      transition: background .2s, color .2s, border-color .2s;
+      font-family: 'Spinnaker', sans-serif;
+    }
+    .pill:hover, .pill.pill-active {
+      background: #fff;
+      color: var(--offi-teal);
+      border-color: var(--offi-teal);
+    }
+    .pill .pdf-icon { width: 16px; height: 16px; flex-shrink: 0; }
 
     .fake-cursor {
       position: absolute;
@@ -286,7 +270,7 @@
             <div class="info-bar-date" id="info-bar-date"></div>
             <div class="info-bar-infos">INFOS</div>
             <div class="info-bar-scroll">
-              <div class="info-bar-scroll-inner">
+              <div class="info-bar-scroll-inner" id="ticker-inner">
                 <span class="ticker-badge dgs">DGS-Urgent</span>
                 <span class="ticker-bullet">•</span>
                 <span class="ticker-badge ansm">ANSM – Informations de sécurité</span>
@@ -299,14 +283,20 @@
             </div>
           </div>
           <div class="search-bar-expanded">
-            <input type="text" class="search-input" id="search-input" placeholder="Rechercher ou coller une URL…" readonly>
-            <div class="browser-panel" id="browser-panel">
-              <div class="browser-toolbar">
-                <a id="browser-url-bar" class="url-bar" href="#" target="_blank" rel="noopener noreferrer"></a>
+            <input type="text" class="search-input" id="search-input" placeholder="Rechercher…" readonly>
+            <div class="result-line" id="result-line">
+              <div class="result-product-line" id="result-product-line">
+                <span class="result-medecin-badge">ANNUAIRE SANTÉ</span>
+                <span class="result-title" id="result-title">Dr Hermine LAMBERT</span>
+                <span class="result-commonspan" id="result-commonspan">Médecine générale</span>
               </div>
-              <div class="browser-frame-wrap">
-                <img class="qare-screenshot" src="qare.jpg" alt="Aperçu page Qare – prescription / QR code">
-                <a id="browser-fallback-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;"></a>
+              <div class="result-badges" id="result-badges">
+                <span class="pill" id="pill-plus-infos" title="Plus d'infos">
+                  <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                  </svg>
+                  + d'infos
+                </span>
               </div>
             </div>
           </div>
@@ -317,7 +307,6 @@
 
   <script>
   (function() {
-    var demoUrl = 'https://www.qare.fr/prescriptions/699c41f2dca2c90030c24f0c/qrcode?secret=0.rjzx41z3gob';
     var wrap = document.getElementById('demo-wrap');
     var docBase = (function() {
       var href = window.location.href;
@@ -334,9 +323,8 @@
     var barContainer = document.getElementById('app-bar-container');
     var barPill = document.getElementById('bar-pill');
     var searchInput = document.getElementById('search-input');
-    var browserPanel = document.getElementById('browser-panel');
-    var browserUrlBar = document.getElementById('browser-url-bar');
-    var browserFallbackLink = document.getElementById('browser-fallback-link');
+    var resultLine = document.getElementById('result-line');
+    var pillPlusInfos = document.getElementById('pill-plus-infos');
     var animFactor = 1.1;
     function d(ms) { return Math.round(ms * animFactor); }
     var infoDate = document.getElementById('info-bar-date');
@@ -372,10 +360,6 @@
       setInterval(updateDate, 1000);
     }
 
-    browserUrlBar.href = demoUrl;
-    browserUrlBar.textContent = demoUrl;
-    browserFallbackLink.href = demoUrl;
-
     var cursor = document.createElement('div');
     cursor.className = 'fake-cursor';
     wrap.appendChild(cursor);
@@ -383,6 +367,20 @@
     function setCursorPos(x, y) {
       cursor.style.left = (x - cursorRadius) + 'px';
       cursor.style.top = (y - cursorRadius) + 'px';
+    }
+
+    function animateCursor(fromX, fromY, toX, toY, duration, onEnd) {
+      var startTime = null;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var t = Math.min((ts - startTime) / duration, 1);
+        var x = fromX + (toX - fromX) * t;
+        var y = fromY + (toY - fromY) * t;
+        setCursorPos(x, y);
+        if (t < 1) requestAnimationFrame(step);
+        else if (onEnd) onEnd();
+      }
+      requestAnimationFrame(step);
     }
 
     function animateCursorCurved(fromX, fromY, toX, toY, duration, onEnd) {
@@ -415,7 +413,9 @@
       setTimeout(scheduleNotifyParentHeight, d(500));
     }
 
-    var typeSpeed = 55;
+    var typeSpeed = 110;
+    var query = 'hermine lambert';
+
     function typewriter(text, onChar, onComplete) {
       var i = 0;
       function tick() {
@@ -423,15 +423,17 @@
           if (onChar) onChar(text.slice(0, i));
           i++;
           if (i <= text.length) setTimeout(tick, typeSpeed);
-          else if (onComplete) setTimeout(onComplete, d(400));
+          else if (onComplete) setTimeout(onComplete, d(320));
         }
       }
       tick();
     }
 
-    function showBrowserPanel() {
-      searchInput.classList.add('hidden');
-      browserPanel.classList.add('visible');
+    function showMedecinResult() {
+      searchInput.style.display = 'none';
+      resultLine.classList.add('visible');
+      var productLine = document.getElementById('result-product-line');
+      if (productLine) setTimeout(function() { productLine.classList.add('show'); }, d(120));
       scheduleNotifyParentHeight();
     }
 
@@ -455,13 +457,25 @@
         animateCursorCurved(startX, startY, pillCenter.x, pillCenter.y, d(900), function() {
           cursorClick(function() {
             expandBar();
+
             setTimeout(function() {
-              typewriter(demoUrl, function(val) {
-                searchInput.value = val;
-              }, function() {
-                showBrowserPanel();
+              typewriter(query, function(val) { searchInput.value = val; }, function() {
+                showMedecinResult();
+
+                setTimeout(function() {
+                  if (pillPlusInfos) {
+                    var curX = parseFloat(cursor.style.left || '0') + cursorRadius;
+                    var curY = parseFloat(cursor.style.top || '0') + cursorRadius;
+                    var pillCenter = getCenterInWrap(pillPlusInfos);
+                    animateCursorCurved(curX, curY, pillCenter.x, pillCenter.y, d(700), function() {
+                      cursorClick(function() {
+                        pillPlusInfos.classList.add('pill-active');
+                      });
+                    });
+                  }
+                }, d(1200));
               });
-            }, d(800));
+            }, d(990));
           });
         });
       }, d(990));
