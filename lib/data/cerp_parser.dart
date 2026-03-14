@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/search_result.dart';
@@ -71,7 +72,12 @@ Future<List<SearchResult>> parseSerp(String url) async {
   // ==========================================================================
   Future<List<SearchResult>> parseCerp(String url) async {
     final response = await OffiboxDataFetch.get(url);
-    if (response.statusCode != 200) return [];
+    if (response.statusCode != 200) {
+      if (kDebugMode) {
+        debugPrint('[Offibox] CERP Madouest: HTTP ${response.statusCode} (fichier non chargé, recherche CERP vide)');
+      }
+      return [];
+    }
 
     final body = response.body.replaceAll('\uFEFF', '').trim();
     final lines = const LineSplitter().convert(body);
@@ -117,15 +123,28 @@ Future<List<SearchResult>> parseSerp(String url) async {
 /// ==========================================================================
 Future<List<SearchResult>> parseCoetpharm2026(String url) async {
   final response = await OffiboxDataFetch.get(url);
-  if (response.statusCode != 200) return [];
+  if (response.statusCode != 200) {
+    if (kDebugMode) {
+      debugPrint('[Offibox] Co&Pharm 2026: HTTP ${response.statusCode} (fichier non chargé, recherche Co&Pharm vide)');
+    }
+    return [];
+  }
 
   final body = response.body.replaceAll('\uFEFF', '').trim();
   final results = <SearchResult>[];
   List<List<dynamic>> rows;
   try {
-    rows = const CsvToListConverter().convert(body);
+    // CSV français (Excel) = souvent point-virgule ; essayer ';' puis ',' en secours
+    rows = const CsvToListConverter(fieldDelimiter: ';').convert(body);
+    if (rows.isEmpty || (rows.length > 1 && rows[1].length < 3)) {
+      rows = const CsvToListConverter().convert(body);
+    }
   } catch (_) {
-    return results;
+    try {
+      rows = const CsvToListConverter().convert(body);
+    } catch (_) {
+      return results;
+    }
   }
 
   for (int i = 1; i < rows.length; i++) {

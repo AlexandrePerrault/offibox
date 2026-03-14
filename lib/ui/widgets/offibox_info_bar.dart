@@ -356,8 +356,8 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
         '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
   }
 
-  /// Badge gris (date/heure) et badge INFOS : même hauteur que la barre d'infos (version PC).
-  static double get _badgeHeight => OffiboxWindowUI.tickerBarHeight;
+  /// Badge gris (date/heure) et badge INFOS : même hauteur que le texte qui défile (badges défilants).
+  static double get _badgeHeight => OffiboxWindowUI.tickerBadgeHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -402,12 +402,12 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
                 ),
                 const SizedBox(width: 6),
               ],
-              // Badge gris date/heure — même hauteur que les infos qui défilent
+              // Badge gris date/heure — même hauteur que le texte qui défile
               Container(
                 height: _badgeHeight,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8,
-                  vertical: 2.5,
+                  vertical: 1.5,
                 ),
                 decoration: BoxDecoration(
                   color: _infoBarAnthracite,
@@ -428,7 +428,7 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
                 ),
               ),
               const SizedBox(width: 4),
-              // Badge INFOS — même hauteur que les infos qui défilent
+              // Badge INFOS — même hauteur que le texte qui défile
               GestureDetector(
                 onTap: widget.onChanged != null && !widget.value
                     ? () => widget.onChanged!(true)
@@ -438,7 +438,7 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
                   height: _badgeHeight,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 2.5,
+                    vertical: 1.5,
                   ),
                   decoration: BoxDecoration(
                     color: OffiboxWindowUI.tickerInfosBadgeGreen,

@@ -110,7 +110,11 @@ class OffiboxController extends ChangeNotifier {
   Timer? _debounce;
   Timer? _loadingProgressTimer;
   Timer? _searchingDelayTimer;
+  /// Debounce recherche annuaire (RPPS / nom / structure) : ne lance qu'après arrêt de la frappe pour éviter lag et appels multiples.
+  Timer? _rppsLookupDebounce;
   int _searchSeq = 0;
+  /// Séquence dédiée au lookup RPPS (pour ignorer les résultats arrivés après une nouvelle requête).
+  int _rppsLookupSeq = 0;
 
   /// True pendant une recherche (utile pour afficher une animation "patientez").
   /// On l’active après un petit délai pour éviter le clignotement sur les recherches instantanées.
@@ -722,6 +726,9 @@ class OffiboxController extends ChangeNotifier {
     return false;
   }
 
+  /// Délai avant de lancer le lookup annuaire (évite de lancer à chaque frappe et ralentissements).
+  static const Duration _rppsLookupDebounceDuration = Duration(milliseconds: 800);
+
   void _kickRppsLookupIfNeeded(String query, int seq) {
     final q = query.trim();
     if (q.length < 2) return;
@@ -729,9 +736,25 @@ class OffiboxController extends ChangeNotifier {
     final rpps = _extractRppsFromQuery(q);
     final bool preferStructure = rpps == null && _looksLikeStructureQuery(q);
     final name = (rpps == null && !preferStructure) ? _extractNameQuery(q) : null;
-    final structureQuery = (rpps == null && name == null && q.length >= 2) ? q : null;
+    // Requête structure : seulement si ça ressemble à un nom de structure (pharmacie, cabinet…) et au moins 4 caractères.
+    final structureQuery = (rpps == null && name == null && preferStructure && q.length >= 4) ? q : null;
     if (rpps == null && name == null && structureQuery == null) return;
 
+    _rppsLookupDebounce?.cancel();
+    _rppsLookupDebounce = Timer(_rppsLookupDebounceDuration, () {
+      _rppsLookupDebounce = null;
+      _doRppsLookup(query: q, seq: seq, rpps: rpps, name: name, structureQuery: structureQuery);
+    });
+  }
+
+  void _doRppsLookup({
+    required String query,
+    required int seq,
+    required String? rpps,
+    required ({String? nom, String? prenom})? name,
+    required String? structureQuery,
+  }) {
+    final rppsSeq = ++_rppsLookupSeq;
     unawaited(() async {
       // RPPS exact: 1 call. Nom/prénom: 2 calls (ordre + inverse) puis merge. Structure (ex. pharmacie): 1 call.
       List<SearchResult> hits = const [];
@@ -740,9 +763,13 @@ class OffiboxController extends ChangeNotifier {
       } else if (structureQuery != null) {
         hits = await _rppsService.search(structure: structureQuery, limit: 50);
       } else if (name != null) {
-        // Plus large pour gérer les homonymes (tri par département ensuite).
-        final a = await _rppsService.search(nom: name.nom, prenom: name.prenom, limit: 50);
-        final b = await _rppsService.search(nom: name.prenom, prenom: name.nom, limit: 50);
+        // Les deux ordres en parallèle pour réduire le temps (ex. ~10s → ~5s si API lente).
+        final nameResults = await Future.wait([
+          _rppsService.search(nom: name.nom, prenom: name.prenom, limit: 50),
+          _rppsService.search(nom: name.prenom, prenom: name.nom, limit: 50),
+        ]);
+        final a = nameResults[0];
+        final b = nameResults[1];
         // Déduplique par RPPS en gardant la "meilleure" structure (cabinet/libéral d'abord).
         final bestById = <String, SearchResult>{};
         for (final r in [...a, ...b]) {
@@ -825,7 +852,8 @@ class OffiboxController extends ChangeNotifier {
 
       if (!_engineReady) return;
       if (seq != _searchSeq) return;
-      if (currentQuery.trim() != q) return;
+      if (_rppsLookupSeq != rppsSeq) return;
+      if (currentQuery.trim() != query) return;
       if (hits.isEmpty) return;
 
       // Merge sans doublons (RPPS unique via cip13)
@@ -847,6 +875,7 @@ class OffiboxController extends ChangeNotifier {
       // RPPS exact ou requête nom/prénom : on place les résultats annuaire en tête (priorité au professionnel recherché).
       // Requête par structure : on ajoute les résultats annuaire en bas.
       final nameQuery = name != null;
+      if (_rppsLookupSeq != rppsSeq) return;
       final next = <SearchResult>[
         if (rpps != null || nameQuery) ...toAdd,
         ...existing,
@@ -1179,6 +1208,7 @@ if (item.source == SourceType.lpp &&
 void dispose() {
   _debounce?.cancel();
   _searchingDelayTimer?.cancel();
+  _rppsLookupDebounce?.cancel();
   scanController.dispose();
   _rppsService.dispose();
   _mssanteService.dispose();

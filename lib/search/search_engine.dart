@@ -69,6 +69,9 @@ class SearchEngine {
   String _lastQuery = '';
   List<SearchResult> _lastResults = const [];
 
+  /// CIS dont la DCI (substance) matche la requête courante — précalculé une fois par recherche pour éviter O(candidates × dciToCis) dans _matchItem (typos type "imbruvia" → freeze).
+  Set<String>? _cisMatchingDciQuery;
+
   // =========================================================
   // 🔁 INDEXATION
   // =========================================================
@@ -176,29 +179,33 @@ if (cached != null) {
 }
   // Recherche inversée par DCI uniquement (substance, pas le sel : citrate de / chlorhydrate de ne matchent pas)
   final queryNorm = _normalize(query.replaceAll(RegExp(r'\s+'), ''));
+  _cisMatchingDciQuery = null;
   if (queryNorm.length >= 3 && _dciToCis.isNotEmpty) {
+    _cisMatchingDciQuery = {};
+    for (final entry in _dciToCis.entries) {
+      final baseDci = _baseDciFromKey(entry.key);
+      if (baseDci.startsWith(queryNorm) || baseDci == queryNorm) {
+        _cisMatchingDciQuery!.addAll(entry.value);
+      }
+    }
     final seen = <String>{};
     for (final r in candidates) {
       seen.add('${r.cis ?? ""}_${r.cip13 ?? ""}');
     }
     final toAdd = <SearchResult>[];
-    for (final entry in _dciToCis.entries) {
-      final baseDci = _baseDciFromKey(entry.key);
-      if (!baseDci.startsWith(queryNorm) && baseDci != queryNorm) continue;
-      for (final cis in entry.value) {
-        final list = _cisToBdmResults[cis];
-        if (list == null) continue;
-        for (final r in list) {
-          if (r.isGeneric == true) continue;
-          final cip = r.cip13?.replaceAll(RegExp(r'\D'), '') ?? '';
-          if (_genericCipSet.isNotEmpty &&
-              cip.isNotEmpty &&
-              _genericCipSet.contains(cip)) {
-            continue;
-          }
-          if (seen.add('${r.cis ?? ""}_${r.cip13 ?? ""}')) {
-            toAdd.add(r);
-          }
+    for (final cis in _cisMatchingDciQuery!) {
+      final list = _cisToBdmResults[cis];
+      if (list == null) continue;
+      for (final r in list) {
+        if (r.isGeneric == true) continue;
+        final cip = r.cip13?.replaceAll(RegExp(r'\D'), '') ?? '';
+        if (_genericCipSet.isNotEmpty &&
+            cip.isNotEmpty &&
+            _genericCipSet.contains(cip)) {
+          continue;
+        }
+        if (seen.add('${r.cis ?? ""}_${r.cip13 ?? ""}')) {
+          toAdd.add(r);
         }
       }
     }
@@ -286,30 +293,34 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
     candidates = allResults;
   }
 
-  // Recherche par DCI uniquement (substance, pas le sel)
+  // Recherche par DCI : précalcul du set pour _matchItem (évite freeze sur typo).
+  _cisMatchingDciQuery = null;
   if (queryNorm.length >= 3 && _dciToCis.isNotEmpty) {
+    _cisMatchingDciQuery = {};
+    for (final entry in _dciToCis.entries) {
+      final baseDci = _baseDciFromKey(entry.key);
+      if (baseDci.startsWith(queryNorm) || baseDci == queryNorm) {
+        _cisMatchingDciQuery!.addAll(entry.value);
+      }
+    }
     final seen = <String>{};
     for (final r in candidates) {
       seen.add('${r.cis ?? ""}_${r.cip13 ?? ""}');
     }
     final toAdd = <SearchResult>[];
-    for (final entry in _dciToCis.entries) {
-      final baseDci = _baseDciFromKey(entry.key);
-      if (!baseDci.startsWith(queryNorm) && baseDci != queryNorm) continue;
-      for (final cis in entry.value) {
-        final list = _cisToBdmResults[cis];
-        if (list == null) continue;
-        for (final r in list) {
-          if (r.isGeneric == true) continue;
-          final cip = r.cip13?.replaceAll(RegExp(r'\D'), '') ?? '';
-          if (_genericCipSet.isNotEmpty &&
-              cip.isNotEmpty &&
-              _genericCipSet.contains(cip)) {
-            continue;
-          }
-          if (seen.add('${r.cis ?? ""}_${r.cip13 ?? ""}')) {
-            toAdd.add(r);
-          }
+    for (final cis in _cisMatchingDciQuery!) {
+      final list = _cisToBdmResults[cis];
+      if (list == null) continue;
+      for (final r in list) {
+        if (r.isGeneric == true) continue;
+        final cip = r.cip13?.replaceAll(RegExp(r'\D'), '') ?? '';
+        if (_genericCipSet.isNotEmpty &&
+            cip.isNotEmpty &&
+            _genericCipSet.contains(cip)) {
+          continue;
+        }
+        if (seen.add('${r.cis ?? ""}_${r.cip13 ?? ""}')) {
+          toAdd.add(r);
         }
       }
     }
@@ -349,20 +360,15 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
   final label = r.labelNorm;
   final cip = r.cipNorm;
 
-  // 💊 Recherche inversée par DCI uniquement (substance, pas le sel) : requête = préfixe de la base DCI, et libellé contient la requête.
+  // 💊 Recherche inversée par DCI : utilise le set précalculé (évite O(dciToCis) par résultat → freeze sur typo type "imbruvia").
   if (queryNorm != null &&
       queryNorm.length >= 3 &&
-      r.source == SourceType.bdm) {
+      r.source == SourceType.bdm &&
+      _cisMatchingDciQuery != null) {
     final cisKey = r.cis?.replaceAll(RegExp(r'\D'), '').trim() ?? '';
-    if (cisKey.isNotEmpty) {
-      for (final entry in _dciToCis.entries) {
-        final baseDci = _baseDciFromKey(entry.key);
-        if ((baseDci.startsWith(queryNorm) || baseDci == queryNorm) &&
-            entry.value.any((c) => c == cisKey)) {
-          if (!label.contains(queryNorm)) return false;
-          return true;
-        }
-      }
+    if (cisKey.isNotEmpty && _cisMatchingDciQuery!.contains(cisKey)) {
+      if (!label.contains(queryNorm)) return false;
+      return true;
     }
   }
 
