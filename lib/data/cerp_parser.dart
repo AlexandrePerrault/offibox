@@ -64,16 +64,17 @@ Future<List<SearchResult>> parseSerp(String url) async {
   return results;
 }
 
- // ==========================================================================
-  // ✅ PARSER CERP/SERP (CSV : "nom";"cip";"url")
-  // - Recherche par nom (col A) ou CIP7/CIP13 (col B)
-  // - Affichage label + badge "PLUS D'INFOS" (clic => url)
+// ==========================================================================
+  // ✅ PARSER CERP (CERP.csv — Madouest) : col1=nom, col2=CIP 13 ou 7, col3=URL
+  // - Recherche par CIP ou par bloc du nom (libellé)
+  // - Badge "page Madouest" (affiché en 2e ligne) → URL col 3
   // ==========================================================================
   Future<List<SearchResult>> parseCerp(String url) async {
     final response = await OffiboxDataFetch.get(url);
     if (response.statusCode != 200) return [];
 
-    final lines = const LineSplitter().convert(response.body);
+    final body = response.body.replaceAll('\uFEFF', '').trim();
+    final lines = const LineSplitter().convert(body);
     final results = <SearchResult>[];
 
     for (int i = 1; i < lines.length; i++) {
@@ -84,9 +85,9 @@ Future<List<SearchResult>> parseSerp(String url) async {
 
       if (row.length < 3) continue;
 
-      final name = row[0];
-      final cip = row[1].replaceAll(RegExp(r'\D'), '');
-      final link = row[2];
+      final name = row[0].trim();
+      final cip = row[1].replaceAll(RegExp(r'\D'), '').trim();
+      final link = row[2].trim();
 
       if (name.isEmpty || link.isEmpty) continue;
 
@@ -99,8 +100,8 @@ Future<List<SearchResult>> parseSerp(String url) async {
           url: link,
           nsfp: false,
           hospitalOnly: false,
-          laboratory: 'CERP',
-          badge1Name: 'PLUS D’INFOS',
+          laboratory: 'Madouest',
+          badge1Name: 'page Madouest',
           badge1Url: link,
         ),
       );
@@ -110,31 +111,31 @@ Future<List<SearchResult>> parseSerp(String url) async {
   }
 
 /// ==========================================================================
-/// ✅ PARSER CO&PHARM 2026 (CSV : Code, Libellé, URL PDF, URL Logo)
-/// - Recherche par code (col 1) ou libellé (col 2)
-/// - Ligne 1 : badge "produit" + nom + code copier + logo labo
-/// - Ligne 2 : pills "commande" (coetpharm.com) + "conditions Co&Pharm" (PDF col 3)
+/// ✅ PARSER CO&PHARM 2026 (CSV : col1=Code CIP, col2=Libellé, col3=URL PDF, col4=URL logo optionnel)
+/// - Recherche par CIP13 ou par nom (libellé)
+/// - Badge "conditions Co&Pharm" → URL col 3 (clic = ouverture PDF)
 /// ==========================================================================
 Future<List<SearchResult>> parseCoetpharm2026(String url) async {
   final response = await OffiboxDataFetch.get(url);
   if (response.statusCode != 200) return [];
 
+  final body = response.body.replaceAll('\uFEFF', '').trim();
   final results = <SearchResult>[];
   List<List<dynamic>> rows;
   try {
-    rows = const CsvToListConverter().convert(response.body);
+    rows = const CsvToListConverter().convert(body);
   } catch (_) {
     return results;
   }
 
   for (int i = 1; i < rows.length; i++) {
     final row = rows[i].map((e) => e.toString().replaceAll('"', '').trim()).toList();
-    if (row.length < 4) continue;
+    if (row.length < 3) continue;
 
     final cip = row[0].replaceAll(RegExp(r'\D'), '').trim();
     final libelle = row[1].trim();
-    final pdfUrl = row[2].trim();
-    final logoUrl = row[3].trim();
+    final pdfUrl = row.length > 2 ? row[2].trim() : '';
+    final logoUrl = row.length > 3 ? row[3].trim() : '';
 
     if (cip.isEmpty || libelle.isEmpty) continue;
 
@@ -144,9 +145,10 @@ Future<List<SearchResult>> parseCoetpharm2026(String url) async {
         label: libelle,
         labelRaw: libelle.toUpperCase(),
         cip13: cip,
-        laboratory: 'CO&PHARM',
+        laboratory: 'Co&Pharm',
         iconUrl: logoUrl.isNotEmpty ? logoUrl : null,
         catalogueUrl: pdfUrl.isNotEmpty ? pdfUrl : null,
+        url: pdfUrl.isNotEmpty ? pdfUrl : _kCoEtPharmCommanderUrl,
         badge1Name: 'commande',
         badge1Url: _kCoEtPharmCommanderUrl,
         badge2Name: 'conditions Co&Pharm',

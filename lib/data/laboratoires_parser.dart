@@ -74,14 +74,28 @@ Future<List<SearchResult>> parseLaboratoires(String url) async {
         ? rawIcon.replaceAll(r'\', '/')
         : null;
 
-    // F=5 Espace pro, G=6 Catalogue, H=7, I=8 nom site 2, J=9 url, K=10 nom badge 4, L=11 url
-    final urlEspacePro = _v(row, 5);
-    final urlCatalogue = _v(row, 6);
-    final urlH = _v(row, 7);
-    final nomSite2 = _v(row, 8);
-    final urlSite2 = _v(row, 9);
-    final badge4Name = _v(row, 10);
-    final badge4Url = _v(row, 11);
+    // LABORATOIRES.csv : F=5 espace pro (URL), G=6 catalogue (URL), H=7 tarif,
+    // I=8 libellé badge 2, J=9 URL badge 2, K=10 libellé badge 3, L=11 URL badge 3,
+    // M=12 libellé badge 4, N=13 URL badge 4
+    final urlEspacePro = _v(row, 5);   // F
+    final urlCatalogue = _v(row, 6);   // G
+    final labelBadge2 = _v(row, 8);    // I
+    final urlBadge2 = _v(row, 9);      // J
+    final labelBadge3 = _v(row, 10);   // K
+    final urlBadge3 = _v(row, 11);     // L
+    final labelBadge4 = _v(row, 12);   // M
+    final urlBadge4 = _v(row, 13);      // N
+
+    // Badge 2 : I (libellé) + J (URL). Si vides → "Catalogue" + G pour ouvrir le panneau catalogue.
+    final bool hasBadge2 = (labelBadge2 != null && labelBadge2.isNotEmpty && urlBadge2 != null && urlBadge2.isNotEmpty);
+    final String? name2 = hasBadge2 ? labelBadge2 : (urlCatalogue != null && urlCatalogue.isNotEmpty ? 'Catalogue' : null);
+    final String? url2 = hasBadge2 ? urlBadge2 : urlCatalogue;
+
+    // Badge 3 : K (libellé) + L (URL)
+    final bool hasBadge3 = (labelBadge3 != null && labelBadge3.isNotEmpty && urlBadge3 != null && urlBadge3.isNotEmpty);
+
+    // Badge 4 : M (nom du badge) + N (URL correspondante)
+    final bool hasBadge4 = (labelBadge4 != null && labelBadge4.isNotEmpty && urlBadge4 != null && urlBadge4.isNotEmpty);
 
     results.add(
       SearchResult(
@@ -103,12 +117,12 @@ Future<List<SearchResult>> parseLaboratoires(String url) async {
         isPdf: (urlCatalogue ?? '').toLowerCase().endsWith('.pdf'),
         badge1Name: urlEspacePro != null && urlEspacePro.isNotEmpty ? 'Espace pro' : null,
         badge1Url: urlEspacePro,
-        badge2Name: urlCatalogue != null && urlCatalogue.isNotEmpty ? 'Catalogue' : null,
-        badge2Url: urlCatalogue,
-        badge3Name: (urlH != null && urlH.isNotEmpty) ? 'Espace pro 2' : nomSite2,
-        badge3Url: (urlH != null && urlH.isNotEmpty) ? urlH : urlSite2,
-        badge4Name: badge4Name,
-        badge4Url: badge4Url,
+        badge2Name: name2,
+        badge2Url: url2,
+        badge3Name: hasBadge3 ? labelBadge3 : null,
+        badge3Url: hasBadge3 ? urlBadge3 : null,
+        badge4Name: hasBadge4 ? labelBadge4 : null,
+        badge4Url: hasBadge4 ? urlBadge4 : null,
       ),
     );
   }

@@ -78,6 +78,10 @@ Future<List<SearchResult>> loadExtraData() async {
       if (kDebugMode) debugPrint('[Offibox] Laboratoires: $e');
       return <SearchResult>[];
     }),
+    parseCerp(CERP_URL).catchError((Object e, StackTrace _) {
+      if (kDebugMode) debugPrint('[Offibox] CERP Madouest: $e');
+      return <SearchResult>[];
+    }),
     parseCoetpharm2026(COETPHARM_2026_URL).catchError((Object e, StackTrace _) {
       if (kDebugMode) debugPrint('[Offibox] Coetpharm: $e');
       return <SearchResult>[];
@@ -145,6 +149,10 @@ Future<List<SearchResult>> loadExtraData() async {
 
   try {
     results.addAll(extra[8] as List<SearchResult>);
+  } catch (_) {}
+
+  try {
+    results.addAll(extra[9] as List<SearchResult>);
   } catch (_) {}
 
   // ─────────────────────────
