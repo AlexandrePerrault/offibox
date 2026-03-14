@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Démo Offibox – animation HD, fermeture en fin de séquence">
   <title>Démo Offibox – Ouverture URL Qare (prescription / QR code)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,8 +27,9 @@
       flex-direction: column;
       align-items: center;
     }
+    /* Démo HD : conteneur large, rendu net */
     .demo-wrap {
-      max-width: 1200px;
+      max-width: 1600px;
       width: 100%;
       background: transparent;
       overflow: visible;
@@ -35,6 +37,9 @@
       min-height: 420px;
       padding: 0;
       margin: 0;
+      -webkit-font-smoothing: antialiased;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
     }
     .app-bar-outer {
       position: absolute;
@@ -71,6 +76,7 @@
       justify-content: flex-start;
       flex-direction: row;
       align-items: stretch;
+      transition: width .5s ease-in-out, min-height .5s ease-in-out, border-radius .35s ease-in-out;
     }
     .bar-pill-only {
       position: absolute;
@@ -200,6 +206,15 @@
       overflow: hidden;
     }
     .browser-panel.visible { display: flex; }
+    .browser-panel.closing {
+      animation: panelClose 0.4s ease-in forwards;
+    }
+    @keyframes panelClose {
+      to {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+    }
     .browser-toolbar {
       display: flex;
       align-items: center;
@@ -228,13 +243,69 @@
       padding: 12px;
       box-sizing: border-box;
     }
+    .browser-frame-wrap .screenshot-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 100%;
+    }
     .browser-frame-wrap .qare-screenshot {
       max-width: 100%;
+      width: auto;
       height: auto;
-      max-height: 520px;
+      max-height: 720px;
       object-fit: contain;
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: high-quality;
+    }
+    .browser-frame-wrap .qare-screenshot.second {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease-out;
+    }
+    .browser-frame-wrap .qare-screenshot.second.visible {
+      position: relative;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .browser-frame-wrap .qare-screenshot.first.hidden {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+    .code-field-overlay {
+      position: absolute;
+      bottom: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 140px;
+      padding: 6px 12px;
+      background: rgba(255,255,255,.95);
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .code-field-overlay .code-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: var(--offi-teal);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: codeBlink 0.8s ease-in-out infinite;
+    }
+    @keyframes codeBlink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
     }
     .browser-frame-wrap iframe {
       width: 100%;
@@ -305,7 +376,13 @@
                 <a id="browser-url-bar" class="url-bar" href="#" target="_blank" rel="noopener noreferrer"></a>
               </div>
               <div class="browser-frame-wrap">
-                <img class="qare-screenshot" src="qare.jpg" alt="Aperçu page Qare – prescription / QR code">
+                <div class="screenshot-container">
+                  <img class="qare-screenshot first" id="qare-img-1" src="qare.jpg" alt="Aperçu page Qare – prescription / QR code">
+                  <img class="qare-screenshot second" id="qare-img-2" src="qare%202.jpg" alt="Aperçu Qare – code saisi">
+                  <div class="code-field-overlay" id="code-field-overlay" style="display:none;">
+                    <span id="code-field-text"></span><span class="code-cursor" id="code-field-cursor"></span>
+                  </div>
+                </div>
                 <a id="browser-fallback-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;"></a>
               </div>
             </div>
@@ -337,6 +414,12 @@
     var browserPanel = document.getElementById('browser-panel');
     var browserUrlBar = document.getElementById('browser-url-bar');
     var browserFallbackLink = document.getElementById('browser-fallback-link');
+    var codeFieldOverlay = document.getElementById('code-field-overlay');
+    var codeFieldText = document.getElementById('code-field-text');
+    var codeFieldCursor = document.getElementById('code-field-cursor');
+    var qareImg1 = document.getElementById('qare-img-1');
+    var qareImg2 = document.getElementById('qare-img-2');
+    var codeToType = 'N5XECE6F';
     var animFactor = 1.1;
     function d(ms) { return Math.round(ms * animFactor); }
     var infoDate = document.getElementById('info-bar-date');
@@ -433,6 +516,36 @@
       searchInput.classList.add('hidden');
       browserPanel.classList.add('visible');
       scheduleNotifyParentHeight();
+      startPhase2CodeAndSecondImage();
+    }
+
+    function startPhase2CodeAndSecondImage() {
+      setTimeout(function() {
+        if (!codeFieldOverlay || !wrap) return;
+        codeFieldOverlay.style.display = 'block';
+        codeFieldOverlay.style.opacity = '0';
+        var overlayRect = codeFieldOverlay.getBoundingClientRect();
+        var wrapRect = wrap.getBoundingClientRect();
+        codeFieldOverlay.style.opacity = '';
+        var toX = overlayRect.left - wrapRect.left + overlayRect.width / 2 - 20;
+        var toY = overlayRect.top - wrapRect.top + overlayRect.height / 2;
+        var fromCenter = getCenterInWrap(browserPanel);
+        animateCursorCurved(fromCenter.x, fromCenter.y, toX, toY, d(700), function() {
+          cursorClick(function() {
+            typewriter(codeToType, function(val) {
+              if (codeFieldText) codeFieldText.textContent = val;
+            }, function() {
+              if (codeFieldCursor) codeFieldCursor.style.display = 'none';
+              setTimeout(function() {
+                if (qareImg1) qareImg1.classList.add('hidden');
+                if (qareImg2) qareImg2.classList.add('visible');
+                scheduleNotifyParentHeight();
+                setTimeout(closeWindowThenBar, d(2800));
+              }, d(500));
+            });
+          });
+        });
+      }, d(1200));
     }
 
     function getCenterInWrap(el) {
@@ -442,6 +555,28 @@
         x: rect.left - wrapRect.left + rect.width / 2,
         y: rect.top - wrapRect.top + rect.height / 2
       };
+    }
+
+    function closeWindowThenBar() {
+      if (!browserPanel || !barContainer) return;
+      if (cursor) cursor.style.display = 'none';
+      browserPanel.classList.add('closing');
+      setTimeout(function() {
+        browserPanel.classList.remove('visible', 'closing');
+        searchInput.classList.remove('hidden');
+        searchInput.value = '';
+        if (codeFieldText) codeFieldText.textContent = '';
+        if (codeFieldOverlay) codeFieldOverlay.style.display = 'none';
+        if (qareImg1) qareImg1.classList.remove('hidden');
+        if (qareImg2) qareImg2.classList.remove('visible');
+        scheduleNotifyParentHeight();
+        setTimeout(collapseBar, d(400));
+      }, 400);
+    }
+
+    function collapseBar() {
+      if (barContainer) barContainer.classList.remove('expanded');
+      scheduleNotifyParentHeight();
     }
 
     function runSequence() {
