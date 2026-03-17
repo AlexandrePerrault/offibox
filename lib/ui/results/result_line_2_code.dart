@@ -162,6 +162,11 @@ Widget _externalLinkIconWidget() {
   );
 }
 
+/// Icône téléchargement pour les badges type « télécharger Myris pour PC ».
+Widget _downloadIconWidget() {
+  return Icon(Icons.download, size: 20, color: OffiboxColors.primary);
+}
+
 /// Icône pour un lien : PDF → picture_as_pdf, URL site web (http/https) → globe, sinon open_in_new.
 IconData iconForUrl(String url) {
   final lower = url.trim().toLowerCase();
@@ -225,6 +230,8 @@ class ResultLine2Code extends StatelessWidget {
   final void Function(BuildContext context, String url, String labName, String? iconUrl)? onOpenEspacePro;
   /// Si fourni, au clic sur le badge "Catalogue" on affiche le panneau catalogue sous la barre au lieu d'ouvrir l'URL.
   final VoidCallback? onOpenCataloguePanel;
+  /// Si fourni, en ligne 2 catalogue on affiche le badge "disponibilité produits" ; au clic ouvre le panneau titre + image sous la barre.
+  final VoidCallback? onOpenDisponibiliteProduits;
   /// Si fourni, au clic sur un pill YouTube on affiche la vidéo sous la barre au lieu d'ouvrir l'URL.
   final void Function(String youtubeUrl)? onOpenYouTubeVideo;
   /// Vidéo de démonstration (videos.csv) : affichée en ligne 2 quand injecté, à droite de RCP.
@@ -270,6 +277,7 @@ class ResultLine2Code extends StatelessWidget {
     this.generiques2026DciToGenericName,
     this.onOpenEspacePro,
     this.onOpenCataloguePanel,
+    this.onOpenDisponibiliteProduits,
     this.onOpenYouTubeVideo,
     this.videosByCip13,
     this.onOpenTherapeuticVideo,
@@ -357,6 +365,11 @@ class ResultLine2Code extends StatelessWidget {
   // 🏭 Catalogues laboratoires : ligne 2 = HoverPill(s) Espace pro, Catalogue, etc. (F, G, H, I/J, K/L)
   if (item.source == SourceType.catalogue) {
     return (item.badge1Url ?? item.badge2Url ?? item.badge3Url ?? item.badge4Url ?? item.badge5Url ?? item.badge6Url)?.trim().isNotEmpty ?? false;
+  }
+
+  // 📦 CERP (CERP.csv Madouest + CO&PHARM 2026) : ligne 2 = badge(s) avec URL au clic
+  if (item.source == SourceType.cerp) {
+    return (item.badge1Url ?? item.badge2Url ?? item.url)?.trim().isNotEmpty ?? false;
   }
 
   return item.cip13 != null || item.cis != null;
@@ -512,6 +525,7 @@ Widget build(BuildContext context) {
         HoverPillButton(
           label: 'site internet',
           icon: Icons.language,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'https://addictovigilance.fr/',
           onTap: () => openUrl(item.url!.trim()),
         ),
@@ -539,7 +553,7 @@ Widget build(BuildContext context) {
       label: '+ d\'infos',
       icon: _isPdfUrl(item.url!) || _isXlsUrl(item.url!) ? null : iconForUrl(item.url!),
       iconWidget: _isPdfUrl(item.url!) ? _pdfIconWidget() : _isXlsUrl(item.url!) ? _excelIconWidget() : _externalLinkIconWidget(),
-      tooltip: 'accès nomenclature LPP',
+      tooltip: '↗ accès nomenclature LPP',
       onTap: () {
         if (onOpenUrl != null) {
           onOpenUrl!(item.url!.trim());
@@ -649,7 +663,7 @@ Widget build(BuildContext context) {
                     : isXls
                         ? _excelIconWidget()
                         : _externalLinkIconWidget(),
-        tooltip: urlTrim,
+        tooltip: '↗ $urlTrim',
         onTap: () {
           if (useYouTubePanel) {
             onOpenYouTubeVideo!(urlTrim);
@@ -842,6 +856,7 @@ Widget build(BuildContext context) {
       pills.add(HoverPillButton(
         label: 'Player Pharmaradio',
         icon: Icons.play_circle_outline,
+        iconWidget: _externalLinkIconWidget(),
         tooltip: 'Écouter Pharmaradio',
         onTap: () => openUrlExternal(kPharmaradioFlashInfoUrl),
       ),);
@@ -876,7 +891,7 @@ Widget build(BuildContext context) {
                     : isXls
                         ? _excelIconWidget()
                         : _externalLinkIconWidget(),
-        tooltip: urlTrim,
+        tooltip: '↗ $urlTrim',
         onTap: () {
           if (useYouTubePanel) {
             onOpenYouTubeVideo!(urlTrim);
@@ -954,21 +969,35 @@ Widget build(BuildContext context) {
   // ─────────────────────────────
   if (item.source == SourceType.catalogue) {
     final cataloguePills = <Widget>[];
+    // Tooltip : picto lien externe (↗) + URL + mention "lien externe" et ouverture sous la barre.
+    String cataloguePillTooltip(String url, {String? label}) {
+      const String externalPicto = '↗ '; // picto lien externe (au repos + dans le tooltip)
+      final u = url.trim();
+      if (onOpenUrl != null) {
+        final base = u.isEmpty ? 'Ouvrir dans la fenêtre sous la barre' : '$u\n\nLien externe — Ouvrir dans la fenêtre sous la barre';
+        return '$externalPicto$base';
+      }
+      return u.isEmpty ? '$externalPicto${label ?? 'Ouvrir le lien'}' : '$externalPicto$u';
+    }
     void addCataloguePill(String name, String url) {
       if (name.isEmpty || url.isEmpty) return;
       final isPdf = _isPdfUrl(url);
       final isWord = _isWordUrl(url);
       final isXls = _isXlsUrl(url);
-      // XLS/PDF/Word : afficher tout le libellé du badge
       final maxLabelWidth = (isXls || isPdf || isWord) ? 500.0 : null;
       final isCatalogueBadge = name == 'Catalogue';
+      // Toujours afficher l’icône lien externe pour les URL (au repos) ; tooltip avec URL + "lien externe — ouvrir sous la barre".
+      final isDownload = name.toLowerCase().contains('télécharg');
+      final linkIcon = isDownload
+          ? _downloadIconWidget()
+          : (isPdf ? _pdfIconWidget() : isWord ? _pdfIconWidget() : isXls ? _excelIconWidget() : _externalLinkIconWidget());
       if (isCatalogueBadge && onOpenCataloguePanel != null) {
         cataloguePills.add(HoverPillButton(
           label: name,
           maxLabelWidth: maxLabelWidth,
-          icon: isPdf || isWord || isXls ? null : iconForUrl(url),
-          iconWidget: isPdf ? _pdfIconWidget() : isWord ? _pdfIconWidget() : isXls ? _excelIconWidget() : _externalLinkIconWidget(),
-          tooltip: url,
+          icon: isPdf || isWord || isXls ? null : Icons.open_in_new,
+          iconWidget: linkIcon,
+          tooltip: cataloguePillTooltip(url, label: name),
           onTap: onOpenCataloguePanel!,
         ),);
         return;
@@ -976,9 +1005,9 @@ Widget build(BuildContext context) {
       cataloguePills.add(HoverPillButton(
         label: name,
         maxLabelWidth: maxLabelWidth,
-        icon: isPdf || isWord || isXls ? null : iconForUrl(url),
-        iconWidget: isPdf ? _pdfIconWidget() : isWord ? _pdfIconWidget() : isXls ? _excelIconWidget() : _externalLinkIconWidget(),
-        tooltip: url,
+        icon: isPdf || isWord || isXls ? null : Icons.open_in_new,
+        iconWidget: linkIcon,
+        tooltip: cataloguePillTooltip(url),
         onTap: () {
           if (onOpenUrl != null) {
             onOpenUrl!(url.trim());
@@ -990,16 +1019,25 @@ Widget build(BuildContext context) {
     }
     if (item.badge1Name != null && item.badge1Url != null) {
       final isEspacePro = item.badge1Name == 'Espace pro';
-      if (isEspacePro && onOpenEspacePro != null) {
-        final openEspacePro = onOpenEspacePro!;
-        final badge1Url = item.badge1Url!;
+      final badge1Url = item.badge1Url!;
+      final tooltipEspacePro = cataloguePillTooltip(badge1Url);
+      // Quand onOpenUrl est fourni : ouvrir dans la fenêtre sous la barre (remplace le contenu au clic suivant).
+      if (isEspacePro && onOpenUrl != null) {
         cataloguePills.add(HoverPillButton(
           label: item.badge1Name!,
-          icon: _isPdfUrl(item.badge1Url!) || _isWordUrl(item.badge1Url!) || _isXlsUrl(item.badge1Url!) ? null : iconForUrl(item.badge1Url!),
-          iconWidget: _isPdfUrl(item.badge1Url!) ? _pdfIconWidget() : _isWordUrl(item.badge1Url!) ? _pdfIconWidget() : _isXlsUrl(item.badge1Url!) ? _excelIconWidget() : _externalLinkIconWidget(),
-          tooltip: 'accès espace pro',
+          icon: Icons.open_in_new,
+          iconWidget: _externalLinkIconWidget(),
+          tooltip: tooltipEspacePro,
+          onTap: () => onOpenUrl!(badge1Url.trim()),
+        ),);
+      } else if (isEspacePro && onOpenEspacePro != null) {
+        cataloguePills.add(HoverPillButton(
+          label: item.badge1Name!,
+          icon: Icons.open_in_new,
+          iconWidget: _externalLinkIconWidget(),
+          tooltip: tooltipEspacePro,
           onTap: () {
-            openEspacePro(
+            onOpenEspacePro!(
               context,
               badge1Url.trim(),
               item.label.trim().isNotEmpty ? item.label : item.labelRaw.trim(),
@@ -1010,14 +1048,14 @@ Widget build(BuildContext context) {
       } else if (isEspacePro) {
         cataloguePills.add(HoverPillButton(
           label: item.badge1Name!,
-          icon: _isPdfUrl(item.badge1Url!) || _isWordUrl(item.badge1Url!) || _isXlsUrl(item.badge1Url!) ? null : iconForUrl(item.badge1Url!),
-          iconWidget: _isPdfUrl(item.badge1Url!) ? _pdfIconWidget() : _isWordUrl(item.badge1Url!) ? _pdfIconWidget() : _isXlsUrl(item.badge1Url!) ? _excelIconWidget() : _externalLinkIconWidget(),
-          tooltip: 'accès espace pro',
+          icon: Icons.open_in_new,
+          iconWidget: _externalLinkIconWidget(),
+          tooltip: tooltipEspacePro,
           onTap: () {
             if (onOpenUrl != null) {
-              onOpenUrl!(item.badge1Url!.trim());
+              onOpenUrl!(badge1Url.trim());
             } else {
-              openUrl(item.badge1Url!.trim());
+              openUrl(badge1Url.trim());
             }
           },
         ),);
@@ -1045,6 +1083,15 @@ Widget build(BuildContext context) {
       if (cataloguePills.isNotEmpty) cataloguePills.add(const SizedBox(width: 6));
       addCataloguePill(item.badge6Name!, item.badge6Url!);
     }
+    if (onOpenDisponibiliteProduits != null) {
+      if (cataloguePills.isNotEmpty) cataloguePills.add(const SizedBox(width: 6));
+      cataloguePills.add(HoverPillButton(
+        label: 'disponibilité produits',
+        icon: Icons.inventory_2_outlined,
+        tooltip: 'Ouvrir la disponibilité produits (semaine 13) dans la fenêtre sous la barre',
+        onTap: onOpenDisponibiliteProduits!,
+      ),);
+    }
     if (cataloguePills.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: resultLineGap),
@@ -1053,6 +1100,51 @@ Widget build(BuildContext context) {
           spacing: 6,
           runSpacing: 4,
           children: cataloguePills,
+        ),
+      );
+    }
+  }
+
+  // ─────────────────────────────
+  // 📦 CERP (CERP.csv + CO&PHARM 2026) — ligne 2 : badge(s) avec URL au clic (page Madouest, conditions Co&Pharm, etc.)
+  // ─────────────────────────────
+  if (item.source == SourceType.cerp) {
+    final cerpPills = <Widget>[];
+    void addCerpPill(String name, String url) {
+      if (name.isEmpty || url.isEmpty) return;
+      final urlTrim = url.trim();
+      cerpPills.add(HoverPillButton(
+        label: name,
+        icon: _isPdfUrl(urlTrim) ? null : iconForUrl(urlTrim),
+        iconWidget: _isPdfUrl(urlTrim) ? _pdfIconWidget() : _externalLinkIconWidget(),
+        tooltip: '↗ $urlTrim',
+        onTap: () {
+          if (onOpenUrl != null) {
+            onOpenUrl!(urlTrim);
+          } else {
+            openUrl(urlTrim);
+          }
+        },
+      ));
+    }
+    if (item.badge1Name != null && item.badge1Url != null && item.badge1Url!.trim().isNotEmpty) {
+      addCerpPill(item.badge1Name!.trim(), item.badge1Url!.trim());
+    }
+    if (item.badge2Name != null && item.badge2Url != null && item.badge2Url!.trim().isNotEmpty) {
+      if (cerpPills.isNotEmpty) cerpPills.add(const SizedBox(width: 6));
+      addCerpPill(item.badge2Name!.trim(), item.badge2Url!.trim());
+    }
+    if (cerpPills.isEmpty && item.url != null && item.url!.trim().isNotEmpty) {
+      addCerpPill('Ouvrir', item.url!.trim());
+    }
+    if (cerpPills.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: resultLineGap),
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          runSpacing: 4,
+          children: cerpPills,
         ),
       );
     }
@@ -1115,37 +1207,31 @@ Widget build(BuildContext context) {
       ),);
     }
 
-    // Badge générique 2026 : "princeps : [nom princeps col. princeps A]" (rose), pas la DCI ; RCP et MEDDISPAR en HoverPill
+    // Badge générique 2026 : "princeps : [nom princeps]" (rose) à la place de "DCI : ...", depuis le CSV génériques 2026.
+    // Si le CIS du produit est dans generiques2026ByCis, c'est un générique : on affiche toujours le badge rose (source de vérité = fichier CSV).
     final generique2026Info = (generiques2026ByCis != null && cisKey.isNotEmpty)
         ? generiques2026ByCis![cisKey]
         : null;
         if (generique2026Info != null) {
-      if (item.isGeneric == true) {
-        // Génériques : on n'affiche plus la DCI, mais uniquement le badge rose "princeps : [nom]".
-        // Au temps pour moi, tu as dit : "pour le  générique : à la place du badge DCi : princeps : le princeps"
-        final princepsLabel = generique2026Info.princepsDisplay.trim();
-        if (princepsLabel.isNotEmpty) {
-          final shortName = shortPrincepsDisplayForBadge(princepsLabel);
-          
-          String tooltip = princepsLabel;
-          String dciToTap = '';
-          final col1Label = col1BeforeParentheses(generique2026Info.genericNameColA);
-          if (col1Label.isNotEmpty) {
-             final dci = dciFromGenericLabel(col1Label);
-             dciToTap = dci.trim().isNotEmpty ? dci : col1Label;
-             tooltip = 'DCI : $dciToTap\n\n(Princeps complet : $princepsLabel)';
-          }
-          
-          line2Children.add(_GeneriqueEqualsBadge(
-            princepsDisplayName: shortName,
-            tooltipFullPrinceps: tooltip,
-            dciForTap: dciToTap,
-            onDciTap: onDciTap,
-          ),);
-          // Génériques : on n'affiche que le badge "princeps : [nom]" (pas de badge DCI type "CICLOPIROX 8%" à côté).
-          // Le clic sur le badge princeps garde la recherche DCI (dciForTap / onDciTap).
+      // CIS présent dans le CSV génériques 2026 (clé = CIS du générique) → produit générique : afficher le badge rose "princeps : [nom]" à la place de "DCI : ...".
+      final princepsLabel = generique2026Info.princepsDisplay.trim();
+      if (princepsLabel.isNotEmpty) {
+        final shortName = shortPrincepsDisplayForBadge(princepsLabel);
+        String tooltip = princepsLabel;
+        String dciToTap = '';
+        final col1Label = col1BeforeParentheses(generique2026Info.genericNameColA);
+        if (col1Label.isNotEmpty) {
+          final dci = dciFromGenericLabel(col1Label);
+          dciToTap = dci.trim().isNotEmpty ? dci : col1Label;
+          tooltip = 'DCI : $dciToTap\n\n(Princeps complet : $princepsLabel)';
         }
-      } else {
+        line2Children.add(_GeneriqueEqualsBadge(
+          princepsDisplayName: shortName,
+          tooltipFullPrinceps: tooltip,
+          dciForTap: dciToTap,
+          onDciTap: onDciTap,
+        ),);
+      } else if (item.isGeneric != true) {
         // Princeps : on affiche la DCI (au clic), ET on affiche le premier générique connu (en rose) au lieu du badge DCI standard.
         // On récupère le groupe générique (col A).
         final col1Label = col1BeforeParentheses(generique2026Info.genericNameColA);
@@ -1197,6 +1283,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'RCP',
           icon: Icons.description_outlined,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Accéder au RCP',
           onTap: () {
             if (onOpenUrl != null) {
@@ -1220,6 +1307,7 @@ Widget build(BuildContext context) {
           line2Children.add(HoverPillButton(
             label: 'vidéo de démonstration',
             icon: Icons.video_library_outlined,
+            iconWidget: _externalLinkIconWidget(),
             tooltip: "Outils d'aide à l'utilisation des thérapeutiques inhalées (SPLF)",
             onTap: () => onOpenTherapeuticVideo!(vurl),
             maxLabelWidth: 240,
@@ -1231,6 +1319,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'MEDDISPAR',
           icon: Icons.warning_amber_rounded,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Fiche MEDDISPAR',
           onTap: () {
             if (onOpenUrl != null) {
@@ -1288,6 +1377,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'Calendrier vaccinal 2025',
           icon: Icons.calendar_month_outlined,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Calendrier vaccinal 2025 (version Décembre 2025)',
           onTap: () {
             if (onOpenUrl != null) {
@@ -1301,6 +1391,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'Calendrier simplifié',
           icon: Icons.calendar_view_month_outlined,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Calendrier simplifié des vaccinations',
           onTap: () {
             if (onOpenUrl != null) {
@@ -1310,6 +1401,54 @@ Widget build(BuildContext context) {
             }
           },
         ),);
+      }
+    } else {
+      // Fallback : pas d'entrée 2026 par CIS (CSV 2026 clé = CIS du générique). Afficher princeps/générique depuis item ou map princeps → générique.
+      if (item.isGeneric == true &&
+          item.princepsName != null &&
+          item.princepsName!.trim().isNotEmpty) {
+        final princepsLabel = item.princepsName!.trim();
+        final shortName = shortPrincepsDisplayForBadge(princepsLabel);
+        line2Children.add(_GeneriqueEqualsBadge(
+          princepsDisplayName: shortName,
+          tooltipFullPrinceps: princepsLabel,
+          dciForTap: '',
+          onDciTap: onDciTap,
+        ),);
+      } else if (item.isGeneric != true &&
+          hasBiosim != true &&
+          hasBioref != true) {
+        final genericNameFromMap = (generiques2026PrincepsKeyToGenericName != null && item.labelRaw.trim().isNotEmpty)
+            ? generiques2026PrincepsKeyToGenericName![normalizePrincepsKey(item.labelRaw).trim()]
+            : null;
+        final genericName = (item.genericName != null && item.genericName!.trim().isNotEmpty)
+            ? item.genericName!.trim()
+            : genericNameFromMap;
+        if (genericName != null && genericName.isNotEmpty) {
+          final dciStr = shortGenericDisplayForBadge(genericName);
+          line2Children.add(_PrincepsLine2Widget(
+            dci: dciStr,
+            onDciTap: onDciTap,
+          ),);
+          line2Children.add(const SizedBox(width: 6));
+          line2Children.add(_PrincepsEqualsGeneriqueBadge(
+            genericDisplayName: shortGenericDisplayForBadge(genericName),
+            tooltipFullGeneric: genericName,
+            dciForTap: dciStr,
+            onDciTap: onDciTap,
+          ),);
+          if (showPlusInfosBdm) {
+            line2Children.add(const SizedBox(width: 6));
+            final isDisabled = item.isInactive || item.hospitalOnly == true || item.isNsfpEffective == true;
+            line2Children.add(PlusInfosBadge(
+              statuts: statutsForCis ?? const [],
+              tauxRemboursement: tauxRemboursement,
+              compositionLine: compositionLine,
+              listes: listes ?? const [],
+              isDisabled: isDisabled,
+            ),);
+          }
+        }
       }
     }
     // Badge biosimilaire de [bioréférent]. RCP et MEDDISPAR restent en ligne 3 (hover pills).
@@ -1465,6 +1604,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'RCP',
           icon: Icons.description_outlined,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Accéder au RCP',
           onTap: () {
             if (onOpenUrl != null) {
@@ -1488,6 +1628,7 @@ Widget build(BuildContext context) {
           line2Children.add(HoverPillButton(
             label: 'vidéo de démonstration',
             icon: Icons.video_library_outlined,
+            iconWidget: _externalLinkIconWidget(),
             tooltip: "Outils d'aide à l'utilisation des thérapeutiques inhalées (SPLF)",
             onTap: () => onOpenTherapeuticVideo!(vurl),
             maxLabelWidth: 240,
@@ -1499,6 +1640,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'MEDDISPAR',
           icon: Icons.warning_amber_rounded,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Fiche MEDDISPAR',
           onTap: () {
             if (onOpenUrl != null) {
@@ -1556,6 +1698,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'Calendrier vaccinal 2025',
           icon: Icons.calendar_month_outlined,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Calendrier vaccinal 2025 (version Décembre 2025)',
           onTap: () {
             if (onOpenUrl != null) {
@@ -1569,6 +1712,7 @@ Widget build(BuildContext context) {
         line2Children.add(HoverPillButton(
           label: 'Calendrier simplifié',
           icon: Icons.calendar_view_month_outlined,
+          iconWidget: _externalLinkIconWidget(),
           tooltip: 'Calendrier simplifié des vaccinations',
           onTap: () {
             if (onOpenUrl != null) {
@@ -2259,6 +2403,7 @@ class CodeBadgeWithCopy extends StatelessWidget {
     this.leadingIcon,
     this.fontSize = 11,
     this.leadingIconSize,
+    this.height,
   });
 
   final String label;
@@ -2269,10 +2414,51 @@ class CodeBadgeWithCopy extends StatelessWidget {
   final double fontSize;
   /// Taille des icônes (leading + copy). Si null, dérivée de [fontSize].
   final double? leadingIconSize;
+  /// Hauteur fixe du badge (ex. 30.8 pour aligner sur HoverPillButton ligne 2). Si null, hauteur intrinsèque.
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = (leadingIconSize ?? fontSize.clamp(10.0, 12.0)).toDouble();
+    final useCompact = height != null;
+    final effectiveFontSize = useCompact ? 10.0 : fontSize;
+    final iconSize = (leadingIconSize ?? effectiveFontSize.clamp(10.0, 12.0)).toDouble();
+    final effectiveIconSize = useCompact ? 14.0 : iconSize;
+    final double padH = useCompact ? 8.0 : (effectiveFontSize <= 10 ? 6.0 : 10.0);
+    final double padV = useCompact ? (height! - effectiveIconSize) / 2 : (effectiveFontSize <= 10 ? 2.0 : 4.0);
+
+    Widget content = Container(
+      padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV.clamp(2.0, 12.0)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFCBD5E1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (leadingIcon != null) ...[
+            Icon(leadingIcon, size: effectiveIconSize, color: Colors.black54),
+            SizedBox(width: effectiveFontSize <= 10 ? 3 : 4),
+          ],
+          Text(
+            '$label : $value',
+            style: TextStyle(
+              fontSize: effectiveFontSize,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.2,
+            ),
+          ),
+          SizedBox(width: effectiveFontSize <= 10 ? 4 : 6),
+          Icon(Icons.copy, size: effectiveIconSize, color: Colors.black54),
+        ],
+      ),
+    );
+
+    if (height != null) {
+      content = SizedBox(height: height, child: Center(child: content));
+    }
+
     return OffiboxTooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 900),
@@ -2288,36 +2474,7 @@ class CodeBadgeWithCopy extends StatelessWidget {
             ),
           );
         },
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: fontSize <= 10 ? 6 : 10,
-            vertical: fontSize <= 10 ? 2 : 4,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFCBD5E1)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (leadingIcon != null) ...[
-                Icon(leadingIcon, size: iconSize, color: Colors.black54),
-                SizedBox(width: fontSize <= 10 ? 3 : 4),
-              ],
-              Text(
-                '$label : $value',
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
-                ),
-              ),
-              SizedBox(width: fontSize <= 10 ? 4 : 6),
-              Icon(Icons.copy, size: iconSize, color: Colors.black54),
-            ],
-          ),
-        ),
+        child: content,
       ),
     );
   }

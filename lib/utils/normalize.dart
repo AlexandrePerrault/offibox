@@ -154,9 +154,11 @@ String normalizeText(String input) {
 String cleanLabelLine1(String input) {
   if (input.isEmpty) return input;
   String s = normalizeText(input);
-  // Réduire les apostrophes sur les mots courants (S'ÉCABLE → SÉCABLE)
+  // Réduire les apostrophes sur les mots courants (S'ÉCABLE → SÉCABLE, comprim'é → comprimé)
   s = s.replaceAll("S'ÉCABLE", 'SÉCABLE').replaceAll("S'ÉCABLES", 'SÉCABLES');
   s = s.replaceAll("s'écable", 'sécable').replaceAll("s'écables", 'sécables');
+  s = s.replaceAll("COMPRIM'É", 'COMPRIMÉ').replaceAll("COMPRIM'ÉS", 'COMPRIMÉS');
+  s = s.replaceAll("comprim'é", 'comprimé').replaceAll("comprim'és", 'comprimés');
   // Typo BDPM courante
   s = s.replaceAll('GÉLULESS', 'GÉLULES').replaceAll('géluless', 'gélules');
   // Supprimer les phrases consécutives dupliquées (ex. "COMPRIMÉ SÉCABLE COMPRIMÉ SÉCABLE" → "COMPRIMÉ SÉCABLE")

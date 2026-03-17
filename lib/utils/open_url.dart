@@ -43,15 +43,25 @@ Future<void> _openInDefaultBrowser(String url) async {
   }
 }
 
+/// Retire un éventuel slash initial qui rendrait l’URL invalide (ex. "/https://..." depuis un lien relatif mal résolu).
+String _normalizeUrl(String s) {
+  final t = s.trim();
+  if (t.length > 1 && t.startsWith('/')) {
+    final rest = t.substring(1).trimLeft();
+    if (rest.startsWith('http://') || rest.startsWith('https://')) return rest;
+  }
+  return t;
+}
+
 Future<void> openUrl(String rawUrl, {bool forceExternal = false}) async {
   onBeforeOpenLink?.call();
 
-  final clean = rawUrl
+  final clean = _normalizeUrl(rawUrl
       .replaceAll('"', '')
       .replaceAll("'", '')
       .replaceAll('\r', '')
       .replaceAll('\n', '')
-      .trim();
+      .trim());
 
   final isHttp = clean.startsWith('http://') || clean.startsWith('https://');
   final isMail = clean.startsWith('mailto:');

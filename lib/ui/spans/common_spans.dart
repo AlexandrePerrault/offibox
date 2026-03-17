@@ -403,14 +403,18 @@ WidgetSpan surveillanceSquareSpan({
 
 //🟩 OTC/Libre accès (liste médication officinale ANSM) — badge retiré : on n’affiche plus que NR pour non remboursé.//
 
+/// URL ANSM « Médicaments en accès direct » (liste médication officinale / libre accès).
+const String kAnsmMedicationOfficinaleUrl =
+    'https://ansm.sante.fr/documents/reference/medicaments-en-acces-direct';
+
 WidgetSpan otcSquareSpan({
-  String tooltip = 'OTC / Libre accès',
+  String tooltip = 'Médicaments en accès direct (liste médication officinale ANSM)',
 }) {
   return squareTagSpan(
     label: 'OTC/Libre accès',
-    color: Colors.lightGreenAccent.shade700, // 🟩 vert fluo
+    color: Colors.lightGreenAccent.shade700,
     tooltip: tooltip,
-    url: 'https://ansm.sante.fr/',
+    url: kAnsmMedicationOfficinaleUrl,
   );
 }
 
@@ -977,6 +981,113 @@ WidgetSpan produitSpan({
     label: 'produit',
     color: const Color(0xFF00B4D8), // bleu lagon
     tooltip: tooltip,
+  );
+}
+
+/// Badge avec logo à gauche (Widget pour Row/Wrap).
+Widget squareTagWidgetWithLogo({
+  required String label,
+  required Color color,
+  required String tooltip,
+  String? url,
+  required String logoAssetPath,
+  double logoSize = 14,
+}) {
+  final logo = logoAssetPath.toLowerCase().endsWith('.svg')
+      ? SvgPicture.asset(logoAssetPath, width: logoSize, height: logoSize, fit: BoxFit.contain)
+      : Image.asset(logoAssetPath, width: logoSize, height: logoSize, fit: BoxFit.contain);
+  final content = IntrinsicWidth(
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(width: logoSize, height: logoSize, child: logo),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              height: 1,
+              letterSpacing: 0.3,
+              fontFamily: 'Spinnaker',
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+  return OffiboxTooltip(
+    message: tooltip,
+    waitDuration: const Duration(milliseconds: 300),
+    child: url == null || url.isEmpty
+        ? content
+        : GestureDetector(
+            onTap: () => openUrl(url),
+            child: content,
+          ),
+  );
+}
+
+/// Badge MADOUEST avec logo officiel (extrait de madouest.com).
+Widget madouestBadgeWidget({
+  String tooltip = 'Catalogue Madouest (CERP)',
+  String? url,
+}) {
+  return squareTagWidgetWithLogo(
+    label: 'MADOUEST',
+    color: const Color(0xFF2E7D32), // vert CERP
+    tooltip: tooltip,
+    url: url,
+    logoAssetPath: 'assets/icons/madouest.png',
+  );
+}
+
+WidgetSpan madouestBadgeSpan({
+  String tooltip = 'Catalogue Madouest (CERP)',
+  String? url,
+}) {
+  return WidgetSpan(
+    alignment: PlaceholderAlignment.middle,
+    child: Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: madouestBadgeWidget(tooltip: tooltip, url: url),
+    ),
+  );
+}
+
+/// Badge CO&PHARM avec logo (assets/icons/coetpharm.svg).
+Widget coetpharmBadgeWidget({
+  String tooltip = 'Produit Co&Pharm',
+  String? url,
+}) {
+  return squareTagWidgetWithLogo(
+    label: 'CO&PHARM',
+    color: const Color(0xFF00B4D8), // bleu lagon
+    tooltip: tooltip,
+    url: url,
+    logoAssetPath: 'assets/icons/coetpharm.svg',
+  );
+}
+
+WidgetSpan coetpharmBadgeSpan({
+  String tooltip = 'Produit Co&Pharm',
+  String? url,
+}) {
+  return WidgetSpan(
+    alignment: PlaceholderAlignment.middle,
+    child: Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: coetpharmBadgeWidget(tooltip: tooltip, url: url),
+    ),
   );
 }
 

@@ -21,6 +21,9 @@ import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 const String _kCodesActesPlusInfosUrl =
     'https://www.ameli.fr/finistere/pharmacien/exercice-professionnel/remunerations/honoraires-actes-pharmaciens';
 
+/// Hauteur des badges Tél/Fax/Mail (alignée sur HoverPillButton ligne 2).
+const double _kLabContactPillHeight = 30.8;
+
 class ResultLine1 extends StatelessWidget {
   final SearchResult item;
   final String label;
@@ -238,94 +241,96 @@ class ResultLine1 extends StatelessWidget {
             ),
           ),);
         }
-        // Ligne 1 laboratoires : Tél (col C), Fax (col D), Mail (col E) — même taille icônes + contour 3D
-        if (item.phone != null && item.phone!.trim().isNotEmpty) {
-          spans.add(const TextSpan(text: ' '));
-          spans.add(WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Padding(
+        // Ligne 1 laboratoires : Tél, Fax, Mail — badges sur la même ligne (Row).
+        if (item.phone != null || item.fax != null || item.email != null) {
+          final contactPills = <Widget>[];
+          if (item.phone != null && item.phone!.trim().isNotEmpty) {
+            contactPills.add(Padding(
               padding: const EdgeInsets.only(right: 6),
               child: _wrapBadgeIfDisabled(
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: _labLine1IconDecoration(color: const Color(0xFFF1F5F9)),
-                  child: CodeBadgeWithCopy(
-                    label: 'Tél',
-                    value: item.phone!.replaceAll('"', '').replaceAll("'", ''),
-                    tooltip: 'Copier le numéro',
-                    leadingIcon: Icons.phone,
-                    fontSize: 11,
-                    leadingIconSize: _labLine1IconInnerSize,
-                  ),
+                CodeBadgeWithCopy(
+                  label: 'Tél',
+                  value: item.phone!.replaceAll('"', '').replaceAll("'", ''),
+                  tooltip: 'Copier le numéro',
+                  leadingIcon: Icons.phone,
+                  fontSize: 11,
+                  leadingIconSize: 14,
+                  height: _kLabContactPillHeight,
                 ),
                 isDisabled,
               ),
-            ),
-          ),);
-        }
-        if (item.fax != null && item.fax!.trim().isNotEmpty) {
-          spans.add(const TextSpan(text: ' '));
-          spans.add(WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Padding(
+            ),);
+          }
+          if (item.fax != null && item.fax!.trim().isNotEmpty) {
+            contactPills.add(Padding(
               padding: const EdgeInsets.only(right: 6),
               child: _wrapBadgeIfDisabled(
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: _labLine1IconDecoration(color: const Color(0xFFF1F5F9)),
-                  child: CodeBadgeWithCopy(
-                    label: 'Fax',
-                    value: item.fax!.replaceAll('"', '').replaceAll("'", ''),
-                    tooltip: 'Copier le fax',
-                    leadingIcon: Icons.fax,
-                    fontSize: 11,
-                    leadingIconSize: _labLine1IconInnerSize,
-                  ),
+                CodeBadgeWithCopy(
+                  label: 'Fax',
+                  value: item.fax!.replaceAll('"', '').replaceAll("'", ''),
+                  tooltip: 'Copier le fax',
+                  leadingIcon: Icons.fax,
+                  fontSize: 11,
+                  leadingIconSize: 14,
+                  height: _kLabContactPillHeight,
                 ),
                 isDisabled,
               ),
-            ),
-          ),);
-        }
-        if (item.email != null && item.email!.trim().isNotEmpty) {
-          spans.add(const TextSpan(text: ' '));
-          final email = item.email!.replaceAll('"', '').replaceAll("'", '');
-          spans.add(WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: _wrapBadgeIfDisabled(
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: _labLine1IconDecoration(color: const Color(0xFFF1F5F9)),
-                  child: OffiboxTooltip(
-                    message: 'Ouvrir le client mail',
-                    child: InkWell(
-                      onTap: () => openUrl('mailto:$email'),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.email_outlined, size: _labLine1IconInnerSize, color: Colors.black54),
-                          const SizedBox(width: 6),
-                          Text('Mail : $email', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
-                          const SizedBox(width: 6),
-                          InkWell(
-                            onTap: () {
-                              Clipboard.setData(ClipboardData(text: email));
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mail copié'), duration: Duration(milliseconds: 900), behavior: SnackBarBehavior.floating));
-                            },
-                            child: const Icon(Icons.copy, size: _labLine1IconInnerSize, color: Colors.black54),
+            ),);
+          }
+          if (item.email != null && item.email!.trim().isNotEmpty) {
+            final email = item.email!.replaceAll('"', '').replaceAll("'", '');
+            contactPills.add(_wrapBadgeIfDisabled(
+              OffiboxTooltip(
+                message: 'Ouvrir le client mail',
+                child: InkWell(
+                  onTap: () => openUrl('mailto:$email'),
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    height: _kLabContactPillHeight,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: const Color(0xFFCBD5E1)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.email_outlined, size: 14, color: Colors.black54),
+                        const SizedBox(width: 4),
+                        Text('Mail : $email', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(width: 6),
+                        InkWell(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: email));
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mail copié'), duration: Duration(milliseconds: 900), behavior: SnackBarBehavior.floating));
+                          },
+                          borderRadius: BorderRadius.circular(999),
+                          child: const Padding(
+                            padding: EdgeInsets.all(2),
+                            child: Icon(Icons.copy, size: 14, color: Colors.black54),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                isDisabled,
               ),
-            ),
-          ),);
+              isDisabled,
+            ),);
+          }
+          if (contactPills.isNotEmpty) {
+            spans.add(const TextSpan(text: ' '));
+            spans.add(WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: contactPills,
+              ),
+            ),);
+          }
         }
       }
 
@@ -399,14 +404,21 @@ class ResultLine1 extends StatelessWidget {
         spans.add(const TextSpan(text: ' '));
       }
 
-      // 📦 CERP — Catalogue / produits : texte + logo (si asset) + ouverture URL (si fournie)
+      // 📦 CERP — Badge MADOUEST ou CO&PHARM (avec logo) + texte + logo produit + lien
       if (item.source == SourceType.cerp) {
         final url = item.catalogueUrl?.trim().isNotEmpty == true
             ? item.catalogueUrl!.trim()
             : item.url?.trim();
         final libelle = (item.label.isNotEmpty ? item.label : item.labelRaw).trim().toUpperCase();
+        final lab = item.laboratory.trim().toLowerCase();
 
-        spans.add(const TextSpan(text: '📦 '));
+        // Badge MADOUEST ou CO&PHARM avec logo (common_spans)
+        if (lab.contains('co') && lab.contains('pharm')) {
+          spans.add(coetpharmBadgeSpan(tooltip: 'Produit Co&Pharm', url: url));
+        } else {
+          spans.add(madouestBadgeSpan(tooltip: 'Catalogue Madouest (CERP)', url: url));
+        }
+        spans.add(const TextSpan(text: ' '));
         if (libelle.isNotEmpty) {
           final highlightSpans = highlightText(
             context: context,
@@ -1294,6 +1306,7 @@ class _SiteWebLinkExternalBadgeState extends State<_SiteWebLinkExternalBadge> {
     return OffiboxTooltip(
       message: widget.url,
       waitDuration: const Duration(milliseconds: 500),
+      preferBelow: true,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),

@@ -37,6 +37,11 @@ class _OffiboxLogoButtonState extends State<OffiboxLogoButton> {
           child: Image.asset(
             'assets/icons/logo_offibox.png',
             fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.medication,
+              size: widget.size * 0.7,
+              color: const Color(0xFF5A9094), // Offibox teal
+            ),
           ),
         ),
       ),

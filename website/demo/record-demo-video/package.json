@@ -1,0 +1,1 @@
+{"name":"record-demo-video","version":"1.0.0","private":true,"scripts":{"record":"node record.js","pdf":"node generate_architecture_pdf.js"},"dependencies":{"playwright":"^1.40.0"}}

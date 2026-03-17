@@ -626,7 +626,7 @@ class OffiboxController extends ChangeNotifier {
         .replaceAll('à', '0').replaceAll('À', '0');
   }
 
-  /// Pour une recherche précise (ex. "biatain 23 Tal") : si un seul médicament BDM contient tous les tokens du libellé, on n'affiche que celui-là.
+  /// Pour une recherche précise (ex. "biatain 23 Tal") : si un médicament BDM contient tous les tokens, on le met en tête tout en gardant les autres sources (outils métier, sites web, LPP, mutuelles, etc.).
   static List<SearchResult> _tryPreciseMatchOnly(String query, List<SearchResult> results) {
     final q = query.trim();
     if (q.isEmpty) return results;
@@ -635,9 +635,6 @@ class OffiboxController extends ChangeNotifier {
         .map((s) => normalizeLoose(s))
         .where((t) => t.length >= 2 || RegExp(r'^\d+$').hasMatch(t))
         .toList();
-    // Important: ne pas "écraser" les recherches courtes type "prava 20" qui doivent
-    // retourner plusieurs présentations / labos. On n'applique ce mode précis que
-    // lorsque la requête est vraiment descriptive (>= 3 tokens).
     if (tokens.length < 3) return results;
     final bdm = results.where((r) => r.source == SourceType.bdm).toList();
     if (bdm.isEmpty) return results;
@@ -650,10 +647,32 @@ class OffiboxController extends ChangeNotifier {
       return true;
     }).toList();
     if (matches.isEmpty) return results;
-    if (matches.length == 1) return matches;
-    // Plusieurs correspondances : garder le plus spécifique (libellé le plus court)
+    final nonBdm = results.where((r) => r.source != SourceType.bdm).toList();
+    if (matches.length == 1) return [matches.first, ...nonBdm];
     matches.sort((a, b) => a.labelRaw.length.compareTo(b.labelRaw.length));
-    return [matches.first];
+    return [matches.first, ...nonBdm];
+  }
+
+  /// Met en tête les résultats dont le libellé correspond exactement à la requête (ex. « Viatris » avant « Clopidogrel Viatris »).
+  static List<SearchResult> _prioritizeExactMatch(String query, List<SearchResult> results) {
+    final q = query.trim();
+    if (q.isEmpty) return results;
+    final qNorm = normalizeLoose(q);
+    if (qNorm.isEmpty) return results;
+    final exact = <SearchResult>[];
+    final startsWith = <SearchResult>[];
+    final rest = <SearchResult>[];
+    for (final r in results) {
+      final lab = normalizeLoose(r.labelRaw);
+      if (lab == qNorm) {
+        exact.add(r);
+      } else if (lab.startsWith(qNorm)) {
+        startsWith.add(r);
+      } else {
+        rest.add(r);
+      }
+    }
+    return [...exact, ...startsWith, ...rest];
   }
 
   /// Pour outils métier et sites web : un seul résultat par libellé (col B). Évite les doublons quand le même libellé existe dans les deux CSVs.
@@ -681,6 +700,7 @@ class OffiboxController extends ChangeNotifier {
       results = searchFilter.applyTo(results, genericCipSet: genericCipSet, cisArretCommercialisation: cisArretCommercialisation);
     }
     results = _tryPreciseMatchOnly(q, results);
+    results = _prioritizeExactMatch(q, results);
     results = OffiboxController._deduplicateKeywordSiteWebByLibelle(results);
     final sameLocal = identical(results, filteredResults);
     if (!sameLocal) {
@@ -735,7 +755,9 @@ class OffiboxController extends ChangeNotifier {
 
     final rpps = _extractRppsFromQuery(q);
     final bool preferStructure = rpps == null && _looksLikeStructureQuery(q);
-    final name = (rpps == null && !preferStructure) ? _extractNameQuery(q) : null;
+    final nameRaw = (rpps == null && !preferStructure) ? _extractNameQuery(q) : null;
+    // Recherche nom/prénom : seulement si l'utilisateur a tapé un mot entier puis un espace (ex. "Martin " ou "Martin Jean"), et au moins 2 caractères après l'espace pour éviter "Martin J".
+    final name = (nameRaw != null && q.contains(' ') && (nameRaw.prenom?.length ?? 0) >= 2) ? nameRaw : null;
     // Requête structure : seulement si ça ressemble à un nom de structure (pharmacie, cabinet…) et au moins 4 caractères.
     final structureQuery = (rpps == null && name == null && preferStructure && q.length >= 4) ? q : null;
     if (rpps == null && name == null && structureQuery == null) return;

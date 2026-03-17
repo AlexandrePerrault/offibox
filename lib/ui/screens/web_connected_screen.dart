@@ -120,21 +120,21 @@ class _WebConnectedScreenState extends State<WebConnectedScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    'mis à jour le ${kVersionDate}',
+                    'Mis à jour le ${kVersionDate}',
                     style: TextStyle(
                       fontStyle: FontStyle.italic,
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
+                      color: Colors.grey.shade700,
+                      fontSize: 13,
                     ),
                   ),
                   if (_licenseEndDate != null && _licenseEndDate!.isNotEmpty) ...[
                     const SizedBox(width: 12),
                     Text(
-                      'licence jusqu\'au $_licenseEndDate',
+                      'Licence jusqu\'au $_licenseEndDate',
                       style: TextStyle(
                         fontStyle: FontStyle.italic,
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                        fontSize: 13,
                       ),
                     ),
                   ],

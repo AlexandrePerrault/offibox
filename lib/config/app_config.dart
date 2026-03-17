@@ -31,4 +31,11 @@ class AppConfig {
   /// CERP (catalogue équipement, client BA, etc.) : désactivé dans le build principal.
   /// Réactiver pour un setup MSI dédié (dossier CERP sur GitHub).
   static const bool cerpFeaturesEnabled = false;
+
+  /// Mode essai sans identification : pas de login, 15 jours à partir du premier lancement.
+  /// Build : flutter build windows --dart-define=OFFIBOX_TRIAL_NO_AUTH=true
+  static const bool trialNoAuth = bool.fromEnvironment(
+    'OFFIBOX_TRIAL_NO_AUTH',
+    defaultValue: false,
+  );
 }

@@ -89,6 +89,46 @@ export const registerDevice = onCall(callableOptions, async (request) => {
   return { success: true };
 });
 
+/** Trial sans auth : vérifie/crée la période de 15 jours côté serveur (deviceId). Pas d'auth requise. */
+export const checkTrialNoAuth = onCall(callableOptions, async (request) => {
+  const data = request.data;
+  const deviceId: string | undefined = data?.deviceId;
+
+  if (!deviceId || typeof deviceId !== "string" || deviceId.length < 8) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Missing or invalid deviceId"
+    );
+  }
+
+  const db = admin.firestore();
+  const docRef = db.collection("trialNoAuth").doc(deviceId);
+
+  const docSnap = await docRef.get();
+
+  if (!docSnap.exists) {
+    const now = new Date();
+    const trialEndsAt = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
+    await docRef.set({
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      trialEndsAt: admin.firestore.Timestamp.fromDate(trialEndsAt),
+    });
+    return {
+      valid: true,
+      trialEndsAt: trialEndsAt.toISOString(),
+    };
+  }
+
+  const d = docSnap.data()!;
+  const trialEndsAt = d.trialEndsAt?.toDate?.() ?? new Date(0);
+  const valid = trialEndsAt > new Date();
+
+  return {
+    valid,
+    trialEndsAt: trialEndsAt.toISOString(),
+  };
+});
+
 /** Emails exemptés de la limite de 5 appareils (app desktop + version en ligne + dev) */
 const DEVICE_LIMIT_EXEMPT_EMAILS = [
   "offibox17@gmail.com",
@@ -143,6 +183,9 @@ export const getAdminUsers = onCall(callableOptions, async (request) => {
 
   return { users };
 });
+
+// Proxy + cache Annuaire PS (réduit latence API FHIR)
+export { searchAnnuairePS } from "./annuaire_cache";
 
 // Option B : données clients (inscription) + export CSV admin
 export { saveRegistrationData, exportClientsCsv } from "./clients";

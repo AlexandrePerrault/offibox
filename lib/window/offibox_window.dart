@@ -18,6 +18,7 @@ import 'package:offibox/controllers/offibox_controller.dart';
 import 'package:offibox/auth/auth_state_provider.dart';
 import 'package:offibox/providers/offibox_providers.dart';
 import 'package:offibox/utils/ansm_rappel_match.dart';
+import 'package:offibox/ui/results/result_tile.dart';
 import 'package:offibox/ui/results/results_panel.dart';
 import 'package:offibox/ui/widgets/fake_results.dart';
 import 'package:offibox/window/offibox_window_shortcuts.dart';
@@ -144,6 +145,8 @@ class _OffiboxWindowState extends ConsumerState<OffiboxWindow>
   String? _webPanelUrl;
   /// Chemin asset d'une image ouverte sous la barre (ex. assets/images/xxx.png).
   String? _imagePanelAssetPath;
+  /// Titre optionnel du panneau image (ex. "disponibilité produits - semaine 13").
+  String? _imagePanelTitle;
   /// Calculatrice de marge (mot-clé « calculatrice de marge ») ouverte sous la barre.
   bool _showMarginCalculatorPanel = false;
   String _appVersion = '1.0.0';
@@ -291,6 +294,7 @@ Future<void> _registerDeviceIfNeeded() async {
     _xlsPanelUrl = null;
     _wordPanelUrl = null;
     _imagePanelAssetPath = null;
+    _imagePanelTitle = null;
     _showMarginCalculatorPanel = false;
     _showYouTubePanel = false;
     _youtubeVideoUrl = null;
@@ -303,22 +307,33 @@ Future<void> _registerDeviceIfNeeded() async {
   }
 
   /// Ouvre une image asset (assets/images/...) dans le panneau sous la barre.
-  void _openAssetImageInBelowBar(String assetPath) {
+  void _openAssetImageInBelowBar(String assetPath, {String? title}) {
     final path = assetPath.trim().replaceAll(r'\', '/');
     if (path.isEmpty || !path.toLowerCase().startsWith('assets/')) return;
     setState(() {
       _clearBelowBarPanels();
       expanded = true;
       _imagePanelAssetPath = path;
+      _imagePanelTitle = title?.trim().isEmpty == true ? null : title?.trim();
     });
   }
 
+  /// Ouvre le panneau « disponibilité produits » (titre + image semaine) sous la barre.
+  void _openDisponibiliteProduitsPanel() {
+    _openAssetImageInBelowBar(
+      'assets/disponibilite/disponibilite_semaine13.jpg',
+      title: 'disponibilité produits - semaine 13',
+    );
+  }
+
+  /// Ouvre PDF, Word, XLS, vidéo ou URL dans la fenêtre sous la barre (au clic sur un badge).
   void _openHttpUrlInBelowBar(String url) {
     final u = url.trim();
     if (u.isEmpty) return;
     final lower = u.toLowerCase();
+    final path = Uri.tryParse(u)?.path.toLowerCase() ?? lower;
 
-    if (lower.endsWith('.pdf')) {
+    if (path.endsWith('.pdf') || lower.contains('.pdf?')) {
       setState(() {
         _clearBelowBarPanels();
         expanded = true;
@@ -331,7 +346,8 @@ Future<void> _registerDeviceIfNeeded() async {
       return;
     }
 
-    if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || lower.endsWith('.ods')) {
+    if (path.endsWith('.xls') || path.endsWith('.xlsx') || path.endsWith('.ods') ||
+        lower.contains('.xls?') || lower.contains('.xlsx?') || lower.contains('.ods?')) {
       setState(() {
         _clearBelowBarPanels();
         expanded = true;
@@ -340,7 +356,8 @@ Future<void> _registerDeviceIfNeeded() async {
       return;
     }
 
-    if (lower.endsWith('.doc') || lower.endsWith('.docx') || lower.endsWith('.odt')) {
+    if (path.endsWith('.doc') || path.endsWith('.docx') || path.endsWith('.odt') ||
+        lower.contains('.doc?') || lower.contains('.docx?') || lower.contains('.odt?')) {
       setState(() {
         _clearBelowBarPanels();
         expanded = true;
@@ -353,7 +370,13 @@ Future<void> _registerDeviceIfNeeded() async {
       setState(() {
         _clearBelowBarPanels();
         expanded = true;
-        _webPanelUrl = u;
+        // Vidéos YouTube : panneau dédié au lieu du panneau web générique
+        if (lower.contains('youtube.com') || lower.contains('youtu.be')) {
+          _showYouTubePanel = true;
+          _youtubeVideoUrl = u;
+        } else {
+          _webPanelUrl = u;
+        }
       });
       return;
     }
@@ -811,18 +834,29 @@ KeyEventResult _handleKey(
     if (!expanded) {
       return OffiboxWindowUI.collapsedWidth;
     }
-    // Largeur initiale de la barre déployée : 80 % de la largeur de l'écran.
-    return MediaQuery.of(context).size.width * 0.8;
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Catalogue / outils métier / sites web : nombreux badges → fenêtre plus large pour tout afficher.
+    final selected = ref.read(offiboxControllerProvider).selectedResult;
+    if (selected?.source == SourceType.catalogue ||
+        selected?.source == SourceType.keyword ||
+        selected?.source == SourceType.siteWeb) {
+      return (screenWidth * 0.9).clamp(520.0, screenWidth * 0.95);
+    }
+    return screenWidth * 0.8;
   }
 
   /// Hauteur de la barre déployée selon le nombre de lignes du résultat (médicaments : 2, 3 ou 4 ; annuaire RPPS : 4 pour voir la source).
   double? _effectiveExpandedBarHeight(SearchResult? item) {
     if (item == null) return null;
-    final singleLine = item.source == SourceType.keyword ||
+    // DM / codes actes : peu de badges → hauteur réduite.
+    final compactSource = item.source == SourceType.dm || item.source == SourceType.codesActes;
+    if (compactSource) return OffiboxWindowUI.barHeightExpandedSingleLine;
+    // Outils métier, sites web, catalogues : nombreux badges (wrap sur plusieurs lignes) → hauteur suffisante pour tout afficher.
+    if (item.source == SourceType.keyword ||
         item.source == SourceType.siteWeb ||
-        item.source == SourceType.catalogue ||
-        item.source == SourceType.dm;
-    if (singleLine) return OffiboxWindowUI.barHeightExpandedSingleLine;
+        item.source == SourceType.catalogue) {
+      return OffiboxWindowUI.barHeightExpandedWithBadges;
+    }
     if (item.source == SourceType.annuaireSanteRpps) return OffiboxWindowUI.barHeightExpandedFourLines;
     final hasLine3 = (item.url != null && item.url!.trim().isNotEmpty) ||
         (item.meddisparUrl != null && item.meddisparUrl!.trim().isNotEmpty);
@@ -857,8 +891,25 @@ Widget build(BuildContext context) {
         _therapeuticVideoUrl = null;
         _hidePdfHitPanel = false;
       });
-      // Outils métier / Sites web : une seule URL sur la ligne → ouvrir dans la fenêtre sous la barre
       final r = next.selectedResult;
+      // Catalogue / outils métier / sites web : élargir la fenêtre pour afficher tous les badges.
+      final needsWiderWindow = r != null &&
+          (r.source == SourceType.catalogue ||
+              r.source == SourceType.keyword ||
+              r.source == SourceType.siteWeb) &&
+          expanded;
+      if (needsWiderWindow) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!mounted) return;
+          try {
+            final screenWidth = MediaQuery.sizeOf(context).width;
+            final w = (screenWidth * 0.9).clamp(520.0, screenWidth * 0.95).round() + 48;
+            final h = 420.0;
+            await windowManager.setSize(Size(w.toDouble(), h));
+          } catch (_) {}
+        });
+      }
+      // Outils métier / Sites web : une seule URL sur la ligne → ouvrir dans la fenêtre sous la barre
       if (r != null &&
           (r.source == SourceType.keyword || r.source == SourceType.siteWeb) &&
           (r.url?.trim().isNotEmpty ?? false)) {
@@ -1307,35 +1358,26 @@ Widget build(BuildContext context) {
       arretCommercialisationByCis: controller.arretCommercialisationByCis,
       tauxRemboursementByCis: controller.tauxRemboursementByCis,
       getVocUrlsForItem: (item) {
-        final f = controller.getVocFicheForLabel(item.label, controller.currentQuery);
+        final displayLabel = ResultLabelHelper.displayLabel(item);
+        final f = controller.getVocFicheForLabel(displayLabel, controller.currentQuery);
         return (f?.urlPatient, f?.urlPro);
       },
       onOpenUrl: (String url) {
-        // En passant d'un badge à un autre : fermer la modale « plus d'infos » si ouverte, puis effacer page/URL/PDF et afficher le nouveau contenu.
+        // Fermer la modale « plus d'infos » si ouverte.
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop();
         }
+        // Fermer la fenêtre sous la barre en cours (web, PDF, XLS, Word, image, etc.) avant d'ouvrir le nouveau contenu.
+        setState(() => _clearBelowBarPanels());
         final u = url.trim();
-        // Fichiers image (assets/) : ouvrir dans la fenêtre sous la barre, pas comme URL.
         if (u.toLowerCase().startsWith('assets/')) {
           _openAssetImageInBelowBar(u);
           return;
         }
-        final lower = u.toLowerCase();
-        // Tout ce qui est HTTP(S) / PDF / Word / XLS est forcé dans le panneau sous la barre.
-        if (lower.endsWith('.pdf') ||
-            lower.endsWith('.xls') ||
-            lower.endsWith('.xlsx') ||
-            lower.endsWith('.ods') ||
-            lower.endsWith('.doc') ||
-            lower.endsWith('.docx') ||
-            lower.endsWith('.odt') ||
-            u.startsWith('http://') ||
-            u.startsWith('https://')) {
+        if (u.startsWith('http://') || u.startsWith('https://')) {
           _openHttpUrlInBelowBar(u);
           return;
         }
-        // mailto:, tel:, etc.
         openUrl(u);
       },
 
@@ -1412,6 +1454,7 @@ Widget build(BuildContext context) {
           : null,
       showCataloguePanel: _showCataloguePanel,
       onOpenCataloguePanel: () => setState(() => _showCataloguePanel = true),
+      onOpenDisponibiliteProduits: _openDisponibiliteProduitsPanel,
       showYouTubePanel: _showYouTubePanel,
       youtubeVideoUrl: _youtubeVideoUrl,
       onOpenYouTubeVideo: (url) => setState(() {
@@ -1723,7 +1766,8 @@ Widget build(BuildContext context) {
                           cisArretCommercialisation: controller.cisArretCommercialisation,
                           arretCommercialisationByCis: controller.arretCommercialisationByCis,
                           getVocUrlsForItem: (item) {
-                            final f = controller.getVocFicheForLabel(item.label, controller.currentQuery);
+                            final displayLabel = ResultLabelHelper.displayLabel(item);
+                            final f = controller.getVocFicheForLabel(displayLabel, controller.currentQuery);
                             return (f?.urlPatient, f?.urlPro);
                           },
                           onOpenTherapeuticVideo: (url) => setState(() {
@@ -1799,16 +1843,7 @@ Widget build(BuildContext context) {
                               _openAssetImageInBelowBar(u);
                               return;
                             }
-                            final lower = u.toLowerCase();
-                            if (lower.endsWith('.pdf') ||
-                                lower.endsWith('.xls') ||
-                                lower.endsWith('.xlsx') ||
-                                lower.endsWith('.ods') ||
-                                lower.endsWith('.doc') ||
-                                lower.endsWith('.docx') ||
-                                lower.endsWith('.odt') ||
-                                u.startsWith('http://') ||
-                                u.startsWith('https://')) {
+                            if (u.startsWith('http://') || u.startsWith('https://')) {
                               _openHttpUrlInBelowBar(u);
                               return;
                             }
@@ -1868,7 +1903,11 @@ Widget build(BuildContext context) {
               child: ImagePanelBelowBar(
                 assetPath: _imagePanelAssetPath!,
                 barWidth: _barWidth(context),
-                onClose: () => setState(() => _imagePanelAssetPath = null),
+                title: _imagePanelTitle,
+                onClose: () => setState(() {
+                  _imagePanelAssetPath = null;
+                  _imagePanelTitle = null;
+                }),
               ),
             ),
           if (expanded && _showMarginCalculatorPanel)

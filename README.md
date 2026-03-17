@@ -30,6 +30,16 @@ Si le dépôt **offiboxdata** (CSV, HTML, données) est en mode privé, passer u
 
 Les ressources chargées via l’app (CSV, HTML, etc. depuis `raw.githubusercontent.com/.../offiboxdata/...`) utilisent ce token. Créer un PAT : GitHub → Settings (compte) → Developer settings → Personal access tokens (scope **repo**).
 
+## Annuaire PS (API FHIR)
+
+La recherche dans l'annuaire des professionnels de santé (RPPS, nom/prénom, structure) utilise l'API FHIR Annuaire Santé ([interop.esante.gouv.fr/ig/fhir/annuaire](https://interop.esante.gouv.fr/ig/fhir/annuaire)), plus rapide que l'ancienne source data.gouv.fr. Une clé API est obligatoire (Gravitee / ANS).
+
+- **Run / Build :** `flutter run --dart-define=ESANTE_API_KEY=xxx` (ou `flutter build windows --dart-define=ESANTE_API_KEY=xxx`).
+- **Script de build (nombre PS) :** définir la variable d'environnement `ESANTE_API_KEY` avant d'exécuter `scripts/update_annuaire_ps_count.dart`.
+
+Obtenir une clé : [portal.api.esante.gouv.fr](https://portal.api.esante.gouv.fr) → créer un compte → Applications → souscrire à « API Annuaire Santé en libre accès » → récupérer la clé (header `ESANTE-API-KEY`). Documentation complète : [annuaire-sante-fhir-documentation](https://ansforge.github.io/annuaire-sante-fhir-documentation/)
+
+
 ## PDF (pdfrx)
 
 Le visualiseur de catalogues PDF utilise **pdfrx**. Sur **Windows**, le mode Développeur peut être requis pour que le build réussisse (pdfrx utilise des symlinks). Activer : Paramètres → Confidentialité et sécurité → Pour les développeurs → **Mode développeur**.

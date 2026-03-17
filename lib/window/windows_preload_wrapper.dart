@@ -12,6 +12,7 @@ import 'package:offibox/constants/app_update_config.dart';
 import 'package:offibox/providers/offibox_providers.dart';
 import 'package:offibox/services/app_update_service.dart';
 import 'package:offibox/window/widgets/update_available_dialog.dart';
+import 'package:offibox/window/widgets/update_progress_dialog.dart';
 
 /// Durée minimale du préchauffage (barre 10 → 100 %) avant de passer à la suite.
 const Duration _kMinPreheatDuration = Duration(seconds: 12);
@@ -114,6 +115,15 @@ class _WindowsPreloadWrapperState extends ConsumerState<WindowsPreloadWrapper> {
       info ??= await AppUpdateService.checkForUpdate(force: doNotAsk);
       if (!mounted) return;
       if (info == null) return;
+      if (doNotAsk && Platform.isWindows) {
+        final updateInfo = info!;
+        await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => UpdateProgressDialog(updateInfo: updateInfo),
+        );
+        return;
+      }
       if (doNotAsk) {
         await AppUpdateService.downloadAndOpen(info);
         return;

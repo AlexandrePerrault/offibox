@@ -46,9 +46,10 @@ DEFAULT_SOURCE_URL = (
     "20260228-094439/ps-libreacces-personne-activite.txt"
 )
 
-# Page du jeu de données pour message d'erreur 404 (l'URL statique change à chaque extraction).
+# Page du jeu de données (source officielle Annuaire Santé RPPS).
+# https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante-rpps
 DATASET_PAGE_URL = (
-    "https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante"
+    "https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante-rpps"
 )
 
 SPREADSHEET_ID = "1CBHIdBePtr1JhA-UZLSk_jZ5bRBMYIUgBV-3m13Umk4"
@@ -447,7 +448,7 @@ def get_latest_annuaire_ps_url() -> str | None:
     Récupère l'URL actuelle du fichier PS_LibreAcces_Personne_activite via l'API data.gouv.fr.
     Retourne None si l'API ne répond pas ou si aucune ressource correspondante n'est trouvée.
     """
-    dataset_slug = "annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante"
+    dataset_slug = "annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante-rpps"
     api_url = f"https://www.data.gouv.fr/api/1/datasets/{dataset_slug}/"
     try:
         req = Request(api_url, headers={"Accept": "application/json"})

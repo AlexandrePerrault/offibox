@@ -1,4 +1,20 @@
-# Configuration OAuth Google Calendar
+# Configuration
+
+## Annuaire PS (API FHIR)
+
+Pour activer la recherche dans l’annuaire des professionnels de santé (RPPS, nom, structure), une clé API ANS est requise :
+
+- **À la compilation** : `--dart-define=ESANTE_API_KEY=votre_cle`
+- Obtenir la clé : [portal.api.esante.gouv.fr](https://portal.api.esante.gouv.fr) → Applications → souscrire à « API Annuaire Santé en libre accès ».
+- **Documentation API** (guide complet, cas d’usage, démonstrateur) : [ansforge.github.io/annuaire-sante-fhir-documentation](https://ansforge.github.io/annuaire-sante-fhir-documentation/)
+
+Sans clé, la recherche annuaire utilise le CSV data.gouv.fr (pipeline offiboxdata).
+
+**Cache backend** : la Cloud Function `searchAnnuairePS` met en cache les résultats FHIR dans Firestore (24 h). L’app appelle cette fonction en priorité pour réduire la latence. Déployer : `firebase deploy --only functions`.
+
+---
+
+## OAuth Google Calendar
 
 Pour activer l'agenda Google dans l'app Offibox (Windows / Desktop) :
 

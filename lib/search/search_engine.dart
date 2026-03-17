@@ -633,13 +633,14 @@ Iterable<SearchResult> searchStream(String rawQuery) sync* {
       case SourceType.bdm:
         return 0;    // 6. Médicaments
       case SourceType.dm:
-        return 50;   // 7. Pansements (DM) avant LPP
-      case SourceType.lpp:
-        return 60;   // 8. LPP
+        return 50;   // 7. Pansements (DM)
+      case SourceType.cerp:
+        return 55;   // 8. CERP (Madouest, Co&Pharm) avant LPP
       case SourceType.veto:
         return 70;   // 9. Veto
+      case SourceType.lpp:
+        return 400;  // 10. LPP — priorité faible (ex. "coussin" → CERP d'abord)
       case SourceType.amo:
-      case SourceType.cerp:
       case SourceType.pharmacovigilance:
       case SourceType.centresAntiPoison:
       case SourceType.chu:

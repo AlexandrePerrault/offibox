@@ -38,6 +38,8 @@ class SelectedResultView extends StatelessWidget {
   final void Function(String url)? onOpenUrl;
   final void Function(BuildContext context, String url, String labName, String? iconUrl)? onOpenEspacePro;
   final VoidCallback? onOpenCataloguePanel;
+  /// Au clic sur le badge "disponibilité produits" (ligne 2 catalogue) : ouvre le panneau sous la barre.
+  final VoidCallback? onOpenDisponibiliteProduits;
   final void Function(String youtubeUrl)? onOpenYouTubeVideo;
   /// Au clic sur le pill "video" (ligne 2 BDM) : affiche le panneau vidéo thérapeutique.
   final void Function(String url)? onOpenTherapeuticVideo;
@@ -88,6 +90,7 @@ class SelectedResultView extends StatelessWidget {
     this.onOpenUrl,
     this.onOpenEspacePro,
     this.onOpenCataloguePanel,
+    this.onOpenDisponibiliteProduits,
     this.onOpenYouTubeVideo,
     this.onOpenTherapeuticVideo,
     this.videosByCip13,
@@ -172,6 +175,7 @@ class SelectedResultView extends StatelessWidget {
             biosimilairesInfoByCip: biosimilairesInfoByCip,
             onOpenEspacePro: onOpenEspacePro,
             onOpenCataloguePanel: onOpenCataloguePanel,
+            onOpenDisponibiliteProduits: onOpenDisponibiliteProduits,
             onOpenYouTubeVideo: onOpenYouTubeVideo,
             videosByCip13: videosByCip13,
             onOpenTherapeuticVideo: onOpenTherapeuticVideo,

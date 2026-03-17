@@ -363,6 +363,7 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   this.leftReservedWidth = 0,
   this.onOpenEspacePro,
   this.onOpenCataloguePanel,
+  this.onOpenDisponibiliteProduits,
   this.onOpenYouTubeVideo,
   this.onOpenTherapeuticVideo,
   this.videosByCip13,
@@ -421,6 +422,7 @@ class FloatingSearchBar extends ConsumerStatefulWidget {
   final double leftReservedWidth;
   final void Function(BuildContext context, String url, String labName, String? iconUrl)? onOpenEspacePro;
   final VoidCallback? onOpenCataloguePanel;
+  final VoidCallback? onOpenDisponibiliteProduits;
   final void Function(String youtubeUrl)? onOpenYouTubeVideo;
   /// Au clic sur le pill "video" (ligne 2 BDM) : affiche le panneau vidéo thérapeutique.
   final void Function(String url)? onOpenTherapeuticVideo;
@@ -500,16 +502,17 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
         final double maxW = constraints.maxWidth.isFinite ? constraints.maxWidth : 600.0;
         final isExpandedWithResult = widget.selectedResult != null;
         final selected = widget.selectedResult;
-        // Pansements (DM) / Codes actes : pas de ligne 2 → hauteur réduite comme outils métier / sites web / catalogues
-        final isSingleLineSource = selected != null &&
+        // DM / codes actes : peu de badges → hauteur compacte.
+        final isCompactSource = selected != null &&
+            (selected.source == SourceType.codesActes || selected.source == SourceType.dm);
+        // Outils métier / sites web / catalogues : nombreux badges (plusieurs lignes) → hauteur pour tout afficher.
+        final isBadgesSource = selected != null &&
             (selected.source == SourceType.keyword ||
                 selected.source == SourceType.siteWeb ||
-                selected.source == SourceType.catalogue ||
-                selected.source == SourceType.codesActes ||
-                selected.source == SourceType.dm);
-        // Hauteur selon le nombre de lignes (2, 3 ou 4) pour les médicaments ; annuaire RPPS = 4 lignes (source visible).
+                selected.source == SourceType.catalogue);
+        // Hauteur selon le nombre de lignes (2, 3 ou 4) pour les médicaments ; annuaire RPPS = 4 lignes.
         double expandedHeight = _barHeightExpanded;
-        if (selected != null && !isSingleLineSource) {
+        if (selected != null && !isCompactSource && !isBadgesSource) {
           if (selected.source == SourceType.annuaireSanteRpps) {
             expandedHeight = OffiboxWindowUI.barHeightExpandedFourLines;
           } else {
@@ -539,7 +542,11 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
         }
         // Hauteur réduite (-20 %) quand la barre est déployée mais vide (aucun résultat sélectionné).
         final barHeight = isExpandedWithResult
-            ? (isSingleLineSource ? OffiboxWindowUI.barHeightExpandedSingleLine : expandedHeight)
+            ? (isCompactSource
+                ? OffiboxWindowUI.barHeightExpandedSingleLine
+                : isBadgesSource
+                    ? OffiboxWindowUI.barHeightExpandedWithBadges
+                    : expandedHeight)
             : OffiboxWindowUI.barHeightExpandedEmpty;
         return ClipRRect(
           borderRadius: BorderRadius.circular(_borderRadius),
@@ -669,6 +676,7 @@ class _FloatingSearchBarState extends ConsumerState<FloatingSearchBar> {
                                   onOpenUrl: widget.onOpenUrl ?? openUrl,
                                   onOpenEspacePro: widget.onOpenEspacePro,
                                   onOpenCataloguePanel: widget.onOpenCataloguePanel,
+                                  onOpenDisponibiliteProduits: widget.onOpenDisponibiliteProduits,
                                   onOpenYouTubeVideo: widget.onOpenYouTubeVideo,
                                   onOpenTherapeuticVideo: widget.onOpenTherapeuticVideo,
                                   videosByCip13: widget.videosByCip13,

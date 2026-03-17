@@ -58,6 +58,7 @@ class _HoverPillButtonState extends State<HoverPillButton> {
     return OffiboxTooltip(
       message: widget.tooltip,
       waitDuration: const Duration(milliseconds: 900),
+      preferBelow: true,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
@@ -88,13 +89,18 @@ class _HoverPillButtonState extends State<HoverPillButton> {
                 ),
               ],
             ),
-            child: ClipRect(
-              child: Row(
-                mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
-                mainAxisAlignment: widget.expand ? MainAxisAlignment.center : MainAxisAlignment.start,
-                children: [
-                  // Icône (taille fixe)
-                  AnimatedScale(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const double minPillContentWidth = 36.0; // icône ~24 + espace 6 + marge
+                final bool scaleToFit = !widget.expand &&
+                    constraints.maxWidth.isFinite &&
+                    constraints.maxWidth < minPillContentWidth;
+                final content = Row(
+                  mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
+                  mainAxisAlignment: widget.expand ? MainAxisAlignment.center : MainAxisAlignment.start,
+                  children: [
+                    // Icône (taille fixe)
+                    AnimatedScale(
                     scale: _hovered ? 1.12 : 1.0,
                     duration: const Duration(milliseconds: 150),
                     curve: Curves.easeOutBack,
@@ -126,18 +132,21 @@ class _HoverPillButtonState extends State<HoverPillButton> {
                       ),
                     )
                   else
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: widget.maxLabelWidth ?? 500),
-                      child: Text(
-                        widget.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.35,
-                          color: foregroundColor,
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: widget.maxLabelWidth ?? 500),
+                        child: Text(
+                          widget.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.35,
+                            color: foregroundColor,
+                          ),
                         ),
                       ),
                     ),
@@ -160,7 +169,17 @@ class _HoverPillButtonState extends State<HoverPillButton> {
                     ),
                   ],
                 ],
-              ),
+                );
+                return ClipRect(
+                  child: scaleToFit
+                      ? FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: content,
+                        )
+                      : content,
+                );
+              },
             ),
           ),
         ),

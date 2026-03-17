@@ -74,28 +74,31 @@ Future<List<SearchResult>> parseLaboratoires(String url) async {
         ? rawIcon.replaceAll(r'\', '/')
         : null;
 
-    // LABORATOIRES.csv : F=5 espace pro (URL), G=6 catalogue (URL), H=7 tarif,
+    // LABORATOIRES.csv : F=5 espace pro, G=6 catalogue, H=7 tarif,
     // I=8 libellé badge 2, J=9 URL badge 2, K=10 libellé badge 3, L=11 URL badge 3,
-    // M=12 libellé badge 4, N=13 URL badge 4
+    // M=12 libellé badge 4, N=13 URL badge 4, O=14 libellé badge 5, P=15 URL badge 5, Q=16 libellé badge 6, R=17 URL badge 6
     final urlEspacePro = _v(row, 5);   // F
     final urlCatalogue = _v(row, 6);   // G
     final labelBadge2 = _v(row, 8);    // I
-    final urlBadge2 = _v(row, 9);      // J
-    final labelBadge3 = _v(row, 10);   // K
-    final urlBadge3 = _v(row, 11);     // L
-    final labelBadge4 = _v(row, 12);   // M
-    final urlBadge4 = _v(row, 13);      // N
+    final urlBadge2 = _v(row, 9);     // J
+    final labelBadge3 = _v(row, 10);  // K
+    final urlBadge3 = _v(row, 11);    // L
+    final labelBadge4 = _v(row, 12);  // M
+    final urlBadge4 = _v(row, 13);    // N
+    final labelBadge5 = _v(row, 14);  // O
+    final urlBadge5 = _v(row, 15);    // P (optionnel)
+    final labelBadge6 = _v(row, 16);  // Q (optionnel)
+    final urlBadge6 = _v(row, 17);    // R (optionnel)
 
     // Badge 2 : I (libellé) + J (URL). Si vides → "Catalogue" + G pour ouvrir le panneau catalogue.
     final bool hasBadge2 = (labelBadge2 != null && labelBadge2.isNotEmpty && urlBadge2 != null && urlBadge2.isNotEmpty);
     final String? name2 = hasBadge2 ? labelBadge2 : (urlCatalogue != null && urlCatalogue.isNotEmpty ? 'Catalogue' : null);
     final String? url2 = hasBadge2 ? urlBadge2 : urlCatalogue;
 
-    // Badge 3 : K (libellé) + L (URL)
     final bool hasBadge3 = (labelBadge3 != null && labelBadge3.isNotEmpty && urlBadge3 != null && urlBadge3.isNotEmpty);
-
-    // Badge 4 : M (nom du badge) + N (URL correspondante)
     final bool hasBadge4 = (labelBadge4 != null && labelBadge4.isNotEmpty && urlBadge4 != null && urlBadge4.isNotEmpty);
+    final bool hasBadge5 = (labelBadge5 != null && labelBadge5.isNotEmpty && urlBadge5 != null && urlBadge5.isNotEmpty);
+    final bool hasBadge6 = (labelBadge6 != null && labelBadge6.isNotEmpty && urlBadge6 != null && urlBadge6.isNotEmpty);
 
     results.add(
       SearchResult(
@@ -123,6 +126,10 @@ Future<List<SearchResult>> parseLaboratoires(String url) async {
         badge3Url: hasBadge3 ? urlBadge3 : null,
         badge4Name: hasBadge4 ? labelBadge4 : null,
         badge4Url: hasBadge4 ? urlBadge4 : null,
+        badge5Name: hasBadge5 ? labelBadge5 : null,
+        badge5Url: hasBadge5 ? urlBadge5 : null,
+        badge6Name: hasBadge6 ? labelBadge6 : null,
+        badge6Url: hasBadge6 ? urlBadge6 : null,
       ),
     );
   }

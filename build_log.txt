@@ -1,0 +1,968 @@
+﻿[ +354 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[   +1 ms] executing: [C:\flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[  +95 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[        ] 2026-03-03 16:03:22 -0800
+[  +22 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +4 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +61 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[   +2 ms] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[  +37 ms] executing: [C:\Users\perra\Documents\projets_flutter\offibox/] C:\flutter\bin\cache\dart-sdk\bin\dart pub --suppress-analytics --directory . get --example
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 67.0.0 (97.0.0 available)
+  analyzer 6.4.1 (11.0.0 available)
+  archive 4.0.7 (4.0.9 available)
+  build 2.4.1 (4.0.4 available)
+  build_config 1.1.2 (1.3.0 available)
+  build_resolvers 2.4.2 (3.0.4 available)
+  build_runner 2.4.13 (2.12.2 available)
+  build_runner_core 7.3.2 (9.3.2 available)
+  built_value 8.12.3 (8.12.4 available)
+  csv 6.0.0 (7.2.0 available)
+  dart_style 2.3.6 (3.1.7 available)
+  device_info_plus 9.1.2 (12.3.0 available)
+  ffi 2.1.5 (2.2.0 available)
+  firebase_storage 13.0.2 (13.1.0 available)
+  flutter_lints 4.0.0 (6.0.0 available)
+  flutter_riverpod 2.6.1 (3.3.1 available)
+  flutter_svg 2.2.3 (2.2.4 available)
+  freezed 2.5.2 (3.2.5 available)
+  freezed_annotation 2.4.4 (3.1.0 available)
+  google_fonts 7.1.0 (8.0.2 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.9 available)
+  google_sign_in_ios 5.9.0 (6.3.0 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.3 available)
+  hooks 1.0.1 (1.0.2 available)
+  image 4.5.4 (4.8.0 available)
+  js 0.6.7 (0.7.2 available)
+  json_annotation 4.9.0 (4.11.0 available)
+  json_serializable 6.8.0 (6.13.0 available)
+  lints 4.0.0 (6.1.0 available)
+  meta 1.17.0 (1.18.1 available)
+  native_toolchain_c 0.17.4 (0.17.5 available)
+  package_info_plus 8.3.1 (9.0.0 available)
+  petitparser 7.0.1 (7.0.2 available)
+  posix 6.0.3 (6.5.0 available)
+  riverpod 2.6.1 (3.2.1 available)
+  shared_preferences_android 2.4.20 (2.4.21 available)
+  shelf_web_socket 2.0.1 (3.0.0 available)
+  source_gen 1.5.0 (4.2.1 available)
+  source_helper 1.3.5 (1.3.10 available)
+  tray_manager 0.2.4 (0.5.2 available)
+  url_launcher_ios 6.3.6 (6.4.1 available)
+  vector_graphics 1.1.19 (1.1.20 available)
+  vector_graphics_compiler 1.1.20 (1.2.0 available)
+  webview_flutter_android 4.10.11 (4.10.13 available)
+  webview_flutter_wkwebview 3.23.7 (3.24.0 available)
+  win32 5.15.0 (6.0.0 available)
+  win32_registry 1.1.5 (3.0.2 available)
+Got dependencies!
+49 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+[+1117 ms] Found plugin youtube_player_iframe at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\youtube_player_iframe-5.2.2\
+[   +6 ms] Found plugin youtube_player_iframe_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\youtube_player_iframe_web-3.1.2\
+[   +7 ms] Found plugin webview_flutter_wkwebview at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter_wkwebview-3.23.7\
+[   +3 ms] Found plugin webview_flutter_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter_android-4.10.11\
+[   +3 ms] Found plugin webview_flutter at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter-4.13.1\
+[   +2 ms] Found plugin url_launcher at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher-6.3.2\
+[   +2 ms] Found plugin url_launcher_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_windows-3.1.5\
+[   +4 ms] Found plugin url_launcher_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_web-2.4.2\
+[   +2 ms] Found plugin url_launcher_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_macos-3.2.5\
+[   +2 ms] Found plugin url_launcher_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_linux-3.2.2\
+[   +3 ms] Found plugin url_launcher_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_ios-6.3.6\
+[   +2 ms] Found plugin url_launcher_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_android-6.3.28\
+[   +2 ms] Found plugin window_manager at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\window_manager-0.5.1\
+[   +2 ms] Found plugin screen_retriever at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever-0.2.0\
+[   +2 ms] Found plugin screen_retriever_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_windows-0.2.0\
+[   +5 ms] Found plugin screen_retriever_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_macos-0.2.0\
+[   +2 ms] Found plugin screen_retriever_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_linux-0.2.0\
+[   +8 ms] Found plugin webview_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_windows-0.4.0\
+[   +5 ms] Found plugin tray_manager at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\tray_manager-0.2.4\
+[   +6 ms] Found plugin shared_preferences at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences-2.5.4\
+[   +2 ms] Found plugin shared_preferences_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_windows-2.4.1\
+[   +4 ms] Found plugin path_provider_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +7 ms] Found plugin shared_preferences_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_web-2.4.3\
+[   +2 ms] Found plugin shared_preferences_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_linux-2.4.1\
+[   +2 ms] Found plugin path_provider_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.1\
+[   +4 ms] Found plugin shared_preferences_foundation at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_foundation-2.5.6\
+[   +4 ms] Found plugin shared_preferences_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.20\
+[   +7 ms] Found plugin protocol_handler at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler-0.2.0\
+[   +3 ms] Found plugin protocol_handler_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_windows-0.2.0\
+[   +4 ms] Found plugin protocol_handler_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_macos-0.2.0\
+[   +2 ms] Found plugin protocol_handler_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_ios-0.2.0\
+[   +2 ms] Found plugin protocol_handler_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_android-0.2.0\
+[   +3 ms] Found plugin printing at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\
+[  +13 ms] Found plugin pdfium_flutter at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\pdfium_flutter-0.1.9\
+[   +2 ms] Found plugin path_provider at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider-2.1.5\
+[   +2 ms] Found plugin path_provider_foundation at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_foundation-2.6.0\
+[   +9 ms] Found plugin path_provider_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.22\
+[   +2 ms] Found plugin package_info_plus at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\package_info_plus-8.3.1\
+[   +5 ms] Found plugin mobile_scanner at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\mobile_scanner-7.2.0\
+[   +2 ms] Found plugin google_sign_in at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in-6.3.0\
+[   +2 ms] Found plugin google_sign_in_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_web-0.12.4+4\
+[   +5 ms] Found plugin google_sign_in_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_ios-5.9.0\
+[   +1 ms] Found plugin google_sign_in_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_android-6.2.1\
+[   +1 ms] Found plugin google_mlkit_text_recognition at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_mlkit_text_recognition-0.15.1\
+[   +1 ms] Found plugin google_mlkit_commons at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_mlkit_commons-0.11.1\
+[  +25 ms] Found plugin firebase_storage at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_storage-13.0.2\
+[   +2 ms] Found plugin firebase_storage_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_storage_web-3.11.3\
+[   +3 ms] Found plugin firebase_core at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-4.5.0\
+[   +2 ms] Found plugin firebase_core_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core_web-3.5.0\
+[   +6 ms] Found plugin firebase_auth at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth-6.2.0\
+[   +2 ms] Found plugin firebase_auth_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth_web-6.1.3\
+[   +4 ms] Found plugin device_info_plus at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\device_info_plus-9.1.2\
+[   +4 ms] Found plugin cloud_functions at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_functions-6.0.7\
+[   +1 ms] Found plugin cloud_functions_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_functions_web-5.1.3\
+[   +3 ms] Found plugin cloud_firestore at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore-6.1.3\
+[   +2 ms] Found plugin cloud_firestore_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore_web-5.1.3\
+[   +3 ms] Found plugin bitsdojo_window at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window-0.1.6\
+[   +1 ms] Found plugin bitsdojo_window_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_windows-0.1.6\
+[   +3 ms] Found plugin bitsdojo_window_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_macos-0.1.4\
+[   +1 ms] Found plugin bitsdojo_window_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_linux-0.1.4\
+[ +167 ms] Found plugin youtube_player_iframe at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\youtube_player_iframe-5.2.2\
+[   +2 ms] Found plugin youtube_player_iframe_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\youtube_player_iframe_web-3.1.2\
+[   +7 ms] Found plugin webview_flutter_wkwebview at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter_wkwebview-3.23.7\
+[   +1 ms] Found plugin webview_flutter_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter_android-4.10.11\
+[   +1 ms] Found plugin webview_flutter at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter-4.13.1\
+[   +1 ms] Found plugin url_launcher at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher-6.3.2\
+[   +2 ms] Found plugin url_launcher_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_windows-3.1.5\
+[   +4 ms] Found plugin url_launcher_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_web-2.4.2\
+[   +1 ms] Found plugin url_launcher_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_macos-3.2.5\
+[   +2 ms] Found plugin url_launcher_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_linux-3.2.2\
+[   +1 ms] Found plugin url_launcher_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_ios-6.3.6\
+[   +1 ms] Found plugin url_launcher_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_android-6.3.28\
+[   +1 ms] Found plugin window_manager at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\window_manager-0.5.1\
+[   +2 ms] Found plugin screen_retriever at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever-0.2.0\
+[   +1 ms] Found plugin screen_retriever_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_windows-0.2.0\
+[   +3 ms] Found plugin screen_retriever_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_macos-0.2.0\
+[   +1 ms] Found plugin screen_retriever_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_linux-0.2.0\
+[   +4 ms] Found plugin webview_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_windows-0.4.0\
+[   +3 ms] Found plugin tray_manager at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\tray_manager-0.2.4\
+[   +5 ms] Found plugin shared_preferences at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences-2.5.4\
+[   +2 ms] Found plugin shared_preferences_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_windows-2.4.1\
+[   +4 ms] Found plugin path_provider_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +5 ms] Found plugin shared_preferences_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_web-2.4.3\
+[   +3 ms] Found plugin shared_preferences_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_linux-2.4.1\
+[   +2 ms] Found plugin path_provider_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.1\
+[   +3 ms] Found plugin shared_preferences_foundation at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_foundation-2.5.6\
+[   +1 ms] Found plugin shared_preferences_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.20\
+[   +4 ms] Found plugin protocol_handler at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler-0.2.0\
+[   +1 ms] Found plugin protocol_handler_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_windows-0.2.0\
+[   +3 ms] Found plugin protocol_handler_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_macos-0.2.0\
+[   +2 ms] Found plugin protocol_handler_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_ios-0.2.0\
+[   +2 ms] Found plugin protocol_handler_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_android-0.2.0\
+[   +1 ms] Found plugin printing at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\
+[   +9 ms] Found plugin pdfium_flutter at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\pdfium_flutter-0.1.9\
+[   +1 ms] Found plugin path_provider at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider-2.1.5\
+[   +1 ms] Found plugin path_provider_foundation at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_foundation-2.6.0\
+[   +7 ms] Found plugin path_provider_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.22\
+[   +1 ms] Found plugin package_info_plus at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\package_info_plus-8.3.1\
+[   +5 ms] Found plugin mobile_scanner at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\mobile_scanner-7.2.0\
+[   +3 ms] Found plugin google_sign_in at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in-6.3.0\
+[   +1 ms] Found plugin google_sign_in_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_web-0.12.4+4\
+[   +3 ms] Found plugin google_sign_in_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_ios-5.9.0\
+[   +1 ms] Found plugin google_sign_in_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_android-6.2.1\
+[   +1 ms] Found plugin google_mlkit_text_recognition at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_mlkit_text_recognition-0.15.1\
+[   +1 ms] Found plugin google_mlkit_commons at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_mlkit_commons-0.11.1\
+[  +15 ms] Found plugin firebase_storage at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_storage-13.0.2\
+[   +1 ms] Found plugin firebase_storage_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_storage_web-3.11.3\
+[   +2 ms] Found plugin firebase_core at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-4.5.0\
+[   +1 ms] Found plugin firebase_core_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core_web-3.5.0\
+[   +3 ms] Found plugin firebase_auth at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth-6.2.0\
+[   +1 ms] Found plugin firebase_auth_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth_web-6.1.3\
+[   +2 ms] Found plugin device_info_plus at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\device_info_plus-9.1.2\
+[   +3 ms] Found plugin cloud_functions at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_functions-6.0.7\
+[   +1 ms] Found plugin cloud_functions_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_functions_web-5.1.3\
+[   +2 ms] Found plugin cloud_firestore at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore-6.1.3\
+[   +1 ms] Found plugin cloud_firestore_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore_web-5.1.3\
+[   +3 ms] Found plugin bitsdojo_window at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window-0.1.6\
+[   +1 ms] Found plugin bitsdojo_window_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_windows-0.1.6\
+[   +2 ms] Found plugin bitsdojo_window_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_macos-0.1.4\
+[   +1 ms] Found plugin bitsdojo_window_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_linux-0.1.4\
+[  +16 ms] Skipping generating web_plugin_registrant.dart because it is up-to-date.
+[ +119 ms] Found plugin youtube_player_iframe at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\youtube_player_iframe-5.2.2\
+[   +1 ms] Found plugin youtube_player_iframe_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\youtube_player_iframe_web-3.1.2\
+[   +4 ms] Found plugin webview_flutter_wkwebview at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter_wkwebview-3.23.7\
+[   +1 ms] Found plugin webview_flutter_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter_android-4.10.11\
+[   +1 ms] Found plugin webview_flutter at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_flutter-4.13.1\
+[   +1 ms] Found plugin url_launcher at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher-6.3.2\
+[   +1 ms] Found plugin url_launcher_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_windows-3.1.5\
+[   +2 ms] Found plugin url_launcher_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_web-2.4.2\
+[   +1 ms] Found plugin url_launcher_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_macos-3.2.5\
+[   +1 ms] Found plugin url_launcher_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_linux-3.2.2\
+[   +1 ms] Found plugin url_launcher_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_ios-6.3.6\
+[   +1 ms] Found plugin url_launcher_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_android-6.3.28\
+[   +2 ms] Found plugin window_manager at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\window_manager-0.5.1\
+[   +2 ms] Found plugin screen_retriever at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever-0.2.0\
+[   +1 ms] Found plugin screen_retriever_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_windows-0.2.0\
+[   +1 ms] Found plugin screen_retriever_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_macos-0.2.0\
+[   +1 ms] Found plugin screen_retriever_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\screen_retriever_linux-0.2.0\
+[   +4 ms] Found plugin webview_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\webview_windows-0.4.0\
+[   +3 ms] Found plugin tray_manager at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\tray_manager-0.2.4\
+[   +5 ms] Found plugin shared_preferences at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences-2.5.4\
+[   +2 ms] Found plugin shared_preferences_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_windows-2.4.1\
+[   +3 ms] Found plugin path_provider_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +4 ms] Found plugin shared_preferences_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_web-2.4.3\
+[   +2 ms] Found plugin shared_preferences_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_linux-2.4.1\
+[   +2 ms] Found plugin path_provider_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.1\
+[   +4 ms] Found plugin shared_preferences_foundation at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_foundation-2.5.6\
+[   +2 ms] Found plugin shared_preferences_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.20\
+[   +4 ms] Found plugin protocol_handler at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler-0.2.0\
+[   +1 ms] Found plugin protocol_handler_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_windows-0.2.0\
+[   +3 ms] Found plugin protocol_handler_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_macos-0.2.0\
+[   +1 ms] Found plugin protocol_handler_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_ios-0.2.0\
+[   +1 ms] Found plugin protocol_handler_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\protocol_handler_android-0.2.0\
+[   +1 ms] Found plugin printing at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\
+[  +12 ms] Found plugin pdfium_flutter at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\pdfium_flutter-0.1.9\
+[   +1 ms] Found plugin path_provider at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider-2.1.5\
+[   +1 ms] Found plugin path_provider_foundation at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_foundation-2.6.0\
+[   +5 ms] Found plugin path_provider_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.22\
+[   +1 ms] Found plugin package_info_plus at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\package_info_plus-8.3.1\
+[   +5 ms] Found plugin mobile_scanner at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\mobile_scanner-7.2.0\
+[   +3 ms] Found plugin google_sign_in at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in-6.3.0\
+[   +1 ms] Found plugin google_sign_in_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_web-0.12.4+4\
+[   +4 ms] Found plugin google_sign_in_ios at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_ios-5.9.0\
+[   +1 ms] Found plugin google_sign_in_android at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_android-6.2.1\
+[   +1 ms] Found plugin google_mlkit_text_recognition at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_mlkit_text_recognition-0.15.1\
+[   +3 ms] Found plugin google_mlkit_commons at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\google_mlkit_commons-0.11.1\
+[  +10 ms] Found plugin firebase_storage at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_storage-13.0.2\
+[   +1 ms] Found plugin firebase_storage_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_storage_web-3.11.3\
+[   +4 ms] Found plugin firebase_core at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-4.5.0\
+[   +2 ms] Found plugin firebase_core_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core_web-3.5.0\
+[   +4 ms] Found plugin firebase_auth at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth-6.2.0\
+[   +2 ms] Found plugin firebase_auth_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth_web-6.1.3\
+[   +2 ms] Found plugin device_info_plus at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\device_info_plus-9.1.2\
+[   +6 ms] Found plugin cloud_functions at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_functions-6.0.7\
+[   +1 ms] Found plugin cloud_functions_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_functions_web-5.1.3\
+[   +2 ms] Found plugin cloud_firestore at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore-6.1.3\
+[   +1 ms] Found plugin cloud_firestore_web at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore_web-5.1.3\
+[   +2 ms] Found plugin bitsdojo_window at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window-0.1.6\
+[   +1 ms] Found plugin bitsdojo_window_windows at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_windows-0.1.6\
+[   +3 ms] Found plugin bitsdojo_window_macos at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_macos-0.1.4\
+[   +1 ms] Found plugin bitsdojo_window_linux at C:\Users\perra\AppData\Local\Pub\Cache\hosted\pub.dev\bitsdojo_window_linux-0.1.4\
+[   +9 ms] Generating C:\Users\perra\Documents\projets_flutter\offibox\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java
+[   +2 ms] Skipping generating GeneratedPluginRegistrant.java because it is up-to-date.
+[   +7 ms] Skipping generating generated_plugin_registrant.h because it is up-to-date.
+[   +2 ms] Skipping generating generated_plugin_registrant.cc because it is up-to-date.
+[   +2 ms] Skipping generating generated_plugins.cmake because it is up-to-date.
+[   +3 ms] Skipping generating generated_plugin_registrant.h because it is up-to-date.
+[   +1 ms] Skipping generating generated_plugin_registrant.cc because it is up-to-date.
+[   +1 ms] Skipping generating generated_plugins.cmake because it is up-to-date.
+[   +3 ms] Skipping generating GeneratedPluginRegistrant.h because it is up-to-date.
+[   +2 ms] Skipping generating GeneratedPluginRegistrant.m because it is up-to-date.
+[   +1 ms] Skipping generating GeneratedPluginRegistrant.swift because it is up-to-date.
+[ +162 ms] executing: C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe -format json -products * -utf8 -latest -version 16 -requires Microsoft.VisualStudio.Workload.NativeDesktop Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CMake.Project
+[  +95 ms] Exit code 0 from: C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe -format json -products * -utf8 -latest -version 16 -requires Microsoft.VisualStudio.Workload.NativeDesktop Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CMake.Project
+[        ] [
+             {
+               "instanceId": "eed41bf5",
+               "installDate": "2026-02-15T11:24:49Z",
+               "installationName": "VisualStudio/17.14.26+36930.0",
+               "installationPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise",
+               "installationVersion": "17.14.36930.0",
+               "productId": "Microsoft.VisualStudio.Product.Enterprise",
+               "productPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Common7\\IDE\\devenv.exe",
+               "state": 4294967295,
+               "isComplete": true,
+               "isLaunchable": true,
+               "isPrerelease": false,
+               "isRebootRequired": false,
+               "displayName": "Visual Studio Enterprise 2022",
+               "description": "Solution scalable de bout en bout pour les ├®quipes de toutes tailles",
+               "channelId": "VisualStudio.17.Release",
+               "channelUri": "https://aka.ms/vs/17/release/channel",
+               "enginePath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\resources\\app\\ServiceHub\\Services\\Microsoft.VisualStudio.Setup.Service",
+               "installedChannelId": "VisualStudio.17.Release",
+               "installedChannelUri": "https://aka.ms/vs/17/release/channel",
+               "releaseNotes": "https://docs.microsoft.com/en-us/visualstudio/releases/2022/release-notes-v17.14#17.14.26",
+               "resolvedInstallationPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise",
+               "thirdPartyNotices": "https://go.microsoft.com/fwlink/?LinkId=661288",
+               "updateDate": "2026-02-15T11:24:49.1654453Z",
+               "catalog": {
+                 "buildBranch": "d17.14",
+                 "buildVersion": "17.14.36930.0",
+                 "id": "VisualStudio/17.14.26+36930.0",
+                 "localBuild": "build-lab",
+                 "manifestName": "VisualStudio",
+                 "manifestType": "installer",
+                 "productDisplayVersion": "17.14.26",
+                 "productLine": "Dev17",
+                 "productLineVersion": "2022",
+                 "productMilestone": "RTW",
+                 "productMilestoneIsPreRelease": "False",
+                 "productName": "Visual Studio",
+                 "productPatchVersion": "26",
+                 "productPreReleaseMilestoneSuffix": "1.0",
+                 "productSemanticVersion": "17.14.26+36930.0",
+                 "requiredEngineVersion": "3.14.2086.54749"
+               },
+               "properties": {
+                 "appLocalWPF": "true",
+                 "campaignId": "",
+                 "channelManifestId": "VisualStudio.17.Release/17.14.26+36930.0",
+                 "includeRecommended": "1",
+                 "nickname": "",
+                 "setupEngineFilePath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe"
+               }
+             }
+           ]
+[   +5 ms] Building Windows application...
+[   +4 ms] executing: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe -S C:\Users\perra\Documents\projets_flutter\offibox\windows -B C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64 -G Visual Studio 17 2022 -A x64 -DFLUTTER_TARGET_PLATFORM=windows-x64
+[ +103 ms] -- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+[  +54 ms] -- Using cached Firebase SDK zip file
+[        ] -- Using cached extracted Firebase SDK
+flutter : [   +8 ms] CMake Deprecation Warning at C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/ex
+tracted/firebase_cpp_sdk_windows/CMakeLists.txt:17 (cmake_minimum_required):
+Au caractère C:\Users\perra\AppData\Local\Temp\ps-script-f792a5d4-f178-4999-91b3-748b6755cbb1.ps1:85 : 56
++ ... ments\projets_flutter\offibox"; flutter build windows -v 2>&1 | Out-F ...
++                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([   +8 ms] CMak...imum_required)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[   +1 ms]   Compatibility with CMake < 3.10 will be removed from a future version of
+[        ]   CMake.
+[        ]   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+[        ]   to tell CMake that the project requires at least <min> but has been updated
+[        ]   to work with policies introduced by <max> or earlier.
+[  +51 ms] -- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
+[  +14 ms] -- Downloading/updating pdfium
+[  +89 ms] -- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+[ +823 ms] -- Configuring done (0.9s)
+[  +70 ms] -- Generating done (0.1s)
+[   +3 ms] -- Build files have been written to: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/pdfium-download
+[ +215 ms] Version MSBuild 17.14.40+3e7442088 pour .NET Framework
+[ +892 ms] -- Building with D3D texture support.
+[   +4 ms] -- Target Windows CPU Name: x64
+[        ] -- Use existing precompiled PDFium.
+[  +46 ms] -- Configuring done (2.3s)
+[ +611 ms] -- Generating done (0.6s)
+[   +3 ms] -- Build files have been written to: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64
+[  +33 ms] executing: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe --build C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64 --config Release --target INSTALL --verbose
+[ +151 ms] Change Dir: 'C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64'
+[        ] Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" INSTALL.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+[ +129 ms] Version MSBuild 17.14.40+3e7442088 pour .NET Framework
+[  +76 ms] La g├®n├®ration a d├®marr├® 16/03/2026 20:59:35.
+[ +346 ms] Projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
+[        ] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj" (1) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ZERO_CHECK.vcxproj" (2) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[   +1 ms]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[  +11 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+[  +45 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[ +113 ms]   1>Checking Build System
+[ +175 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ZERO_CHECK.vcxproj" termin├®e (cibles par d├®faut).
+[  +86 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj" (1) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\webview_windows\webview_windows_DEPENDENCIES_DOWNLOAD.vcxproj" (4) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "x64\Release\webview_windows_DEPENDENCIES_DOWNLOAD\webview_.54641B3D.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "x64\Release\webview_windows_DEPENDENCIES_DOWNLOAD\webview_.54641B3D.tlog\unsuccessfulbuild".
+[  +46 ms] PreBuildEvent:
+[        ]   setlocal
+[        ]   C:\Users\perra\AppData\Local\NuGet\nuget.exe install Microsoft.Windows.ImplementationLibrary -Version 1.0.220914.1 -ExcludeVersion -OutputDirectory C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/packages
+[        ]   if %errorlevel% neq 0 goto :cmEnd
+[        ]   C:\Users\perra\AppData\Local\NuGet\nuget.exe install Microsoft.Web.WebView2 -Version 1.0.1210.39 -ExcludeVersion -OutputDirectory C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/packages
+[        ]   if %errorlevel% neq 0 goto :cmEnd
+[        ]   :cmEnd
+[        ]   endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+[        ]   :cmErrorLevel
+[        ]   exit /b %1
+[        ]   :cmDone
+[        ]   if %errorlevel% neq 0 goto :VCEnd
+[        ]   :VCEnd
+[+1004 ms]   Feeds used:
+[        ]     C:\Users\perra\.nuget\packages\
+[        ]     https://api.nuget.org/v3/index.json
+[        ]     C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+[ +172 ms]   Le package 'Microsoft.Windows.ImplementationLibrary.1.0.220914.1' est d├®j├á install├®.
+[ +982 ms]   Feeds used:
+[        ]     C:\Users\perra\.nuget\packages\
+[        ]     https://api.nuget.org/v3/index.json
+[        ]     C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+[ +162 ms]   Le package 'Microsoft.Web.WebView2.1.0.1210.39' est d├®j├á install├®.
+[  +34 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +16 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "x64\Release\webview_windows_DEPENDENCIES_DOWNLOAD\webview_.54641B3D.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "x64\Release\webview_windows_DEPENDENCIES_DOWNLOAD\webview_.54641B3D.tlog\webview_windows_DEPENDENCIES_DOWNLOAD.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\webview_windows\webview_windows_DEPENDENCIES_DOWNLOAD.vcxproj" termin├®e (cibles par d├®faut).
+[  +79 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\bitsdojo_window_windows\bitsdojo_window_windows_plugin.vcxproj" (5) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\bitsdojo_window_windows\bitsdojo_window_windows_plugin.vcxproj" (5) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\flutter_assemble.vcxproj" (6) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +1 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "x64\Release\flutter_assemble\flutter_assemble.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "x64\Release\flutter_assemble\flutter_assemble.tlog\unsuccessfulbuild".
+[  +12 ms] CustomBuild:
+[        ]   "La build de 'C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\CMakeFiles\2242ffee45a7539213c60165fe24a091\flutter_assemble.rule' d├®pend de 'C:\USERS\PERRA\DOCUMENTS\PROJETS_FLUTTER\OFFIBOX\WINDOWS\FLUTTER\EPHEMERAL\FLUTTER_WINDOWS.DLL', qui est produit par la build de 'C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\CMakeFiles\7dc12d4122c3a53619f580d9b61da833\flutter_windows.dll.rule'. Impossible de g├®n├®rer les ├®l├®ments en parall├¿le."
+[ +116 ms]   Generating C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/flutter_windows.dll, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/flutter_export.h, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/flutter_windows.h, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/flutter_messenger.h, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/flutter_plugin_registrar.h, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/flutter_texture_registrar.h, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/cpp_client_wrapper/core_implementations.cc, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/cpp_client_wrapper/standard_codec.cc, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/cpp_client_wrapper/plugin_registrar.cc, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/cpp_client_wrapper/flutter_engine.cc, C:/Users/perra/Documents/projets_flutter/offibox/windows/flutter/ephemeral/cpp_client_wrapper/flutter_view_controller.cc, _phony_
+[+2065 ms]   [ +356 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ]   [   +2 ms] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ]   [   +1 ms] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[   +9 ms]   [  +20 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +2 ms]   [   +3 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +93 ms]   [  +93 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[   +2 ms]   [   +3 ms] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ]   [        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[  +84 ms]   [  +85 ms] Initializing file store
+[  +63 ms]   [  +63 ms] Done initializing file store
+[ +236 ms]   [ +236 ms] Skipping target: dart_build
+[   +4 ms]   [   +5 ms] Skipping target: gen_dart_plugin_registrant
+[+5407 ms]   [+5408 ms] Skipping target: unpack_windows
+[   +1 ms]   [   +1 ms] Skipping target: install_code_assets
+[        ]   [        ] Skipping target: gen_localizations
+[+1818 ms]   [+1818 ms] Skipping target: kernel_snapshot_program
+[  +94 ms]   [  +94 ms] Skipping target: aot_elf_release
+[  +79 ms]   [  +79 ms] Skipping target: windows_aot_bundle
+[  +63 ms]   [  +63 ms] invalidated build due to missing files: C:\Users\perra\Documents\projets_flutter\offibox\DOES_NOT_EXIST_RERUN_FOR_WILDCARD236225212
+[+2668 ms]   [+2668 ms] release_bundle_windows-x64_assets: Starting due to {InvalidatedReasonKind.inputMissing: The following inputs were missing: C:\Users\perra\Documents\projets_flutter\offibox\DOES_NOT_EXIST_RERUN_FOR_WILDCARD236225212}
+[ +586 ms]   [ +584 ms] Manifest contained wildcard assets. Inserting missing file into build graph to force rerun. for more information see #56466.
+[ +563 ms]   [ +565 ms] shaderc command: [C:\flutter\bin\cache\artifacts\engine\windows-x64\impellerc.exe, --sksl, --runtime-stage-gles, --runtime-stage-gles3, --runtime-stage-vulkan, --iplr, --sl=C:\Users\perra\Documents\projets_flutter\offibox\build\flutter_assets\shaders/ink_sparkle.frag, --spirv=C:\Users\perra\Documents\projets_flutter\offibox\build\flutter_assets\shaders/ink_sparkle.frag.spirv, --input=C:\flutter\packages\flutter\lib\src\material\shaders\ink_sparkle.frag, --input-type=frag, --include=C:\flutter\packages\flutter\lib\src\material\shaders, --include=C:\flutter\bin\cache\artifacts\engine\windows-x64\shader_lib]
+[   +4 ms]   [   +5 ms] shaderc command: [C:\flutter\bin\cache\artifacts\engine\windows-x64\impellerc.exe, --sksl, --runtime-stage-gles, --runtime-stage-gles3, --runtime-stage-vulkan, --iplr, --sl=C:\Users\perra\Documents\projets_flutter\offibox\build\flutter_assets\shaders/stretch_effect.frag, --spirv=C:\Users\perra\Documents\projets_flutter\offibox\build\flutter_assets\shaders/stretch_effect.frag.spirv, --input=C:\flutter\packages\flutter\lib\src\material\shaders\stretch_effect.frag, --input-type=frag, --include=C:\flutter\packages\flutter\lib\src\material\shaders, --include=C:\flutter\bin\cache\artifacts\engine\windows-x64\shader_lib]
+[+1330 ms]   [+1330 ms] release_bundle_windows-x64_assets: Complete
+[ +382 ms]   [ +381 ms] Persisting file store
+[  +31 ms]   [  +31 ms] Done persisting file store
+[  +58 ms]   [  +58 ms] build succeeded.
+[   +2 ms]   [   +1 ms] "flutter assemble" took 13├ö├ç┬╗605ms.
+[ +125 ms]   [ +126 ms] Running 1 shutdown hook
+[   +1 ms]   [   +2 ms] Shutdown hooks complete
+[  +97 ms]   [  +96 ms] exiting with code 0
+[ +101 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "x64\Release\flutter_assemble\flutter_assemble.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "x64\Release\flutter_assemble\flutter_assemble.tlog\flutter_assemble.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\flutter_assemble.vcxproj" termin├®e (cibles par d├®faut).
+[  +44 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\bitsdojo_window_windows\bitsdojo_window_windows_plugin.vcxproj" (5) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\flutter_wrapper_plugin.vcxproj" (7) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +3 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "flutter_wrapper_plugin.dir\Release\flutter_.D2ECC8A6.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "flutter_wrapper_plugin.dir\Release\flutter_.D2ECC8A6.tlog\unsuccessfulbuild".
+[   +4 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +77 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +40 ms] Lib:
+[        ]   Toutes les sorties sont ├á jour.
+[   +3 ms]   flutter_wrapper_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\Release\flutter_wrapper_plugin.lib
+[  +28 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "flutter_wrapper_plugin.dir\Release\flutter_.D2ECC8A6.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "flutter_wrapper_plugin.dir\Release\flutter_.D2ECC8A6.tlog\flutter_wrapper_plugin.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\flutter_wrapper_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +11 ms] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "bitsdojo_window_windows_plugin.dir\Release\bitsdojo.EE88D1AA.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "bitsdojo_window_windows_plugin.dir\Release\bitsdojo.EE88D1AA.tlog\unsuccessfulbuild".
+[   +3 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +18 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +19 ms] Lib:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   bitsdojo_window_windows_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\bitsdojo_window_windows\Release\bitsdojo_window_windows_plugin.lib
+[  +12 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "bitsdojo_window_windows_plugin.dir\Release\bitsdojo.EE88D1AA.tlog\unsuccessfulbuild".
+[   +1 ms]   Mise ├á jour de l'horodatage "bitsdojo_window_windows_plugin.dir\Release\bitsdojo.EE88D1AA.tlog\bitsdojo_window_windows_plugin.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\bitsdojo_window_windows\bitsdojo_window_windows_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +82 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\cloud_firestore\cloud_firestore_plugin.vcxproj" (8) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\cloud_firestore\cloud_firestore_plugin.vcxproj" (8) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_core\firebase_core_plugin.vcxproj" (9) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "firebase_core_plugin.dir\Release\firebase.36C27749.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "firebase_core_plugin.dir\Release\firebase.36C27749.tlog\unsuccessfulbuild".
+[   +3 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +16 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[   +7 ms] Lib:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   firebase_core_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_core\Release\firebase_core_plugin.lib
+[  +16 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "firebase_core_plugin.dir\Release\firebase.36C27749.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "firebase_core_plugin.dir\Release\firebase.36C27749.tlog\firebase_core_plugin.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_core\firebase_core_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +10 ms] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +3 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "cloud_firestore_plugin.dir\Release\cloud_fi.82D2B56E.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "cloud_firestore_plugin.dir\Release\cloud_fi.82D2B56E.tlog\unsuccessfulbuild".
+[   +4 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +26 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +15 ms] Lib:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   cloud_firestore_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\cloud_firestore\Release\cloud_firestore_plugin.lib
+[  +12 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "cloud_firestore_plugin.dir\Release\cloud_fi.82D2B56E.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "cloud_firestore_plugin.dir\Release\cloud_fi.82D2B56E.tlog\cloud_firestore_plugin.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\cloud_firestore\cloud_firestore_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +41 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_auth\firebase_auth_plugin.vcxproj" (10) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "firebase_auth_plugin.dir\Release\firebase.525A0F73.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "firebase_auth_plugin.dir\Release\firebase.525A0F73.tlog\unsuccessfulbuild".
+[  +10 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +18 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[   +6 ms] Lib:
+[        ]   Toutes les sorties sont ├á jour.
+[        ]   firebase_auth_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_auth\Release\firebase_auth_plugin.lib
+[  +14 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "firebase_auth_plugin.dir\Release\firebase.525A0F73.tlog\unsuccessfulbuild".
+[   +1 ms]   Mise ├á jour de l'horodatage "firebase_auth_plugin.dir\Release\firebase.525A0F73.tlog\firebase_auth_plugin.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_auth\firebase_auth_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +46 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_storage\firebase_storage_plugin.vcxproj" (11) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +4 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "firebase_storage_plugin.dir\Release\firebase.7F6692C2.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "firebase_storage_plugin.dir\Release\firebase.7F6692C2.tlog\unsuccessfulbuild".
+[   +4 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +18 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[   +8 ms] Lib:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   firebase_storage_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_storage\Release\firebase_storage_plugin.lib
+[  +18 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "firebase_storage_plugin.dir\Release\firebase.7F6692C2.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "firebase_storage_plugin.dir\Release\firebase.7F6692C2.tlog\firebase_storage_plugin.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\firebase_storage\firebase_storage_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +40 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\flutter_wrapper_app.vcxproj" (12) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +3 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "flutter_wrapper_app.dir\Release\flutter_.1F91A049.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "flutter_wrapper_app.dir\Release\flutter_.1F91A049.tlog\unsuccessfulbuild".
+[   +4 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +29 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[   +7 ms] Lib:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   flutter_wrapper_app.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\Release\flutter_wrapper_app.lib
+[  +12 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "flutter_wrapper_app.dir\Release\flutter_.1F91A049.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "flutter_wrapper_app.dir\Release\flutter_.1F91A049.tlog\flutter_wrapper_app.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\flutter\flutter_wrapper_app.vcxproj" termin├®e (cibles par d├®faut).
+[  +81 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" (3) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\printing\printing_plugin.vcxproj" (14) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "printing_plugin.dir\Release\printing_plugin.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "printing_plugin.dir\Release\printing_plugin.tlog\unsuccessfulbuild".
+[   +7 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +22 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +43 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +5 ms]   printing_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\printing\Release\printing_plugin.dll
+[  +12 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "printing_plugin.dir\Release\printing_plugin.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "printing_plugin.dir\Release\printing_plugin.tlog\printing_plugin.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\printing\printing_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +45 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\protocol_handler_windows\protocol_handler_windows_plugin.vcxproj" (15) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "protocol_handler_windows_plugin.dir\Release\protocol.C720DDDF.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "protocol_handler_windows_plugin.dir\Release\protocol.C720DDDF.tlog\unsuccessfulbuild".
+[   +3 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +15 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +12 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   protocol_handler_windows_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\protocol_handler_windows\Release\protocol_handler_windows_plugin.dll
+[  +16 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "protocol_handler_windows_plugin.dir\Release\protocol.C720DDDF.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "protocol_handler_windows_plugin.dir\Release\protocol.C720DDDF.tlog\protocol_handler_windows_plugin.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\protocol_handler_windows\protocol_handler_windows_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +41 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\screen_retriever_windows\screen_retriever_windows_plugin.vcxproj" (16) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "screen_retriever_windows_plugin.dir\Release\screen_r.5D90CEC3.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "screen_retriever_windows_plugin.dir\Release\screen_r.5D90CEC3.tlog\unsuccessfulbuild".
+[   +3 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +31 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +10 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +2 ms]   screen_retriever_windows_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\screen_retriever_windows\Release\screen_retriever_windows_plugin.dll
+[  +10 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "screen_retriever_windows_plugin.dir\Release\screen_r.5D90CEC3.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "screen_retriever_windows_plugin.dir\Release\screen_r.5D90CEC3.tlog\screen_retriever_windows_plugin.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\screen_retriever_windows\screen_retriever_windows_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +45 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\tray_manager\tray_manager_plugin.vcxproj" (17) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +3 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "tray_manager_plugin.dir\Release\tray_man.C537BFC1.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "tray_manager_plugin.dir\Release\tray_man.C537BFC1.tlog\unsuccessfulbuild".
+[   +4 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +13 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[   +9 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   tray_manager_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\tray_manager\Release\tray_manager_plugin.dll
+[  +15 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "tray_manager_plugin.dir\Release\tray_man.C537BFC1.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "tray_manager_plugin.dir\Release\tray_man.C537BFC1.tlog\tray_manager_plugin.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\tray_manager\tray_manager_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +41 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\url_launcher_windows\url_launcher_windows_plugin.vcxproj" (18) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "url_launcher_windows_plugin.dir\Release\url_laun.4B4BF761.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "url_launcher_windows_plugin.dir\Release\url_laun.4B4BF761.tlog\unsuccessfulbuild".
+[   +3 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +25 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +10 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +2 ms]   url_launcher_windows_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\url_launcher_windows\Release\url_launcher_windows_plugin.dll
+[  +10 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "url_launcher_windows_plugin.dir\Release\url_laun.4B4BF761.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "url_launcher_windows_plugin.dir\Release\url_laun.4B4BF761.tlog\url_launcher_windows_plugin.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\url_launcher_windows\url_launcher_windows_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +49 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\webview_windows\webview_windows_plugin.vcxproj" (19) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +3 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "webview_windows_plugin.dir\Release\webview_.F8F9AF59.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "webview_windows_plugin.dir\Release\webview_.F8F9AF59.tlog\unsuccessfulbuild".
+[   +4 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +39 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +14 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +2 ms]   webview_windows_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\webview_windows\Release\webview_windows_plugin.dll
+[  +12 ms] _CopyOutOfDateSourceItemsToOutputDirectoryAlways:
+[        ]   Copie du fichier de "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\packages\Microsoft.Web.WebView2\build\native\x64\WebView2Loader.dll" vers "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\webview_windows\Release\WebView2Loader.dll".
+[   +7 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "webview_windows_plugin.dir\Release\webview_.F8F9AF59.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "webview_windows_plugin.dir\Release\webview_.F8F9AF59.tlog\webview_windows_plugin.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\webview_windows\webview_windows_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +57 ms] Le projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" (13) g├®n├¿re "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\window_manager\window_manager_plugin.vcxproj" (20) sur le n┼ôud 1 (cibles par d├®faut).
+[        ] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "window_manager_plugin.dir\Release\window_m.78C4680A.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "window_manager_plugin.dir\Release\window_m.78C4680A.tlog\unsuccessfulbuild".
+[   +5 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +14 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +26 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +1 ms]   window_manager_plugin.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\window_manager\Release\window_manager_plugin.dll
+[  +13 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "window_manager_plugin.dir\Release\window_m.78C4680A.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "window_manager_plugin.dir\Release\window_m.78C4680A.tlog\window_manager_plugin.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\plugins\window_manager\window_manager_plugin.vcxproj" termin├®e (cibles par d├®faut).
+[  +24 ms] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +3 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "offibox.dir\Release\offibox.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "offibox.dir\Release\offibox.tlog\unsuccessfulbuild".
+[   +3 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +51 ms] ClCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +12 ms] ResourceCompile:
+[        ]   Toutes les sorties sont ├á jour.
+[  +17 ms] Link:
+[        ]   Toutes les sorties sont ├á jour.
+[   +2 ms]   offibox.vcxproj -> C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\Release\offibox.exe
+[  +16 ms] _CopyOutOfDateSourceItemsToOutputDirectoryAlways:
+[        ]   Copie du fichier de "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\packages\Microsoft.Web.WebView2\build\native\x64\WebView2Loader.dll" vers "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\Release\WebView2Loader.dll".
+[   +7 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "offibox.dir\Release\offibox.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "offibox.dir\Release\offibox.tlog\offibox.lastbuildstate".
+[   +1 ms] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\runner\offibox.vcxproj" termin├®e (cibles par d├®faut).
+[  +14 ms] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Cr├®ation de "x64\Release\ALL_BUILD\ALL_BUILD.tlog\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+[        ]   Mise ├á jour de l'horodatage "x64\Release\ALL_BUILD\ALL_BUILD.tlog\unsuccessfulbuild".
+[  +13 ms] CustomBuild:
+[        ]   Toutes les sorties sont ├á jour.
+[  +81 ms]   Building Custom Rule C:/Users/perra/Documents/projets_flutter/offibox/windows/CMakeLists.txt
+[  +78 ms] FinalizeBuildStatus:
+[        ]   Suppression du fichier "x64\Release\ALL_BUILD\ALL_BUILD.tlog\unsuccessfulbuild".
+[        ]   Mise ├á jour de l'horodatage "x64\Release\ALL_BUILD\ALL_BUILD.tlog\ALL_BUILD.lastbuildstate".
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\ALL_BUILD.vcxproj" termin├®e (cibles par d├®faut).
+[  +10 ms] PrepareForBuild:
+[        ]   La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
+[   +2 ms] InitializeBuildStatus:
+[        ]   Mise ├á jour de l'horodatage "x64\Release\INSTALL\INSTALL.tlog\unsuccessfulbuild".
+[  +72 ms] CustomBuild:
+[        ]   1>
+[  +20 ms] PostBuildEvent:
+[        ]   setlocal
+[        ]   "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DBUILD_TYPE=Release -P cmake_install.cmake
+[        ]   if %errorlevel% neq 0 goto :cmEnd
+[        ]   :cmEnd
+[        ]   endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+[        ]   :cmErrorLevel
+[        ]   exit /b %1
+[        ]   :cmDone
+[        ]   if %errorlevel% neq 0 goto :VCEnd
+[        ]   :VCEnd
+[ +108 ms]   -- Install configuration: "Release"
+[  +10 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/data/icudtl.dat
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/flutter_windows.dll
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/bitsdojo_window_windows_plugin.lib
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/cloud_firestore_plugin.lib
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/firebase_auth_plugin.lib
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/firebase_core_plugin.lib
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/firebase_storage_plugin.lib
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/printing_plugin.dll
+[   +1 ms]   -- Installing: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/pdfium.dll
+[  +30 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/protocol_handler_windows_plugin.dll
+[        ]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/screen_retriever_windows_plugin.dll
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/tray_manager_plugin.dll
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/url_launcher_windows_plugin.dll
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/webview_windows_plugin.dll
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/window_manager_plugin.dll
+[   +1 ms]   -- Up-to-date: C:/Users/perra/Documents/projets_flutter/offibox/build/windows/x64/runner/Release/pdfium.dll
+[        ]   CMake Error at cmake_install.cmake:321 (file):
+[        ]     file INSTALL cannot find
+[        ]     "C:/Users/perra/Documents/projets_flutter/offibox/build/native_assets/windows":
+[        ]     No error.
+[  +18 ms] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: La commande 
+"setlocal [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: "C:\Program 
+Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" 
+-DBUILD_TYPE=Release -P cmake_install.cmake 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% 
+neq 0 goto :cmEnd [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmEnd 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: endlocal & call 
+:cmErrorLevel %errorlevel% & goto :cmDone 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmErrorLevel 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: exit /b %1 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmDone 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% 
+neq 0 goto :VCEnd [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :VCEnd" s'est 
+arr├¬t├®e avec le code 1. [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] G├®n├®ration du projet "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj" termin├®e (cibles par d├®faut) -- ├ëCHEC.
+[   +7 ms] ├ëCHEC de la build.
+[   +6 ms] "C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj" (cible par d├®faut) (1) ->
+[        ] (PostBuildEvent cible) -> 
+[        ]   C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: La commande 
+"setlocal [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: "C:\Program 
+Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" 
+-DBUILD_TYPE=Release -P cmake_install.cmake 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% 
+neq 0 goto :cmEnd [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmEnd 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: endlocal & call 
+:cmErrorLevel %errorlevel% & goto :cmDone 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmErrorLevel 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: exit /b %1 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmDone 
+[C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% 
+neq 0 goto :VCEnd [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ] C:\Program Files\Microsoft Visual 
+Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :VCEnd" s'est 
+arr├¬t├®e avec le code 1. [C:\Users\perra\Documents\projets_flutter\offibox\build\windows\x64\INSTALL.vcxproj]
+[        ]     0 Avertissement(s)
+[        ]     1 Erreur(s)
+[        ] Temps ├®coul├® 00:00:21.72
+[  +46 ms] Building Windows application... (completed in 25,2s)
+[        ] "flutter windows" took 27ÔÇ»625ms.
+[ +127 ms] Build process failed.
+[   +1 ms] 
+           #0      throwToolExit (package:flutter_tools/src/base/common.dart:34:3)
+           #1      _runBuild (package:flutter_tools/src/windows/build_windows.dart:262:5)
+           <asynchronous suspension>
+           #2      buildWindows (package:flutter_tools/src/windows/build_windows.dart:118:5)
+           <asynchronous suspension>
+           #3      BuildWindowsCommand.runCommand (package:flutter_tools/src/commands/build_windows.dart:72:5)
+           <asynchronous suspension>
+           #4      FlutterCommand.run.<anonymous closure> 
+(package:flutter_tools/src/runner/flutter_command.dart:1590:27)
+           <asynchronous suspension>
+           #5      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #6      CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+           <asynchronous suspension>
+           #7      FlutterCommandRunner.runCommand.<anonymous closure> 
+(package:flutter_tools/src/runner/flutter_command_runner.dart:496:9)
+           <asynchronous suspension>
+           #8      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #9      FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:431:5)
+           <asynchronous suspension>
+           #10     FlutterCommandRunner.run.<anonymous closure> 
+(package:flutter_tools/src/runner/flutter_command_runner.dart:307:33)
+           <asynchronous suspension>
+           #11     run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:104:11)
+           <asynchronous suspension>
+           #12     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #13     main (package:flutter_tools/executable.dart:103:3)
+           <asynchronous suspension>
+
+
+[        ] Running 1 shutdown hook
+[        ] Shutdown hooks complete
+[ +103 ms] exiting with code 1

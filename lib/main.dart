@@ -13,9 +13,12 @@ import 'package:window_manager/window_manager.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:offibox/config/app_config.dart';
 import 'app/offibox_app.dart';
 import 'cache/hive_cache.dart';
+import 'package:offibox/diagnostics/startup_diagnostic.dart';
 import 'package:offibox/system/window_position.dart';
 import 'firebase_options.dart';
 
@@ -81,6 +84,14 @@ Future<void> main() async {
   if (Platform.isWindows) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await WindowPosition.restoreAndListen();
+    });
+  }
+
+  // Diagnostic complet (logo gris / barre ne se déploie) — console uniquement en debug
+  if (kDebugMode) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 2500));
+      await StartupDiagnostic.run();
     });
   }
 }

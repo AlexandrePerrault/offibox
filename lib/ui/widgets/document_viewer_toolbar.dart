@@ -101,6 +101,7 @@ Widget documentViewerSourceLabel({
     color: textColor ?? Colors.white70,
     fontSize: 12,
     fontFamily: 'Spinnaker',
+    fontStyle: FontStyle.italic,
   );
   final child = Text(text, style: style, overflow: TextOverflow.ellipsis, maxLines: 1);
   if (url != null && url.isNotEmpty) {

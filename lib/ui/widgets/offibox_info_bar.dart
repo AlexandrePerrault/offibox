@@ -372,7 +372,8 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
         onExit: (_) => _paused = false,
         child: Container(
           height: barHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          // Pas de marge à gauche pour coller le toggle au bord, légère marge à droite
+          padding: const EdgeInsets.only(left: 0, right: 8),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(
@@ -402,63 +403,79 @@ class _OffiboxInfoBarState extends State<OffiboxInfoBar> {
                 ),
                 const SizedBox(width: 6),
               ],
-              // Badge gris date/heure — même hauteur que le texte qui défile
-              Container(
-                height: _badgeHeight,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 1.5,
-                ),
-                decoration: BoxDecoration(
-                  color: _infoBarAnthracite,
-                  borderRadius: BorderRadius.circular(
-                    OffiboxWindowUI.tickerBadgeBorderRadius,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  _dateTimeFormatted,
-                  style: GoogleFonts.spinnaker(
-                    fontSize: OffiboxWindowUI.tickerBadgeFontSize,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    height: 1,
-                    letterSpacing: 0.2,
+              // Badge gris date/heure — largeur réduite (ancienne taille visuelle)
+              Flexible(
+                fit: FlexFit.loose,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 160),
+                  child: Container(
+                    height: _badgeHeight,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 1.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _infoBarAnthracite,
+                      borderRadius: BorderRadius.circular(
+                        OffiboxWindowUI.tickerBadgeBorderRadius,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      _dateTimeFormatted,
+                      style: GoogleFonts.spinnaker(
+                        fontSize: OffiboxWindowUI.tickerBadgeFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        height: 1,
+                        letterSpacing: 0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 4),
-              // Badge INFOS — même hauteur que le texte qui défile
-              GestureDetector(
-                onTap: widget.onChanged != null && !widget.value
-                    ? () => widget.onChanged!(true)
-                    : null,
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  height: _badgeHeight,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 1.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: OffiboxWindowUI.tickerInfosBadgeGreen,
-                    borderRadius: BorderRadius.circular(
-                      OffiboxWindowUI.tickerBadgeBorderRadius,
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    widget.value
-                        ? 'INFOS'
-                        : 'BARRE D\'INFOS DÉSACTIVÉE',
-                    style: GoogleFonts.spinnaker(
-                      fontSize: OffiboxWindowUI.tickerBadgeFontSize,
-                      fontWeight: FontWeight.w700,
-                      fontStyle:
-                          widget.value ? FontStyle.normal : FontStyle.italic,
-                      color: Colors.white,
-                      height: 1,
-                      letterSpacing: 0.25,
+              // Badge INFOS — largeur réduite (ancienne taille visuelle)
+              Flexible(
+                fit: FlexFit.loose,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 130),
+                  child: GestureDetector(
+                    onTap: widget.onChanged != null && !widget.value
+                        ? () => widget.onChanged!(true)
+                        : null,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      height: _badgeHeight,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: OffiboxWindowUI.tickerInfosBadgeGreen,
+                        borderRadius: BorderRadius.circular(
+                          OffiboxWindowUI.tickerBadgeBorderRadius,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        widget.value
+                            ? 'INFOS'
+                            : 'BARRE D\'INFOS DÉSACTIVÉE',
+                        style: GoogleFonts.spinnaker(
+                          fontSize: OffiboxWindowUI.tickerBadgeFontSize,
+                          fontWeight: FontWeight.w700,
+                          fontStyle:
+                              widget.value ? FontStyle.normal : FontStyle.italic,
+                          color: Colors.white,
+                          height: 1,
+                          letterSpacing: 0.25,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ),

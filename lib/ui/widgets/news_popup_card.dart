@@ -27,6 +27,7 @@ class NewsPopupCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
+        width: 360,
         constraints: const BoxConstraints(maxWidth: 360),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -38,6 +39,8 @@ class NewsPopupCard extends StatelessWidget {
                   child: Text(
                     displayLine,
                     style: Theme.of(context).textTheme.titleSmall,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 if (hasUrl)

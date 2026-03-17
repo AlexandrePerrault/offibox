@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -91,19 +92,78 @@ class AppUpdateService {
     return null;
   }
 
-  /// Télécharge l'installer et ouvre le fichier.
+  /// Télécharge l'installer avec barre de progression, puis lance l'installation silencieuse (sans UI du setup).
+  /// [onProgress] : (progress 0.0..1.0, received, total) — total peut être -1 si inconnu.
+  static Future<bool> downloadAndInstallSilent(
+    AppUpdateInfo info, {
+    void Function(double progress, int received, int total)? onProgress,
+  }) async {
+    if (!Platform.isWindows) return false;
+    try {
+      final file = await downloadWithProgress(
+        info.downloadUrl,
+        onProgress: onProgress,
+      );
+      if (file == null) return false;
+      return await applyUpdateSilent(file.path);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Télécharge avec suivi de progression. Retourne le fichier ou null.
+  static Future<File?> downloadWithProgress(
+    String url, {
+    void Function(double progress, int received, int total)? onProgress,
+  }) async {
+    final request = http.Request('GET', Uri.parse(url));
+    final client = http.Client();
+    final response = await client.send(request);
+    if (response.statusCode != 200) return null;
+
+    final total = response.contentLength ?? -1;
+    int received = 0;
+    final dir = await getTemporaryDirectory();
+    final fileName = url.split('/').last;
+    if (fileName.isEmpty) return null;
+    final file = File('${dir.path}/$fileName');
+    final sink = file.openWrite();
+
+    await for (final chunk in response.stream) {
+      sink.add(chunk);
+      received += chunk.length;
+      if (total > 0 && onProgress != null) {
+        onProgress(received / total, received, total);
+      } else if (onProgress != null) {
+        onProgress(received > 0 ? 1.0 : 0.0, received, total);
+      }
+    }
+    await sink.close();
+    client.close();
+    return file;
+  }
+
+  /// Lance l'installer en mode silencieux (pas d'UI du setup, mise à jour en place).
+  static Future<bool> applyUpdateSilent(String exePath) async {
+    if (!Platform.isWindows) return false;
+    try {
+      // Lancer l'installer en arrière-plan puis quitter : l'installer remplace les fichiers à la fermeture de l'app.
+      await Process.start(
+        exePath,
+        ['/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART'],
+        mode: ProcessStartMode.detached,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Télécharge l'installer et ouvre le fichier (ancien comportement : lance le setup avec UI).
   static Future<bool> downloadAndOpen(AppUpdateInfo info) async {
     try {
-      final response = await http.get(Uri.parse(info.downloadUrl));
-      if (response.statusCode != 200) return false;
-
-      final dir = await getDownloadsDirectory() ?? await getTemporaryDirectory();
-      final fileName = info.downloadUrl.split('/').last;
-      if (fileName.isEmpty) return false;
-
-      final file = File('${dir.path}/$fileName');
-      await file.writeAsBytes(response.bodyBytes);
-
+      final file = await downloadWithProgress(info.downloadUrl);
+      if (file == null) return false;
       final uri = Uri.file(file.path);
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

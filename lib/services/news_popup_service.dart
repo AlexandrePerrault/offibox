@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -33,6 +34,8 @@ class NewsEntry {
 /// - col 3 (D) : source (facultatif), affichée en italique sous l'info.
 ///
 /// On suppose que la ligne la plus récente est en haut du fichier (après l’en‑tête).
+bool _newsNetworkErrorLogged = false;
+
 Future<NewsEntry?> fetchLatestNews() async {
   try {
     final response = await OffiboxDataFetch.get(NEWS_CSV_URL);
@@ -67,8 +70,29 @@ Future<NewsEntry?> fetchLatestNews() async {
         source: source,
       );
     }
-  } catch (e) {
-    if (kDebugMode) debugPrint('[Offibox] ⚠ news.csv erreur: $e');
+  } catch (e, st) {
+    if (kDebugMode) {
+      final msg = e.toString().toLowerCase();
+      final isNetworkError = e is SocketException ||
+          e is OSError ||
+          e is http.ClientException ||
+          msg.contains('socketexception') ||
+          msg.contains('host lookup') ||
+          msg.contains('failed host lookup') ||
+          msg.contains('hôte inconnu') ||
+          msg.contains('connection refused') ||
+          msg.contains('network is unreachable') ||
+          msg.contains('errno');
+      if (isNetworkError) {
+        if (!_newsNetworkErrorLogged) {
+          _newsNetworkErrorLogged = true;
+          debugPrint('[Offibox] Actualités non chargées (pas de connexion ou hôte inaccessible).');
+        }
+      } else {
+        debugPrint('[Offibox] ⚠ news.csv erreur: $e');
+        debugPrint(st.toString());
+      }
+    }
   }
   return null;
 }

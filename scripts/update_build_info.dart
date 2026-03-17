@@ -44,7 +44,7 @@ Future<String?> _readExistingDateIfAny() async {
     final file = File(_outPath);
     if (!await file.exists()) return null;
     final content = await file.readAsString();
-    final regex = RegExp(r\"kVersionDate\\s*=\\s*'([^']+)'\\s*;\");
+    final regex = RegExp(r"kVersionDate\s*=\s*'([^']+)'\s*;");
     final match = regex.firstMatch(content);
     if (match == null) return null;
     return match.group(1);

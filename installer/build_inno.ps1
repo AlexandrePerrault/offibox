@@ -6,7 +6,8 @@
 # Sortie : ..\website\download\Offibox-Setup-<version>.exe
 
 param(
-    [switch]$SkipFlutter   # Ne pas lancer flutter build windows
+    [switch]$SkipFlutter,   # Ne pas lancer flutter build windows
+    [switch]$TrialNoAuth    # Build essai 15 jours sans identification (--dart-define=OFFIBOX_TRIAL_NO_AUTH=true)
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,10 +15,18 @@ $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $ReleaseDir = Join-Path $ProjectRoot "build\windows\x64\runner\Release"
 
 if (-not $SkipFlutter) {
-    Write-Host "Build Flutter Windows..." -ForegroundColor Cyan
+    $dartDefines = @()
+    if ($TrialNoAuth) {
+        $dartDefines += "--dart-define=OFFIBOX_TRIAL_NO_AUTH=true"
+        Write-Host "Build essai sans identification (15 jours)..." -ForegroundColor Cyan
+    } else {
+        Write-Host "Build Flutter Windows..." -ForegroundColor Cyan
+    }
     Push-Location $ProjectRoot
     try {
-        flutter build windows
+        $cmd = "flutter build windows"
+        if ($dartDefines.Count -gt 0) { $cmd += " " + ($dartDefines -join " ") }
+        Invoke-Expression $cmd
         if ($LASTEXITCODE -ne 0) { throw "flutter build windows a échoué." }
     } finally {
         Pop-Location
@@ -85,7 +94,8 @@ Write-Host "pubspec.yaml mis a jour : version $AppVersion" -ForegroundColor Gree
 Write-Host "Compilation Inno Setup : Offibox.iss" -ForegroundColor Cyan
 Push-Location $PSScriptRoot
 try {
-    & $iscc "/DMyAppVersion=$AppVersion" "Offibox.iss"
+    $outputBase = if ($TrialNoAuth) { "Offibox-Setup-Trial-$AppVersion" } else { "Offibox-Setup-$AppVersion" }
+    & $iscc "/DMyAppVersion=$AppVersion" "/DOutputBaseFilename=$outputBase" "Offibox.iss"
     if ($LASTEXITCODE -ne 0) { throw "ISCC a échoué." }
     $outDir = Join-Path $ProjectRoot "website\download"
     $exe = Get-ChildItem -Path $outDir -Filter "Offibox-Setup-*.exe" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1

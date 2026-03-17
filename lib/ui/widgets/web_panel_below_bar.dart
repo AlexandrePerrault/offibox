@@ -78,14 +78,15 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
     }
   }
 
-  Future<void> _injectBlackTextStyle() async {
+  /// Améliore la clarté sans forcer la couleur : ombre légère pour liser le texte sur fond clair ou foncé.
+  Future<void> _injectClarityStyle() async {
     if (!_webViewController.value.isInitialized || _closing) return;
     try {
       await _webViewController.executeScript('''
         (function() {
           var s = document.createElement('style');
-          s.id = 'offibox-webview-text-black';
-          s.textContent = 'body, body *, p, span, div, a, li, td, th, h1, h2, h3, h4, [class] { color: #000 !important; }';
+          s.id = 'offibox-webview-clarity';
+          s.textContent = 'body, body *, p, span, div, a, li, td, th, h1, h2, h3, h4, label, input, button { text-shadow: 0 0 1px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.15); -webkit-font-smoothing: antialiased; }';
           (document.head || document.documentElement).appendChild(s);
           return 'ok';
         })();
@@ -99,7 +100,7 @@ class _WebPanelBelowBarState extends State<WebPanelBelowBar> {
       await _webViewController.setBackgroundColor(Colors.white);
       await _webViewController.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
       _loadingSubscription = _webViewController.loadingState.listen((LoadingState state) {
-        if (state == LoadingState.navigationCompleted) _injectBlackTextStyle();
+        if (state == LoadingState.navigationCompleted) _injectClarityStyle();
       });
       await _webViewController.loadUrl(widget.url.trim());
       if (!mounted) return;
@@ -376,14 +377,14 @@ class _WebFullscreenContentState extends State<_WebFullscreenContent> {
     _init();
   }
 
-  Future<void> _injectBlackTextStyle() async {
+  Future<void> _injectClarityStyle() async {
     if (!_controller.value.isInitialized) return;
     try {
       await _controller.executeScript('''
         (function() {
           var s = document.createElement('style');
-          s.id = 'offibox-webview-text-black';
-          s.textContent = 'body, body *, p, span, div, a, li, td, th, h1, h2, h3, h4, [class] { color: #000 !important; }';
+          s.id = 'offibox-webview-clarity-fullscreen';
+          s.textContent = 'body, body *, p, span, div, a, li, td, th, h1, h2, h3, h4, label, input, button { text-shadow: 0 0 1px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.15); -webkit-font-smoothing: antialiased; }';
           (document.head || document.documentElement).appendChild(s);
           return 'ok';
         })();
@@ -396,7 +397,7 @@ class _WebFullscreenContentState extends State<_WebFullscreenContent> {
       await _controller.initialize();
       await _controller.setBackgroundColor(Colors.white);
       _loadingSubscription = _controller.loadingState.listen((LoadingState state) {
-        if (state == LoadingState.navigationCompleted) _injectBlackTextStyle();
+        if (state == LoadingState.navigationCompleted) _injectClarityStyle();
       });
       await _controller.loadUrl(widget.url.trim());
       if (mounted) setState(() => _initialized = true);

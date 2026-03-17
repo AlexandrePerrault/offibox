@@ -13,6 +13,7 @@ import 'package:offibox/constants/ui_constants.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
 import 'package:offibox/ui/widgets/offibox_tooltip.dart';
 import 'package:offibox/constants/offibox_icons.dart';
+import 'package:offibox/data/data_sources.dart';
 
 /// Taille d'affichage pour les logos "Source :". Véto = 52 ; LPP = 52 × 0,7 (−30 %) ; e-pansement = 52 * 1.5 (plus lisible).
 const double _sourceLogoSize = 52;
@@ -34,8 +35,7 @@ const String _dmSourceUrl = 'https://www.e-pansement.fr/';
 const String _dmSourceAsset = 'assets/icons/e_pansement.png';
 const String _lppSourceUrl = 'http://www.codage.ext.cnamts.fr/codif/tips/index.php?p_site=AMELI';
 const String _lppSourceAsset = 'assets/icons/entete_ameli_gdr.gif';
-const String _rppsSourceUrl =
-    'https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante-rpps';
+const String _rppsSourceUrl = ANNUAIRE_PS_DATA_GOUV_SOURCE;
 const String _rppsSourceAsset = 'assets/icons/Datagouv.png';
 const String _rppsSourceTooltip = 'Annuaire Santé (data.gouv.fr)';
 

@@ -6,6 +6,9 @@
 #ifndef MyAppVersion
 #define MyAppVersion "1.1.25"
 #endif
+#ifndef OutputBaseFilename
+#define OutputBaseFilename Offibox-Setup-{#MyAppVersion}
+#endif
 #define MyAppPublisher "Offibox"
 #define MyAppURL "https://www.offibox.fr"
 #define MyAppExeName "offibox.exe"
@@ -19,13 +22,14 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-; Installation par utilisateur (comme l'ancien MSI) : AppData\Local\Offibox
+; Installation par utilisateur (sans admin) : AppData\Roaming\Offibox
+; {userappdata} = C:\Users\<user>\AppData\Roaming
 DefaultDirName={userappdata}\Offibox
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-; Fichier de sortie
+; Fichier de sortie (OutputBaseFilename override via build_inno.ps1 -TrialNoAuth)
 OutputDir=..\website\download
-OutputBaseFilename=Offibox-Setup-{#MyAppVersion}
+OutputBaseFilename={#OutputBaseFilename}
 SetupIconFile={#ReleaseDir}\data\flutter_assets\assets\icons\app_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2/ultra64
@@ -53,18 +57,22 @@ Name: "launchafter"; Description: "Lancer Offibox à la fin de l'installation"; 
 Source: "{#ReleaseDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "La Boîte à Outils de l'Officine"
-Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; Comment: "La Boîte à Outils de l'Officine"
+; WorkingDir obligatoire : l'app Flutter charge data/ et assets depuis le répertoire de l'exe — sans ça le raccourci peut être grisé ou l'app ne démarre pas
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Comment: "La Boîte à Outils de l'Officine"
+Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon; Comment: "La Boîte à Outils de l'Officine"
 
 [Registry]
 ; Clé de base (supprimée à la désinstallation)
 Root: HKCU; Subkey: "Software\Offibox"; ValueType: none; Flags: deletekey uninsdeletekey
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "Lancer Offibox"; Flags: nowait postinstall skipifsilent; Check: WizardIsTaskSelected('launchafter')
+Filename: "{app}\{#MyAppExeName}"; Description: "Lancer Offibox"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent; Check: WizardIsTaskSelected('launchafter')
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
+  ExePath: String;
 begin
   if CurStep = ssPostInstall then
   begin
@@ -77,5 +85,11 @@ begin
       RegWriteDWordValue(HKEY_CURRENT_USER, 'Software\Offibox', 'DesktopShortcut', 1)
     else
       RegDeleteValue(HKEY_CURRENT_USER, 'Software\Offibox', 'DesktopShortcut');
+    { Débloquer l'exe (Windows peut le bloquer si le setup a été téléchargé) pour éviter icône grisée / non cliquable }
+    ExePath := ExpandConstant('{app}\{#MyAppExeName}');
+    if FileExists(ExePath) then
+      Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+        '-NoProfile -ExecutionPolicy Bypass -Command "Unblock-File -LiteralPath ''' + ExePath + '''"',
+        '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;
 end;

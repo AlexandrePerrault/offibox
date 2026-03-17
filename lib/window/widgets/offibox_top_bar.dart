@@ -129,6 +129,7 @@ class OffiboxTopBar extends StatelessWidget {
     this.onDownloadCataloguePdf,
     this.showCataloguePanel = false,
     this.onOpenCataloguePanel,
+    this.onOpenDisponibiliteProduits,
     this.showYouTubePanel = false,
     this.youtubeVideoUrl,
     this.onOpenYouTubeVideo,
@@ -173,6 +174,7 @@ class OffiboxTopBar extends StatelessWidget {
   final bool showCataloguePanel;
   /// Appelé au clic sur le badge Catalogue : affiche le panneau sous la barre.
   final VoidCallback? onOpenCataloguePanel;
+  final VoidCallback? onOpenDisponibiliteProduits;
   /// Afficher le panneau vidéo YouTube sous la barre.
   final bool showYouTubePanel;
   /// URL YouTube à afficher.
@@ -310,7 +312,9 @@ class OffiboxTopBar extends StatelessWidget {
   static const double _gapLogoMenu = 4;
   /// Marge à droite pour que le bloc hamburger + logo ne soit pas collé au bord.
   static const double _rightBlockPadding = 8;
-  /// Largeur réservée à droite (logo + hamburger + marges).
+  /// Largeur max du bloc « mis à jour et licence jusque … » en dernière ligne (pour que la date reste visible).
+  static const double _dateLicenceBlockMaxWidth = 340;
+  /// Largeur réservée à droite (logo + hamburger + marges). Texte mis à jour/licence en dernière ligne.
   static double get _logoAndMenuWidth =>
       OffiboxWindowUI.pillSize + _gapLogoMenu + OffiboxWindowUI.menuButtonSize + _rightBlockPadding;
   /// Largeur fixe de la zone du bouton filtre (gauche) — diamètre égal au menu hamburger (menuButtonSize) + padding gauche 12.
@@ -414,6 +418,7 @@ class OffiboxTopBar extends StatelessWidget {
               leftReservedWidth: filterButtonZoneWidth,
               onOpenEspacePro: onOpenEspacePro,
               onOpenCataloguePanel: onOpenCataloguePanel,
+              onOpenDisponibiliteProduits: onOpenDisponibiliteProduits,
               onOpenYouTubeVideo: onOpenYouTubeVideo,
               onOpenTherapeuticVideo: onOpenTherapeuticVideo,
               videosByCip13: videosByCip13,
@@ -445,30 +450,6 @@ class OffiboxTopBar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (expanded) ...[
-                        Text(
-                          'mis à jour le ${dataUpdateDate ?? kVersionDate}',
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            color: Colors.grey.shade500,
-                            fontSize: 10,
-                            height: 1.2,
-                          ),
-                        ),
-                        if (licenseEndDate != null && licenseEndDate!.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            'licence jusqu\'au $licenseEndDate',
-                            style: TextStyle(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.grey.shade500,
-                              fontSize: 10,
-                              height: 1.2,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(width: 8),
-                      ],
                       if (expanded &&
                           menuPopupKey != null &&
                           onOpenOffibox != null &&
@@ -530,6 +511,32 @@ class OffiboxTopBar extends StatelessWidget {
           ],
         ),
         ),
+        if (expanded) ...[
+          const SizedBox(height: 2),
+          SizedBox(
+            width: barWidth,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: _dateLicenceBlockMaxWidth),
+                child: Text(
+                  licenseEndDate != null && licenseEndDate!.trim().isNotEmpty
+                      ? 'Mis à jour le ${dataUpdateDate ?? kVersionDate}. Licence jusque $licenseEndDate'
+                      : 'Mis à jour le ${dataUpdateDate ?? kVersionDate}',
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey.shade700,
+                    fontSize: 12,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ),
+          ),
+        ],
         if (showCataloguePanel &&
             selectedResult != null &&
             selectedResult!.source == SourceType.catalogue &&

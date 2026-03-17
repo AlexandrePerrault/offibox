@@ -20,10 +20,13 @@ import 'package:offibox/services/google_calendar_desktop_auth.dart';
 import 'package:offibox/ui/widgets/debug_banner.dart';
 import 'package:offibox/services/annuaire_ps_count_service.dart';
 import 'package:offibox/window/widgets/about_dialog.dart';
+import 'package:offibox/window/widgets/update_progress_dialog.dart';
 import 'package:offibox/ui/widgets/hamburger_menu.dart';
 import 'package:offibox/window/widgets/account_dialog.dart';
+import 'package:offibox/ui/results/result_tile.dart';
 import 'package:offibox/window/widgets/offibox_top_bar.dart';
 import 'package:offibox/system/window_click_through_stub.dart' if (dart.library.io) 'package:offibox/system/window_click_through.dart';
+import 'package:offibox/diagnostics/startup_diagnostic.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Écran selon l'état d'auth (login ou FirstLaunchCheck).
@@ -77,32 +80,32 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       if (info != null) {
         Navigator.of(context).pop();
         if (!context.mounted) return;
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Téléchargement en cours'),
-            content: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    'Téléchargement de la version ${info.version}…',
-                  ),
-                ),
-              ],
+        if (Platform.isWindows) {
+          await showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => UpdateProgressDialog(updateInfo: info),
+          );
+        } else {
+          showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Téléchargement en cours'),
+              content: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+                  const SizedBox(width: 16),
+                  Expanded(child: Text('Téléchargement de la version ${info.version}…')),
+                ],
+              ),
             ),
-          ),
-        );
-        await AppUpdateService.downloadAndOpen(info);
-        if (!context.mounted) return;
-        Navigator.of(context).pop();
+          );
+          await AppUpdateService.downloadAndOpen(info);
+          if (!context.mounted) return;
+          Navigator.of(context).pop();
+        }
       } else {
         Navigator.of(context).pop();
       }
@@ -277,6 +280,12 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       });
     }
     final showOnlyPill = !_expanded && (authAsync.valueOrNull != null);
+    // Diagnostic démarrage (une fois par affichage AuthGate)
+    StartupDiagnostic.logAuthGateState(
+      expanded: _expanded,
+      windowSizeSynced: _windowSizeSynced,
+      authLabel: debugLabel,
+    );
     // Sur Windows, écran de login = fenêtre entière cliquable (pas de région).
     if (Platform.isWindows && authAsync.valueOrNull == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -334,7 +343,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                   arretCommercialisationByCis: controller.arretCommercialisationByCis,
                   tauxRemboursementByCis: controller.tauxRemboursementByCis,
                   getVocUrlsForItem: (item) {
-                    final f = controller.getVocFicheForLabel(item.label, controller.currentQuery);
+                    final displayLabel = ResultLabelHelper.displayLabel(item);
+                    final f = controller.getVocFicheForLabel(displayLabel, controller.currentQuery);
                     return (f?.urlPatient, f?.urlPro);
                   },
                   menuPopupKey: _menuPopupKey,

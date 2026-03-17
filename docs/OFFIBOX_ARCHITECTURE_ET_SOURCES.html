@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Offibox - Architecture technique et sources externes</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 40px; line-height: 1.5; color: #333; }
+    h1 { color: #5A9094; border-bottom: 2px solid #5A9094; padding-bottom: 8px; }
+    h2 { color: #2d5a5d; margin-top: 32px; }
+    h3 { color: #444; margin-top: 24px; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13px; }
+    th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+    th { background: #5A9094; color: white; }
+    tr:nth-child(even) { background: #f8f9fa; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+    .source-type { font-weight: bold; color: #5A9094; }
+    ul { margin: 8px 0; }
+    li { margin: 4px 0; }
+    .footer { margin-top: 40px; font-size: 12px; color: #666; }
+    @media print { body { padding: 20px; } }
+  </style>
+</head>
+<body>
+
+<h1>Offibox — Architecture technique et sources externes</h1>
+<p><em>Document de présentation pour développeurs — Généré le 15 mars 2026</em></p>
+
+<!-- ========== PARTIE 1 : ARCHITECTURE ========== -->
+<h2>1. Stack technique</h2>
+<table>
+  <tr><th>Couche</th><th>Technologie</th></tr>
+  <tr><td>Framework</td><td>Flutter (Dart 3.3+)</td></tr>
+  <tr><td>Plateforme cible</td><td>Desktop Windows (prioritaire), Linux en cours, iOS/Android prévu</td></tr>
+  <tr><td>State management</td><td>Riverpod + Provider</td></tr>
+  <tr><td>Backend / Auth</td><td>Firebase (Auth, Firestore, Storage, Functions)</td></tr>
+  <tr><td>Cache local</td><td>Hive</td></tr>
+  <tr><td>UI</td><td>Material Design, Google Fonts (Spinnaker)</td></tr>
+</table>
+
+<h2>2. Structure du projet</h2>
+<pre style="background:#f5f5f5; padding:16px; overflow-x:auto; font-size:12px;">
+lib/
+├── app/                    # Point d'entrée, MaterialApp, thème
+├── auth/                   # Firebase Auth, login, protocole offibox://
+├── config/                 # AppConfig, OAuth Google
+├── constants/              # UI (couleurs, dimensions)
+├── controllers/            # OffiboxController (logique principale)
+├── core/                   # Filtres de recherche
+├── data/                   # Parsers, loaders, sources de données
+├── models/                 # SearchResult, SourceType, ClientProfile (freezed)
+├── providers/              # Riverpod providers
+├── search/                 # SearchEngine (moteur de recherche)
+├── services/               # Annuaire PS, ANSM, PDF, etc.
+├── system/                 # Fenêtre, autostart Windows
+├── ui/                     # Widgets, écrans, résultats
+├── utils/                  # Normalisation, open_url, scan
+└── window/                 # Fenêtre frameless, barre flottante
+</pre>
+
+<h2>3. Flux de données</h2>
+<p>[CSV GitHub offiboxdata] + [APIs externes] → DataLoaderCore → OffiboxController → SearchEngine (indexation) → Recherche utilisateur → Affichage résultats</p>
+
+<h2>4. Dépendances principales</h2>
+<table>
+  <tr><th>Catégorie</th><th>Packages</th></tr>
+  <tr><td>Fenêtre</td><td>bitsdojo_window, window_manager, tray_manager, win32</td></tr>
+  <tr><td>WebView</td><td>webview_windows (Windows)</td></tr>
+  <tr><td>PDF</td><td>pdfrx, printing</td></tr>
+  <tr><td>Réseau</td><td>http, oauth2, url_launcher</td></tr>
+  <tr><td>Firebase</td><td>firebase_core, firebase_auth, cloud_firestore, firebase_storage</td></tr>
+  <tr><td>Données</td><td>csv, path, json_annotation, freezed</td></tr>
+  <tr><td>Scan</td><td>mobile_scanner</td></tr>
+</table>
+
+<h2>5. Points clés pour un développeur</h2>
+<ul>
+  <li><strong>OffiboxController</strong> (~1300 lignes) : logique centrale, chargement, recherche, filtres</li>
+  <li><strong>SearchEngine</strong> : recherche synchrone, index par préfixe, cache, typo-tolérance</li>
+  <li><strong>data_sources.dart</strong> : URLs des CSV</li>
+  <li><strong>Parsers</strong> : bdm_parser, keywords_parser, lpp_loader, etc.</li>
+  <li><strong>Riverpod</strong> : offiboxControllerProvider, clientProfileProvider</li>
+  <li><strong>Plateforme</strong> : Platform.isWindows / Platform.isLinux</li>
+  <li><strong>Secrets</strong> : OFFIBOXDATA_GITHUB_TOKEN, ESANTE_API_KEY (--dart-define)</li>
+</ul>
+
+<!-- ========== PARTIE 2 : SOURCES EXTERNES ========== -->
+<h2>6. Sources externes de l'application</h2>
+
+<h3>6.1 GitHub — Dépôt offiboxdata (CSV, données)</h3>
+<p><strong>Base :</strong> <code>https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/</code></p>
+<p><em>Token requis si repo privé : OFFIBOXDATA_GITHUB_TOKEN</em></p>
+<table>
+  <tr><th>Fichier</th><th>Usage</th></tr>
+  <tr><td>BDM_MASTER2026.csv</td><td>Base Claude Bernard (médicaments)</td></tr>
+  <tr><td>BDM_CIP_QUANTITE.csv</td><td>Quantité par boîte, libellé affiché</td></tr>
+  <tr><td>PANSEMENTS+DM2026.csv</td><td>Dispositifs médicaux / pansements</td></tr>
+  <tr><td>FICHIER MED VETERINAIRES2026.csv</td><td>Médicaments vétérinaires</td></tr>
+  <tr><td>codes LPP +++ - codes LPP.csv</td><td>Codes LPP (TIPS AMELI)</td></tr>
+  <tr><td>outils_metier.csv</td><td>Mots-clés outils métier</td></tr>
+  <tr><td>sites_web.csv</td><td>Mots-clés sites web</td></tr>
+  <tr><td>codes_actes_pharmacie.csv</td><td>Codes actes, tarifs</td></tr>
+  <tr><td>videos.csv</td><td>Vidéos thérapeutiques (CIP13 → URL)</td></tr>
+  <tr><td>LABORATOIRES.csv</td><td>Catalogues laboratoires</td></tr>
+  <tr><td>CERP/CERP.csv</td><td>CERP Madouest</td></tr>
+  <tr><td>CERP/CO&PHARM 2026.csv</td><td>Co&Pharm</td></tr>
+  <tr><td>stupéfiants+hopital 2026.csv</td><td>Stupéfiants, CIP hospitaliers</td></tr>
+  <tr><td>medicaments d'exception.csv</td><td>Badge EXCEPTION</td></tr>
+  <tr><td>exception_otc_2026.csv</td><td>OTC / libre accès</td></tr>
+  <tr><td>liste_medication_officinale_cip13.csv</td><td>Médication officinale (ANSM)</td></tr>
+  <tr><td>mutuelles_2026.csv</td><td>AMC / mutuelles</td></tr>
+  <tr><td>pharmacovigilance.csv</td><td>CRPV</td></tr>
+  <tr><td>centres_anti_poison.csv</td><td>Centres anti-poison</td></tr>
+  <tr><td>chu.csv</td><td>CHU</td></tr>
+  <tr><td>ceip_addictovigilance.csv</td><td>CEIP-A</td></tr>
+  <tr><td>CIP hospitaliers.csv</td><td>CIP hospitaliers</td></tr>
+  <tr><td>composition-bdm.csv</td><td>DCI → princeps</td></tr>
+  <tr><td>statut CIS 2026.csv</td><td>Statuts CIS</td></tr>
+  <tr><td>taux_remboursement_cis.csv</td><td>Taux remboursement</td></tr>
+  <tr><td>CIS_CIP_Dispo_Spec.csv</td><td>Disponibilités ANSM</td></tr>
+  <tr><td>fichiers-medicaments/statutsANSM.csv</td><td>Statuts ANSM (fallback)</td></tr>
+  <tr><td>fiches_voc.csv</td><td>Fiches VOC anticancéreux (OMÉDIT)</td></tr>
+  <tr><td>news.csv</td><td>Actualités popup barre</td></tr>
+  <tr><td>biosimilaires 2026.csv</td><td>Biosimilaires</td></tr>
+  <tr><td>generiques_ansm.csv</td><td>Génériques ANSM (filtre Génériques)</td></tr>
+  <tr><td>génériques 2026.csv</td><td>Génériques 2026 (princeps, DCI, labos)</td></tr>
+  <tr><td>statuts ansm.csv</td><td>Statuts ANSM (fallback barre d'info)</td></tr>
+  <tr><td>icons/</td><td>Icônes (raw GitHub)</td></tr>
+</table>
+
+<h3>6.2 Base de données publique des médicaments (BDPM)</h3>
+<p><strong>Base :</strong> <code>https://base-donnees-publique.medicaments.gouv.fr/</code></p>
+<table>
+  <tr><th>URL</th><th>Usage</th></tr>
+  <tr><td>/download/file/CIS_bdpm.txt</td><td>Spécialités</td></tr>
+  <tr><td>/download/file/CIS_CIP_bdpm.txt</td><td>Présentations</td></tr>
+  <tr><td>/download/file/CIS_COMPO_bdpm.txt</td><td>Compositions</td></tr>
+  <tr><td>/download/file/CIS_GENER_bdpm.txt</td><td>Génériques</td></tr>
+  <tr><td>/download/file/CIS_CPD_bdpm.txt</td><td>Conditions prescription</td></tr>
+  <tr><td>/download/file/CIS_CIP_Dispo_Spec.txt</td><td>Ruptures, tensions</td></tr>
+</table>
+
+<h3>6.3 ANSM (Agence nationale de sécurité du médicament)</h3>
+<p><strong>Base :</strong> <code>https://ansm.sante.fr/</code></p>
+<table>
+  <tr><th>URL / Page</th><th>Usage</th></tr>
+  <tr><td>/uploads/2026/01/20/fic03spe.txt</td><td>Princeps / Génériques (badge G/R)</td></tr>
+  <tr><td>/disponibilites-des-produits-de-sante/medicaments</td><td>Disponibilités</td></tr>
+  <tr><td>/informations-de-securite</td><td>Rappels de produits</td></tr>
+  <tr><td>/documents/reference/medicaments-biosimilaires</td><td>Référence biosimilaires</td></tr>
+  <tr><td>/documents/reference/repertoire-des-medicaments-generiques</td><td>Génériques</td></tr>
+  <tr><td>/documents/reference/medicaments-en-acces-direct</td><td>Accès direct</td></tr>
+  <tr><td>/page/liste-des-centres-regionaux-de-pharmacovigilance</td><td>CRPV</td></tr>
+  <tr><td>/documents/reference/declarer-un-effet-indesirable</td><td>Pharmacovigilance</td></tr>
+</table>
+
+<h3>6.4 API FHIR Annuaire Santé (Professionnels de santé)</h3>
+<p><strong>Endpoint :</strong> <code>https://gateway.api.esante.gouv.fr/fhir/v2</code></p>
+<p><em>Clé requise : ESANTE_API_KEY (header ESANTE-API-KEY)</em></p>
+<p>Documentation : <a href="https://interop.esante.gouv.fr/ig/fhir/annuaire">interop.esante.gouv.fr/ig/fhir/annuaire</a></p>
+<p>Ressources : Practitioner, PractitionerRole, Organization</p>
+
+<h3>6.5 Santé publique France / Gouvernement</h3>
+<table>
+  <tr><th>URL</th><th>Usage</th></tr>
+  <tr><td>https://sante.gouv.fr/professionnels/article/dgs-urgent</td><td>DGS-Urgent (veille)</td></tr>
+  <tr><td>https://sante.gouv.fr/IMG/pdf/pdf_calendrier_vaccinal-12-2025.pdf</td><td>Calendrier vaccinal</td></tr>
+  <tr><td>https://www.santepubliquefrance.fr/.../calendrier-simplifie-des-vaccinations-2025</td><td>Calendrier vaccinations</td></tr>
+  <tr><td>https://signalement.social-sante.gouv.fr/...</td><td>Signalement (COVID, etc.)</td></tr>
+</table>
+
+<h3>6.6 Autres sources officielles</h3>
+<table>
+  <tr><th>URL</th><th>Usage</th></tr>
+  <tr><td>https://www.ameli.fr/.../honoraires-actes-pharmaciens</td><td>Tarifs actes pharmacie</td></tr>
+  <tr><td>http://www.codage.ext.cnamts.fr/codif/tips/</td><td>Codes LPP (AMELI)</td></tr>
+  <tr><td>https://www.data.gouv.fr/datasets/annuaire-sante-...</td><td>Annuaire PS (référence)</td></tr>
+  <tr><td>https://www.anses.fr/.../medicament-veterinaire</td><td>Médicaments vétérinaires</td></tr>
+  <tr><td>https://www.e-pansement.fr/</td><td>Pansements / DM</td></tr>
+  <tr><td>https://addictovigilance.fr/</td><td>Addictovigilance</td></tr>
+  <tr><td>https://www.meddispar.fr/</td><td>Médicaments à prescription restreinte</td></tr>
+  <tr><td>https://www.omedit-fiches-cancer.fr/</td><td>Fiches VOC anticancéreux</td></tr>
+  <tr><td>https://www.who.int/fr/campaigns</td><td>Actualités OMS</td></tr>
+  <tr><td>https://www.ordre.pharmacien.fr/.../la-liste-des-medicaments-a-marge-therapeutique-etroite-non-substituables</td><td>Médicaments MTE (non substituables)</td></tr>
+  <tr><td>https://signalement.social-sante.gouv.fr/espace-declaration/guidage</td><td>Signalement effets indésirables</td></tr>
+  <tr><td>https://www.coetpharm.com/</td><td>Co&amp;Pharm (commande)</td></tr>
+</table>
+
+<h3>6.7 APIs tierces</h3>
+<table>
+  <tr><th>Service</th><th>URL</th><th>Usage</th></tr>
+  <tr><td>GitHub API</td><td>https://api.github.com/repos/AlexandrePerrault/offiboxdata/contents/...</td><td>Fetch CSV (repo privé)</td></tr>
+  <tr><td>GitHub API</td><td>https://api.github.com/repos/.../commits?per_page=1</td><td>Dernier commit</td></tr>
+  <tr><td>Google Calendar</td><td>https://www.googleapis.com/calendar/v3</td><td>Agenda utilisateur</td></tr>
+  <tr><td>Google OAuth</td><td>https://oauth2.googleapis.com/token</td><td>Token Calendar</td></tr>
+  <tr><td>MSSanté (Mailiz)</td><td>https://auth-mailiz.mssante.fr/realms/mssante/...</td><td>Auth BAL MSSanté</td></tr>
+</table>
+
+<h3>6.8 Firebase</h3>
+<p>Auth, Firestore, Storage, Functions — configuration via <code>firebase_options.dart</code></p>
+
+<h3>6.9 Sites laboratoires (exemples)</h3>
+<p>Viatris : monespacepharmacien.viatris.com, service.viatris.fr, myris.viatris.fr</p>
+
+<div class="footer">
+  <p><strong>Offibox</strong> — Document généré automatiquement. Pour générer un PDF : ouvrir ce fichier dans un navigateur, puis Ctrl+P → Enregistrer au format PDF.</p>
+</div>
+
+</body>
+</html>

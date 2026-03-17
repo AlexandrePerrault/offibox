@@ -14,13 +14,17 @@ const String _kPrefsDate = 'offibox_annuaire_ps_count_date';
 /// Durée de validité du cache : 1 mois (30 jours). Recalcul après ce délai.
 const int _kCacheValidityDays = 30;
 
-const String _datasetSlug =
-    'annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante';
-const String _apiBase = 'https://www.data.gouv.fr/api/1';
+/// API FHIR Annuaire Santé (plus rapide que data.gouv.fr).
+const String _kFhirAnnuaireBase =
+    'https://gateway.api.esante.gouv.fr/fhir/v2';
 
-/// Récupère le nombre de professionnels de santé (Annuaire PS, data.gouv.fr).
-/// Recalcule au plus une fois par mois ; entre deux recalculs retourne le cache.
-/// En échec API ou réseau : conserve la dernière valeur en cache, sinon [kAnnuairePsTotalHorsAppli].
+String _apiKey() =>
+    const String.fromEnvironment('ESANTE_API_KEY', defaultValue: '');
+
+/// Récupère le nombre de professionnels de santé (Annuaire PS) via l'API FHIR
+/// (interop.esante.gouv.fr/ig/fhir/annuaire). Recalcule au plus une fois par mois ;
+/// entre deux recalculs retourne le cache. En échec API ou réseau : conserve la dernière
+/// valeur en cache, sinon [kAnnuairePsTotalHorsAppli].
 Future<int> getAnnuairePsCount() async {
   final prefs = await SharedPreferences.getInstance();
   final savedDate = prefs.getString(_kPrefsDate);
@@ -39,7 +43,7 @@ Future<int> getAnnuairePsCount() async {
 
   int count = 0;
   try {
-    count = await _fetchCountFromApi();
+    count = await _fetchCountFromFhir();
   } catch (e) {
     if (kDebugMode) debugPrint('[Offibox] Annuaire PS count API: $e');
   }
@@ -56,38 +60,27 @@ Future<int> getAnnuairePsCount() async {
   return count;
 }
 
-/// Appel API data.gouv.fr : dataset par slug puis extras.total_professionnels ou total_ps.
-Future<int> _fetchCountFromApi() async {
-  final listUri = Uri.parse('$_apiBase/datasets/').replace(
-    queryParameters: {'slug': _datasetSlug},
+/// Appel API FHIR : GET Practitioner?_count=1 → Bundle.total.
+Future<int> _fetchCountFromFhir() async {
+  final key = _apiKey();
+  if (key.isEmpty) return 0;
+
+  final uri = Uri.parse('$_kFhirAnnuaireBase/Practitioner').replace(
+    queryParameters: {'_count': '1', 'active': 'true'},
   );
-  final listRes = await http.get(
-    listUri,
-    headers: {'User-Agent': 'Offibox/1.0'},
+  final res = await http.get(
+    uri,
+    headers: {
+      'ESANTE-API-KEY': key,
+      'Accept': 'application/fhir+json',
+    },
   );
-  if (listRes.statusCode != 200) return 0;
+  if (res.statusCode != 200) return 0;
 
-  final listJson = jsonDecode(listRes.body) as Map<String, dynamic>;
-  final data = listJson['data'] as List<dynamic>?;
-  if (data == null || data.isEmpty) return 0;
+  final json = jsonDecode(res.body) as Map<String, dynamic>?;
+  if (json == null || json['resourceType'] != 'Bundle') return 0;
 
-  final datasetId = (data.first as Map<String, dynamic>)['id'] as String?;
-  if (datasetId == null) return 0;
-
-  final datasetUri = Uri.parse('$_apiBase/datasets/$datasetId/');
-  final dsRes = await http.get(
-    datasetUri,
-    headers: {'User-Agent': 'Offibox/1.0'},
-  );
-  if (dsRes.statusCode != 200) return 0;
-
-  final dsJson = jsonDecode(dsRes.body) as Map<String, dynamic>;
-  final extras = dsJson['extras'] as Map<String, dynamic>?;
-  if (extras != null) {
-    final total = extras['total_professionnels'] as int?;
-    if (total != null && total > 0) return total;
-    final totalPs = extras['total_ps'] as int?;
-    if (totalPs != null && totalPs > 0) return totalPs;
-  }
+  final total = json['total'];
+  if (total is int && total > 0) return total;
   return 0;
 }

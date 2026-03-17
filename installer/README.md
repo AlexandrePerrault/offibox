@@ -22,12 +22,18 @@ L’installateur recommandé est **Inno Setup 6** (interface moderne, français,
 2. **Sortie :** `website\download\Offibox-Setup-1.1.25.exe` (version lue depuis `Offibox.iss` / `pubspec.yaml`).
 
 **Contenu de l’installateur :**
-- Installation par utilisateur (sans admin) dans `%LocalAppData%\Offibox`
+- Installation par utilisateur (sans admin) dans `%AppData%\Offibox` (AppData\Roaming\Offibox)
 - Interface en français, licence EULA (fichier `License.rtf`)
 - Options : créer une icône sur le bureau, lancer au démarrage de Windows, lancer à la fin de l’installation
 - Même clés de registre que l’ancien MSI : `HKCU\Software\Offibox` (installed, LaunchAtStartup, DesktopShortcut)
 
 **Mettre à jour la version :** modifier `#define MyAppVersion` dans `installer\Offibox.iss` (et éventuellement `pubspec.yaml`), puis relancer `.\build_inno.ps1`.
+
+**Version essai sans identification (15 jours) :**
+```powershell
+.\build_inno.ps1 -TrialNoAuth
+```
+Produit `Offibox-Setup-Trial-X.Y.Z.exe` : pas de login, 15 jours à partir du premier lancement.
 
 ---
 
@@ -51,6 +57,28 @@ Deux options : **WiX v4** (SDK + `dotnet build`) ou **WiX v3** (script PowerShel
 1. **Créer une icône sur le bureau**
 2. **Lancer Offibox au démarrage de Windows (recommandé)** → `HKCU\Software\Offibox\LaunchAtStartup` = 1
 3. **Lancer Offibox à la fin de l’installation**
+
+---
+
+## Dépannage : icône grisée / non cliquable après installation
+
+Si le raccourci Offibox est grisé ou ne lance pas l’app :
+
+1. **Vérifier la cible du raccourci**  
+   Clic droit sur l’icône → Propriétés → onglet Raccourci. La cible doit être du type :  
+   `C:\Users\<Vous>\AppData\Roaming\Offibox\offibox.exe`
+   et **Répertoire de travail** : `C:\Users\<Vous>\AppData\Roaming\Offibox`.
+   Si « Répertoire de travail » est vide ou incorrect, le corriger ou réinstaller avec le dernier installateur (WorkingDir est maintenant défini dans Offibox.iss).
+
+2. **Débloquer l’exécutable**  
+   Si le setup a été téléchargé, Windows peut bloquer les fichiers extraits.  
+   Ouvrir `%AppData%\Offibox` (Roaming\Offibox), clic droit sur `offibox.exe` → Propriétés → onglet Général → cocher « Débloquer » si présent → OK.
+
+3. **Lancer l’exe directement**  
+   Aller dans `%AppData%\Offibox` (Win+R, coller `%AppData%\Offibox`, Entrée) et double-cliquer sur `offibox.exe`. Si l’app démarre, le problème vient du raccourci (réinstaller ou recréer le raccourci à la main avec le bon Répertoire de travail).
+
+4. **Réinstaller**  
+   Désinstaller Offibox (Paramètres → Applications), puis réinstaller avec le dernier `Offibox-Setup-X.Y.Z.exe` (les versions récentes du script Inno définissent bien WorkingDir sur les raccourcis).
 
 ---
 

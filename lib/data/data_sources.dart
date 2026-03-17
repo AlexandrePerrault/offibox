@@ -17,11 +17,11 @@ const String VETO_URL =
 const String LPP_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/codes%20LPP%20%2B%2B%2B%20-%20codes%20LPP.csv';
 
-/// Outils métier (mots-clés) — même format que keywords : keyword tapé, mot affiché, icône, url, badges.
+/// Outils métier (mots-clés) — repo offiboxdata. Col A=keyword, B=libellé, C=date, D=logo, E=url, F–Q=badges 1–6. Phase 1, affichage « Mots-clés ».
 const String OUTILS_METIER_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/outils_metier.csv';
 
-/// Sites web (mots-clés) — même format.
+/// Sites internet (mots-clés) — même format que outils métier. Phase 1, affichage « Sites web ».
 const String SITES_WEB_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/sites_web.csv';
 
@@ -33,14 +33,17 @@ const String CODES_ACTES_PHARMACIE_URL =
 const String VIDEOS_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/videos.csv';
 
+/// Catalogues laboratoires — raw CSV GitHub (NOM LABO, icône, tél, fax, mail, espace pro, catalogue, tarif, badges 2–6).
+/// https://github.com/AlexandrePerrault/offiboxdata/blob/main/LABORATOIRES.csv
 const String LABORATOIRES_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/LABORATOIRES.csv';
 
-/// CERP (Madouest, etc.) — désormais dans le dossier CERP
+/// CERP — dossier GitHub [CERP](https://github.com/AlexandrePerrault/offiboxdata/tree/main/CERP).
+/// CERP.csv (Madouest) : col1=nom, col2=CIP 7/13, col3=URL → recherche par CIP ou nom, badge « page Madouest » en ligne 2.
 const String CERP_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CERP/CERP.csv';
 
-/// Co&Pharm 2026 (réservé CERP) : col1=CIP(7/13), col2=Libellé, col3=URL PDF, col4=URL logo
+/// Co&Pharm 2026 (même dossier CERP) : col1=CIP, col2=Libellé, col3=URL PDF, col4=URL logo → badges « commande » + « conditions Co&Pharm » en ligne 2.
 const String COETPHARM_2026_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CERP/CO%26PHARM%202026.csv';
 
@@ -86,11 +89,18 @@ const String CEIP_ADDICTOVIGILANCE_URL =
 const String CIP_HOSPITALIERS_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/CIP%20hospitaliers.csv';
 
-/// BDM CIP → quantité par boîte ; source officielle du libellé affiché en ligne 1 pour les médicaments.
+/// BDM CIP → quantité par boîte ; fallback du libellé affiché en ligne 1 pour les médicaments.
 /// Colonnes utilisées : A = CIP13, C = dosage, E = libellé (affiché en résultat).
 /// https://github.com/AlexandrePerrault/offiboxdata/blob/main/BDM_CIP_QUANTITE.csv
 const String BDM_CIP_QUANTITE_URL =
   'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/BDM_CIP_QUANTITE.csv';
+
+/// Medipim — libellés produits (CIP13 → Libelle) depuis l'API Medipim.
+/// https://platform.medipim.fr/docs/api/v4/
+/// Pipeline medipim_labels_pipeline : stream produits actifs, extrait name.fr, pousse vers offiboxdata.
+/// Prioritaire pour l'affichage ligne 1 des résultats BDM (remplace BDM_CIP_QUANTITE / BDPM).
+const String MEDIPIM_LABELS_CSV_URL =
+  'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/medipim_labels.csv';
 
 /// URL de la source affichée pour les médicaments (BDM) — page GitHub lisible
 const String BDM_SOURCE_DISPLAY_URL =
@@ -141,6 +151,26 @@ const String CIS_GENER_BDPM_TXT_URL =
 const String CIS_CPD_BDPM_TXT_URL =
   'https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CPD_bdpm.txt';
 
+/// Annuaire PS — source officielle data.gouv.fr (extraction PS_LibreAcces_Personne_activite).
+/// https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante-rpps
+/// Le pipeline annuaire_ps_2026 télécharge, filtre par profession et pousse vers offiboxdata.
+/// Format CSV : RPPS, Nom, Prenom, Titre, Adresse, Code_postal, Ville, Telephone, Nom_structure.
+/// Utilisé quand ESANTE_API_KEY n'est pas définie (recherche locale sans clé FHIR).
+const String ANNUAIRE_PS_DATA_GOUV_SOURCE =
+    'https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante-rpps';
+const String ANNUAIRE_PS_CSV_URL =
+    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/annuaire_medecins_2026.csv';
+
+/// Annuaire MSSanté — extraction BAL (boîtes aux lettres) personnelles depuis data.gouv.fr.
+/// https://www.data.gouv.fr/datasets/annuaire-sante-extraction-des-bal-mssante
+/// Pipeline annuaire_mssante_pipeline : télécharge extraction-correspondance-mssante.txt,
+/// filtre type PER, extrait RPPS→email, pousse vers offiboxdata.
+/// Format CSV : RPPS;Email (séparateur ;).
+const String ANNUAIRE_MSSANTE_DATA_GOUV_SOURCE =
+    'https://www.data.gouv.fr/datasets/annuaire-sante-extraction-des-bal-mssante';
+const String ANNUAIRE_MSSANTE_CSV_URL =
+    'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/annuaire_mssante_bal.csv';
+
 /// Statuts ANSM (fallback) : fichiers-medicaments/statutsANSM.csv
 /// Colonnes : CIS (A), (B), type (C), libellé (D), (E), date MAJ (F), date remise (G), URL (H).
 const String STATUTS_ANSM_URL =
@@ -150,7 +180,8 @@ const String STATUTS_ANSM_URL =
 /// Mettre l’URL du fichier (ex. raw GitHub) ou laisser vide pour désactiver l’alerte « produit concerné par un rappel de lot N° ».
 const String ANSM_RAPPELS_CSV_URL = '';
 
-/// Fiches VOC (voie orale cancer) OMÉDIT : col A = médicament, col B = URL fiche patient, col C = URL fiche pro.
+/// Fiches VOC anticancéreux (voie orale cancer, OMÉDIT) : col A = médicament, col B = URL fiche patient, col C = URL fiche pro.
+/// Fichier alimenté par le pipeline VOC (scripts/omedit_voc) → badges « fiche patient / pro (OMEDIT) » en ligne 2/3 BDM.
 const String FICHES_VOC_CSV_URL =
     'https://raw.githubusercontent.com/AlexandrePerrault/offiboxdata/main/fiches_voc.csv';
 

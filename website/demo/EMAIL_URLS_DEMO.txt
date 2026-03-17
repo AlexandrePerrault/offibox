@@ -1,0 +1,26 @@
+À : perraultalexandre78@gmail.com
+Objet : URLs des démos Offibox (GitHub Pages)
+
+Bonjour,
+
+Voici les liens des démos HTML Offibox en ligne :
+
+— Démo Qare (animation complète, code N5XECE6F, fermeture barre) —
+https://alexandreperrault.github.io/offibox/website/demo/demo-app-animation-qare.html
+
+— Démo animation générique —
+https://alexandreperrault.github.io/offibox/website/demo/demo-app-animation.html
+
+— Démo médecin —
+https://alexandreperrault.github.io/offibox/website/demo/demo-app-animation-medecin.html
+
+— Démo mobile —
+https://alexandreperrault.github.io/offibox/website/demo/demo-app-animation-mobile.html
+
+— Dossier démo (code source) —
+https://github.com/AlexandrePerrault/offibox/tree/master/website/demo
+
+— Page d'accueil Offibox —
+https://alexandreperrault.github.io/offibox/
+
+Cordialement

@@ -18,8 +18,10 @@ class OffiboxWindowUI {
   static const double barHeightExpandedThreeLines = 146;
   /// 4 lignes : + ligne biosimilaires / bonnes pratiques
   static const double barHeightExpandedFourLines = 174;
-  /// Hauteur barre quand le résultat sélectionné est sur une ligne (outils métier, sites web, catalogues).
-  static const double barHeightExpandedSingleLine = 96;  // une à deux lignes
+  /// Hauteur barre quand le résultat a peu de contenu (DM, codes actes) — une à deux lignes.
+  static const double barHeightExpandedSingleLine = 96;
+  /// Hauteur barre pour outils métier / sites web / catalogues : badges susceptibles de passer sur 3–4 lignes → tout afficher.
+  static const double barHeightExpandedWithBadges = 190;
   /// Hauteur barre quand elle est déployée mais vide (aucun résultat sélectionné) : -20 % par rapport à une ligne.
   static const double barHeightExpandedEmpty = barHeightExpandedSingleLine * 0.8;
 

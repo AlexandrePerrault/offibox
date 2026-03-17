@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:offibox/auth/auth_gate.dart';
+import 'package:offibox/auth/local_trial_gate.dart';
+import 'package:offibox/config/app_config.dart';
 import 'package:offibox/auth/auth_state_provider.dart';
 import 'package:offibox/auth/offibox_protocol_listener_wrapper_web.dart' if (dart.library.io) 'package:offibox/auth/offibox_protocol_listener_wrapper.dart';
 import 'package:offibox/constants/offibox_window_ui.dart';
@@ -114,6 +116,9 @@ class _InitialRoute extends ConsumerWidget {
     // Web : barre uniquement, sans connexion (déploiement public iframe / Wix).
     if (kIsWeb) return const OffiboxWindow();
     if (Platform.isWindows || Platform.isLinux) {
+      if (AppConfig.trialNoAuth) {
+        return const LocalTrialGate();
+      }
       if (user == null) {
         return const AuthGate();
       }
