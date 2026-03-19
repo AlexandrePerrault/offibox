@@ -10,6 +10,7 @@ Fichier XLS : mis à jour mensuellement par l'ANSM (URL avec date, ex. décembre
 
 Usage:
   python build_liste_medication_officinale_cip13.py [--xls URL_ou_chemin] [--out fichier.csv]
+  python build_liste_medication_officinale_cip13.py --auto   # récupère la dernière URL depuis la page ANSM
   Sans argument : télécharge le XLS depuis l'URL par défaut et écrit dans le répertoire courant.
 
 Dépendances: pip install requests xlrd
@@ -21,7 +22,9 @@ import re
 import sys
 from pathlib import Path
 
-# URL type (à mettre à jour si l'ANSM change le chemin ; page de référence ci-dessus)
+# Page de référence ANSM (contient le lien vers le dernier XLS)
+ANSM_REFERENCE_PAGE = "https://ansm.sante.fr/documents/reference/medicaments-en-acces-direct"
+# URL type (fallback si --auto échoue)
 DEFAULT_XLS_URL = "https://ansm.sante.fr/uploads/2025/12/22/20251222-liste-medication-officinale-listecomplete-decembre-2025.xls"
 OUTPUT_FILENAME = "liste_medication_officinale_cip13.csv"
 # Colonne D = index 3 (0-based) dans le XLS ANSM pour le code CIP 13 chiffres
@@ -87,14 +90,46 @@ def download_xls(url: str, timeout: int = 60) -> bytes:
     return r.content
 
 
+def fetch_latest_xls_url(timeout: int = 30) -> str:
+    """Récupère l'URL du dernier XLS depuis la page de référence ANSM."""
+    try:
+        import requests
+    except ImportError:
+        print("Dépendance manquante: pip install requests", file=sys.stderr)
+        sys.exit(1)
+    r = requests.get(ANSM_REFERENCE_PAGE, timeout=timeout)
+    r.raise_for_status()
+    html = r.text
+    # Chercher href="/uploads/.../liste-medication-officinale-listecomplete-....xls"
+    m = re.search(
+        r'href="(https://ansm\.sante\.fr/uploads/[^"]*liste-medication-officinale-listecomplete[^"]*\.xls)"',
+        html,
+    )
+    if m:
+        return m.group(1)
+    # Fallback : href relatif
+    m = re.search(
+        r'href="(/uploads/[^"]*liste-medication-officinale-listecomplete[^"]*\.xls)"',
+        html,
+    )
+    if m:
+        return "https://ansm.sante.fr" + m.group(1)
+    return ""
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Génère liste_medication_officinale_cip13.csv depuis le XLS ANSM (col D = CIP13)."
     )
     parser.add_argument(
+        "--auto",
+        action="store_true",
+        help="Récupérer la dernière URL XLS depuis la page ANSM (recommandé pour CI/mensuel)",
+    )
+    parser.add_argument(
         "--xls",
-        default=DEFAULT_XLS_URL,
-        help="URL du XLS ANSM ou chemin local vers un fichier .xls",
+        default=None,
+        help="URL du XLS ANSM ou chemin local vers un fichier .xls (ignoré si --auto)",
     )
     parser.add_argument(
         "--out",
@@ -102,8 +137,18 @@ def main():
         help=f"Fichier CSV de sortie (défaut: {OUTPUT_FILENAME})",
     )
     args = parser.parse_args()
-    xls_arg = args.xls.strip()
     out_path = Path(args.out)
+
+    if args.auto:
+        print(f"Récupération de l'URL depuis {ANSM_REFERENCE_PAGE}...")
+        xls_arg = fetch_latest_xls_url()
+        if not xls_arg:
+            print("Impossible de trouver l'URL XLS sur la page ANSM, utilisation du fallback.", file=sys.stderr)
+            xls_arg = DEFAULT_XLS_URL
+        else:
+            print(f"URL trouvée: {xls_arg}")
+    else:
+        xls_arg = (args.xls or DEFAULT_XLS_URL).strip()
 
     if xls_arg.startswith("http://") or xls_arg.startswith("https://"):
         print(f"Téléchargement de {xls_arg}...")
