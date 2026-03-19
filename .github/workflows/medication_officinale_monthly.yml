@@ -1,0 +1,49 @@
+# Export mensuel liste_medication_officinale_cip13.csv depuis le XLS ANSM.
+# Source : https://ansm.sante.fr/documents/reference/medicaments-en-acces-direct
+# Médicaments en accès direct (OTC/Libre accès) — badge affiché en ligne 1 des résultats BDM.
+#
+# Premier lancement : exécuter manuellement une fois (Actions → Medication officinale (monthly) → Run workflow)
+# pour générer et pousser le fichier dans offiboxdata, sinon erreur 404 au chargement.
+name: Medication officinale (monthly)
+
+on:
+  schedule:
+    # 1er du mois à 7h UTC
+    - cron: '0 7 1 * *'
+  workflow_dispatch:
+
+jobs:
+  export-medication-officinale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout offibox
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests xlrd
+
+      - name: Run export script (--auto = fetch latest URL from ANSM page)
+        run: python scripts/build_liste_medication_officinale_cip13.py --auto --out liste_medication_officinale_cip13.csv
+
+      - name: Checkout offiboxdata
+        uses: actions/checkout@v4
+        with:
+          repository: AlexandrePerrault/offiboxdata
+          token: ${{ secrets.OFFIBOXDATA_GITHUB_TOKEN }}
+          path: offiboxdata
+
+      - name: Copy CSV to offiboxdata
+        run: cp liste_medication_officinale_cip13.csv offiboxdata/
+
+      - name: Commit and push to offiboxdata
+        run: |
+          cd offiboxdata
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add liste_medication_officinale_cip13.csv
+          git diff --staged --quiet || (git commit -m "Monthly update liste_medication_officinale (ANSM)" && git push)
