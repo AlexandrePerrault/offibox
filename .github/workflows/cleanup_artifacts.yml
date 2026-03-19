@@ -1,0 +1,46 @@
+# Nettoie les artefacts GitHub Actions pour libérer de l'espace (limite 500 Mo gratuit).
+# S'exécute chaque dimanche à 3h UTC.
+name: Cleanup artifacts
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      delete_all:
+        description: "Supprimer TOUS les artefacts (libère max d'espace)"
+        required: false
+        default: false
+        type: boolean
+      name_contains:
+        description: "Filtrer par nom (ex: ios pour artefacts iOS uniquement)"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write  # nécessaire pour supprimer les artefacts
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Delete artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          KEEP="7"
+          if [ "${{ github.event.inputs.delete_all }}" = "true" ]; then KEEP="0"; fi
+          NAME="${{ github.event.inputs.name_contains }}"
+          if [ -n "$NAME" ]; then
+            python scripts/delete_github_artifacts.py --keep-days $KEEP --name-contains "$NAME"
+          else
+            python scripts/delete_github_artifacts.py --keep-days $KEEP
+          fi
