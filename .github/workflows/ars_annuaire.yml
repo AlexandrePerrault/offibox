@@ -1,0 +1,41 @@
+# Génère ars_annuaire.csv depuis l'API Service Public et pousse vers offiboxdata.
+# Déclencher manuellement : Actions → ARS Annuaire (fetch + push) → Run workflow
+name: ARS Annuaire (fetch + push)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 1 * *'  # 1er de chaque mois à 5h UTC
+
+jobs:
+  fetch-ars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout offibox
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run fetch_ars_annuaire script
+        run: python scripts/fetch_ars_annuaire.py
+
+      - name: Checkout offiboxdata
+        uses: actions/checkout@v4
+        with:
+          repository: AlexandrePerrault/offiboxdata
+          token: ${{ secrets.OFFIBOXDATA_GITHUB_TOKEN }}
+          path: offiboxdata
+
+      - name: Copy ars_annuaire.csv to offiboxdata
+        run: cp ars_annuaire.csv offiboxdata/
+
+      - name: Commit and push to offiboxdata
+        run: |
+          cd offiboxdata
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add ars_annuaire.csv
+          git diff --staged --quiet || (git commit -m "Mise à jour annuaire ARS" && git push)
