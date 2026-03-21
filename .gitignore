@@ -65,3 +65,8 @@ tools/nuget.exe
 
 # Installateurs Windows (générés en local / CI, ne pas committer)
 website/download/*.exe
+
+# Export génériques (script local, poussé vers offiboxdata par workflow)
+generiques_ansm.csv
+génériques 2026.csv
+scripts/generiques_output/
