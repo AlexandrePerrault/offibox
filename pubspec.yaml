@@ -1,7 +1,7 @@
 name: offibox
 description: Offibox desktop search bar
 publish_to: "none"
-version: 1.1.41
+version: 1.1.73
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -31,6 +31,7 @@ dependencies:
   path: ^1.9.0
   file_picker: ^8.0.0
   http: ^1.2.0
+  archive: ^4.0.7
   oauth2: ^2.0.5
   csv: ^6.0.0
   path_provider: ^2.1.2
@@ -109,7 +110,15 @@ flutter:
     - assets/data/ansm_hybrides_cip13.txt
     - assets/data/weleda_w_cip13.csv
     - assets/data/has_recommandations_nom_url.csv
+    - assets/data/interactions_thesaurus_ansm_sep2023.csv
+    - assets/data/pharmacopee_francaise_index.json
+    - assets/data/preparatoire_index.json
+    - assets/data/cespharm_catalogue.csv
     - assets/data/recomedicales_pathologies.csv
+    - assets/data/latest_dgs_urgent.json
+    - assets/data/centres_vaccinations.csv
+    - assets/data/codes_actes_pharmacie.csv
+    - assets/data/lehning_teintures_meres.json
     - assets/medipim_fabricants_list.csv
     # Alias historique (même contenu) — évite les builds qui référencent encore ce chemin.
     - assets/medipim_fabricants.csv
