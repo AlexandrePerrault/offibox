@@ -266,20 +266,28 @@ if ($doPush) {
           $full = Join-Path $ProjectRoot $rel
           if (Test-Path $full) { Add-GitPathQuiet -Path $full }
         }
-        Get-ChildItem -Path (Join-Path $ProjectRoot "website\download") -Filter "*.exe" -File -ErrorAction SilentlyContinue |
-          ForEach-Object { Add-GitPathQuiet -Path $_.FullName }
+        # Installateurs .exe : gitignore + Release org (offibox/offibox-releases), pas ce dépôt.
         $status = & git status --porcelain 2>$null
         if ($status) {
           & git commit -m "Release $VersionName"
-          if ($LASTEXITCODE -eq 0) {
-            & git push origin $branch
-            if ($LASTEXITCODE -eq 0) {
-              & git tag -f "v$VersionName" 2>$null | Out-Null
-              & git push origin -f "v$VersionName" 2>$null | Out-Null
-            }
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "git commit Release $VersionName a echoue."
           }
         } else {
           Write-Host "Depot prive : rien a committer (release org publiee quand meme)." -ForegroundColor Yellow
+        }
+        $branchPush = Start-Process -FilePath "git" -ArgumentList "push","origin",$branch `
+          -WorkingDirectory $ProjectRoot -Wait -NoNewWindow -PassThru `
+          -RedirectStandardOutput (Join-Path $env:TEMP "git_branch_push_out.txt") `
+          -RedirectStandardError (Join-Path $env:TEMP "git_branch_push_err.txt")
+        Remove-Item (Join-Path $env:TEMP "git_branch_push_out.txt"), (Join-Path $env:TEMP "git_branch_push_err.txt") -ErrorAction SilentlyContinue
+        if ($branchPush.ExitCode -eq 0) {
+          $tag = "v$VersionName"
+          if ((Set-GitTagQuiet -TagName $tag) -and (Push-GitTagOriginQuiet -TagName $tag)) {
+            Write-Host "Tag $tag pousse sur origin." -ForegroundColor Green
+          }
+        } else {
+          Write-Warning "git push origin $branch a echoue (code $($branchPush.ExitCode))."
         }
       }
     }
