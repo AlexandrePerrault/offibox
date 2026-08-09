@@ -1,0 +1,41 @@
+# Médicaments vétérinaires ANMV (Anses) → FICHIER MED VETERINAIRES2026.csv sur offiboxdata.
+# Source officielle : https://pro.anses.fr/RCP/amm-vet-fr-v2.xls (MAJ Anses chaque mardi).
+# Ce workflow vérifie chaque jour à 6h UTC ; commit uniquement si le fichier a changé.
+name: ANMV Veterinary (daily)
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-anmv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout offibox
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install xlrd
+        run: pip install xlrd
+
+      - name: Fetch ANMV and push to offiboxdata
+        env:
+          GITHUB_TOKEN: ${{ secrets.OFFIBOXDATA_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "$GITHUB_TOKEN" ]; then
+            python scripts/fetch_anmv_veterinary.py -o "FICHIER MED VETERINAIRES2026.csv" --push
+          else
+            python scripts/fetch_anmv_veterinary.py -o "FICHIER MED VETERINAIRES2026.csv"
+            echo "OFFIBOXDATA_GITHUB_TOKEN absent — pas de push vers offiboxdata."
+          fi
+
+      - name: Upload artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: fichier-med-veterinaires
+          path: FICHIER MED VETERINAIRES2026.csv
