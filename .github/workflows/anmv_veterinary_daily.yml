@@ -25,13 +25,15 @@ jobs:
 
       - name: Fetch ANMV and push to offiboxdata
         env:
-          GITHUB_TOKEN: ${{ secrets.OFFIBOXDATA_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          # Repo offiboxdata privé : PAT dédié (pas le GITHUB_TOKEN du job offibox).
+          OFFIBOXDATA_GITHUB_TOKEN: ${{ secrets.OFFIBOXDATA_GITHUB_TOKEN }}
         run: |
-          if [ -n "$GITHUB_TOKEN" ]; then
+          if [ -n "$OFFIBOXDATA_GITHUB_TOKEN" ]; then
             python scripts/fetch_anmv_veterinary.py -o "FICHIER MED VETERINAIRES2026.csv" --push
           else
             python scripts/fetch_anmv_veterinary.py -o "FICHIER MED VETERINAIRES2026.csv"
             echo "OFFIBOXDATA_GITHUB_TOKEN absent — pas de push vers offiboxdata."
+            exit 1
           fi
 
       - name: Upload artifact (backup)
