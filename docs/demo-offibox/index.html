@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Démo Offibox — barre et menus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="https://www.offibox.fr/" target="_blank" rel="noopener">
+      <img class="brand-logo" src="offibox-topnav-logo.png" alt="OffiBox">
+    </a>
+    <nav class="site-nav" aria-label="Navigation démo">
+      <span class="nav-link is-active">Démo</span>
+      <a class="nav-link" href="https://www.offibox.fr/#fonctionnalites" target="_blank" rel="noopener">Fonctionnalités</a>
+      <a class="nav-link" href="https://www.offibox.fr/#tarifs" target="_blank" rel="noopener">Tarifs</a>
+      <a class="nav-link" href="https://www.offibox.fr/#contact" target="_blank" rel="noopener">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <p class="eyebrow">Certifié HDS &amp; RGPD</p>
+      <button type="button" class="header-cta" id="btn-reset">Réinitialiser la démo</button>
+    </div>
+  </header>
+
+  <div class="desktop">
+    <div class="stage">
+      <aside class="explain" id="explain" aria-live="polite">
+        <div class="kicker">Présentation client</div>
+        <h2 id="explain-title">La barre Offibox</h2>
+        <div id="explain-body">
+          <p>Offibox est une barre fine en haut de l’écran d’officine : recherche, scans et outils métier sans quitter le LGO.</p>
+          <p>Cette démo reprend la charte d’offibox.fr (Spinnaker, teal, pastilles, fond mint). Cliquez n’importe quel bouton principal de la barre.</p>
+          <ul>
+            <li><strong>+</strong> — actualités, bloc-note, messagerie, mails</li>
+            <li><strong>QR indigo</strong> — lecteur DataMatrix / mutuelle / téléconsultation</li>
+            <li><strong>Numérisation cyan</strong> — scan de document</li>
+            <li><strong>Onglets</strong> — Outils métier, Médicaments, Para &amp; DM, Codes, Annuaires, Laboratoires, RECOS</li>
+            <li><strong>☰</strong> — menu compte, aide, tutoriel, quitter…</li>
+          </ul>
+        </div>
+        <div class="where" id="explain-where">Dans l’app : barre déployée au double-clic sur le logo (pastille à droite).</div>
+      </aside>
+
+      <div class="app-col">
+        <div class="offibox-root" id="offibox-root">
+          <div class="info-bar" id="info-bar" data-tip="Fil d’infos (DGS-Urgent, ANSM, rappels…)" data-explain="ticker">
+            <div class="info-toggle" id="info-toggle" title="Activer / couper le fil d’infos"></div>
+            <div class="info-date" id="info-date">02/09</div>
+            <div class="info-infos">INFOS</div>
+            <div class="info-scroll">
+              <div class="info-scroll-inner">
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge ansm">ANSM – Informations de sécurité</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge rappel">Rappel produit</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge ansm">ANSM – Informations de sécurité</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge rappel">Rappel produit</span>
+                <span class="ticker-dot">•</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="app-bar" id="app-bar">
+            <div class="bar-chrome" id="bar-chrome">
+              <div class="search-row">
+                <div class="search-tools">
+                  <button type="button" class="circle-btn plus" id="btn-plus" data-tip="Actualités, bloc-note, e-mail…" aria-haspopup="true" aria-expanded="false" aria-label="Menu +">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="plus-badge" title="nouvelle actualité">2</span>
+                  </button>
+                  <button type="button" class="circle-btn qr" id="btn-qr" data-tip="Scanner QR code" aria-label="Scanner QR code">
+                    <span class="material-symbols-outlined">qr_code_scanner</span>
+                  </button>
+                  <button type="button" class="circle-btn scan" id="btn-scan" data-tip="Numérisation" aria-label="Numérisation">
+                    <span class="material-symbols-outlined">document_scanner</span>
+                  </button>
+                </div>
+
+                <div class="search-field" id="search-field" data-tip="Barre de recherche globale" data-explain="search">
+                  <span class="ph" id="search-ph">Rechercher un code, un médicament, un mot-clé, dans l'annuaire, scanner un</span>
+                  <span class="ph-icons" aria-hidden="true">
+                    <span class="barcode" id="ph-barcode"><i style="width:2px"></i><i style="width:1px"></i><i style="width:2.5px"></i><i style="width:1px"></i><i style="width:1.5px"></i><i style="width:2.5px"></i><i style="width:1px"></i><i style="width:2px"></i></span>
+                    <span class="material-symbols-outlined">search</span>
+                  </span>
+                </div>
+
+                <div class="right-chrome">
+                  <button type="button" class="circle-btn clear" id="btn-clear" data-tip="effacer la recherche" aria-label="effacer la recherche" disabled>
+                    <span class="material-symbols-outlined" style="font-size:19px">backspace</span>
+                  </button>
+                  <button type="button" class="hide-pill" id="btn-hide" data-tip="Masquer Offibox : seul le logo reste.&#10;Double-clic sur le logo (ou Déployer la barre)&#10;pour revenir à cette page.">
+                    <span class="material-symbols-outlined">visibility_off</span>
+                    masquer
+                  </button>
+                  <button type="button" class="circle-btn menu" id="btn-hamburger" data-tip="Menu" aria-haspopup="true" aria-expanded="false" aria-label="Menu">
+                    <span class="material-symbols-outlined">menu</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="logo-pill" id="logo-pill" data-tip="double cliquer pour ouvrir , click droit pour fermer&#10;version démo">
+              <img src="offibox-logo-box.png" alt="Offibox">
+            </div>
+
+            <div class="popup-menu plus" id="menu-plus" role="menu" aria-label="Menu rapide">
+              <div class="menu-row" data-explain="plus-actu" role="menuitem">
+                <span class="material-symbols-outlined">newspaper</span>
+                <span>Actualités</span>
+                <span class="trail">2</span>
+              </div>
+              <div class="menu-row" data-explain="plus-bloc" role="menuitem">
+                <span class="material-symbols-outlined">note_alt</span>
+                <span>Bloc-note</span>
+              </div>
+              <div class="menu-row" data-explain="plus-chat" role="menuitem">
+                <span class="material-symbols-outlined">chat_bubble</span>
+                <span>Messagerie interne</span>
+              </div>
+              <div class="menu-row" data-explain="plus-mssante" role="menuitem">
+                <span class="material-symbols-outlined">mark_email_read</span>
+                <span>Envoyer un mail sécurisé</span>
+              </div>
+              <div class="menu-row" data-explain="plus-smtp" role="menuitem">
+                <span class="material-symbols-outlined">mail</span>
+                <span>Composer un e-mail (SMTP)</span>
+              </div>
+            </div>
+
+            <div class="popup-menu hamburger" id="menu-hamburger" role="menu" aria-label="Menu principal">
+              <div class="menu-row" data-explain="ham-shortcuts" role="menuitem">
+                <span class="material-symbols-outlined">keyboard</span>
+                <span>Raccourcis clavier</span>
+              </div>
+              <div class="menu-divider"></div>
+              <div class="menu-row" data-explain="ham-site" role="menuitem">
+                <span class="slot"><span class="material-symbols-outlined">open_in_new</span></span>
+                <span>Ouvrir <span class="brand-offi">Offi</span><span class="brand-box">box.fr</span></span>
+              </div>
+              <div class="menu-row" data-explain="ham-idbox" role="menuitem">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <span><span class="brand-id">ID</span> <span class="brand-box">BOX</span></span>
+              </div>
+              <div class="menu-row" data-explain="ham-compte" role="menuitem">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Mon compte</span>
+              </div>
+              <div class="menu-row" data-explain="ham-contact" role="menuitem">
+                <span class="material-symbols-outlined">alternate_email</span>
+                <span>Formulaire de contact</span>
+              </div>
+              <div class="menu-row" data-explain="ham-history" role="menuitem">
+                <span class="material-symbols-outlined">history</span>
+                <span>Historique des versions</span>
+              </div>
+              <div class="menu-row" data-explain="ham-update" role="menuitem">
+                <span class="material-symbols-outlined">system_update_alt</span>
+                <span>Recherche de mise à jour</span>
+              </div>
+              <div class="menu-row" data-explain="ham-tuto" role="menuitem">
+                <span class="material-symbols-outlined">school</span>
+                <span>Tutoriel</span>
+              </div>
+              <div class="menu-row" data-explain="ham-help" role="menuitem">
+                <span class="material-symbols-outlined">help</span>
+                <span>Aide</span>
+              </div>
+              <div class="menu-row" data-explain="ham-about" role="menuitem">
+                <span class="material-symbols-outlined">info</span>
+                <span>À propos</span>
+              </div>
+              <div class="menu-row" data-explain="ham-minimize" role="menuitem">
+                <span class="slot" style="font-size:22px;font-weight:300;line-height:1;color:var(--primary)">−</span>
+                <span>Réduire Offibox</span>
+              </div>
+              <div class="menu-row" data-explain="ham-logout" role="menuitem">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Se déconnecter</span>
+              </div>
+              <div class="menu-row" data-explain="ham-quit" role="menuitem">
+                <span class="material-symbols-outlined">close</span>
+                <span>Quitter</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-tabs" id="quick-tabs">
+            <button type="button" class="tab" data-tab="outils" data-tip="">
+              <span class="material-symbols-outlined">build</span> Outils métier
+            </button>
+            <button type="button" class="tab" data-tab="medicaments" data-tip="">
+              <span class="material-symbols-outlined">medication</span> Médicaments
+            </button>
+            <button type="button" class="tab" data-tab="para" data-tip="Parapharmacie et dispositifs médicaux (Medipim)">
+              <span class="material-symbols-outlined">medical_services</span> Para &amp; DM
+            </button>
+            <button type="button" class="tab" data-tab="codes" data-tip="">
+              <span class="material-symbols-outlined">receipt_long</span> Codes
+            </button>
+            <button type="button" class="tab" data-tab="annuaires" data-tip="">
+              <span class="material-symbols-outlined">contact_phone</span> Annuaires
+            </button>
+            <button type="button" class="tab" data-tab="laboratoires" data-tip="Catalogues, coordonnées, site internet">
+              <span class="material-symbols-outlined">science</span> Laboratoires
+            </button>
+            <button type="button" class="tab" data-tab="recos" data-tip="Recommandations (RecoMédicales + HAS)">
+              <span class="material-symbols-outlined">menu_book</span> RECOS
+            </button>
+          </div>
+
+          <div class="qr-panel" id="qr-panel">
+            <button type="button" class="qr-close" id="qr-close" aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            <div class="dm" aria-hidden="true"></div>
+            <p>Scannez un code DataMatrix, une carte de mutuelle, un QR code d’ordonnance de téléconsultation (pour vérification), etc., au moyen de votre lecteur de codes-barres.</p>
+          </div>
+
+          <!-- Hubs -->
+          <section class="hub" id="hub-outils">
+            <div class="hub-head">
+              <div class="hub-title">OUTILS MÉTIER</div>
+              <button type="button" class="hub-close" data-close-hub aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="hub-body">
+              <div class="hub-grid">
+                <button type="button" class="hub-tile" data-explain="outil-sites"><span class="material-symbols-outlined">language</span>Outils métier<br>— sites internet</button>
+                <button type="button" class="hub-tile" data-explain="outil-actu"><span class="material-symbols-outlined">newspaper</span>Actualités</button>
+                <button type="button" class="hub-tile" data-explain="outil-cespharm"><span class="material-symbols-outlined">volunteer_activism</span>Catalogue<br>Cespharm</button>
+                <button type="button" class="hub-tile" data-explain="outil-inter"><span class="material-symbols-outlined">science</span>Interactions<br>thésaurus ANSM</button>
+                <button type="button" class="hub-tile" data-explain="outil-pharma"><span class="material-symbols-outlined">menu_book</span>Pharmacopée<br>française</button>
+                <button type="button" class="hub-tile" data-explain="outil-prep"><span class="material-symbols-outlined">science</span>Préparatoire</button>
+                <button type="button" class="hub-tile" data-explain="outil-voyage"><span class="material-symbols-outlined">flight_takeoff</span>Conseils<br>aux voyageurs</button>
+                <button type="button" class="hub-tile" data-explain="outil-dico"><span class="material-symbols-outlined">menu_book</span>Dictionnaire<br>Académie nationale<br>de pharmacie</button>
+                <button type="button" class="hub-tile" data-explain="outil-marge"><span class="material-symbols-outlined">calculate</span>Calculatrice<br>de marge</button>
+                <button type="button" class="hub-tile" data-explain="outil-videos"><span class="material-symbols-outlined">play_circle</span>Vidéos de<br>démonstration</button>
+                <button type="button" class="hub-tile" data-explain="outil-entretiens"><span class="material-symbols-outlined">medical_information</span>Entretiens<br>patients</button>
+                <button type="button" class="hub-tile" data-explain="outil-missions"><span class="material-symbols-outlined">vaccines</span>Missions</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="hub" id="hub-medicaments">
+            <div class="hub-head">
+              <div class="hub-title">MÉDICAMENTS</div>
+              <button type="button" class="hub-close" data-close-hub aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="hub-body">
+              <div class="field-row">
+                <div class="pill-field" data-explain="med-nom"><span class="material-symbols-outlined">medication</span> Nom commercial…</div>
+                <div class="pill-field" data-explain="med-cip"><span class="material-symbols-outlined">qr_code_2</span> Code (CIP7 / CIP13 / DataMatrix)…</div>
+                <div class="pill-field" data-explain="med-dci"><span class="material-symbols-outlined">biotech</span> Composition (DCI, plusieurs molécules…)…</div>
+              </div>
+              <div class="field-row">
+                <div class="pill-field" data-explain="med-statut"><span class="material-symbols-outlined">verified</span> Statut (liste 1, stupéfiants…)…</div>
+                <div class="pill-field" data-explain="med-lehning"><span class="material-symbols-outlined">water_drop</span> Teintures-mères Lehning</div>
+                <div class="pill-field" data-explain="med-weleda"><span class="material-symbols-outlined">spa</span> Formules Weleda (W)</div>
+                <div class="pill-field" data-explain="med-boiron"><span class="material-symbols-outlined">inventory_2</span> Boiron : liste des produits disponibles</div>
+              </div>
+              <div class="field-row">
+                <button type="button" class="btn-search" data-explain="med-search"><span class="material-symbols-outlined">search</span> Rechercher</button>
+                <button type="button" class="btn-clear-search" data-explain="clear"><span class="material-symbols-outlined">delete</span> Effacer la recherche</button>
+              </div>
+              <p class="hub-note">Les sous-badges affinent le mode : nom, CIP, composition, statut, homéopathie… La fiche s’injecte ensuite dans la barre (CIP, RCP, OMÉDIT…).</p>
+            </div>
+          </section>
+
+          <section class="hub" id="hub-para">
+            <div class="hub-head">
+              <div class="hub-title" style="color:#0D9488">Parapharmacie</div>
+              <button type="button" class="hub-close" data-close-hub aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="hub-body">
+              <div class="field-row">
+                <div class="pill-field" data-explain="para-nom"><span class="material-symbols-outlined">spa</span> rechercher par nom, laboratoire…</div>
+                <div class="pill-field" data-explain="para-ean"><span class="material-symbols-outlined">qr_code_2</span> Code EAN / ACL / GTIN…</div>
+                <button type="button" class="btn-search" data-explain="para-search"><span class="material-symbols-outlined">search</span> Rechercher</button>
+              </div>
+              <p class="hub-note">Para &amp; DM : parapharmacie et dispositifs médicaux (catalogue Medipim), recherche par nom, EAN, LPP.</p>
+            </div>
+          </section>
+
+          <section class="hub" id="hub-codes">
+            <div class="hub-head">
+              <div class="hub-title">Rechercher par</div>
+              <button type="button" class="hub-close" data-close-hub aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="hub-body">
+              <div class="hub-grid">
+                <button type="button" class="hub-tile code c-cip" data-explain="code-cip">CODE CIP</button>
+                <button type="button" class="hub-tile code c-ean" data-explain="code-ean">CODE EAN / GTIN / ACL</button>
+                <button type="button" class="hub-tile code c-lpp" data-explain="code-lpp">CODE LPP</button>
+                <button type="button" class="hub-tile code c-rpps" data-explain="code-rpps">CODE RPPS</button>
+                <button type="button" class="hub-tile code c-acte" data-explain="code-acte">CODE ACTE</button>
+                <button type="button" class="hub-tile code c-pref" data-explain="code-pref">CODE PREFECTORAL</button>
+                <button type="button" class="hub-tile code c-gr" data-explain="code-gr">CODE GRAND REGIME ( CPAM, MSA )</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="hub" id="hub-annuaires">
+            <div class="hub-head">
+              <div class="hub-title">ANNUAIRES</div>
+              <button type="button" class="hub-close" data-close-hub aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="hub-body">
+              <div class="hub-grid">
+                <button type="button" class="hub-tile ann" data-explain="ann-sante"><span class="material-symbols-outlined">badge</span>Annuaire<br>Santé</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-officines"><span class="material-symbols-outlined">local_pharmacy</span>Annuaire<br>des<br>Officines</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-pharmaciens"><span class="material-symbols-outlined">clinical_notes</span>Annuaire<br>des<br>Pharmaciens</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-hopitaux"><span class="material-symbols-outlined">apartment</span>Annuaire<br>des<br>Hôpitaux</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-ars"><span class="material-symbols-outlined">account_balance</span>Annuaire<br>des<br>ARS</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-cap"><span class="material-symbols-outlined">emergency</span>Centres<br>anti-poison</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-crpv"><span class="material-symbols-outlined">medication</span>Centres de<br>Pharmaco-<br>vigilance</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-ceip"><span class="material-symbols-outlined">psychology</span>CEIP-A<br>Addictovigilance</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-gr"><span class="material-symbols-outlined">account_balance</span>Annuaire des<br>grands<br>régimes</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-mut"><span class="material-symbols-outlined">health_and_safety</span>Annuaire<br>des<br>mutuelles</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-pmi"><span class="material-symbols-outlined">child_care</span>PMI</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-css"><span class="material-symbols-outlined">favorite</span>Centres de<br>santé sexuelles</button>
+                <button type="button" class="hub-tile ann" data-explain="ann-fj"><span class="material-symbols-outlined">vaccines</span>Centres de<br>vaccination<br>fièvre jaune</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="hub" id="hub-laboratoires">
+            <div class="hub-head">
+              <div class="hub-title">Laboratoires</div>
+              <button type="button" class="hub-close" data-close-hub aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="hub-body">
+              <div class="field-row">
+                <div class="pill-field" data-explain="lab-search" style="max-width:360px"><span class="material-symbols-outlined">search</span> Rechercher un laboratoire…</div>
+              </div>
+              <p class="hub-note">Coordonnées, catalogues, site internet et commande directe — la grille de logos s’affiche ici dans l’app (non clonée dans cette première démo).</p>
+            </div>
+          </section>
+
+          <section class="hub" id="hub-recos">
+            <div class="hub-head">
+              <div class="hub-title">RECOMMANDATIONS</div>
+              <button type="button" class="hub-close" data-close-hub aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="hub-body">
+              <div class="recos-row">
+                <button type="button" class="tab" data-explain="reco-med"><span class="material-symbols-outlined">menu_book</span> Reco médicales</button>
+                <button type="button" class="tab" data-explain="reco-has"><span class="material-symbols-outlined">assured_workload</span> Recos HAS</button>
+              </div>
+              <p class="hub-note">Ouvre le hub des recos pour consulter une fiche RecoMédicales ou HAS sans quitter Offibox.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-back" id="modal-back">
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal-x" id="modal-x" aria-label="Fermer">×</button>
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div class="tip" id="tip"></div>
+  <script src="demo.js"></script>
+</body>
+</html>

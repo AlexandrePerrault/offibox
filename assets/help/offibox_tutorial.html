@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Tutoriel Offibox</title>
+<style>
+  :root {
+    --teal: #5A9094;
+    --teal-dark: #3d6a6e;
+    --cyan: #2BB9C5;
+    --indigo: #5C6BC0;
+    --beige: #F5F0E8;
+    --text: #334155;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --card: #ffffff;
+    --red: #D32F2F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: "Segoe UI", Calibri, system-ui, sans-serif;
+    color: var(--text);
+    background: #1e293b;
+    height: 100%;
+  }
+  .stage {
+    position: relative;
+    min-height: 100vh;
+    padding: 28px 18px 110px;
+    overflow: hidden;
+  }
+  .app-mock {
+    max-width: 1080px;
+    margin: 0 auto;
+    filter: grayscale(.55) brightness(.72);
+    opacity: .55;
+    transition: filter .35s, opacity .35s;
+    pointer-events: none;
+    user-select: none;
+  }
+  .app-mock.lit { filter: none; opacity: 1; }
+  .bar {
+    background: #fff;
+    border: 1px solid #c7c7cc;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px 8px 14px;
+    box-shadow: 0 8px 18px rgba(0,0,0,.12);
+    min-height: 52px;
+  }
+  .circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 18px;
+    flex: 0 0 36px;
+  }
+  .plus { background: var(--teal); }
+  .qr { background: var(--indigo); font-size: 13px; }
+  .scan { background: var(--cyan); font-size: 13px; }
+  .search {
+    flex: 1;
+    height: 34px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    color: var(--muted);
+    font-style: italic;
+    display: flex; align-items: center;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+  .erase { background: var(--red); font-size: 12px; }
+  .hide {
+    border: 1.5px solid var(--teal);
+    color: var(--teal);
+    background: #fff;
+    border-radius: 999px;
+    padding: 7.2px 14.4px;
+    font-size: 14.4px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .menu { background: var(--teal); }
+  .logo {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--teal);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .tabs {
+    margin-top: 10px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .tab {
+    border: 1.5px solid var(--teal);
+    background: #fff;
+    color: var(--teal);
+    border-radius: 999px;
+    padding: 6px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .hit {
+    position: relative;
+    border-radius: 12px;
+    transition: box-shadow .3s, transform .3s, filter .3s;
+  }
+  .hit.active {
+    filter: none !important;
+    transform: scale(1.06);
+    box-shadow: 0 0 0 3px #fff, 0 0 0 7px var(--teal), 0 10px 28px rgba(90,144,148,.45);
+    z-index: 2;
+    animation: pulse 1.1s ease-in-out infinite alternate;
+  }
+  @keyframes pulse {
+    from { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--teal), 0 8px 18px rgba(90,144,148,.3); }
+    to   { box-shadow: 0 0 0 3px #fff, 0 0 0 10px var(--teal), 0 12px 28px rgba(90,144,148,.5); }
+  }
+  .card {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    width: min(440px, calc(100% - 28px));
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 18px 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.28);
+    z-index: 5;
+  }
+  .card h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--teal);
+  }
+  .meta { color: var(--muted); font-size: .8rem; margin: 2px 0 8px; }
+  .card p { margin: 0 0 14px; font-size: .95rem; line-height: 1.45; }
+  .actions { display: flex; gap: 10px; }
+  button {
+    flex: 1;
+    border-radius: 999px;
+    border: 1.5px solid var(--teal);
+    padding: 9px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: .92rem;
+  }
+  .skip { background: #fff; color: var(--teal); }
+  .next { background: var(--teal); color: #fff; }
+  button:hover { filter: brightness(1.05); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="app-mock" id="mock">
+    <div class="bar">
+      <div class="hit" data-id="plus"><div class="circle plus">+</div></div>
+      <div class="hit" data-id="qr"><div class="circle qr">QR</div></div>
+      <div class="hit" data-id="scan"><div class="circle scan">SCAN</div></div>
+      <div class="hit" data-id="searchField" style="flex:1"><div class="search">Rechercher un médicament, un code, un professionnel…</div></div>
+      <div class="hit" data-id="clear"><div class="circle erase">⌫</div></div>
+      <div class="hit" data-id="hideOffibox"><div class="hide">masquer</div></div>
+      <div class="hit" data-id="hamburger"><div class="circle menu">☰</div></div>
+      <div class="logo">OB</div>
+    </div>
+    <div class="tabs">
+      <div class="hit tab" data-id="outilsMetier">Outils métier</div>
+      <div class="hit tab" data-id="medicaments">Médicaments</div>
+      <div class="hit tab" data-id="paraDm">Para &amp; DM</div>
+      <div class="hit tab" data-id="codes">Codes</div>
+      <div class="hit tab" data-id="annuaires">Annuaires</div>
+      <div class="hit tab" data-id="laboratoires">Laboratoires</div>
+      <div class="hit tab" data-id="recos">RECOS</div>
+      <div class="hit tab" data-id="toutSelectionner">Tout sélectionner</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="title">Tutoriel</h2>
+    <div class="meta" id="meta">1 / 15</div>
+    <p id="body"></p>
+    <div class="actions">
+      <button class="skip" type="button" id="skip">Passer l’animation</button>
+      <button class="next" type="button" id="next">Suivant</button>
+    </div>
+  </div>
+</div>
+<script>
+const STEPS = [
+  { id: 'outilsMetier', title: 'Outils métier', body: 'Documents, sites web utiles au comptoir, nouvelles missions, entretiens, dictionnaires, conseils aux voyageurs, etc.' },
+  { id: 'medicaments', title: 'Médicaments', body: 'Recherche des spécialités (nom, DCI, CIP, laboratoire, statut, génériques, RCP…).' },
+  { id: 'paraDm', title: 'Para & DM', body: 'Parapharmacie et dispositifs médicaux (catalogue Medipim).' },
+  { id: 'codes', title: 'Codes', body: 'Codes de facturation : LPP, actes, NGAP…' },
+  { id: 'annuaires', title: 'Annuaires', body: 'Professionnels de santé (RPPS), officines, établissements et autres structures.' },
+  { id: 'laboratoires', title: 'Laboratoires', body: 'Catalogues, coordonnées, site internet et espace pro des laboratoires.' },
+  { id: 'recos', title: 'RECOS', body: 'Recommandations RecoMédicales et HAS.' },
+  { id: 'toutSelectionner', title: 'Tout sélectionner', body: 'Active toutes les sources à la fois. « Tout désélectionner » revient aux Outils métier.' },
+  { id: 'plus', title: 'Menu +', body: 'Actualités, Bloc-note, Messagerie interne, mail sécurisé, Composer un e-mail (SMTP).' },
+  { id: 'qr', title: 'Scanner QR code', body: 'Scan webcam : QR, Datamatrix (CIP) ou QR mutuelle. Le résultat est injecté dans la barre.' },
+  { id: 'scan', title: 'Numérisation', body: 'Numérise un document via le scanner du poste. Le PDF peut être joint à un mail.' },
+  { id: 'searchField', title: 'Barre de recherche', body: 'Tapez un nom, un CIP, un mot-clé ou un professionnel. La recherche suit l’onglet actif.' },
+  { id: 'clear', title: 'Effacer la recherche', body: 'La gomme vide le champ, les résultats et la sélection. Raccourci : Ctrl+L.' },
+  { id: 'hideOffibox', title: 'masquer', body: 'Range Offibox : seul le logo reste. Double-clic sur le logo pour revenir à cette page.' },
+  { id: 'hamburger', title: 'Menu', body: 'Compte, aide, tutoriel, réduire ou quitter. Relancez ce tutoriel depuis ce menu.' }
+];
+let i = 0;
+function render() {
+  const s = STEPS[i];
+  document.getElementById('title').textContent = s.title;
+  document.getElementById('meta').textContent = (i + 1) + ' / ' + STEPS.length;
+  document.getElementById('body').textContent = s.body;
+  document.getElementById('next').textContent = i === STEPS.length - 1 ? 'Terminer' : 'Suivant';
+  document.querySelectorAll('.hit').forEach(el => el.classList.toggle('active', el.dataset.id === s.id));
+}
+function done() {
+  try { window.parent.postMessage({ type: 'offibox-tutorial-done' }, '*'); } catch (_) {}
+}
+document.getElementById('next').onclick = () => {
+  if (i >= STEPS.length - 1) { done(); return; }
+  i += 1; render();
+};
+document.getElementById('skip').onclick = done;
+render();
+</script>
+</body>
+</html>

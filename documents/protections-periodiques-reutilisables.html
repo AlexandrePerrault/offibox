@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spinnaker&amp;display=swap">
+<title>Protections périodiques réutilisables</title>
+<style>
+  :root { color-scheme: light; }
+  html, body { margin: 0; background: #f4f7f8; color: #1f2937; }
+  html { height: 100%; }
+  body {
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 28px 22px 48px;
+    box-sizing: border-box;
+  }
+  body::-webkit-scrollbar { width: 14px; }
+  body::-webkit-scrollbar-track { background: #e5e7eb; }
+  body::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border-radius: 8px;
+    border: 3px solid #e5e7eb;
+  }
+  main { max-width: 920px; margin: 0 auto; }
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 0 6px;
+  }
+  .title-line {
+    margin: 0;
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: #0f6e56;
+    line-height: 1.25;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .subtitle { margin: 0 0 18px; color: #4b5563; font-size: 15px; }
+  .source {
+    color: #1565c0;
+    font-style: italic;
+    font-weight: 400;
+  }
+  .source:hover { text-decoration: underline; }
+  a.title-more,
+  a.title-more:hover { text-decoration: none; }
+  a.title-more { display: inline-block; white-space: nowrap; }
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 0 0 14px;
+    align-items: stretch;
+  }
+  section, .warn {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    margin: 0;
+  }
+  .stack { margin: 0 0 14px; }
+  .chapter {
+    display: inline-block;
+    margin: 0 0 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1B6B4F;
+    color: #fff;
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    line-height: 1.2;
+  }
+  .chapter.alert { background: #c2410c; }
+  .chapter.follow { margin-top: 14px; }
+  li.critere { color: #b91c1c; font-weight: 700; }
+  .warn-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 10px;
+  }
+  .warn-head .chapter { margin: 0; }
+  .warn-aside {
+    font-weight: 700;
+    color: #9a3412;
+  }
+  .lpp {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #a7f3d0;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #0f6e56;
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 650;
+    padding: 3px 8px;
+    cursor: pointer;
+  }
+  .lpp a { color: inherit; font-weight: 650; }
+  .lpp svg {
+    width: 13px;
+    height: 13px;
+    color: rgba(0, 0, 0, 0.54);
+    flex: none;
+  }
+  .lpp.copied { background: #d1fae5; color: #047857; }
+  .lead { text-decoration: underline; text-underline-offset: 3px; }
+  ul { margin: 0; padding-left: 18px; }
+  li { margin: 0 0 6px; }
+  li.apart { margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 8px; vertical-align: top; border-bottom: 1px solid #e5e7eb; }
+  th { color: #3f6b6f; font-weight: 650; font-size: 12px; letter-spacing: 0.02em; }
+  tr:last-child td { border-bottom: 0; }
+  a { color: #0f6e56; font-weight: 650; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .warn {
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+  }
+  .warn .chapter { color: #fff; }
+  .warn code, td code, .code {
+    font-family: Consolas, "Segoe UI", monospace;
+    font-weight: 650;
+  }
+  .accept {
+    margin: 12px 0 0;
+    font-weight: 700;
+    color: #111827;
+  }
+  .steps { margin: 0; padding-left: 18px; }
+  .note { margin: 0 0 12px; color: #4b5563; font-size: 13px; }
+  .tag {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .tag.coupe { background: #e7f6f1; color: #0f6e56; }
+  .tag.culotte { background: #e8f1fb; color: #1565c0; }
+  .prod {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .name { font-weight: 600; }
+  .noref {
+    color: #b91c1c;
+    font-weight: 700;
+  }
+  .ean, .more {
+    border-radius: 999px;
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+    line-height: 1.2;
+  }
+  .ean {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #99f6e4;
+    background: #ecfeff;
+    color: #0f766e;
+    padding: 3px 8px;
+  }
+  .ean svg {
+    width: 13px;
+    height: 13px;
+    color: rgba(0, 0, 0, 0.54);
+    flex: none;
+  }
+  .ean:hover { background: #ccfbf1; }
+  .ean.copied { background: #d1fae5; color: #047857; }
+  .more {
+    border: 1px solid #d8b4fe;
+    background: #f3e8ff;
+    color: #6b21a8;
+    padding: 3px 10px;
+  }
+  .more:hover { background: #6b21a8; color: #fff; border-color: #6b21a8; }
+  dialog {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 18px;
+    max-width: 420px;
+  }
+  dialog::backdrop { background: rgba(15, 23, 42, 0.35); }
+  dialog h3 { margin: 0 0 8px; color: #0f6e56; font-size: 16px; }
+  dialog p { margin: 0 0 8px; }
+  dialog button.close {
+    margin-top: 6px;
+    border: 0;
+    border-radius: 999px;
+    background: #0f6e56;
+    color: #fff;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  @media (max-width: 720px) {
+    .pair { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="title-row">
+    <p class="title-line">Remboursement des Protections périodiques réutilisables</p>
+    <a class="more title-more" href="https://www.service-public.gouv.fr/particuliers/actualites/A18883">+ d’infos</a>
+  </div>
+  <p class="subtitle">Prise en charge par l’Assurance maladie à partir du 1<sup>er</sup> octobre 2026 <a class="source" href="https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000054632785">( Source : JORF n° 0183 du 7 août 2026)</a></p>
+
+  <div class="pair">
+    <section>
+      <span class="chapter">les bénéficiaires</span>
+      <ul>
+        <li class="critere">toutes les femmes de moins de 26 ans ou bénéficiaires de la C2S ( sans restriction d’âge)</li>
+        <li>Hors de ces critères, la vente reste possible, sans remboursement.</li>
+      </ul>
+      <span class="chapter follow">facturation</span>
+      <ul>
+        <li>pas de prescription nécessaire</li>
+        <li>code acte : PML</li>
+        <li>taux de remboursement : 60 % &lt; 26 ans et 100 % pour les bénéficiaires de la Complémentaire santé solidaire (C2S)</li>
+        <li>prescripteur : RPPS du pharmacien</li>
+        <li>pas d’obligation de scanner un document ni de transmettre une pièce justificative</li>
+      </ul>
+    </section>
+    <section>
+      <span class="chapter">quels produits ?</span>
+      <ul>
+        <li>Culottes menstruelles et coupes menstruelles inscrites sur la LPP, délivrées en officine.</li>
+        <li>2 produits maximum par personne, culottes et coupes confondues.</li>
+        <li>Période de date à date à partir de la première délivrance, pas l’année civile.</li>
+        <li class="apart">Ces produits n’apparaissent pas dans le dossier pharmaceutique.</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="stack">
+    <span class="chapter">Prix et remboursement</span>
+    <table>
+      <thead>
+        <tr><th>Produit</th><th>Prix limite TTC</th><th>Prix de cession HT</th><th>Prise en charge</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Culotte</td>
+          <td>19 €</td>
+          <td>14,40 €</td>
+          <td rowspan="2">60 % avant 26 ans (complément selon la mutuelle). 100 % en C2S. TVA 5,5 %.</td>
+        </tr>
+        <tr>
+          <td>Coupe</td>
+          <td>15,80 €</td>
+          <td>12 €</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="pair">
+    <section>
+      <span class="chapter">Facturation</span>
+      <ul>
+        <li>Carte Vitale, physique ou dématérialisée.</li>
+        <li>Prescripteur : le numéro RPPS du pharmacien.</li>
+        <li>Aucune pièce justificative à scanner.</li>
+        <li>Facturer uniquement le code LPP individuel de la marque.</li>
+      </ul>
+    </section>
+    <div class="warn">
+      <div class="warn-head">
+        <span class="chapter alert">Codes génériques :</span>
+        <span class="warn-aside">ne pas utiliser ces codes (risque de rejet de facturation)</span>
+      </div>
+      <ul>
+        <li>Culottes : <code>1724852</code></li>
+        <li>Coupes : <code>1719621</code></li>
+      </ul>
+      <p class="accept">seuls les codes individuels (voir plus bas) sont acceptés</p>
+    </div>
+  </div>
+
+  <section class="stack">
+    <span class="chapter" id="dispo-titre">liste des produits disponibles au …</span>
+    <p class="note">liste susceptible d’évolution dès enregistrement à la LPP</p>
+    <table>
+      <thead>
+        <tr><th>Type</th><th>Produit</th><th>Code LPP</th><th></th></tr>
+      </thead>
+      <tbody id="produits"></tbody>
+    </table>
+  </section>
+
+  <section class="stack">
+    <span class="chapter">Vérifier l’éligibilité</span>
+    <p class="lead"><strong>Octobre 2026, sans ADAC.</strong> Contrôler l’âge (moins de 26 ans) ou les droits C2S. Le plafond de 2 produits n’est pas visible : aucune trace des délivrances faites dans une autre officine.</p>
+    <p><strong class="lead">Dès novembre 2026, avec ADAC</strong> (téléservice sur ameliPro)</p>
+    <ol class="steps">
+      <li>connectez vous au téléservice via AmeliPro</li>
+      <li>Saisir le NIR.</li>
+      <li>Rubrique Services patients : Aide à la détection d’atypies de consommation.</li>
+      <li>vérifiez l’éligibilité de la patiente, le nombre de protections déjà facturées, et celles restantes.</li>
+    </ol>
+  </section>
+</main>
+<script>
+var AMELI = "http://www.codage.ext.cnamts.fr/cgi/tips/cgi-fiche?p_date_jo_arrete=%25&p_menu=FICHE&p_site=AMELI&p_code_tips=";
+var ROWS = [
+  ["coupe","Claricup, boîte, T0","3701271303858","6730544"],
+  ["coupe","Claricup, boîte, T1","3701271303865","6730544"],
+  ["coupe","Claricup, boîte, T2","3701271303872","6730544"],
+  ["coupe","Claricup, boîte, T3","3701271303889","6730544"],
+  ["coupe","Claricup, lot de 2, T0","3701271303896","6730544"],
+  ["coupe","Claricup, lot de 2, T1","3701271303902","6730544"],
+  ["coupe","Claricup, lot de 2, T2","3701271303919","6730544"],
+  ["coupe","Claricup, lot de 2, T3","3701271303926","6730544"],
+  ["coupe","Elia, coupe 20 ml, TS","3760339074871","6759105"],
+  ["coupe","Elia, coupe 30 ml, TM","3760339074888","6759105"],
+  ["coupe","Petite Chose, TS","3760301870654","6778261"],
+  ["coupe","Petite Chose, TM","3760301870661","6778261"],
+  ["coupe","Petite Chose, TL","3760301870678","6778261"],
+  ["culotte","Elia, flux abondant, noir, 12 ans","3760339073195","6706971"],
+  ["culotte","Elia, flux abondant, noir, 14 ans","3760339073188","6706971"],
+  ["culotte","Elia, flux abondant, noir, XS","3760339073171","6706971"],
+  ["culotte","Elia, flux abondant, noir, S","3760339073164","6706971"],
+  ["culotte","Elia, flux abondant, noir, M","3760339073157","6706971"],
+  ["culotte","Elia, flux abondant, noir, L","3760339073140","6706971"],
+  ["culotte","Elia, flux abondant, noir, XL","3760339073133","6706971"],
+  ["culotte","Elia, flux abondant, noir, XXL","3760339073126","6706971"],
+  ["culotte","Elia, flux moyen, noir, 12 ans","3760339073270","6706971"],
+  ["culotte","Elia, flux moyen, noir, 14 ans","3760339073263","6706971"],
+  ["culotte","Elia, flux moyen, noir, XS","3760339073256","6706971"],
+  ["culotte","Elia, flux moyen, noir, S","3760339073249","6706971"],
+  ["culotte","Elia, flux moyen, noir, M","3760339073232","6706971"],
+  ["culotte","Elia, flux moyen, noir, L","3760339073225","6706971"],
+  ["culotte","Elia, flux moyen, noir, XL","3760339073218","6706971"],
+  ["culotte","Elia, flux moyen, noir, XXL","3760339073201","6706971"],
+  ["culotte","Tina, 10/11 ans","3701469317124","6784014"],
+  ["culotte","Tina, XXS/32","3701469317117","6784014"],
+  ["culotte","Tina, XS/34","3701469317100","6784014"],
+  ["culotte","Tina, S/36","3701469317094","6784014"],
+  ["culotte","Tina, M/38","3701469317087","6784014"],
+  ["culotte","Tina, L/40","3701469317070","6784014"],
+  ["culotte","Tina, XL/42","3701469317063","6784014"],
+  ["culotte","Tina, 2XL/44","3701469317056","6784014"],
+  ["culotte","Tina, 3XL/46","3701469317049","6784014"],
+  ["culotte","Tina, 4XL/48","3701469317032","6784014"],
+  ["culotte","Saforelle, premières règles, 12/14 ans","3700399103029","6724578"],
+  ["culotte","Saforelle, flux abondant, 34/36","3700399102862","6724578"],
+  ["culotte","Saforelle, flux abondant, 38","3700399102879","6724578"],
+  ["culotte","Saforelle, flux abondant, 40","3700399102886","6724578"],
+  ["culotte","Saforelle, flux abondant, 42","3700399102893","6724578"],
+  ["culotte","Saforelle, flux abondant, 44","3700399102909","6724578"],
+  ["culotte","Saforelle, flux abondant, 46","3700399102916","6724578"],
+  ["culotte","Saforelle, flux abondant, 48","3700399102923","6724578"],
+  ["culotte","Saforelle, flux abondant, 50","3700399102930","6724578"],
+  ["culotte","Organyc (Corman), bio, classique, ado","8016867021937","6790121"],
+  ["culotte","Organyc (Corman), bio, classique, XS","8016867019538","6790121"],
+  ["culotte","Organyc (Corman), bio, classique, S","8016867019545","6790121"],
+  ["culotte","Organyc (Corman), bio, classique, M","8016867019552","6790121"],
+  ["culotte","Organyc (Corman), bio, classique, L","8016867019569","6790121"],
+  ["culotte","Organyc (Corman), bio, classique, XL","8016867019576","6790121"],
+  ["culotte","Organyc (Corman), bio, classique, 2XL","8016867021944","6790121"],
+  ["culotte","Organyc (Corman), bio, classique, 3XL","8016867021951","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, ado","8016867021883","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, XS","8016867018272","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, S","8016867018289","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, M","8016867018296","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, L","8016867018302","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, XL","8016867018319","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, 2XL","8016867021890","6790121"],
+  ["culotte","Organyc (Corman), bio, taille haute, 3XL","8016867021906","6790121"],
+  ["culotte","Lemahieu","","6775452"]
+];
+
+function ameli(code) { return AMELI + code; }
+
+var COPY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+
+function escAttr(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+function rowMain(r) {
+  var kind = r[0] === "coupe" ? "Coupe" : "Culotte";
+  var ean = r[2];
+  var eanBtn = ean
+    ? '<button type="button" class="ean" data-copy="' + ean + '"><span>EAN : ' + ean + "</span>" + COPY_ICON + "</button>"
+    : "";
+  var moreBtn = ean
+    ? '<button type="button" class="more" data-ean="' + ean + '" data-label="' + escAttr(r[1]) + '">+ d’infos</button>'
+    : "";
+  var noref = (r[1] === "Lemahieu" && r[3] === "6775452" && !ean)
+    ? '<span class="noref">pas de reference connue à ce jour</span>'
+    : "";
+  return "<td><span class=\"tag " + r[0] + "\">" + kind + "</span></td><td><div class=\"prod\"><span class=\"name\">" + r[1] + "</span>" + noref + eanBtn + moreBtn + "</div></td><td><span class=\"lpp\" data-copy=\"" + r[3] + "\"><a href=\"" + ameli(r[3]) + "\">" + r[3] + "</a>" + COPY_ICON + "</span></td>";
+}
+
+function renderRows() {
+  document.getElementById("produits").innerHTML = ROWS.map(function (r) {
+    return "<tr>" + rowMain(r) + "<td></td></tr>";
+  }).join("");
+}
+
+var mois = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+var now = new Date();
+document.getElementById("dispo-titre").textContent = "liste des produits disponibles au " + now.getDate() + " " + mois[now.getMonth()] + " " + now.getFullYear();
+renderRows();
+
+document.addEventListener("click", function (ev) {
+  var ean = ev.target.closest(".ean, .lpp");
+  if (ean && !ev.target.closest("a")) {
+    var text = ean.getAttribute("data-copy");
+    var labelEl = ean.querySelector("span, a");
+    var label = labelEl ? labelEl.textContent : ean.textContent;
+    function done() {
+      if (labelEl) labelEl.textContent = "copié";
+      else ean.textContent = "copié";
+      ean.classList.add("copied");
+      setTimeout(function () {
+        if (labelEl) labelEl.textContent = label;
+        else ean.textContent = label;
+        ean.classList.remove("copied");
+      }, 900);
+    }
+    function legacy() {
+      var area = document.createElement("textarea");
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      area.remove();
+      done();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, legacy);
+    } else {
+      legacy();
+    }
+    return;
+  }
+  var more = ev.target.closest(".more");
+  if (!more) return;
+  var code = more.getAttribute("data-ean") || "";
+  if (!code) return;
+  var label = more.getAttribute("data-label") || "";
+  try {
+    if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+      window.chrome.webview.postMessage(JSON.stringify({
+        type: "offibox-medipim-ean",
+        ean: code,
+        label: label
+      }));
+    }
+  } catch (e) {}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offibox - Démo pharmacie</title>
+  <style>
+    :root {
+      --bg: #f5f8fb;
+      --card: #ffffff;
+      --text: #1f2d3a;
+      --muted: #5b6b79;
+      --accent: #2f6f95;
+      --accent-2: #2f6f95;
+      --ok: #2f8a57;
+      --line: #d9e2ea;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Segoe UI, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    .hero {
+      padding: 24px 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(22, 36, 50, 0.04);
+    }
+    h1 { margin: 0 0 10px; font-size: 34px; }
+    h2 { margin: 0 0 8px; font-size: 24px; }
+    .lead { color: var(--muted); font-size: 18px; margin: 0; }
+    .chip {
+      display: inline-block;
+      margin: 12px 8px 0 0;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      border: 1px solid var(--line);
+      color: #425466;
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 120px;
+    }
+    .kpi .n {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--accent-2);
+      letter-spacing: .4px;
+    }
+    .kpi .l {
+      color: var(--text);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .kpi .s {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    .section { margin-top: 28px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 18px; color: var(--accent-2); }
+    .card p { margin: 0; color: #32485a; }
+    ul.clean { margin: 8px 0 0 0; padding-left: 18px; color: #d6e5ef; }
+    ul.clean { color: #32485a; }
+    ul.clean li { margin-bottom: 6px; }
+    .timeline {
+      border-left: 3px solid #c7d6e1;
+      margin-top: 10px;
+      padding-left: 12px;
+    }
+    .timeline .step { margin: 10px 0; }
+    .timeline .step b { color: var(--ok); }
+    .note {
+      margin-top: 20px;
+      color: #5e6f7e;
+      font-size: 13px;
+      border-top: 1px dashed #c7d6e1;
+      padding-top: 10px;
+    }
+    .cta {
+      margin-top: 18px;
+      display: inline-block;
+      text-decoration: none;
+      background: #2f6f95;
+      color: #fff;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Offibox pour l'officine</h1>
+      <p class="lead">
+        Une seule barre de recherche pour retrouver en quelques secondes les informations utiles au comptoir.
+      </p>
+      <span class="chip">Scan boîte médicament</span>
+      <span class="chip">QR mutuelle</span>
+      <span class="chip">Ordonnances téléconsultation</span>
+      <span class="chip">Recherche RPPS inverse</span>
+      <span class="chip">Messagerie sécurisée</span>
+
+      <div class="grid" id="counters">
+        <article class="kpi">
+          <div class="n" data-target="15811">0</div>
+          <div class="l">Produits recensés</div>
+          <div class="s">Médicaments + catalogues + références utiles</div>
+        </article>
+        <article class="kpi">
+          <div class="n" data-target="1904997">0</div>
+          <div class="l">Professionnels de santé</div>
+          <div class="s">Recherche RPPS + envoi rapide via messagerie sécurisée</div>
+        </article>
+        <article class="kpi">
+          <div class="n" data-target="4200">0</div>
+          <div class="l">URLs indexées</div>
+          <div class="s">Liens pratiques officine, ANSM, HAS, Vidal, etc.</div>
+        </article>
+        <article class="kpi">
+          <div class="n" data-target="350">0</div>
+          <div class="l">Sites web référencés</div>
+          <div class="s">Accès direct aux services utiles du quotidien</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Ce que vous pouvez scanner</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>DataMatrix boîte médicament</h3>
+          <p>Offibox lit automatiquement :</p>
+          <ul class="clean">
+            <li>CIP</li>
+            <li>Date d'expiration</li>
+            <li>Numéro de lot</li>
+            <li>Numéro de série</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>QR mutuelle</h3>
+          <p>Le code mutuelle est reconnu et la fiche correspondante s'affiche directement.</p>
+        </article>
+        <article class="card">
+          <h3>QR d'ordonnance / téléconsultation</h3>
+          <p>Medadom, Qare et autres liens sont ouverts dans la fenêtre web intégrée Offibox.</p>
+        </article>
+        <article class="card">
+          <h3>Code RPPS</h3>
+          <p>Recherche inverse : vous saisissez le RPPS, Offibox retrouve le professionnel.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Ce que vous trouvez dans Offibox</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Médicaments</h3>
+          <p>Nom, CIP, DCI, disponibilité, statut, remboursement, alertes et liens utiles.</p>
+        </article>
+        <article class="card">
+          <h3>Annuaire santé</h3>
+          <p>Professionnels de santé, structures, recherche par nom, ville, RPPS.</p>
+        </article>
+        <article class="card">
+          <h3>Mutuelles et organismes</h3>
+          <p>Recherche par nom, code, contact, informations de prise en charge.</p>
+        </article>
+        <article class="card">
+          <h3>Documents et contenus</h3>
+          <p>PDF, vidéos, pages web, informations laboratoires, outils métier.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Un usage simple au comptoir</h2>
+      <div class="timeline">
+        <div class="step"><b>1.</b> Vous scannez un code (boîte, mutuelle, ordonnance).</div>
+        <div class="step"><b>2.</b> Offibox retrouve l'information utile immédiatement.</div>
+        <div class="step"><b>3.</b> Vous ouvrez les documents/liens sans quitter l'application.</div>
+        <div class="step"><b>4.</b> Vous gagnez du temps, avec moins de manipulations.</div>
+      </div>
+      <a class="cta" href="telechargement-pc.html">Télécharger Offibox</a>
+    </section>
+
+    <p class="note">
+      Astuce: pour mettre à jour les chiffres, modifiez les valeurs <code>data-target</code> dans les compteurs.
+      Les nombres s'animent automatiquement à l'ouverture de la page.
+    </p>
+  </div>
+
+  <script>
+    function formatFr(n) {
+      return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+
+    function animateCounter(el, to, duration) {
+      const start = performance.now();
+      function step(now) {
+        const p = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const val = Math.floor(eased * to);
+        el.textContent = formatFr(val);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function runCounters() {
+      document.querySelectorAll('.kpi .n').forEach((el, i) => {
+        const to = Number(el.dataset.target || 0);
+        animateCounter(el, to, 1100 + i * 180);
+      });
+    }
+
+    const observer = new IntersectionObserver((entries, obs) => {
+      if (entries.some(e => e.isIntersecting)) {
+        runCounters();
+        obs.disconnect();
+      }
+    }, { threshold: 0.35 });
+
+    observer.observe(document.getElementById('counters'));
+  </script>
+</body>
+</html>

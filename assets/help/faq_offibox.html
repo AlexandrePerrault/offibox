@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Aide Offibox — FAQ</title>
+<style>
+  :root {
+    --teal: #5A9094;
+    --teal-dark: #3d6a6e;
+    --beige: #F5F0E8;
+    --text: #334155;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --card: #ffffff;
+    --warn: #B45309;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Calibri, system-ui, sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #f7f4ef 0%, #eef2f4 100%);
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 20px 18px 48px;
+  }
+  header.hero {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 24px rgba(51,65,85,.06);
+  }
+  header.hero h1 {
+    margin: 0 0 6px;
+    font-size: 1.65rem;
+    color: var(--teal);
+    letter-spacing: .02em;
+  }
+  header.hero .sub { color: var(--muted); margin: 0 0 8px; font-size: .98rem; }
+  header.hero .meta { color: var(--muted); font-size: .85rem; margin: 0; }
+  .intro {
+    margin: 12px 0 0;
+    font-size: .95rem;
+    color: var(--text);
+  }
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 8px;
+  }
+  nav.toc a {
+    text-decoration: none;
+    color: var(--teal-dark);
+    background: #e8f2f3;
+    border: 1px solid #c9dfe1;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: .82rem;
+    font-weight: 600;
+  }
+  nav.toc a:hover { background: var(--teal); color: #fff; }
+  section.block {
+    margin-top: 18px;
+  }
+  section.block > h2 {
+    margin: 0 0 10px;
+    font-size: 1.15rem;
+    color: var(--teal-dark);
+    padding-left: 10px;
+    border-left: 4px solid var(--teal);
+  }
+  details.faq {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 0 0 8px;
+    overflow: hidden;
+  }
+  details.faq[open] { border-color: #b7d4d6; box-shadow: 0 4px 14px rgba(90,144,148,.12); }
+  details.faq summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 12px 14px;
+    font-weight: 650;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+  }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary::before {
+    content: "▸";
+    color: var(--teal);
+    font-size: .95rem;
+    width: 1em;
+    flex: 0 0 auto;
+    transition: transform .15s ease;
+  }
+  details.faq[open] summary::before { transform: rotate(90deg); }
+  details.faq .body {
+    padding: 0 14px 14px 36px;
+    color: var(--text);
+    font-size: .94rem;
+  }
+  details.faq .body ul { margin: 6px 0 0; padding-left: 1.15rem; }
+  details.faq .body li { margin: 4px 0; }
+  .install-guide {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .install-guide h3 {
+    margin: 0 0 8px;
+    color: var(--teal);
+    font-size: 1.05rem;
+  }
+  .install-step {
+    margin: 18px 0 0;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+  .install-step:first-of-type { border-top: 0; padding-top: 0; margin-top: 10px; }
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: .9rem;
+    flex: 0 0 auto;
+  }
+  .step-title { font-weight: 700; font-size: 1rem; }
+  .step-desc { margin: 0 0 10px; color: var(--muted); font-size: .92rem; }
+  .shot-wrap {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #f8fafc;
+  }
+  .shot-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .callout {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 46%;
+    pointer-events: none;
+  }
+  .callout .badge {
+    background: #dc2626;
+    color: #fff;
+    font-weight: 700;
+    font-size: .72rem;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .callout .label {
+    background: rgba(255,255,255,.94);
+    color: var(--text);
+    font-size: .72rem;
+    font-weight: 650;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  }
+  .callout .arrow {
+    color: #dc2626;
+    font-size: 1.35rem;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(255,255,255,.8);
+    font-weight: 700;
+  }
+  /* Positions approximatives sur captures Inno Setup */
+  .c-accept { right: 8%; bottom: 22%; flex-direction: column; align-items: flex-end; }
+  .c-next { right: 4%; bottom: 3%; }
+  .c-desktop { left: 8%; top: 42%; }
+  .c-startup { left: 8%; top: 58%; }
+  .c-launch { left: 8%; top: 70%; }
+  .c-path { left: 10%; top: 48%; flex-direction: column; align-items: flex-start; }
+  .c-browse { right: 8%; top: 46%; }
+  .c-exe { left: 12%; top: 55%; }
+  .caption {
+    margin: 8px 0 0;
+    font-size: .85rem;
+    color: var(--muted);
+  }
+  footer {
+    margin-top: 28px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #e8f2f3;
+    color: var(--muted);
+    font-size: .85rem;
+  }
+  a { color: var(--teal-dark); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>Aide Offibox</h1>
+    <p class="sub">Foire aux questions</p>
+    <p class="meta"><a href="https://www.offibox.fr" target="_blank" rel="noopener">www.offibox.fr</a> — contact@offibox.fr · Version document : août 2026</p>
+    <p class="intro">Ce document répond aux questions les plus fréquentes sur l’installation, la première connexion, l’utilisation quotidienne et le compte Offibox. Les infos sont fournies à titre indicatif, le logiciel est susceptible d’évolution.</p>
+    <nav class="toc" aria-label="Sommaire">
+      <a href="#presentation">Présentation</a>
+      <a href="#installation">Installation</a>
+      <a href="#interface">Interface</a>
+      <a href="#compte">Compte</a>
+      <a href="#confidentialite">Confidentialité</a>
+      <a href="#depannage">Dépannage</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="block" id="presentation">
+    <h2>1. Présentation</h2>
+    <details class="faq"><summary>Qu’est-ce qu’Offibox ?</summary>
+      <div class="body">Offibox est une boîte à outils destinée aux professionnels de santé en officine. Le logiciel Windows se présente sous forme d’une barre / « pilule » discrète en haut à droite de l’écran : elle laisse le bureau et les autres logiciels visibles, et se déploie à la demande pour rechercher des informations et ouvrir des outils métier.</div>
+    </details>
+    <details class="faq"><summary>À qui s’adresse Offibox ?</summary>
+      <div class="body">Le service est strictement réservé aux professionnels de santé (notamment officines et équipes officinales), dans le cadre de leur activité professionnelle.</div>
+    </details>
+    <details class="faq"><summary>Quelles sources d’information Offibox utilise-t-il ?</summary>
+      <div class="body">
+        Offibox agrège et facilite l’accès à des données et ressources utiles au quotidien, notamment : base de données publique des médicaments (BDPM), dispositifs médicaux, parapharmacie, outils métier, sites web professionnels, annuaires, mutuelles, etc.
+        <p>Les informations sont fournies à titre indicatif et professionnel : elles ne remplacent pas le jugement du pharmacien ni les sources officielles.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="block" id="installation">
+    <h2>2. Installation et première connexion</h2>
+
+    <div class="install-guide">
+      <h3>Guide illustré — assistant d’installation Windows</h3>
+      <p class="step-desc">Téléchargez l’installateur depuis <a href="https://www.offibox.fr" target="_blank" rel="noopener">www.offibox.fr</a> (fichier <strong>Offibox-Setup.exe</strong>), puis suivez les étapes ci-dessous.</p>
+
+      <div class="install-step">
+        <div class="step-head"><span class="step-num">1</span><span class="step-title">Lancer le fichier d’installation</span></div>
+        <p class="step-desc">Dans le dossier Téléchargements, double-cliquez sur <strong>Offibox-Setup.exe</strong> (icône cube Offibox).</p>
+        <div class="shot-wrap">
+          <img src="install_01_setup_exe.png" alt="Fichier Offibox-Setup.exe dans l’Explorateur Windows"/>
+          <div class="callout c-exe">
+            <span class="badge">1</span>
+            <span class="arrow">⬇</span>
+            <span class="label">Double-cliquer sur Offibox-Setup.exe</span>
+          </div>
+        </div>
+        <p class="caption">Si Windows affiche un avertissement SmartScreen, choisissez « Informations complémentaires » puis « Exécuter quand même » (installateur signé Offibox).</p>
+      </div>
+
+      <div class="install-step">
+        <div class="step-head"><span class="step-num">2</span><span class="step-title">Accepter le contrat de licence</span></div>
+        <p class="step-desc">Lisez l’accord de licence, cochez <strong>« Je comprends et j’accepte… »</strong>, puis cliquez sur <strong>Suivant</strong>.</p>
+        <div class="shot-wrap">
+          <img src="install_02_licence.png" alt="Écran Accord de licence de l’installateur Offibox"/>
+          <div class="callout c-accept">
+            <span class="badge">A</span>
+            <span class="label">Cocher « J’accepte les termes »</span>
+            <span class="arrow">⬇</span>
+          </div>
+          <div class="callout c-next">
+            <span class="arrow">➡</span>
+            <span class="badge">B</span>
+            <span class="label">Suivant</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="install-step">
+        <div class="step-head"><span class="step-num">3</span><span class="step-title">Choisir le dossier de destination</span></div>
+        <p class="step-desc">Par défaut : <code>%LocalAppData%\Offibox</code> (installation par utilisateur, sans droits administrateur). Conservez ce chemin sauf besoin particulier, puis <strong>Suivant</strong>.</p>
+        <div class="shot-wrap">
+          <img src="install_04_destination.png" alt="Écran dossier de destination Offibox"/>
+          <div class="callout c-path">
+            <span class="badge">A</span>
+            <span class="label">Dossier d’installation</span>
+            <span class="arrow">⬇</span>
+          </div>
+          <div class="callout c-browse">
+            <span class="arrow">⬅</span>
+            <span class="badge">B</span>
+            <span class="label">Parcourir… (optionnel)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="install-step">
+        <div class="step-head"><span class="step-num">4</span><span class="step-title">Tâches supplémentaires</span></div>
+        <p class="step-desc">Cochez les options souhaitées (recommandé : icône bureau + démarrage Windows + lancement en fin d’install), puis <strong>Suivant</strong> pour installer.</p>
+        <div class="shot-wrap">
+          <img src="install_03_taches.png" alt="Écran tâches supplémentaires Offibox"/>
+          <div class="callout c-desktop">
+            <span class="badge">1</span>
+            <span class="arrow">➡</span>
+            <span class="label">Icône sur le bureau</span>
+          </div>
+          <div class="callout c-startup">
+            <span class="badge">2</span>
+            <span class="arrow">➡</span>
+            <span class="label">Lancer au démarrage Windows</span>
+          </div>
+          <div class="callout c-launch">
+            <span class="badge">3</span>
+            <span class="arrow">➡</span>
+            <span class="label">Lancer à la fin de l’install</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <details class="faq" open><summary>Comment télécharger et installer Offibox ?</summary>
+      <div class="body">
+        Téléchargez l’installateur Windows depuis <a href="https://www.offibox.fr" target="_blank" rel="noopener">www.offibox.fr</a>
+        (ou <a href="https://github.com/offibox/offibox-releases/releases/latest/download/Offibox-Setup.exe" target="_blank" rel="noopener">Offibox-Setup.exe</a>).
+        Lancez le fichier .exe et suivez l’assistant (voir le guide illustré ci-dessus). Après installation, Offibox peut démarrer automatiquement si l’option correspondante est activée.
+      </div>
+    </details>
+    <details class="faq"><summary>Qu’est-ce que la clé API / clé Offibox ?</summary>
+      <div class="body">Lors de votre inscription sur offibox.fr, vous recevez une clé de connexion poste (format type XXXX-XXXX-XXXX-XXXX). Au premier lancement, Offibox affiche l’écran « Première connexion » : saisissez cette clé pour activer le poste.</div>
+    </details>
+    <details class="faq"><summary>Je n’ai pas reçu / j’ai perdu ma clé. Que faire ?</summary>
+      <div class="body">Connectez-vous à votre espace sur www.offibox.fr ou contactez contact@offibox.fr. Ne partagez pas votre clé : elle identifie votre poste / abonnement.</div>
+    </details>
+    <details class="faq"><summary>Pourquoi Offibox me redemande la clé après une réinstallation ?</summary>
+      <div class="body">Après une désinstallation / réinstallation Windows, Offibox peut redemander la clé pour revalider le poste auprès du serveur (sécurité et continuité de l’abonnement). C’est le comportement attendu.</div>
+    </details>
+    <details class="faq"><summary>Combien de temps dure le chargement au démarrage ?</summary>
+      <div class="body">Au premier lancement ou après une mise à jour majeure, Offibox charge la base médicaments et les catalogues (splash « chargement d’offibox »). Les lancements suivants sont plus rapides grâce au cache local.</div>
+    </details>
+    <details class="faq"><summary>Offibox a besoin de Microsoft Edge WebView2 ?</summary>
+      <div class="body">Oui, pour afficher les pages web et certains panneaux sous la barre. Si le runtime WebView2 n’est pas installé, Windows / Edge le propose généralement ; sinon installez « Microsoft Edge WebView2 Runtime » depuis le site Microsoft.</div>
+    </details>
+  </section>
+
+  <section class="block" id="interface">
+    <h2>3. Interface et utilisation quotidienne</h2>
+    <details class="faq"><summary>Comment ouvrir / fermer la barre Offibox ?</summary>
+      <div class="body">Cliquez sur le logo Offibox en haut à droite pour déployer la barre. Repliez-la via le contrôle prévu (ou après fermeture des panneaux) pour retrouver un bureau libre. Hors de la zone de la barre, le bureau reste cliquable.</div>
+    </details>
+    <details class="faq"><summary>Comment lancer une recherche ?</summary>
+      <div class="body">Ouvrez la barre, saisissez votre requête dans le champ, puis validez avec Entrée ou le badge orange « Rechercher ». Pour les médicaments (nom / DCI), la liste s’affiche après validation, pas à chaque frappe.</div>
+    </details>
+    <details class="faq"><summary>Que puis-je rechercher ?</summary>
+      <div class="body">
+        <ul>
+          <li>Médicaments (nom, DCI, CIP…) — fiches, monographies Medipim, RCP, alertes ANSM…</li>
+          <li>Outils métier et sites web professionnels</li>
+          <li>Codes actes, mutuelles, grands régimes, RPPS, CIP, ACL, GTIN…</li>
+          <li>Annuaires (pharmaciens, santé, PMI, poison, pharmacovigilance, ARS, vaccination fièvre jaune…)</li>
+          <li>Laboratoires, codes LPP / dispositifs médicaux, parapharmacie, formules Weleda, etc.</li>
+        </ul>
+      </div>
+    </details>
+    <details class="faq"><summary>À quoi sert le bouton « + » ?</summary>
+      <div class="body">Il donne accès aux menus / actualités. Une pastille chiffrée peut indiquer une nouveauté du jour (actualité news, alerte DGS ou ANSM). La pastille disparaît le lendemain si aucune nouvelle info n’est publiée.</div>
+    </details>
+    <details class="faq"><summary>Puis-je ouvrir un site ou un PDF sans quitter mon logiciel métier ?</summary>
+      <div class="body">Oui. Les pages web et PDF s’ouvrent dans un panneau sous la barre Offibox, au-dessus du bureau, pour consulter une information sans masquer entièrement votre logiciel de gestion.</div>
+    </details>
+    <details class="faq"><summary>Offibox fonctionne-t-il hors ligne ?</summary>
+      <div class="body">Une grande partie des données (BDM, outils, catalogues en cache) reste utilisable hors ligne. Certaines fonctions (validation de clé, actualités réseau, pages web, annuaires distants, mises à jour) nécessitent Internet.</div>
+    </details>
+  </section>
+
+  <section class="block" id="compte">
+    <h2>4. Compte, abonnement et mises à jour</h2>
+    <details class="faq"><summary>Y a-t-il un essai gratuit ?</summary>
+      <div class="body">Oui. Offibox propose un essai gratuit de 15 jours, puis des abonnements mensuels sans engagement selon les formules en vigueur sur www.offibox.fr.</div>
+    </details>
+    <details class="faq"><summary>Où gérer mon compte (CIP, adresse, options) ?</summary>
+      <div class="body">Depuis Offibox, ouvrez « Mon compte ». Vous y retrouvez notamment les coordonnées de l’officine, le code CIP, les options « Lancer Offibox au démarrage » et « Rechercher des mises à jour automatiquement ».</div>
+    </details>
+    <details class="faq"><summary>Comment se mettent à jour les données et le logiciel ?</summary>
+      <div class="body">
+        <ul>
+          <li><strong>Données métier</strong> : synchronisation périodique depuis les sources Offibox / offiboxdata (cache local pour démarrer vite).</li>
+          <li><strong>Logiciel</strong> : si l’option est activée, Offibox peut télécharger et installer automatiquement une nouvelle version depuis GitHub Releases, puis se relancer.</li>
+        </ul>
+      </div>
+    </details>
+    <details class="faq"><summary>Comment me déconnecter ?</summary>
+      <div class="body">Via le menu Offibox (« Se déconnecter »), vous revenez à l’écran de saisie de clé API. Utile pour changer de clé ou libérer le poste.</div>
+    </details>
+  </section>
+
+  <section class="block" id="confidentialite">
+    <h2>5. Confidentialité et responsabilité</h2>
+    <details class="faq"><summary>Offibox collecte-t-il des données de santé patients ?</summary>
+      <div class="body">Dans le cadre normal d’utilisation (recherche de médicaments, annuaires, outils métier), Offibox ne collecte pas de données de santé à caractère médical au sens du RGPD. Les données traitées concernent surtout le poste, le compte et l’usage de l’outil.</div>
+    </details>
+    <details class="faq"><summary>Quelle est la responsabilité d’usage ?</summary>
+      <div class="body">Offibox est un outil d’aide à la pratique. Les décisions pharmaceutiques restent sous la responsabilité du professionnel. Vérifiez toujours les sources officielles (ANSM, BDPM, Ameli, Ordre…) en cas de doute.</div>
+    </details>
+  </section>
+
+  <section class="block" id="depannage">
+    <h2>6. Dépannage</h2>
+    <details class="faq"><summary>Je vois une fenêtre blanche à la place de « Première connexion ».</summary>
+      <div class="body">Fermez complètement Offibox (pas seulement un redémarrage à chaud), puis relancez. Assurez-vous d’avoir la dernière version. Si le problème continue : contact@offibox.fr avec la version affichée et une capture d’écran.</div>
+    </details>
+    <details class="faq"><summary>La pilule / le logo n’est pas cliquable.</summary>
+      <div class="body">Attendez la fin du splash de démarrage. Si le bureau ne répond pas correctement autour d’Offibox, redémarrez l’application. Sur multi-écrans / DPI élevés, un redémarrage complet recalibre souvent la zone cliquable.</div>
+    </details>
+    <details class="faq"><summary>La recherche ne donne rien.</summary>
+      <div class="body">Vérifiez que vous avez bien validé avec Entrée ou « Rechercher ». Essayez un autre orthographe / CIP. Si la base semble absente, attendez la fin du chargement ou relancez Offibox avec une connexion Internet.</div>
+    </details>
+    <details class="faq"><summary>Les pages web ne s’affichent pas sous la barre.</summary>
+      <div class="body">Vérifiez l’installation de WebView2, votre connexion réseau et les éventuels bloqueurs / pare-feu d’entreprise. Relancez Offibox après installation du runtime.</div>
+    </details>
+    <details class="faq"><summary>Comment désinstaller Offibox ?</summary>
+      <div class="body">Via « Applications et fonctionnalités » Windows, ou le désinstalleur fourni avec l’installation. Une réinstallation ultérieure pourra redemander la clé API.</div>
+    </details>
+  </section>
+
+  <section class="block" id="contact">
+    <h2>7. Contact et liens utiles</h2>
+    <details class="faq" open><summary>Comment contacter le support ?</summary>
+      <div class="body">
+        <ul>
+          <li>E-mail : <a href="mailto:contact@offibox.fr">contact@offibox.fr</a></li>
+          <li>Site : <a href="https://www.offibox.fr" target="_blank" rel="noopener">https://www.offibox.fr</a></li>
+          <li>Mentions légales, CGU et politique de confidentialité : pages correspondantes sur le site</li>
+        </ul>
+      </div>
+    </details>
+    <details class="faq"><summary>Éditeur</summary>
+      <div class="body">SARL OFFIBOX — 3 place d’Ahrensbok, 17350 Saint-Savinien, France — SIREN 104 421 268 — RCS Saintes.</div>
+    </details>
+  </section>
+
+  <footer>
+    Document à usage support client. Peut être adapté selon l’évolution des formules commerciales et des fonctionnalités. Dernière rédaction : août 2026.
+  </footer>
+</div>
+</body>
+</html>

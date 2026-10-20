@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calcul de la clé NIR</title>
+<style>
+  @font-face {
+    font-family: Spinnaker;
+    src: url("Spinnaker-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+  :root { color-scheme: light; }
+  html, body { margin: 0; background: #f8fafc; color: #0f172a; }
+  body, button, input, h1, label, p, span {
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+  }
+  body { font-size: 16px; line-height: 1.4; padding: 28px 22px 40px; }
+  main { max-width: 640px; }
+  h1 { margin: 0 0 6px; font-size: 22px; font-weight: 400; color: #3f6b6f; }
+  p.lead { margin: 0 0 18px; color: #475569; font-size: 14px; }
+  label { display: block; font-weight: 400; margin-bottom: 8px; }
+  .track {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 8px 4px 10px;
+    border-bottom: 6px solid #b7d36a;
+  }
+  .group { display: flex; gap: 3px; }
+  .cell {
+    width: 30px;
+    height: 38px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cell input, .cell .key {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    text-align: center;
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-style: normal;
+    font-size: 22px;
+    font-weight: 400;
+    color: #1e293b;
+    padding: 0;
+  }
+  .cell input:focus { outline: none; }
+  .cell input::placeholder {
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-style: italic;
+    font-size: 13px;
+    font-weight: 400;
+    color: #a3acb5;
+    opacity: 1;
+  }
+  .track.has-value .cell input::placeholder { color: transparent; }
+  .cell.keybox .key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-style: normal;
+    color: #1e293b;
+  }
+  .cell.keybox .key.phantom {
+    font-style: italic;
+    font-size: 13px;
+    color: #a3acb5;
+  }
+  .cell.keybox .key.live {
+    color: #dc2626;
+    font-style: normal;
+    font-size: 22px;
+  }
+  .row:focus-within .cell:focus-within {
+    box-shadow: inset 0 0 0 2px #5a9094;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Calcul de la clé NIR</h1>
+  <p class="lead">Saisissez les 13 caractères du numéro de sécurité sociale. La clé s’affiche en rouge dans la barre dès le dernier chiffre, sans envoi du numéro.</p>
+  <label>Numéro de sécurité sociale</label>
+  <div class="track" id="track"></div>
+</main>
+<script>
+var GROUPS = [
+  { n: 1, bg: "#F6E98A" },
+  { n: 2, bg: "#E4D2F6" },
+  { n: 2, bg: "#F6E98A" },
+  { n: 2, bg: "#C9E0F8" },
+  { n: 3, bg: "#F6E98A" },
+  { n: 3, bg: "#E4D2F6" }
+];
+var KEY_BG = "#C9E0F8";
+var EXAMPLE = "1760129220014".split("");
+var inputs = [];
+var keyEls = [];
+var track = document.getElementById("track");
+
+function addGroup(count, bg, key) {
+  var group = document.createElement("div");
+  group.className = "group";
+  for (var i = 0; i < count; i++) {
+    var cell = document.createElement("div");
+    cell.className = "cell" + (key ? " keybox" : "");
+    cell.style.background = bg;
+    if (key) {
+      var span = document.createElement("span");
+      span.className = "key";
+      cell.appendChild(span);
+      keyEls.push(span);
+    } else {
+      var index = inputs.length;
+      var input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = 1;
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.placeholder = EXAMPLE[index] || "";
+      input.dataset.i = String(index);
+      input.setAttribute("aria-label", "Caractère " + (index + 1));
+      cell.appendChild(input);
+      inputs.push(input);
+    }
+    group.appendChild(cell);
+  }
+  track.appendChild(group);
+}
+
+GROUPS.forEach(function (g) { addGroup(g.n, g.bg, false); });
+addGroup(2, KEY_BG, true);
+
+function nirDigits(raw) {
+  return String(raw || "").toUpperCase().replace(/[^0-9AB]/g, "");
+}
+
+function nirCle(raw) {
+  var s = nirDigits(raw);
+  if (s.length === 15) s = s.slice(0, 13);
+  if (s.length !== 13) return null;
+  var dept = s.slice(5, 7);
+  var deptNum = dept === "2A" ? "19" : (dept === "2B" ? "18" : dept);
+  if (!/^\d{2}$/.test(deptNum)) return null;
+  var digits = s.slice(0, 5) + deptNum + s.slice(7);
+  if (!/^\d{13}$/.test(digits)) return null;
+  var mod = BigInt(digits) % 97n;
+  return String(97n - mod).padStart(2, "0");
+}
+
+function currentNir() {
+  return inputs.map(function (el) { return el.value; }).join("");
+}
+
+function paintKeys(key) {
+  var showExample = !track.classList.contains("has-value");
+  keyEls[0].textContent = key ? key[0] : (showExample ? "9" : "");
+  keyEls[1].textContent = key ? key[1] : (showExample ? "7" : "");
+  keyEls[0].classList.toggle("phantom", !key && showExample);
+  keyEls[1].classList.toggle("phantom", !key && showExample);
+  keyEls[0].classList.toggle("live", !!key);
+  keyEls[1].classList.toggle("live", !!key);
+}
+
+function refresh() {
+  var raw = currentNir();
+  track.classList.toggle("has-value", nirDigits(raw).length > 0);
+  paintKeys(nirCle(raw));
+}
+
+var pasting = false;
+
+function fillFrom(start, chars) {
+  var clean = nirDigits(chars);
+  if (clean.length >= 13) {
+    start = 0;
+    clean = clean.slice(0, 13);
+    inputs.forEach(function (el) { el.value = ""; });
+  }
+  for (var i = 0; i < clean.length && start + i < inputs.length; i++) {
+    inputs[start + i].value = clean[i];
+  }
+  var next = start + clean.length;
+  if (next < inputs.length) inputs[next].focus();
+  else inputs[inputs.length - 1].focus();
+  refresh();
+}
+
+inputs.forEach(function (input, index) {
+  input.addEventListener("focus", function () { input.select(); });
+  input.addEventListener("input", function () {
+    if (pasting) return;
+    var clean = nirDigits(input.value);
+    if (clean.length > 1) {
+      fillFrom(index, clean);
+      return;
+    }
+    input.value = clean.slice(0, 1);
+    if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
+    refresh();
+  });
+  input.addEventListener("keydown", function (ev) {
+    if (ev.key === "Backspace" && !input.value && index > 0) {
+      inputs[index - 1].value = "";
+      inputs[index - 1].focus();
+      refresh();
+      ev.preventDefault();
+    } else if (ev.key === "ArrowLeft" && index > 0) {
+      inputs[index - 1].focus();
+      ev.preventDefault();
+    } else if (ev.key === "ArrowRight" && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+      ev.preventDefault();
+    }
+  });
+  input.addEventListener("paste", function (ev) {
+    var text = (ev.clipboardData || window.clipboardData).getData("text");
+    if (!text) return;
+    ev.preventDefault();
+    pasting = true;
+    fillFrom(index, text);
+    setTimeout(function () { pasting = false; }, 0);
+  });
+});
+
+refresh();
+</script>
+</body>
+</html>

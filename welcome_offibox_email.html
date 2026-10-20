@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Bienvenue sur Offibox</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Spinnaker&display=swap");
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background:#f3f7f7;color:#263238;font-family:'Spinnaker',Arial,Helvetica,sans-serif;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+      Votre clé API Offibox et le lien de téléchargement.
+    </div>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f3f7f7;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;border:1px solid #dbe7e7;border-radius:24px;">
+            <tr>
+              <td align="center" style="padding:30px 32px 16px;">
+                <!-- Joindre le logo horizontal OffiBox fourni avec le Content-ID « offibox-logo ». -->
+                <img
+                  src="cid:offibox-logo"
+                  width="520"
+                  alt="Offibox"
+                  style="display:block;width:100%;max-width:520px;height:auto;border:0;object-fit:contain;"
+                >
+                <div style="margin-top:12px;font-family:'Spinnaker',Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;line-height:34px;color:#263238;">
+                  Bienvenue sur <span style="color:#3e7f83;">Offi</span><span style="color:#3f4547;">box</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:8px 40px 36px;font-family:'Spinnaker',Arial,Helvetica,sans-serif;font-size:16px;line-height:25px;">
+                <p style="margin:0 0 20px;">Bonjour,</p>
+                <p style="margin:0 0 24px;">
+                  Votre compte <span style="color:#3e7f83;">Offi</span><span style="color:#3f4547;">box</span> a été créé. Voici votre clé API, à saisir lors de la première connexion à l’application :
+                </p>
+
+                <p style="margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#607d7e;">
+                  Votre clé API
+                </p>
+                <div style="margin:0 0 14px;padding:13px 16px;background:#fff8e8;border:1px solid #ead7a4;border-radius:12px;font-family:'Spinnaker',Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:22px;word-break:break-all;color:#5d4a1f;">
+                  {{CLE_API}}
+                </div>
+                <p style="margin:0 0 24px;color:#546e7a;">
+                  Cette clé est strictement personnelle. Elle vous servira lors de votre première connexion après l’installation de l’application.
+                </p>
+
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 10px;">
+                  <tr>
+                    <td align="center" bgcolor="#3e7f83" style="border-radius:30px;">
+                      <a href="{{TELECHARGER_OFFIBOX_URL}}" style="display:inline-block;padding:15px 28px;font-family:'Spinnaker',Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:30px;">
+                        Télécharger
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:28px 0 20px;">
+                  Voici également vos informations de connexion :
+                </p>
+
+                <p style="margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#607d7e;">
+                  Votre identifiant
+                </p>
+                <div style="margin:0 0 20px;padding:13px 16px;background:#f3f7f7;border:1px solid #d6e4e4;border-radius:12px;font-size:17px;font-weight:700;color:#263238;">
+                  {{IDENTIFIANT}}
+                </div>
+
+                <p style="margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#607d7e;">
+                  Votre mot de passe initial
+                </p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 16px;">
+                  <tr>
+                    <td style="padding:13px 16px;background:#f3f7f7;border:1px solid #d6e4e4;border-radius:12px;font-family:'Spinnaker',Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;color:#263238;">
+                      {{MOT_DE_PASSE_INITIAL}}
+                    </td>
+                    <td width="10" style="width:10px;"></td>
+                    <td align="center" bgcolor="#3e7f83" style="border-radius:24px;white-space:nowrap;">
+                      <a href="{{MODIFIER_MOT_DE_PASSE_URL}}" style="display:inline-block;padding:8px 16px;font-family:'Spinnaker',Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:24px;">
+                        Modifier mon mot de passe
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 28px;color:#546e7a;">
+                  Ils vous serviront pour vous connecter à votre tableau de bord sur
+                  <a href="{{CONNEXION_OFFIBOX_URL}}" style="color:#3e7f83;font-weight:700;text-decoration:underline;">www.offibox.fr</a>.
+                </p>
+
+                <div style="margin:0;padding:22px;background:#f3f7f7;border-radius:16px;text-align:center;">
+                  <p style="margin:0 0 12px;font-size:17px;font-weight:700;color:#345f62;">
+                    Besoin d’aide ?
+                  </p>
+                  <p style="margin:0 0 15px;color:#546e7a;">
+                    Contactez-nous en cliquant sur le lien ci-dessous :
+                  </p>
+                  <a href="mailto:contact@offibox.fr?subject=Besoin%20d%27aide%20Offibox" style="font-weight:700;color:#3e7f83;text-decoration:underline;">
+                    Contacter <span style="color:#3e7f83;">Offi</span><span style="color:#3f4547;">box</span>
+                  </a>
+                </div>
+
+                <p style="margin:26px 0 0;">
+                  À bientôt,<br>
+                  <strong>L’équipe <span style="color:#3e7f83;">Offi</span><span style="color:#3f4547;">box</span></strong>
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin:18px 0 0;font-family:'Spinnaker',Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#78909c;">
+            <span style="color:#3e7f83;">Offi</span><span style="color:#3f4547;">box</span> — La boîte à outils de l’officine<br>
+            <a href="https://www.offibox.fr/" style="color:#3e7f83;">www.<span style="color:#3e7f83;">offi</span><span style="color:#3f4547;">box</span>.fr</a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

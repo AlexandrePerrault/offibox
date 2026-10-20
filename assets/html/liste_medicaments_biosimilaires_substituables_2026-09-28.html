@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liste des médicaments biosimilaires substituables au 28 septembre 2026</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Spinnaker&display=swap");
+    :root {
+      --offibox: #5A9094;
+      --offibox-dark: #3f6d70;
+      --ink: #1e2937;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --bg: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      margin: 0;
+      padding: 16px clamp(10px, 1.6vw, 22px) 28px;
+      font-family: "Spinnaker", Arial, Helvetica, sans-serif;
+      font-weight: 400;
+      color: var(--ink);
+      background: #fff;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--offibox-dark);
+    }
+    .sources {
+      margin: 0 0 18px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .sources a { color: var(--offibox); }
+    table {
+      width: 100%;
+      max-width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    /* Col. 1 et 2 suivent la largeur de la webview ; col. 3 prend le reste. */
+    col.col-group { width: clamp(7.2rem, 16vw, 13rem); }
+    col.col-ref { width: clamp(6.4rem, 11vw, 8.6rem); }
+    col.col-bio { width: auto; }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px clamp(6px, 0.9vw, 12px);
+      vertical-align: top;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    th {
+      background: var(--bg);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #475569;
+    }
+    td.col-ref {
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    td.col-bio {
+      overflow: hidden;
+    }
+    tr.new td { background: #f4eef8; }
+    .new-tag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: #8E44AD;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-width: 100%;
+    }
+    a.pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--offibox);
+      color: #fff;
+      text-decoration: none;
+      font-family: "Spinnaker", Arial, Helvetica, sans-serif;
+      font-size: 11.5px;
+      font-weight: 400;
+      text-transform: uppercase;
+      border: 1px solid var(--offibox);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    a.pill:hover {
+      background: #fff;
+      color: var(--offibox);
+    }
+    /* Col. 2 — médicament biologique de référence */
+    td.col-ref a.pill {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+    td.col-ref a.pill:hover {
+      background: #fff;
+      color: #2563eb;
+    }
+    span.pill.muted {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+      font-family: "Spinnaker", Arial, Helvetica, sans-serif;
+      font-size: 11.5px;
+      font-weight: 400;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .note {
+      margin-top: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <h1>Liste des médicaments biosimilaires substituables au 28 septembre 2026</h1>
+  <p class="sources">
+    Sources :
+    <a href="https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000054877278">JORF — arrêté du 17 septembre 2026</a>
+    ·
+    <a href="https://www.ameli.fr/pharmacien/exercice-professionnel/delivrance-produits-sante/regles-delivrance-prise-charge/medicaments-biosimilaires/regles-dispensation-et-substitution">Ameli — règles de dispensation et substitution</a>
+  </p>
+
+  <table>
+    <colgroup>
+      <col class="col-group">
+      <col class="col-ref">
+      <col class="col-bio">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Groupes biologiques similaires substituables</th>
+        <th>Médicament biologique de référence</th>
+        <th>Médicaments biosimilaires</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Adalimumab</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Humira">Humira®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Amgevita">Amgevita®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Amsparity">Amsparity®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Hukyndra">Hukyndra®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Hulio">Hulio®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Hyrimoz">Hyrimoz®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Idacio">Idacio®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Imraldi">Imraldi®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Libmyris">Libmyris®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Yuflyma">Yuflyma®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Aflibercept</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Eylea">Eylea®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Afiveg">Afiveg®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Afqlir">Afqlir®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ahzantive">Ahzantive®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Baiama">Baiama®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Eydenzelt">Eydenzelt®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Mynzepli">Mynzepli®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Pavblu">Pavblu®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Yesafili">Yesafili®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Énoxaparine</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Lovenox">Lovenox®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20arrow">Enoxaparine arrow®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20becat">Enoxaparine becat®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20biogaran">Enoxaparine biogaran®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20crusia">Enoxaparine crusia®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20eg">Enoxaparine eg®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20Teva">Enoxaparine Teva®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20Venipharm">Enoxaparine Venipharm®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enoxaparine%20Zentiva">Enoxaparine Zentiva®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ghemaxan">Ghemaxan®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Inhixa">Inhixa®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Époétine</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Eprex">Eprex®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Abseamed">Abseamed®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Binocrit">Binocrit®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Retacrit">Retacrit®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Étanercept</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Enbrel">Enbrel®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Benepali">Benepali®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Erelzi">Erelzi®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Fubelv">Fubelv®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Nepexto">Nepexto®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Filgrastim</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Neupogen">Neupogen®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Accofil">Accofil®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Grastofil">Grastofil®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Nivestim">Nivestim®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ratiograstim">Ratiograstim®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Tevagrastim">Tevagrastim®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Zarzio">Zarzio®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Zefylti">Zefylti®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Follitropine α</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Gonal-F">Gonal-F®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Bemfola">Bemfola®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ovaleap">Ovaleap®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Pegfilgrastim</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Neulasta">Neulasta®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Cegfila">Cegfila®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Dyrupeg">Dyrupeg®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Fulphila">Fulphila®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Grasustek">Grasustek®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Nyvepria">Nyvepria®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Pelgraz">Pelgraz®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Pelmeg">Pelmeg®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Stimufend">Stimufend®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Vivlipeg">Vivlipeg®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ziextenzo">Ziextenzo®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Ranibizumab</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Lucentis">Lucentis®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Byooviz">Byooviz®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ranivisio">Ranivisio®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Rimmyrah">Rimmyrah®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Vislyfa">Vislyfa®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ximluci">Ximluci®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Tériparatide</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Forsteo">Forstéo®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Livogiva">Livogiva®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Movymia">Movymia®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Sondelbay">Sondelbay®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Terrosa">Terrosa®</a>
+        </div></td>
+      </tr>
+      <tr>
+        <td>Ustékinumab</td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Stelara">Stelara®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Imuldosa">Imuldosa®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Otulfi">Otulfi®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Pyzchiva">Pyzchiva®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Steqeyma">Steqeyma®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Usrenty">Usrenty®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Uzpruvo">Uzpruvo®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Wezenla">Wezenla®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Yesintek">Yesintek®</a>
+        </div></td>
+      </tr>
+      <tr class="new">
+        <td>Dénosumab 60 mg <span class="new-tag">JO 17/09/2026</span></td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Prolia">Prolia®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Acvybra">Acvybra®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Conexxence">Conexxence®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Evfraxy">Evfraxy®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Izamby">Izamby®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Jubbonti">Jubbonti®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Kefdensis">Kefdensis®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Obodence">Obodence®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Osvyrti">Osvyrti®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Ponlimsi">Ponlimsi®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Stoboclo">Stoboclo®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Zadenvi">Zadenvi®</a>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Junod®</span>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Osqay®</span>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Rolcya®</span>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Vysribli®</span>
+        </div></td>
+      </tr>
+      <tr class="new">
+        <td>Dénosumab 120 mg <span class="new-tag">JO 17/09/2026</span></td>
+        <td class="col-ref"><div class="pills"><a class="pill" href="offibox://medicaments-nom?q=Xgeva">Xgeva®</a></div></td>
+        <td class="col-bio"><div class="pills">
+          <a class="pill" href="offibox://medicaments-nom?q=Bomyntra">Bomyntra®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Degevma">Degevma®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Denbrayce">Denbrayce®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Enwylma">Enwylma®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Jubereq">Jubereq®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Osenvelt">Osenvelt®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Wyost">Wyost®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Xbonzy">Xbonzy®</a>
+          <a class="pill" href="offibox://medicaments-nom?q=Xbryk">Xbryk®</a>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Bilprevda®</span>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Vevzuo®</span>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Yaxwer®</span>
+          <span class="pill muted" title="Inscrit au JO, non commercialisé en France au 28/09/2026">Zvogra®</span>
+        </div></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">Clic sur un badge (bioréférent bleu ou biosimilaire) : ouvre la fiche produit. Pastilles grises : spécialités inscrites au JO mais non commercialisées en France au 28 septembre 2026.</p>
+</body>
+</html>

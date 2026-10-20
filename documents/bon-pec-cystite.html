@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bon de prise en charge des antibiotiques délivrés sans ordonnance (cystite)</title>
+<style>
+  :root { color-scheme: light; }
+  html, body { margin: 0; background: #e6e6e6; color: #1a1a1a; opacity: 1; }
+  html, body, .sheet, .sign, canvas, input { opacity: 1; }
+  html::before, html::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+  }
+  body {
+    font-family: Calibri, Carlito, "Segoe UI", sans-serif;
+    font-size: 11pt;
+    line-height: 1.28;
+    padding: 16px 0 32px;
+  }
+  .sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+    box-sizing: border-box;
+    padding: 22mm 18mm 16mm;
+  }
+  h1 {
+    margin: 0 0 16px;
+    font-size: 14pt;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    line-height: 1.35;
+  }
+  p { margin: 0; }
+  .who { margin: 0 0 8px; }
+  .stamp { min-height: 1.25em; margin: 0; }
+  .date {
+    text-align: right;
+    margin: 8px 8mm 26px 0;
+  }
+  .patient { margin: 0 0 11px; display: flex; align-items: baseline; gap: 8px; }
+  .patient input.fill {
+    flex: 1 1 auto;
+    min-width: 40mm;
+    border: none;
+    border-bottom: 1px solid #1a1a1a;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    outline: none;
+    padding: 0 2px;
+  }
+  .patient input.fill-age { flex: 0 0 24mm; min-width: 0; }
+  .gap { height: 28px; }
+  .choice { margin: 8px 0 8px 14mm; }
+  .choice input {
+    appearance: none;
+    width: 11px;
+    height: 11px;
+    border: 1px solid #222;
+    margin: 0 8px 0 0;
+    vertical-align: -1px;
+    background: #fff;
+  }
+  .choice input:checked { background: #1a1a1a; }
+  .or { margin: 4px 0 4px 22mm; }
+  .sign-wrap {
+    margin: 28mm 0 0 auto;
+    width: 88mm;
+  }
+  .sign {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 36mm;
+    border: 1px solid #8eafc9;
+    box-sizing: border-box;
+    background: #fff;
+    cursor: crosshair;
+  }
+  .sign[data-signed="1"] {
+    border-color: #1e293b;
+    cursor: default;
+  }
+  .sign-label {
+    padding: 3px 22px 0 8px;
+    font-size: 10.5pt;
+    pointer-events: none;
+  }
+  .sign canvas {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 18mm;
+    touch-action: none;
+  }
+  .sign-clear {
+    display: none;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 2;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 1px solid #1e293b;
+    background: #fff;
+    color: #1a1a1a;
+    font: 14px/16px Calibri, "Segoe UI", sans-serif;
+    cursor: pointer;
+  }
+  .sign[data-signed="1"] .sign-clear { display: block; }
+  .sign-ui {
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+  }
+  .sign-validate,
+  .sign-keep {
+    display: none;
+    margin: 6px 0 0;
+    text-align: right;
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-size: 10.5pt;
+  }
+  .sign-wrap[data-ink="1"] .sign-validate { display: block; }
+  .sign-wrap[data-ask="1"] .sign-keep { display: block; }
+  .sign-ui button {
+    margin-left: 6px;
+    font-family: Spinnaker, "Segoe UI", sans-serif;
+    font-size: 10.5pt;
+    background: #fff;
+    border: 1px solid #1e293b;
+    cursor: pointer;
+  }
+  @media print {
+    html, body { background: #fff; padding: 0; }
+    .sheet { width: auto; min-height: 0; margin: 0; }
+    .sign-clear, .sign-ui, .sign-validate, .sign-keep { display: none !important; }
+    .sign, .sign canvas { cursor: default; }
+    .patient input.fill { border: none; border-bottom: 1px solid #1a1a1a; background: transparent; }
+    .sign img.pec-sign { display: block; width: 100%; height: 22mm; object-fit: contain; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+  <h1>Bon de prise en charge des antibiotiques délivrés sans ordonnance (cystite)</h1>
+  <p class="who">Nom du pharmacien et identification de la structure dans laquelle il exerce<br>(Tampon de l’officine avec nom, adresse, numéro AM)</p>
+  <p class="stamp"><span data-pec="pharmacie"></span></p>
+  <p class="stamp"><span data-pec="adresse"></span></p>
+  <p class="stamp"><span data-pec="ville"></span></p>
+  <p class="date">Date : <span data-pec="date"></span></p>
+  <p class="patient"><span>Nom et prénom du bénéficiaire :</span><input class="fill" name="beneficiaire" autocomplete="off"></p>
+  <p class="patient"><span>Âge du bénéficiaire :</span><input class="fill fill-age" name="age" inputmode="numeric" autocomplete="off"></p>
+  <div class="gap"></div>
+  <p class="choice"><label><input type="checkbox">Fosfomycine trometamol 3g per os en une prise unique</label></p>
+  <p class="or">Ou</p>
+  <p class="choice"><label><input type="checkbox">Pivmecillinam 400mg per os 2 fois par jour pendant 3 jours</label></p>
+  <div class="sign-wrap">
+  <div class="sign" title="Signer avec la souris" data-signed="0">
+    <div class="sign-label">Signature du pharmacien :</div>
+    <button type="button" class="sign-clear" title="Recommencer" data-offibox-no-print>×</button>
+    <canvas></canvas>
+  </div>
+  <div class="sign-ui" data-offibox-no-print>
+  <p class="sign-validate"><button type="button" class="sign-validate-btn">Valider la signature</button></p>
+  <p class="sign-keep">Conserver cette signature pour la prochaine fois ?
+    <button type="button" data-keep="1">Oui</button>
+    <button type="button" data-keep="0">Non</button>
+  </p>
+  </div>
+</div>
+<script type="application/json" id="offibox-pec-signature">""</script>
+<script>
+(function () {
+  var box = document.querySelector('.sign');
+  var wrap = document.querySelector('.sign-wrap');
+  if (!box || !wrap) return;
+  var canvas = box.querySelector('canvas');
+  var clearBtn = box.querySelector('.sign-clear');
+  var ctx = canvas.getContext('2d');
+  var drawing = false;
+  var dirty = false;
+  var saved = '';
+  try {
+    var node = document.getElementById('offibox-pec-signature');
+    saved = JSON.parse((node && node.textContent) || '""') || '';
+  } catch (e) { saved = ''; }
+
+  function post(action, data) {
+    var payload = { type: 'offibox-pec-signature', action: action };
+    if (data) payload.data = data;
+    try {
+      if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+        window.chrome.webview.postMessage(payload);
+      }
+    } catch (e) {}
+  }
+
+  function stylePen() {
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#1a1a1a';
+  }
+
+  function fit(keep) {
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(1, Math.round(rect.width * dpr));
+    var h = Math.max(1, Math.round(rect.height * dpr));
+    if (canvas.width === w && canvas.height === h) return;
+    var prev = keep && box.getAttribute('data-signed') === '1' ? canvas.toDataURL('image/png') : '';
+    canvas.width = w;
+    canvas.height = h;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stylePen();
+    if (prev) paintUrl(prev);
+  }
+
+  function paintUrl(url) {
+    var img = new Image();
+    img.onload = function () {
+      var rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      box.setAttribute('data-signed', '1');
+    };
+    img.src = url;
+  }
+
+  function point(ev) {
+    var rect = canvas.getBoundingClientRect();
+    return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+  }
+
+  canvas.addEventListener('pointerdown', function (ev) {
+    if (box.getAttribute('data-signed') === '1') return;
+    if (ev.button !== 0) return;
+    fit(false);
+    drawing = true;
+    dirty = true;
+    try { canvas.setPointerCapture(ev.pointerId); } catch (e) {}
+    var p = point(ev);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x + 0.2, p.y);
+    ctx.stroke();
+    ev.preventDefault();
+  });
+  canvas.addEventListener('pointermove', function (ev) {
+    if (!drawing) return;
+    var p = point(ev);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  });
+  function endStroke() {
+    if (!drawing) return;
+    drawing = false;
+    if (!dirty) return;
+    if (box.getAttribute('data-signed') === '1') return;
+    wrap.setAttribute('data-ink', '1');
+  }
+  canvas.addEventListener('pointerup', endStroke);
+  canvas.addEventListener('pointercancel', endStroke);
+
+  var validateBtn = wrap.querySelector('.sign-validate-btn');
+  if (validateBtn) {
+    validateBtn.addEventListener('click', function () {
+      if (!dirty || box.getAttribute('data-signed') === '1') return;
+      box.setAttribute('data-signed', '1');
+      wrap.removeAttribute('data-ink');
+      var url = canvas.toDataURL('image/png');
+      if (url !== saved) wrap.setAttribute('data-ask', '1');
+    });
+  }
+
+  clearBtn.addEventListener('click', function () {
+    var rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    dirty = false;
+    box.setAttribute('data-signed', '0');
+    wrap.removeAttribute('data-ink');
+    wrap.removeAttribute('data-ask');
+    saved = '';
+    post('clear');
+  });
+
+  wrap.addEventListener('click', function (ev) {
+    var btn = ev.target.closest ? ev.target.closest('button[data-keep]') : null;
+    if (!btn) return;
+    if (btn.getAttribute('data-keep') === '1') {
+      saved = canvas.toDataURL('image/png');
+      post('save', saved);
+    }
+    wrap.removeAttribute('data-ask');
+  });
+
+  function whenLaidOut(done) {
+    var tries = 0;
+    function tick() {
+      var rect = canvas.getBoundingClientRect();
+      if (rect.width > 8 && rect.height > 8) {
+        fit(false);
+        done();
+        return;
+      }
+      if (tries++ > 20) return;
+      setTimeout(tick, 50);
+    }
+    tick();
+  }
+  whenLaidOut(function () {
+    if (saved.indexOf('data:image/png;base64,') === 0) paintUrl(saved);
+  });
+})();
+</script>
+</main>
+</body>
+</html>

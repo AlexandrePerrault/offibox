@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistance à distance – Offibox</title>
+  <meta name="description" content="Assistance à distance Offibox : laissez un technicien installer ou configurer Offibox sur votre poste, avec votre accord.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --white: #ffffff;
+      --gray: #334155;
+      --gray-light: #e2e8f0;
+      --muted: #64748b;
+      --offi-teal: #5A9094;
+      --offi-teal-dark: #4a7a7e;
+      --bg: #f7f5f1;
+      --ok: #166534;
+      --ok-bg: #ecfdf3;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(90, 144, 148, 0.12), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(90, 144, 148, 0.08), transparent 50%),
+        var(--bg);
+      color: var(--gray);
+      padding: 2rem 1.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .wrap { width: 100%; max-width: 720px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 1.75rem; }
+    .header h1 { font-size: 1.65rem; font-weight: 700; color: var(--gray); }
+    .header .brand { color: var(--offi-teal); font-weight: 600; }
+    .header .lead {
+      margin-top: 0.75rem;
+      font-size: 1.02rem;
+      color: var(--muted);
+      max-width: 34rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .card {
+      background: var(--white);
+      padding: 2rem 2.25rem;
+      border-radius: 18px;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--gray-light);
+    }
+    .card h2 {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--offi-teal);
+      margin: 1.6rem 0 0.55rem;
+    }
+    .card h2:first-child { margin-top: 0; }
+    .card p, .card ol, .card ul { margin-bottom: 0.9rem; font-size: 0.96rem; }
+    .card ol, .card ul { padding-left: 1.35rem; }
+    .card li { margin-bottom: 0.4rem; }
+    .card a { color: var(--offi-teal); font-weight: 600; text-decoration: none; }
+    .card a:hover { text-decoration: underline; }
+
+    .cta-box {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.85rem;
+      margin: 1.25rem 0 0.5rem;
+      padding: 1.15rem 1.2rem;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #f3fafb 0%, #eef6f7 100%);
+      border: 1px solid #d5e6e8;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 48px;
+      padding: 0.85rem 1.35rem;
+      border-radius: 12px;
+      background: var(--offi-teal);
+      color: #fff !important;
+      font-size: 1.02rem;
+      font-weight: 700;
+      text-decoration: none !important;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .cta-btn:hover { background: var(--offi-teal-dark); }
+    .cta-note { font-size: 0.9rem; color: var(--muted); text-align: center; margin: 0; }
+
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      padding-left: 0;
+    }
+    .steps li {
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 1rem;
+      min-height: 2.2rem;
+    }
+    .steps li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0.1rem;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 999px;
+      background: var(--offi-teal);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .trust {
+      margin-top: 0.5rem;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: var(--ok-bg);
+      border: 1px solid #bbf7d0;
+      color: var(--ok);
+      font-size: 0.92rem;
+    }
+
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .checklist li {
+      padding-left: 1.6rem;
+      position: relative;
+      margin-bottom: 0.45rem;
+    }
+    .checklist li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--offi-teal);
+      font-weight: 700;
+    }
+
+    .contact-box {
+      margin-top: 0.5rem;
+      padding: 0.9rem 1rem;
+      border-left: 3px solid var(--offi-teal);
+      background: #f8fafc;
+      border-radius: 0 10px 10px 0;
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 1.75rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0.35rem;
+      padding: 0.6rem 1.2rem;
+      background: var(--white);
+      border: 2px solid var(--offi-teal);
+      border-radius: 12px;
+      color: var(--offi-teal);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .back-link:hover { background: var(--offi-teal); color: var(--white); }
+
+    .footnote {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 1.25rem 1rem 2rem; }
+      .card { padding: 1.4rem 1.2rem; }
+      .header h1 { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <h1>Assistance à distance – <span class="brand">Offi</span>box</h1>
+      <p class="lead">
+        Un technicien Offibox peut installer ou configurer le logiciel sur votre poste,
+        <strong>uniquement avec votre accord</strong>, pendant une session guidée.
+      </p>
+    </header>
+
+    <main class="card">
+      <h2>Lancer l’assistance</h2>
+      <p>
+        Pendant un rendez-vous téléphonique ou par e-mail avec Offibox, ouvrez cette page
+        et cliquez sur le bouton ci-dessous. Un petit outil d’assistance se télécharge :
+        acceptez-le, puis communiquez le code affiché à votre interlocuteur.
+      </p>
+
+      <div class="cta-box">
+        <!--
+          Téléchargement direct AnyDesk Windows (exe).
+          Exemples :
+          - AnyDesk invitation / client custom
+          - https://get.teamviewer.com/offibox (QuickSupport personnalisé)
+        -->
+        <a
+          class="cta-btn"
+          id="assistance-download"
+          href="https://anydesk.com/fr/downloads/thank-you?dv=win_exe"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Télécharger l’outil d’assistance
+        </a>
+        <p class="cta-note">
+          Windows uniquement · session ponctuelle · aucune installation permanente obligatoire
+        </p>
+      </div>
+
+      <div class="trust">
+        L’accès s’arrête dès que vous fermez la session. Aucune prise en main n’est possible
+        sans votre validation à l’écran.
+      </div>
+
+      <h2>Comment ça se passe ?</h2>
+      <ol class="steps">
+        <li>
+          Prenez rendez-vous avec Offibox
+          (<a href="mailto:contact@offibox.fr?subject=Assistance%20%C3%A0%20distance%20Offibox">contact@offibox.fr</a>
+          ou par téléphone.
+        </li>
+        <li>Cliquez sur <strong>Télécharger l’outil d’assistance</strong> et lancez le fichier.</li>
+        <li>Communiquez le <strong>code</strong> affiché à votre technicien Offibox.</li>
+        <li>Acceptez la demande de prise en main lorsqu’elle apparaît à l’écran.</li>
+        <li>
+          Le technicien installe / configure Offibox (clé API, WebView2 si besoin),
+          puis vous refermez la session ensemble.
+        </li>
+      </ol>
+
+      <h2>Avant de commencer</h2>
+      <ul class="checklist">
+        <li>Être devant le PC Windows de l’officine</li>
+        <li>Disposer d’un accès administrateur (ou d’une personne habilité)</li>
+        <li>Avoir votre <strong>clé Offibox</strong> sous la main (reçue à l’inscription)</li>
+        <li>Autoriser temporairement le téléchargement si l’antivirus le demande</li>
+        <li>Prévoir 10 à 20 minutes selon la connexion</li>
+      </ul>
+
+      <h2>Ce que nous pouvons faire pendant la session</h2>
+      <ul>
+        <li>Installer ou mettre à jour Offibox</li>
+        <li>Saisir / vérifier la clé de première connexion</li>
+        <li>Vérifier WebView2, le démarrage Windows, les mises à jour</li>
+        <li>Vous montrer les gestes essentiels (pilule, recherche, Mon compte)</li>
+      </ul>
+
+      <h2>Confidentialité</h2>
+      <p>
+        La session est destinée uniquement à l’assistance technique Offibox.
+        Fermez les logiciels contenant des données patients avant de démarrer si vous le souhaitez.
+        Vous pouvez couper la session à tout moment.
+      </p>
+
+      <h2>Besoin d’aide pour démarrer ?</h2>
+      <div class="contact-box">
+        <strong>SARL OFFIBOX</strong><br>
+        E-mail :
+        <a href="mailto:contact@offibox.fr?subject=Assistance%20%C3%A0%20distance%20Offibox">contact@offibox.fr</a><br>
+        Site : <a href="https://www.offibox.fr">www.offibox.fr</a>
+      </div>
+    </main>
+
+    <p class="links">
+      <a class="back-link" href="https://www.offibox.fr">Retour à l’accueil</a>
+      <a class="back-link" href="mailto:contact@offibox.fr">Écrire au support</a>
+    </p>
+
+    <p class="footnote">
+      Page d’assistance Offibox — destinée aux professionnels de santé.<br>
+      Remplacez le lien du bouton par votre URL AnyDesk / TeamViewer QuickSupport.
+    </p>
+  </div>
+</body>
+</html>

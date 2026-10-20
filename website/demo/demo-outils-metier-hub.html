@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Démo Offibox – Barre hoverpill & sous-menus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spinnaker&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5A9094;
+      --primary-hover: rgba(90, 144, 148, 0.92);
+      --pill-border-rest: #C7C7CC;
+      --hub-green: #1B6B4F;
+      --hub-orange: #D97706;
+      --hub-orange-shadow: rgba(217, 119, 6, 0.2);
+      --toggle-green: #2E7D32;
+      --text: #334155;
+      --text-muted: #64748b;
+      --acc-l0: #F2F2F7;
+      --acc-l1: #FFFFFF;
+      --acc-l2: #EBEBF0;
+      --acc-border: rgba(0, 0, 0, 0.1);
+      --white: #fff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Spinnaker', sans-serif;
+      background: transparent;
+      color: var(--text);
+    }
+    .demo-wrap {
+      position: relative;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 8px 12px 24px;
+    }
+
+    /* Barre principale */
+    .app-bar {
+      background: var(--white);
+      border-radius: 15px;
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 4px 10px rgba(0,0,0,.14);
+      overflow: hidden;
+    }
+    .bar-inner {
+      display: flex;
+      flex-direction: column;
+    }
+    /* Zone fixe : infos + recherche + hoverpills — le logo y est ancré (comme l’app). */
+    .bar-chrome {
+      position: relative;
+      padding: 8px 68px 6px 8px;
+      min-width: 0;
+    }
+    /* Menu « + » rendu sous .app-bar (évite overflow:hidden de la carte). */
+    #flyout-plus.plus-flyout-portal {
+      position: relative;
+      top: auto;
+      left: auto;
+      right: auto;
+      display: none;
+      margin-top: -1px;
+      z-index: 60;
+    }
+    #flyout-plus.plus-flyout-portal.visible {
+      display: block;
+    }
+    .demo-wrap.plus-menu-open,
+    .demo-wrap.hamburger-menu-open {
+      padding-bottom: 8px;
+    }
+    /* Menu hamburger hors .app-bar — sous la barre, flèche sous le bouton ☰ */
+    #flyout-hamburger.hamburger-flyout-portal {
+      position: absolute;
+      top: auto;
+      left: auto;
+      right: auto;
+      display: none;
+      width: 224px;
+      max-height: none;
+      overflow: visible;
+      z-index: 60;
+    }
+    #flyout-hamburger.hamburger-flyout-portal.visible {
+      display: block;
+    }
+    .bar-panels {
+      padding: 0 68px 10px 8px;
+      min-width: 0;
+    }
+    .bar-logo {
+      position: absolute;
+      right: 4px;
+      /* Centré sur la ligne recherche uniquement (pas le panneau déployé). */
+      top: calc(8px + 44px + 18px);
+      transform: translateY(-50%);
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid #e2e8f0;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .bar-logo img { width: 48px; height: 48px; object-fit: contain; }
+
+    /* Ticker */
+    .info-bar {
+      height: 38px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .info-toggle {
+      width: 27px; height: 17px;
+      background: #34C759;
+      border-radius: 9px;
+      flex-shrink: 0;
+      border: 1.5px solid #fff;
+      position: relative;
+    }
+    .info-toggle::before {
+      content: '';
+      position: absolute;
+      top: 1px; left: 2px;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .info-date {
+      height: 19px;
+      padding: 2.5px 8px;
+      background: #37474F;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .info-infos {
+      height: 19px;
+      padding: 2.5px 8px;
+      background: #4E8A72;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .info-scroll { flex: 1; overflow: hidden; min-width: 0; }
+    .info-scroll-inner {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      animation: ticker 28s linear infinite;
+    }
+    .ticker-badge {
+      height: 19px;
+      padding: 2.5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .ticker-badge.dgs { background: #B71C1C; }
+    .ticker-badge.ansm { background: #1565C0; }
+    .ticker-badge.alert { background: #E65100; border: 1px solid #E65100; }
+    .ticker-dot { color: #94a3b8; font-size: 9px; padding: 0 4px; }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Ligne recherche */
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .search-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .search-tool-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .search-btn-round {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      font-family: inherit;
+    }
+    .search-btn-plus {
+      background: #E8F5F4;
+      color: #5A9094;
+    }
+    .search-btn-plus:hover,
+    .search-btn-plus.active {
+      background: #5A9094;
+      color: #fff;
+    }
+    .search-btn-plus .plus-glyph {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 1;
+      margin-top: -1px;
+    }
+    .search-btn-scan {
+      background: #2BB9C5;
+      color: #fff;
+    }
+    .search-btn-scan:hover,
+    .search-btn-scan.active {
+      background: #fff;
+      color: #2BB9C5;
+      box-shadow: inset 0 0 0 1.5px #2BB9C5;
+    }
+    .search-btn-scan svg { width: 21px; height: 21px; }
+    .search-btn-round.teal { background: var(--primary); color: #fff; }
+    .search-btn-round.red { background: #dc2626; color: #fff; }
+    .search-btn-round svg { width: 18px; height: 18px; }
+    /* Popup menus — même style que HamburgerMenu / menu de droite (app) */
+    .offibox-popup-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% - 1px);
+      width: 224px;
+      z-index: 50;
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+      padding: 6px 4px;
+      list-style: none;
+    }
+    .offibox-popup-menu.anchor-left { left: 0; }
+    .offibox-popup-menu.anchor-right { left: auto; right: 0; }
+    .offibox-popup-menu.visible { display: block; }
+    .offibox-popup-menu::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-left: 1px solid #E2E8F0;
+      border-top: 1px solid #E2E8F0;
+      transform: rotate(45deg);
+      z-index: 1;
+    }
+    .offibox-popup-menu.anchor-left::before { left: 12px; }
+    .offibox-popup-menu.anchor-right::before { left: auto; right: 12px; }
+    .offibox-menu-divider {
+      height: 1px;
+      margin: 2px 8px;
+      background: #E2E8F0;
+    }
+    .offibox-menu-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+      padding: 0 3px;
+      margin: 0;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+      animation: menuItemIn 0.18s ease-out backwards;
+    }
+    .offibox-menu-row:nth-child(1) { animation-delay: 0ms; }
+    .offibox-menu-row:nth-child(2) { animation-delay: 32ms; }
+    .offibox-menu-row:nth-child(3) { animation-delay: 64ms; }
+    .offibox-menu-row:nth-child(4) { animation-delay: 96ms; }
+    .offibox-menu-row:nth-child(5) { animation-delay: 128ms; }
+    .offibox-menu-row:nth-child(6) { animation-delay: 160ms; }
+    .offibox-menu-row:nth-child(7) { animation-delay: 192ms; }
+    .offibox-menu-row:nth-child(8) { animation-delay: 224ms; }
+    .offibox-menu-row:nth-child(9) { animation-delay: 256ms; }
+    .offibox-menu-row:nth-child(10) { animation-delay: 288ms; }
+    @keyframes menuItemIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .offibox-menu-row:hover {
+      background: #5A9094;
+    }
+    .offibox-menu-icon {
+      width: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .offibox-menu-icon svg {
+      width: 20px;
+      height: 20px;
+      color: #5A9094;
+      transition: color 0.12s ease;
+    }
+    .offibox-menu-label {
+      flex: 1;
+      min-width: 0;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #424242;
+      line-height: 1.2;
+      transition: color 0.12s ease;
+    }
+    .offibox-menu-row:hover .offibox-menu-label,
+    .offibox-menu-row:hover .offibox-menu-icon svg,
+    .offibox-menu-row:hover .offibox-menu-icon > span {
+      color: #fff;
+    }
+    .offibox-menu-label .brand-offi { color: #5A9094; font-weight: 700; }
+    .offibox-menu-label .brand-box { color: #616161; font-weight: 700; }
+    .offibox-menu-label .brand-id { color: #2E7D32; font-weight: 700; }
+    .offibox-menu-row:hover .offibox-menu-label .brand-offi,
+    .offibox-menu-row:hover .offibox-menu-label .brand-box,
+    .offibox-menu-row:hover .offibox-menu-label .brand-id {
+      color: #fff;
+    }
+    .search-btn-menu.active {
+      background: #5A9094;
+      color: #fff;
+    }
+    /* Badges numérisation sous la barre */
+    .scan-badges-bar {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 8px;
+      padding: 0;
+      animation: panelIn 0.22s ease-out;
+    }
+    .scan-badges-bar.visible { display: flex; }
+    .scan-action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 31px;
+      padding: 0 12px;
+      border-radius: 16px;
+      border: 1.5px solid var(--primary);
+      background: #fff;
+      color: var(--primary);
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .scan-action-pill svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .scan-action-pill:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+    /* Dialogue « Démarrer la numérisation ? » (comme showOffiboxConfirmDialog) */
+    .scan-confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 28px;
+      background: rgba(0, 0, 0, 0.48);
+    }
+    .scan-confirm-overlay.visible {
+      display: flex;
+    }
+    .scan-confirm-dialog {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fff 0%, #fdfefe 55%, #f3f7f8 100%);
+      border: 1.4px solid rgba(90, 144, 148, 0.45);
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+      font-family: 'Spinnaker', sans-serif;
+    }
+    .scan-confirm-dialog::before {
+      content: '';
+      display: block;
+      height: 4px;
+      background: linear-gradient(90deg, #5A9094, #4A7A7E);
+    }
+    .scan-confirm-body {
+      padding: 22px 22px 10px;
+      text-align: center;
+      font-size: 17px;
+      line-height: 1.35;
+      color: #424242;
+    }
+    .scan-confirm-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      padding: 8px 14px 20px;
+    }
+    .scan-confirm-pill {
+      height: 32px;
+      border-radius: 16px;
+      border: 1px solid var(--primary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
+      transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+    }
+    .scan-confirm-pill.teal {
+      background: var(--primary);
+      color: #fff;
+    }
+    .scan-confirm-pill.teal:hover {
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+    }
+    .scan-confirm-pill.outline {
+      background: #fff;
+      color: var(--primary);
+    }
+    .scan-confirm-pill.outline:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+    .search-input-wrap { flex: 1; min-width: 0; }
+    .search-input {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text-muted);
+      background: #fff;
+    }
+
+    /* Hoverpills — fidèle searchQuickTabBarStyle */
+    .quick-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      min-height: 28px;
+    }
+    .quick-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 28px;
+      padding: 0 7px;
+      border-radius: 14px;
+      border: 1px solid var(--pill-border-rest);
+      background: var(--white);
+      color: var(--primary);
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.12px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 160ms ease-out, color 160ms ease-out, border-color 160ms ease-out;
+      white-space: nowrap;
+    }
+    .quick-tab svg.icon { width: 14px; height: 14px; flex-shrink: 0; }
+    .quick-tab:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .quick-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .quick-tab.active:hover {
+      background: var(--primary-hover);
+    }
+    .quick-tab.action-filled {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Panneau sous-menu (hub) */
+    .sub-panel {
+      display: none;
+      margin-top: 10px;
+      animation: panelIn 0.25s ease-out;
+    }
+    .sub-panel.visible { display: block; }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hub-shell {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid rgba(90, 144, 148, 0.35);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      max-height: 520px;
+      display: flex;
+      flex-direction: column;
+    }
+    .hub-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 8px 8px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      background: var(--acc-l1);
+    }
+    .hub-header-title {
+      flex: 1;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: pointer;
+      letter-spacing: 0.02em;
+    }
+
+    /* Croix fermante rouge — OffiboxCloseCrossButton (#D32F2F) */
+    .close-cross-btn {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      border-radius: 50%;
+      border: 1.5px solid #D32F2F;
+      background: #D32F2F;
+      color: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+      transition: background 140ms ease-out, color 140ms ease-out, box-shadow 140ms ease-out;
+      padding: 0;
+    }
+    .close-cross-btn:hover {
+      background: #fff;
+      color: #D32F2F;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
+    .close-cross-btn svg { width: 15px; height: 15px; pointer-events: none; }
+
+    .hub-scroll {
+      overflow-y: auto;
+      padding: 8px 12px 12px;
+      background: var(--acc-l0);
+    }
+
+    /* Accordéon hub — coque OffiboxGreenAccordionShell */
+    .acc {
+      margin-bottom: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      border: 1px solid var(--acc-border);
+      background: var(--acc-l1);
+      transition: box-shadow 0.2s;
+    }
+    .acc.open { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .acc-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px 4px 12px;
+      background: var(--acc-l1);
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+    .acc-head:hover { background: #fafafa; }
+    .title-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .title-badge.sm { font-size: 10.5px; padding: 4px 9px; }
+    .acc-head-titles {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Sous-badges carrés (squareTagWidget — Cespharm, Pharmacopée…) */
+    .hub-square-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+      color: #fff;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .hub-square-tag-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .hub-square-tag-row .hub-italic {
+      flex: 1;
+      margin: 0;
+      text-align: center;
+    }
+    .hub-source-box {
+      padding: 8px 10px;
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 11.5px;
+      color: #424242;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+    .hub-source-box em { font-style: italic; color: #616161; }
+    .hub-source-box strong { font-weight: 600; }
+    .hub-inner-section {
+      background: var(--acc-l0);
+      border-radius: 12px;
+      border: 1px solid var(--acc-border);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .hub-inner-section-head {
+      padding: 8px 10px;
+      background: var(--acc-l1);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .hub-inner-section-body { padding: 8px 10px 10px; }
+    .hub-body-sub-badge {
+      display: inline-flex;
+      margin: 4px 0 6px;
+    }
+    /* Calculette BGE — margin_calculator_panel.dart */
+    .margin-calc-shell {
+      background: #fafcfa;
+      border: 1.2px solid #6b9e3e;
+      border-radius: 6px;
+      padding: 10px;
+    }
+    .margin-calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 560px) {
+      .margin-calc-grid { grid-template-columns: 1fr; }
+    }
+    .margin-calc-col h4 {
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0 0 6px;
+    }
+    .margin-field-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .margin-field-row label {
+      flex: 11;
+      text-align: right;
+      font-size: 11px;
+      font-weight: 600;
+      color: #424242;
+      line-height: 1.2;
+    }
+    .margin-field-row .margin-input,
+    .margin-field-row .margin-pill-select {
+      flex: 10;
+      min-width: 0;
+      height: 32px;
+      border-radius: 6px;
+      border: 1.2px solid #7eb8da;
+      background: #fff;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 8px;
+      color: #1e293b;
+    }
+    .margin-pill-select {
+      display: flex;
+      align-items: center;
+      cursor: default;
+      color: var(--primary);
+    }
+    .margin-field-row .margin-input[readonly] {
+      background: #f8fafc;
+      color: #334155;
+    }
+    .margin-calc-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .margin-calc-actions .margin-spacer { flex: 11; }
+    .btn-calc-orange {
+      flex: 10;
+      height: 32px;
+      border: none;
+      border-radius: 8px;
+      background: #e76f00;
+      color: #fff;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: default;
+      box-shadow: 0 2px 8px rgba(231,111,0,0.25);
+    }
+    .videos-search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .videos-search-row .outline-field {
+      flex: 1;
+      min-width: 140px;
+      min-height: 44px;
+    }
+    .videos-search-row .outline-field.narrow { max-width: 228px; flex: 0 1 228px; }
+    /* Flèche accordéon — OffiboxAccordionArrowButton vert #1B6B4F */
+    .acc-arrow {
+      margin-left: auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid var(--hub-green);
+      background: var(--hub-green);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+      transition: transform 220ms ease-in-out;
+    }
+    .acc.open .acc-arrow { transform: rotate(180deg); }
+    .acc-arrow svg { width: 14px; height: 14px; }
+    .acc-body {
+      display: none;
+      background: var(--acc-l2);
+      border-top: 1px solid rgba(0,0,0,0.06);
+      padding: 8px 12px 10px;
+      animation: accBodyIn 0.22s ease-out;
+    }
+    .acc.open .acc-body { display: block; }
+    @keyframes accBodyIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Sous-badges hub Annuaires / Laboratoires — hoverpill teal */
+    .hub-sub-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .hub-sub-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 30px;
+      padding: 0 8px;
+      border-radius: 15px;
+      border: 1px solid var(--pill-border-rest);
+      background: #fff;
+      color: var(--primary);
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12px;
+      cursor: pointer;
+      transition: background 160ms, color 160ms, border-color 160ms;
+      white-space: nowrap;
+    }
+    .hub-sub-pill svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .hub-sub-pill:hover,
+    .hub-sub-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Grille champs Médicaments — pills vert hub */
+    .sub-pill-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .sub-pill-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--pill-border-rest);
+      background: #fff;
+      color: var(--hub-green);
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: background 160ms, color 160ms, border-color 160ms, box-shadow 160ms;
+    }
+    .sub-pill-field svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+    .sub-pill-field .sub-pill-hint {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #64748b;
+      font-size: 10px;
+    }
+    .sub-pill-field:hover {
+      border-color: var(--hub-green);
+      color: var(--hub-green);
+    }
+    .sub-pill-field.active {
+      background: var(--hub-green);
+      border-color: var(--hub-green);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(27,107,79,0.25);
+    }
+    .sub-pill-field.active .sub-pill-hint { color: rgba(255,255,255,0.9); }
+    .btn-search-green {
+      flex-shrink: 0;
+      height: 28px;
+      min-width: 118px;
+      padding: 0 12px;
+      border: 1.5px solid var(--hub-green);
+      border-radius: 14px;
+      background: var(--hub-green);
+      color: #fff;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(27, 107, 79, 0.22);
+      white-space: nowrap;
+    }
+    .btn-search-green svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* Badge Rechercher orange — HoverPillButton (Codes, Médicaments, Outils métier…) */
+    .btn-search-orange {
+      flex-shrink: 0;
+      height: 28px;
+      min-width: 118px;
+      padding: 0 12px;
+      border: 1.5px solid var(--hub-orange);
+      border-radius: 14px;
+      background: var(--hub-orange);
+      color: #fff;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px var(--hub-orange-shadow);
+      white-space: nowrap;
+    }
+    .btn-search-orange svg { width: 14px; height: 14px; flex-shrink: 0; }
+    #meds-pill-grid .btn-search-orange,
+    #meds-pill-grid .btn-search-green {
+      min-height: 34px;
+      height: 34px;
+      border-radius: 12px;
+      width: 100%;
+    }
+    .btn-search-orange.block { width: 100%; min-height: 34px; height: 34px; border-radius: 12px; }
+
+    .outline-field.accent-cip { border-color: #1565C0; }
+    .outline-field.accent-cip label { color: #1565C0; }
+    .outline-field.accent-lpp { border-color: #7B1FA2; }
+    .outline-field.accent-lpp label { color: #7B1FA2; }
+    .outline-field.accent-ean { border-color: #00796B; }
+    .outline-field.accent-ean label { color: #00796B; }
+    .outline-field.accent-rpps { border-color: #E65100; }
+    .outline-field.accent-rpps label { color: #E65100; }
+    .outline-field.accent-acte { border-color: #2E7D32; }
+    .outline-field.accent-acte label { color: #2E7D32; }
+    .outline-field.accent-liste { border-color: #1B6B4F; }
+    .outline-field.accent-liste label { color: #1B6B4F; }
+
+    /* Contenu sous-menu recherche */
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .toggle-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #424242;
+    }
+    .toggle-switch {
+      width: 36px; height: 20px;
+      border-radius: 10px;
+      background: #cbd5e1;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-switch.on { background: rgba(46,125,50,0.45); }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle-switch.on::after {
+      transform: translateX(16px);
+      background: var(--toggle-green);
+    }
+    .field-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      margin-bottom: 10px;
+    }
+    .outline-field {
+      flex: 1;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #fff;
+    }
+    .outline-field label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .outline-field input {
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 14px;
+      width: 100%;
+      background: transparent;
+    }
+    .btn-orange {
+      min-width: 118px;
+      height: 28px;
+      border: 1.5px solid var(--hub-orange);
+      border-radius: 14px;
+      background: var(--hub-orange);
+      color: #fff;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15px;
+      cursor: default;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px var(--hub-orange-shadow);
+      flex-shrink: 0;
+    }
+    .list-trigger {
+      width: 100%;
+      min-height: 60px;
+      border: 1.5px solid var(--primary);
+      border-radius: 12px;
+      background: rgba(90,144,148,0.06);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: default;
+    }
+    .list-trigger svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .hub-italic {
+      text-align: center;
+      font-size: 12px;
+      font-style: italic;
+      color: #424242;
+      margin: 8px 0 4px;
+    }
+
+    /* Autres sous-menus */
+    .sub-placeholder {
+      padding: 14px;
+      background: var(--acc-l2);
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      border: 1px solid var(--acc-border);
+    }
+
+    .hidden { display: none !important; }
+
+    /* Grille logos laboratoires — LaboratoiresPanelBelowBar */
+    .lab-search-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      margin-bottom: 10px;
+    }
+    .lab-search-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #fff;
+    }
+    .lab-search-field svg { width: 17px; height: 17px; flex-shrink: 0; color: var(--primary); }
+    .lab-search-field input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: 'Spinnaker', sans-serif;
+      font-size: 13px;
+      background: transparent;
+    }
+    .lab-search-field input::placeholder {
+      font-size: 12px;
+      color: #94a3b8;
+      font-style: italic;
+    }
+    .lab-grid-wrap {
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 0 4px;
+    }
+    .lab-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .lab-badge {
+      min-height: 52px;
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid rgba(90, 144, 148, 0.55);
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 160ms, box-shadow 160ms;
+    }
+    .lab-badge:hover {
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(90, 144, 148, 0.15);
+    }
+    .lab-badge.selected {
+      border: 2.2px solid var(--primary);
+      box-shadow: 0 2px 8px rgba(90, 144, 148, 0.2);
+    }
+    .lab-badge img {
+      max-width: 100%;
+      max-height: 42px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+    .lab-badge .lab-fallback {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--primary);
+      text-align: center;
+      line-height: 1.1;
+      padding: 2px;
+    }
+    .lab-grid-empty {
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+      font-family: 'Spinnaker', sans-serif;
+    }
+
+    @media (max-width: 900px) {
+      .sub-pill-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .field-row { flex-direction: column; }
+      .btn-orange { min-height: 44px; }
+      .sub-pill-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap" id="demo-wrap">
+    <div class="app-bar">
+      <div class="bar-inner">
+        <div class="bar-chrome">
+          <div class="bar-logo">
+            <img id="logo-img" src="offibox-logo-box.png" alt="Offibox" referrerpolicy="no-referrer">
+          </div>
+          <div class="info-bar">
+            <div class="info-toggle"></div>
+            <div class="info-date" id="info-date"></div>
+            <div class="info-infos">INFOS</div>
+            <div class="info-scroll">
+              <div class="info-scroll-inner">
+                <span class="ticker-badge alert">ANSM Tension d'approvisionnement</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge ansm">ANSM Informations de sécurité</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge alert">ANSM Tension d'approvisionnement</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge ansm">ANSM Informations de sécurité</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-badge dgs">DGS-Urgent</span>
+                <span class="ticker-dot">•</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="search-row">
+            <div class="search-tools">
+              <div class="search-tool-wrap">
+                <button type="button" class="search-btn-round search-btn-plus" id="btn-plus" title="Actualités, bloc-note, e-mail…" aria-expanded="false" aria-haspopup="true">
+                  <span class="plus-glyph" aria-hidden="true">+</span>
+                </button>
+              </div>
+              <div class="search-tool-wrap">
+                <button type="button" class="search-btn-round search-btn-scan" id="btn-scan" title="Numérisation" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" d="M5 9V5h4M19 9V5h-4M5 15v4h4M19 15v4h-4"/>
+                    <rect x="7.25" y="8.25" width="9.5" height="9.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <rect x="9.5" y="10.75" width="5" height="1.1" rx="0.3"/>
+                    <rect x="9.5" y="13.25" width="5" height="1.1" rx="0.3"/>
+                    <rect x="9.5" y="15.75" width="3.2" height="1.1" rx="0.3"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="search-input-wrap">
+              <input type="text" class="search-input" readonly placeholder="Rechercher un code, un médicament, un mot-clé, dans l'annuaire, scanner un code…">
+            </div>
+            <button type="button" class="search-btn-round red" title="Effacer">×</button>
+            <div class="search-tool-wrap menu-anchor-right">
+              <button type="button" class="search-btn-round teal search-btn-menu" id="btn-hamburger" title="Menu" aria-expanded="false" aria-haspopup="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="scan-badges-bar" id="scan-badges-bar" aria-hidden="true">
+            <button type="button" class="scan-action-pill" title="Enregistrer le PDF sur ce poste">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Enregistrer en PDF
+            </button>
+            <button type="button" class="scan-action-pill" title="Partager le document scanné">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Partager le document
+            </button>
+          </div>
+
+          <div class="quick-tabs" id="quick-tabs">
+            <button type="button" class="quick-tab" data-tab="outils">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Outils métier
+            </button>
+            <button type="button" class="quick-tab" data-tab="medicaments">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+              Médicaments
+            </button>
+            <button type="button" class="quick-tab" data-tab="parapharmacie">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5S12 7 12 7s-2 1.5-4 3.5S5 15 5 15a7 7 0 0 0 7 7z"/></svg>
+              Parapharmacie
+            </button>
+            <button type="button" class="quick-tab" data-tab="dm">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 11 2-2 3 3-2 2-3-3Z"/><path d="m9 14-2 2-3-3 2-2 3 3Z"/><path d="m15 8 2-2 3 3-2 2-3-3Z"/></svg>
+              DM
+            </button>
+            <button type="button" class="quick-tab" data-tab="codes">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20h16V2H4z"/><path d="M8 6h8M8 10h8M8 14h5"/></svg>
+              Codes
+            </button>
+            <button type="button" class="quick-tab" data-tab="annuaires">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Annuaires
+            </button>
+            <button type="button" class="quick-tab" data-tab="laboratoires">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.5L4.5 20A2 2 0 0 0 6.4 22h11.2a2 2 0 0 0 1.9-2L14 9.5V2"/><path d="M8.5 2h7"/></svg>
+              Laboratoires
+            </button>
+            <button type="button" class="quick-tab" data-tab="recos">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              RECOS
+            </button>
+            <button type="button" class="quick-tab action-filled" id="btn-wide" data-tab="wide">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Tout désélectionner
+            </button>
+          </div>
+
+        </div>
+
+        <div class="bar-panels">
+
+          <!-- Panneau Outils métier -->
+          <div class="sub-panel" id="panel-outils">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title" id="hub-reset">OUTILS MÉTIER</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll" id="hub-accordions"></div>
+            </div>
+          </div>
+
+          <!-- Médicaments -->
+          <div class="sub-panel" id="panel-medicaments">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title">MÉDICAMENTS</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll">
+                <div class="sub-pill-grid" id="meds-pill-grid">
+                  <button type="button" class="sub-pill-field" data-med="nom">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/></svg>
+                    <span class="sub-pill-hint">Nom commercial…</span>
+                  </button>
+                  <button type="button" class="sub-pill-field" data-med="code">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg>
+                    <span class="sub-pill-hint">Code (CIP7 / CIP13 / QR-code)…</span>
+                  </button>
+                  <button type="button" class="sub-pill-field" data-med="dci">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 9a3 3 0 0 0-3-3 3 3 0 0 0-3 3v8h6V9Z"/><path d="M12 6V3"/></svg>
+                    <span class="sub-pill-hint">Composition (DCI…)…</span>
+                  </button>
+                  <button type="button" class="sub-pill-field" data-med="weleda">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5S12 7 12 7s-2 1.5-4 3.5S5 15 5 15a7 7 0 0 0 7 7z"/></svg>
+                    <span class="sub-pill-hint">Formule Weleda…</span>
+                  </button>
+                  <button type="button" class="sub-pill-field" data-med="galenic">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.5L4.5 20A2 2 0 0 0 6.4 22h11.2a2 2 0 0 0 1.9-2L14 9.5V2"/></svg>
+                    <span class="sub-pill-hint">Forme galénique…</span>
+                  </button>
+                  <button type="button" class="sub-pill-field" data-med="statut">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    <span class="sub-pill-hint">Statut (liste 1, stupéfiants…)…</span>
+                  </button>
+                  <button type="button" class="btn-search-orange" id="meds-search-btn" title="Lancer la recherche">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Rechercher
+                  </button>
+                  <button type="button" class="btn-search-green" id="meds-clear-btn" title="Réinitialiser les champs et les résultats">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                    Effacer la recherche
+                  </button>
+                </div>
+                <div class="outline-field" id="meds-active-field" style="display:none">
+                  <label id="meds-field-label">Nom commercial</label>
+                  <input type="text" id="meds-field-input" placeholder="Nom du médicament…" readonly>
+                </div>
+                <p class="hub-italic" id="meds-hint">Sélectionnez un mode de recherche ci-dessus.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-panel" id="panel-parapharmacie">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title">PARAPHARMACIE</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll">
+                <div class="field-row">
+                  <div class="outline-field">
+                    <label>Recherche par nom ou marque</label>
+                    <input type="text" placeholder="Ex. Avène, La Rosée…" readonly>
+                  </div>
+                  <button type="button" class="btn-search-orange" title="Rechercher">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Rechercher
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-panel" id="panel-dm">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title">DISPOSITIFS MÉDICAUX</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll">
+                <div class="field-row">
+                  <div class="outline-field">
+                    <label>Recherche DM (libellé, LPP, code)</label>
+                    <input type="text" placeholder="Mot-clé ou code LPP…" readonly>
+                  </div>
+                  <button type="button" class="btn-search-orange" title="Rechercher">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Rechercher
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-panel" id="panel-codes">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title">CODES</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll" id="codes-accordions"></div>
+            </div>
+          </div>
+
+          <div class="sub-panel" id="panel-annuaires">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title">ANNUAIRES</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll">
+                <div class="hub-sub-pills" id="annuaire-sub-pills">
+                  <button type="button" class="hub-sub-pill" data-ann="ps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 2v4M8 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Annuaire Santé</button>
+                  <button type="button" class="hub-sub-pill" data-ann="pharma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/></svg>Annuaire des officines</button>
+                  <button type="button" class="hub-sub-pill" data-ann="hopital"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v4"/><path d="M14 14h-4"/><path d="M18 6h2v12H4V6h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>Annuaire des hôpitaux</button>
+                  <button type="button" class="hub-sub-pill" data-ann="ars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>ARS</button>
+                  <button type="button" class="hub-sub-pill" data-ann="anti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Centres anti-poison</button>
+                  <button type="button" class="hub-sub-pill" data-ann="pv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Pharmacovigilance</button>
+                  <button type="button" class="hub-sub-pill" data-ann="ceip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.5L4.5 20A2 2 0 0 0 6.4 22h11.2a2 2 0 0 0 1.9-2L14 9.5V2"/></svg>CEIP/Addictovigilance</button>
+                  <button type="button" class="hub-sub-pill" data-ann="cpam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Grand régime</button>
+                  <button type="button" class="hub-sub-pill" data-ann="mut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Mutuelles</button>
+                  <button type="button" class="hub-sub-pill" data-ann="pmi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg>PMI</button>
+                  <button type="button" class="hub-sub-pill" data-ann="css"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Centre de santé sexuelles</button>
+                  <button type="button" class="hub-sub-pill" data-ann="vacc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/></svg>Centres de vaccination-fièvre jaune</button>
+                </div>
+                <div class="sub-placeholder" id="annuaire-sub-body">Choisissez un annuaire dans les badges ci-dessus.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-panel" id="panel-laboratoires">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title">LABORATOIRES</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll">
+                <div class="lab-search-row">
+                  <div class="lab-search-field">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.5L4.5 20A2 2 0 0 0 6.4 22h11.2a2 2 0 0 0 1.9-2L14 9.5V2"/><path d="M8.5 2h7"/></svg>
+                    <input type="text" id="lab-search-input" placeholder="taper un nom de laboratoire" autocomplete="off">
+                  </div>
+                  <button type="button" class="btn-search-orange" id="lab-search-btn" title="Ouvrir le laboratoire sélectionné">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Rechercher
+                  </button>
+                </div>
+                <div class="lab-grid-wrap">
+                  <div class="lab-grid" id="lab-grid"></div>
+                  <div class="lab-grid-empty hidden" id="lab-grid-empty">Aucun laboratoire</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-panel" id="panel-recos">
+            <div class="hub-shell">
+              <div class="hub-header">
+                <div class="hub-header-title">RECOMMANDATIONS</div>
+                <button type="button" class="close-cross-btn panel-close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="hub-scroll" id="recos-accordions"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="offibox-popup-menu anchor-right hamburger-flyout hamburger-flyout-portal" id="flyout-hamburger" role="menu" aria-label="Menu principal">
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg></span>
+        <span class="offibox-menu-label">Mon compte</span>
+      </div>
+      <div class="offibox-menu-divider" role="separator"></div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></span>
+        <span class="offibox-menu-label">Raccourcis clavier</span>
+      </div>
+      <div class="offibox-menu-divider" role="separator"></div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg></span>
+        <span class="offibox-menu-label">Ouvrir <span class="brand-offi">Offi</span><span class="brand-box">box.fr</span></span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>
+        <span class="offibox-menu-label"><span class="brand-id">ID</span> <span class="brand-box">BOX</span></span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 8v5M16 16h.01"/></svg></span>
+        <span class="offibox-menu-label">Formulaire de contact</span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
+        <span class="offibox-menu-label">Historique des versions</span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
+        <span class="offibox-menu-label">À propos</span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><span style="font-size:22px;font-weight:300;line-height:1">−</span></span>
+        <span class="offibox-menu-label">Réduire</span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+        <span class="offibox-menu-label">Quitter</span>
+      </div>
+    </div>
+
+    <div class="offibox-popup-menu anchor-left plus-flyout plus-flyout-portal" id="flyout-plus" role="menu" aria-label="Menu rapide">
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg></span>
+        <span class="offibox-menu-label">Actualités</span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V9l-5-6z"/><path d="M13 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <span class="offibox-menu-label">Bloc-note</span>
+      </div>
+      <div class="offibox-menu-row" role="menuitem" tabindex="0">
+        <span class="offibox-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span class="offibox-menu-label">Envoyer un mail sécurisé</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scan-confirm-overlay" id="scan-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="scan-confirm-title" hidden>
+    <div class="scan-confirm-dialog" id="scan-confirm-dialog">
+      <p class="scan-confirm-body" id="scan-confirm-title">
+        Insérer votre document.<br>
+        Démarrer la numérisation ?
+      </p>
+      <div class="scan-confirm-actions">
+        <button type="button" class="scan-confirm-pill teal" id="scan-confirm-oui">Oui</button>
+        <button type="button" class="scan-confirm-pill outline" id="scan-confirm-annuler">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var OFFIBOX_LOGO_EMBED='data:image/jpeg;base64,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';
+    var docBase = (function() {
+      var href = window.location.href;
+      var i = href.lastIndexOf('/');
+      return i >= 0 ? href.slice(0, i + 1) : href + '/';
+    })();
+    function assetUrl(p) {
+      try { return new URL(p, docBase).href; } catch (e) { return p; }
+    }
+
+    function initDemoLogo() {
+      var logo = document.getElementById('logo-img');
+      if (!logo) return;
+      var candidates = [];
+      if (typeof OFFIBOX_LOGO_EMBED === 'string' && OFFIBOX_LOGO_EMBED.indexOf('data:image') === 0) {
+        candidates.push(OFFIBOX_LOGO_EMBED);
+      }
+      candidates.push(
+        assetUrl('offibox-logo-box.png'),
+        assetUrl('../logo%20sans%20texte.png')
+      );
+      var idx = 0;
+      function tryNext() {
+        if (idx >= candidates.length) return;
+        var url = candidates[idx++];
+        var probe = new Image();
+        probe.onload = function() { logo.src = url; };
+        probe.onerror = tryNext;
+        probe.src = url;
+      }
+      tryNext();
+    }
+    initDemoLogo();
+
+    var d = new Date();
+    document.getElementById('info-date').textContent =
+      ('0' + d.getDate()).slice(-2) + '/' +
+      ('0' + (d.getMonth() + 1)).slice(-2) + '/' +
+      d.getFullYear();
+
+    function titleBadge(label, color, sm) {
+      return '<span class="title-badge' + (sm ? ' sm' : '') + '" style="background:' + color + '">' + label + '</span>';
+    }
+
+    function titleBadgesDual(left, leftColor, right, rightColor) {
+      return titleBadge(left, leftColor, true) +
+        '<span style="font-size:18px;font-weight:700;color:#616161">—</span>' +
+        titleBadge(right, rightColor, true);
+    }
+
+    function hubSquareTag(label, color) {
+      return '<span class="hub-square-tag" style="background:' + color + '">' + label + '</span>';
+    }
+
+    function hubSourceBox(html) {
+      return '<div class="hub-source-box">' + html + '</div>';
+    }
+
+    function marginCalcBody() {
+      return (
+        '<div class="margin-calc-shell">' +
+          '<div class="margin-calc-grid">' +
+            '<div class="margin-calc-col">' +
+              '<div class="margin-field-row"><label>Prix d\'achat HT (€) :</label>' +
+                '<input class="margin-input" type="text" value="12,50" readonly></div>' +
+              '<div class="margin-field-row"><label>Calcul à partir de * :</label>' +
+                '<span class="margin-pill-select">Coef. multiplicateur</span></div>' +
+              '<div class="margin-field-row"><label>Coef. multiplicateur :</label>' +
+                '<input class="margin-input" type="text" value="1,85" readonly></div>' +
+              '<div class="margin-field-row"><label>TVA * :</label>' +
+                '<span class="margin-pill-select">10 %</span></div>' +
+              '<div class="margin-calc-actions">' +
+                '<span class="margin-spacer"></span>' +
+                '<button type="button" class="btn-calc-orange">Calculer</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="margin-calc-col">' +
+              '<h4>Résultat</h4>' +
+              '<div class="margin-field-row"><label>Prix d\'achat HT (€) :</label>' +
+                '<input class="margin-input" type="text" value="12,50" readonly></div>' +
+              '<div class="margin-field-row"><label>Prix de vente HT :</label>' +
+                '<input class="margin-input" type="text" value="21,14" readonly></div>' +
+              '<div class="margin-field-row"><label>Prix de vente TTC :</label>' +
+                '<input class="margin-input" type="text" value="23,25" readonly></div>' +
+              '<div class="margin-field-row"><label>Marge :</label>' +
+                '<input class="margin-input" type="text" value="8,64" readonly></div>' +
+              '<div class="margin-field-row"><label>Taux de marque en % ( Marge/prix de vente HT) :</label>' +
+                '<input class="margin-input" type="text" value="40,87" readonly></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    /* Sections hub Outils métier — couleurs fidèles à outils_metier_hub_panel.dart */
+    var hubSections = [
+      {
+        id: 'search',
+        color: '#1565C0',
+        title: 'OUTILS MÉTIER — SITES INTERNET',
+        body: function() {
+          return (
+            '<div class="toggle-row">' +
+              '<div class="toggle-item"><span class="toggle-switch" data-toggle="outils"></span> outils métier seuls</div>' +
+              '<div class="toggle-item"><span class="toggle-switch" data-toggle="sites"></span> sites internet seuls</div>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="outline-field"><label>Recherche par mot-clé</label><input type="text" placeholder="3 lettres min." readonly></div>' +
+              '<button type="button" class="btn-search-orange" title="Rechercher">' + searchIconSvg + 'Rechercher</button>' +
+            '</div>' +
+            '<p class="hub-italic">ou rechercher dans la liste</p>' +
+            '<div class="list-trigger">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h10M4 14h7M4 18h4"/></svg>' +
+              'liste' +
+            '</div>'
+          );
+        }
+      },
+      { id: 'actualites', color: '#37474F', title: 'ACTUALITÉS', body: function() {
+          return '<div class="sub-placeholder" style="background:#fff;border-radius:10px">Fil d\'actualités DGS-Urgent, ANSM, rappels produits — défilement sous la barre d\'infos.</div>';
+        }
+      },
+      { id: 'cespharm', color: '#00838F', title: 'CATALOGUE CESPHARM', body: function() {
+          return (
+            '<div class="field-row">' +
+              '<div class="outline-field" style="min-height:60px"><label>Recherche</label>' +
+              '<input type="text" placeholder="Taper un mot clé" readonly></div>' +
+              '<button type="button" class="btn-search-orange" style="min-height:60px;border-radius:12px">' + searchIconSvg + 'Rechercher</button>' +
+            '</div>' +
+            '<div class="hub-square-tag-row">' +
+              hubSquareTag('Rechercher', '#0D9488') +
+              '<p class="hub-italic">ou rechercher dans la liste</p>' +
+              hubSquareTag('Cespharm', '#00838F') +
+            '</div>' +
+            '<div class="list-trigger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h10M4 14h7M4 18h4"/></svg>liste</div>'
+          );
+        }
+      },
+      { id: 'interactions', color: '#5D4037', title: 'INTERACTIONS — THÉSAURUS ANSM', titleHtml: function() {
+          return titleBadgesDual('INTERACTIONS', '#5D4037', 'THÉSAURUS ANSM', '#8D6E63');
+        }, body: function() {
+          return (
+            hubSourceBox('<em>Source :</em> <strong>ANSM — THÉSAURUS DES INTERACTIONS MÉDICAMENTEUSES</strong> · MAJ le 7/06/2024') +
+            '<p style="font-size:11.5px;color:#424242;margin-bottom:8px">Rechercher une interaction par molécule ( DCI ).</p>' +
+            '<div class="outline-field" style="min-height:44px"><label>Molécule (DCI)</label>' +
+            '<input type="text" placeholder="Ex. abiraterone…" readonly></div>' +
+            '<div class="hub-body-sub-badge">' + titleBadge('Rechercher par nom commercial', '#00695C', true) + '</div>' +
+            '<p style="font-size:11px;color:#616161;margin-bottom:6px">Dès 3 lettres, choisissez un médicament BDM ; la DCI est déduite pour afficher les interactions ci-dessous.</p>' +
+            '<div class="outline-field" style="min-height:44px"><label>Nom de marque</label>' +
+            '<input type="text" placeholder="ex : zytiga" readonly></div>'
+          );
+        }
+      },
+      { id: 'pharmacopee', color: '#4E342E', title: 'PHARMACOPÉE FRANÇAISE', body: function() {
+          return (
+            hubSourceBox('<em>Source :</em> <strong>ANSM — Pharmacopée française (monographies en vigueur)</strong> · mise à jour le 5 janvier 2026') +
+            '<div class="field-row">' +
+              '<div class="outline-field" style="min-height:60px"><label>Nom de monographie</label>' +
+              '<input type="text" placeholder="Ex. aconit, sapin noir…" readonly></div>' +
+              '<button type="button" class="btn-search-orange" style="min-height:60px;border-radius:12px">' + searchIconSvg + 'Rechercher</button>' +
+            '</div>' +
+            '<div class="hub-square-tag-row">' +
+              hubSquareTag('Rechercher par nom', '#5D4037') +
+              '<p class="hub-italic">ou rechercher dans la liste</p>' +
+              hubSquareTag('liste', '#6D4C41') +
+            '</div>' +
+            '<div class="list-trigger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h10M4 14h7"/></svg>liste</div>'
+          );
+        }
+      },
+      { id: 'dictionnaire', color: '#055E45', title: 'DICTIONNAIRE ACADÉMIE NATIONALE DE PHARMACIE', body: function() {
+          return (
+            '<div class="field-row">' +
+              '<div class="outline-field" style="min-height:44px"><label>Rechercher un terme</label>' +
+              '<input type="text" placeholder="Mot du dictionnaire…" readonly></div>' +
+              '<button type="button" class="btn-search-orange">' + searchIconSvg + 'Rechercher</button>' +
+            '</div>' +
+            '<p class="hub-italic">ou rechercher dans la liste</p>' +
+            '<div class="list-trigger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h10M4 14h7"/></svg>Liste A → Z</div>'
+          );
+        }
+      },
+      { id: 'marge', color: '#00695C', title: 'CALCULATRICE DE MARGE', body: marginCalcBody },
+      { id: 'videos', color: '#6A1B9A', title: 'VIDÉOS DE DÉMONSTRATION', body: function() {
+          return (
+            '<div class="hub-inner-section">' +
+              '<div class="hub-inner-section-head">' + titleBadge('Vidéos de démonstration', '#2E7D32', false) + '</div>' +
+              '<div class="hub-inner-section-body">' +
+                '<div class="videos-search-row">' +
+                  '<div class="outline-field narrow"><label>CIP7 / CIP13</label>' +
+                  '<input type="text" placeholder="340093…" readonly></div>' +
+                  '<div class="outline-field"><label>nom du produit</label>' +
+                  '<input type="text" placeholder="ex : Symbicort" readonly></div>' +
+                  '<button type="button" class="btn-search-orange">' + searchIconSvg + 'Rechercher</button>' +
+                '</div>' +
+                '<p class="hub-italic">ou rechercher dans la liste</p>' +
+                '<div class="list-trigger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h10M4 14h7"/></svg>Filtrer les produits (A → Z)…</div>' +
+              '</div>' +
+            '</div>'
+          );
+        }
+      }
+    ];
+
+    var openSection = null;
+    var openCodesSection = null;
+    var openRecosSection = null;
+    var hubRoot = document.getElementById('hub-accordions');
+    var activeTab = null;
+
+    var searchIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>';
+
+    function codeSearchRow(label, placeholder, accentClass) {
+      return (
+        '<div class="field-row">' +
+          '<div class="outline-field ' + accentClass + '"><label>' + label + '</label>' +
+          '<input type="text" placeholder="' + placeholder + '" readonly></div>' +
+          '<button type="button" class="btn-search-orange" title="Rechercher">' + searchIconSvg + 'Rechercher</button>' +
+        '</div>'
+      );
+    }
+
+    function collapseAllPanels() {
+      activeTab = null;
+      openSection = null;
+      openCodesSection = null;
+      openRecosSection = null;
+      document.querySelectorAll('.sub-panel').forEach(function(p) { p.classList.remove('visible'); });
+      document.querySelectorAll('.quick-tab').forEach(function(b) {
+        if (b.getAttribute('data-tab') !== 'wide') b.classList.remove('active');
+      });
+      renderHub();
+      renderCodes();
+      renderRecos();
+      postHeight();
+    }
+
+    var accArrowSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>';
+
+    function renderAccordionList(rootEl, sections, openIdRef, onOpenChange) {
+      if (!rootEl) return;
+      var openId = openIdRef.value;
+      var html = '';
+      sections.forEach(function(sec) {
+        if (openId !== null && openId !== sec.id) return;
+        var isOpen = openId === sec.id;
+        var titleInner = sec.titleHtml
+          ? sec.titleHtml()
+          : titleBadge(sec.title, sec.color, false);
+        html += '<div class="acc' + (isOpen ? ' open' : '') + '" data-id="' + sec.id + '">' +
+          '<button type="button" class="acc-head" aria-expanded="' + isOpen + '">' +
+            '<span class="acc-head-titles">' + titleInner + '</span>' +
+            '<span class="acc-arrow">' + accArrowSvg + '</span>' +
+          '</button>' +
+          (isOpen ? '<div class="acc-body">' + sec.body() + '</div>' : '') +
+        '</div>';
+      });
+      rootEl.innerHTML = html;
+      rootEl.querySelectorAll('.acc-head').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var id = btn.closest('.acc').getAttribute('data-id');
+          openIdRef.value = (openIdRef.value === id) ? null : id;
+          onOpenChange();
+        });
+      });
+    }
+
+    function renderHub() {
+      renderAccordionList(hubRoot, hubSections, { get value() { return openSection; }, set value(v) { openSection = v; } }, function() {
+        renderHub();
+        bindHubToggles();
+        postHeight();
+      });
+    }
+
+    function bindHubToggles() {
+      if (!hubRoot) return;
+      hubRoot.querySelectorAll('.toggle-switch').forEach(function(sw) {
+        sw.onclick = function(e) {
+          e.stopPropagation();
+          var wasOn = sw.classList.contains('on');
+          hubRoot.querySelectorAll('.toggle-switch').forEach(function(s) { s.classList.remove('on'); });
+          if (!wasOn) sw.classList.add('on');
+        };
+      });
+    }
+
+    document.getElementById('hub-reset').addEventListener('click', function() {
+      openSection = null;
+      renderHub();
+      postHeight();
+    });
+
+    var codesTitle = document.querySelector('#panel-codes .hub-header-title');
+    if (codesTitle) {
+      codesTitle.style.cursor = 'pointer';
+      codesTitle.addEventListener('click', function() {
+        openCodesSection = null;
+        renderCodes();
+        postHeight();
+      });
+    }
+    var recosTitle = document.querySelector('#panel-recos .hub-header-title');
+    if (recosTitle) {
+      recosTitle.style.cursor = 'pointer';
+      recosTitle.addEventListener('click', function() {
+        openRecosSection = null;
+        renderRecos();
+        postHeight();
+      });
+    }
+
+    /* Codes — accordéons fidèles codes_search_lower_sub_badges_bar.dart */
+    var codesSections = [
+      { id: 'cip', color: '#1565C0', title: 'CODE CIP', body: function() {
+          return codeSearchRow('CIP7 / CIP13 / QR…', 'Code CIP…', 'accent-cip');
+        }
+      },
+      { id: 'lpp', color: '#7B1FA2', title: 'CODE LPP', body: function() {
+          return codeSearchRow('Code LPP', 'Code LPP…', 'accent-lpp');
+        }
+      },
+      { id: 'ean', color: '#00796B', title: 'CODE EAN / GTIN', body: function() {
+          return codeSearchRow('EAN / GTIN', 'EAN / GTIN…', 'accent-ean');
+        }
+      },
+      { id: 'rpps', color: '#E65100', title: 'CODE RPPS', body: function() {
+          return codeSearchRow('Code RPPS', 'Code RPPS…', 'accent-rpps');
+        }
+      },
+      { id: 'acte', color: '#2E7D32', title: 'CODE ACTE', body: function() {
+          return '<div class="field-row">' +
+            '<div class="outline-field accent-acte"><label>Code acte (EFE, RKD…)</label><input type="text" placeholder="Code acte…" readonly></div>' +
+            '<div class="outline-field accent-acte"><label>Mot-clé</label><input type="text" placeholder="Mot-clé…" readonly></div>' +
+            '</div>' +
+            '<div class="field-row" style="margin-top:8px">' +
+            '<button type="button" class="btn-search-orange block" title="Rechercher">' + searchIconSvg + 'Rechercher</button>' +
+            '</div>';
+        }
+      },
+      { id: 'liste', color: '#1B6B4F', title: 'LISTE — AMC / AMO', body: function() {
+          return '<div class="field-row">' +
+            '<div class="outline-field accent-liste"><label>Code préfectoral mutuelle</label><input type="text" placeholder="Code préfectoral…" readonly></div>' +
+            '<div class="outline-field accent-liste"><label>Code grand régime</label><input type="text" placeholder="Ex. 0233…" readonly></div>' +
+            '</div>' +
+            '<div class="field-row" style="margin-top:8px">' +
+            '<button type="button" class="btn-search-orange block" title="Rechercher">' + searchIconSvg + 'Rechercher</button>' +
+            '</div>';
+        }
+      }
+    ];
+
+    function renderCodes() {
+      renderAccordionList(
+        document.getElementById('codes-accordions'),
+        codesSections,
+        { get value() { return openCodesSection; }, set value(v) { openCodesSection = v; } },
+        function() { renderCodes(); postHeight(); }
+      );
+    }
+
+    /* RECOS — accordéons Reco médicales + HAS */
+    var recosSections = [
+      { id: 'recomed', color: '#4556F7', title: 'RECO MÉDICALES', body: function() {
+          return '<div class="outline-field"><label>Pathologie ou mot-clé</label><input type="text" placeholder="Rechercher une RecoMédicale…" readonly></div>' +
+            '<div class="list-trigger" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h10M4 14h7"/></svg>Liste RecoMédicales</div>';
+        }
+      },
+      { id: 'has', color: '#00897B', title: 'RECOS HAS', body: function() {
+          return '<div class="outline-field"><label>Recommandation HAS</label><input type="text" placeholder="Mot-clé, pathologie…" readonly></div>' +
+            '<div class="list-trigger" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h10M4 14h7"/></svg>Liste HAS</div>';
+        }
+      }
+    ];
+
+    function renderRecos() {
+      renderAccordionList(
+        document.getElementById('recos-accordions'),
+        recosSections,
+        { get value() { return openRecosSection; }, set value(v) { openRecosSection = v; } },
+        function() { renderRecos(); postHeight(); }
+      );
+    }
+
+    /* Annuaires — sous-badges hub */
+    var annuaireBodies = {
+      ps: 'Professionnels de santé — nom, prénom, profession, RPPS, commune…',
+      pharma: 'Officines — nom, titulaire, commune, code postal…',
+      hopital: 'Établissements de santé — nom, commune, FINESS…',
+      ars: 'Agences régionales de santé — contacts par région',
+      anti: 'Centres anti-poison — liste par ville de référence',
+      pv: 'Centres régionaux de pharmacovigilance',
+      ceip: 'Centres régionaux CEIP / addictovigilance',
+      cpam: 'Caisses AMO — code grand régime, nom…',
+      mut: 'Mutuelles — code préfectoral, nom…',
+      pmi: 'Protection maternelle et infantile — département, commune',
+      css: 'Centres de santé sexuelle — département, commune',
+      vacc: 'Centres de vaccination fièvre jaune — département, commune'
+    };
+
+    document.querySelectorAll('#annuaire-sub-pills .hub-sub-pill').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#annuaire-sub-pills .hub-sub-pill').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var key = btn.getAttribute('data-ann');
+        var body = document.getElementById('annuaire-sub-body');
+        if (body && annuaireBodies[key]) body.textContent = annuaireBodies[key];
+        postHeight();
+      });
+    });
+
+    /* Laboratoires — 7 logos lisibles (comme la grille app : marques principales) */
+    var demoLabs = [
+      { name: '3M', icon: '../../assets/icons/3m_com.png' },
+      { name: 'Abbott', icon: '../../assets/icons/abbott.png' },
+      { name: 'Aboca', icon: '../../assets/icons/logo_aboca_group_green.png' },
+      { name: 'Biogaran', icon: '../../assets/icons/biogaran_fr.png' },
+      { name: 'Boiron', icon: '../../assets/icons/boiron.png' },
+      { name: 'Opella', icon: '../../assets/icons/OPELLA.png' },
+      { name: 'Viatris', icon: '../../assets/icons/viatris.png' }
+    ];
+
+    var selectedLab = null;
+    var labGridEl = document.getElementById('lab-grid');
+    var labSearchInput = document.getElementById('lab-search-input');
+    var labEmptyEl = document.getElementById('lab-grid-empty');
+
+    function normalizeLabQuery(s) {
+      return (s || '').toLowerCase()
+        .replace(/[àáâãäå]/g, 'a')
+        .replace(/[èéêë]/g, 'e')
+        .replace(/[ìíîï]/g, 'i')
+        .replace(/[òóôõö]/g, 'o')
+        .replace(/[ùúûü]/g, 'u')
+        .replace(/[ç]/g, 'c')
+        .replace(/[ñ]/g, 'n')
+        .trim();
+    }
+
+    function renderLabGrid(filter) {
+      if (!labGridEl) return;
+      var q = normalizeLabQuery(filter || '');
+      var list = demoLabs.filter(function(l) {
+        return !q || normalizeLabQuery(l.name).indexOf(q) >= 0;
+      });
+      labGridEl.innerHTML = '';
+      if (list.length === 0) {
+        labGridEl.classList.add('hidden');
+        if (labEmptyEl) labEmptyEl.classList.remove('hidden');
+      } else {
+        labGridEl.classList.remove('hidden');
+        if (labEmptyEl) labEmptyEl.classList.add('hidden');
+        list.forEach(function(lab) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'lab-badge' +
+            (selectedLab && selectedLab.name === lab.name ? ' selected' : '');
+          btn.title = lab.name;
+          var img = document.createElement('img');
+          img.alt = lab.name;
+          img.src = assetUrl(lab.icon);
+          img.onerror = function() {
+            if (!btn.querySelector('.lab-fallback')) {
+              img.style.display = 'none';
+              var span = document.createElement('span');
+              span.className = 'lab-fallback';
+              span.textContent = lab.name;
+              btn.appendChild(span);
+            }
+          };
+          btn.appendChild(img);
+          btn.addEventListener('click', function() {
+            selectedLab = lab;
+            if (labSearchInput) labSearchInput.value = lab.name;
+            renderLabGrid(labSearchInput ? labSearchInput.value : '');
+          });
+          labGridEl.appendChild(btn);
+        });
+      }
+      postHeight();
+    }
+
+    if (labSearchInput) {
+      labSearchInput.addEventListener('input', function() {
+        renderLabGrid(labSearchInput.value);
+      });
+    }
+    var labSearchBtn = document.getElementById('lab-search-btn');
+    if (labSearchBtn) {
+      labSearchBtn.addEventListener('click', function() {
+        if (!selectedLab && labGridEl) {
+          var first = labGridEl.querySelector('.lab-badge');
+          if (first) first.click();
+        }
+      });
+    }
+    renderLabGrid('');
+
+    /* Médicaments — champs pills */
+    var medsFields = {
+      nom: { label: 'Nom commercial', placeholder: 'Nom du médicament…' },
+      code: { label: 'Code CIP / QR-code', placeholder: 'CIP7 / CIP13 / QR-code…' },
+      dci: { label: 'Composition (DCI)', placeholder: 'Composition, plusieurs molécules…' },
+      weleda: { label: 'Formule Weleda', placeholder: 'Sélectionner une formule…' },
+      galenic: { label: 'Forme galénique', placeholder: 'Comprimé, gélule, sirop…' },
+      statut: { label: 'Statut', placeholder: 'Liste 1, stupéfiants, hospitaliers…' }
+    };
+
+    function clearMedsSearchDemo() {
+      document.querySelectorAll('#meds-pill-grid .sub-pill-field').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      var fieldWrap = document.getElementById('meds-active-field');
+      var hint = document.getElementById('meds-hint');
+      var input = document.getElementById('meds-field-input');
+      if (fieldWrap) fieldWrap.style.display = 'none';
+      if (hint) hint.style.display = '';
+      if (input) input.value = '';
+      postHeight();
+    }
+
+    var medsClearBtn = document.getElementById('meds-clear-btn');
+    if (medsClearBtn) {
+      medsClearBtn.addEventListener('click', clearMedsSearchDemo);
+    }
+
+    document.querySelectorAll('#meds-pill-grid .sub-pill-field').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#meds-pill-grid .sub-pill-field').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var key = btn.getAttribute('data-med');
+        var meta = medsFields[key];
+        var fieldWrap = document.getElementById('meds-active-field');
+        var hint = document.getElementById('meds-hint');
+        if (meta && fieldWrap) {
+          fieldWrap.style.display = '';
+          if (hint) hint.style.display = 'none';
+          document.getElementById('meds-field-label').textContent = meta.label;
+          document.getElementById('meds-field-input').placeholder = meta.placeholder;
+        }
+        postHeight();
+      });
+    });
+
+    function setActiveTab(tab) {
+      if (activeTab === tab) {
+        collapseAllPanels();
+        return;
+      }
+      activeTab = tab;
+      document.querySelectorAll('.quick-tab').forEach(function(btn) {
+        var t = btn.getAttribute('data-tab');
+        if (t === 'wide') return;
+        btn.classList.toggle('active', t === tab);
+      });
+      document.querySelectorAll('.sub-panel').forEach(function(p) {
+        p.classList.remove('visible');
+      });
+      var panel = document.getElementById('panel-' + tab);
+      if (panel) panel.classList.add('visible');
+      if (tab === 'outils') {
+        openSection = null;
+        renderHub();
+      }
+      if (tab === 'codes') {
+        openCodesSection = null;
+        renderCodes();
+      }
+      if (tab === 'recos') {
+        openRecosSection = null;
+        renderRecos();
+      }
+      if (tab === 'laboratoires') {
+        renderLabGrid(labSearchInput ? labSearchInput.value : '');
+      }
+      postHeight();
+    }
+
+    document.querySelectorAll('.quick-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var tab = btn.getAttribute('data-tab');
+        if (tab === 'wide') return;
+        setActiveTab(tab);
+      });
+    });
+
+    document.querySelectorAll('.panel-close').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        collapseAllPanels();
+      });
+    });
+
+    document.getElementById('btn-wide').addEventListener('click', function() {
+      collapseAllPanels();
+    });
+
+    /* Menus popup (+, hamburger) et numérisation */
+    var btnPlus = document.getElementById('btn-plus');
+    var flyoutPlus = document.getElementById('flyout-plus');
+    var btnHamburger = document.getElementById('btn-hamburger');
+    var flyoutHamburger = document.getElementById('flyout-hamburger');
+    var btnScan = document.getElementById('btn-scan');
+    var scanBadgesBar = document.getElementById('scan-badges-bar');
+    var scanConfirmOverlay = document.getElementById('scan-confirm-overlay');
+    var scanConfirmDialog = document.getElementById('scan-confirm-dialog');
+    var scanConfirmOui = document.getElementById('scan-confirm-oui');
+    var scanConfirmAnnuler = document.getElementById('scan-confirm-annuler');
+
+    var demoWrap = document.getElementById('demo-wrap');
+
+    function closePlusFlyout() {
+      if (!flyoutPlus) return;
+      flyoutPlus.classList.remove('visible');
+      if (demoWrap) demoWrap.classList.remove('plus-menu-open');
+      if (btnPlus) {
+        btnPlus.classList.remove('active');
+        btnPlus.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    var HAMBURGER_MENU_W = 224;
+    var HAMBURGER_CARET_FROM_RIGHT = 18;
+
+    function positionHamburgerFlyout() {
+      if (!flyoutHamburger || !demoWrap || !btnHamburger) return;
+      var appBar = document.querySelector('.app-bar');
+      if (!appBar) return;
+      var wrap = demoWrap.getBoundingClientRect();
+      var bar = appBar.getBoundingClientRect();
+      var btn = btnHamburger.getBoundingClientRect();
+      var top = bar.bottom - wrap.top - 1;
+      var btnCenter = btn.left + btn.width / 2 - wrap.left;
+      var left = btnCenter + HAMBURGER_CARET_FROM_RIGHT - HAMBURGER_MENU_W;
+      left = Math.max(0, Math.min(left, wrap.width - HAMBURGER_MENU_W));
+      flyoutHamburger.style.top = top + 'px';
+      flyoutHamburger.style.left = left + 'px';
+    }
+
+    function closeHamburgerFlyout() {
+      if (!flyoutHamburger) return;
+      flyoutHamburger.classList.remove('visible');
+      if (demoWrap) demoWrap.classList.remove('hamburger-menu-open');
+      if (btnHamburger) {
+        btnHamburger.classList.remove('active');
+        btnHamburger.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function openHamburgerFlyout() {
+      if (!flyoutHamburger) return;
+      positionHamburgerFlyout();
+      flyoutHamburger.classList.add('visible');
+      if (demoWrap) demoWrap.classList.add('hamburger-menu-open');
+      if (btnHamburger) {
+        btnHamburger.classList.add('active');
+        btnHamburger.setAttribute('aria-expanded', 'true');
+      }
+      postHeight();
+    }
+
+    function closeScanBadges() {
+      if (!scanBadgesBar) return;
+      scanBadgesBar.classList.remove('visible');
+      scanBadgesBar.setAttribute('aria-hidden', 'true');
+      if (btnScan) {
+        btnScan.classList.remove('active');
+        btnScan.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function openScanConfirm() {
+      if (!scanConfirmOverlay) return;
+      scanConfirmOverlay.classList.add('visible');
+      scanConfirmOverlay.removeAttribute('hidden');
+      postHeight();
+    }
+
+    function closeScanConfirm() {
+      if (!scanConfirmOverlay) return;
+      scanConfirmOverlay.classList.remove('visible');
+      scanConfirmOverlay.setAttribute('hidden', '');
+      postHeight();
+    }
+
+    function showScanBadges() {
+      if (!scanBadgesBar) return;
+      scanBadgesBar.classList.add('visible');
+      scanBadgesBar.setAttribute('aria-hidden', 'false');
+      if (btnScan) {
+        btnScan.classList.add('active');
+        btnScan.setAttribute('aria-expanded', 'true');
+      }
+      postHeight();
+    }
+
+    function closeBarAux() {
+      closePlusFlyout();
+      closeHamburgerFlyout();
+      closeScanConfirm();
+      closeScanBadges();
+    }
+
+    if (btnPlus && flyoutPlus) {
+      btnPlus.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = flyoutPlus.classList.contains('visible');
+        closeHamburgerFlyout();
+        closeScanBadges();
+        collapseAllPanels();
+        if (open) {
+          closePlusFlyout();
+        } else {
+          flyoutPlus.classList.add('visible');
+          if (demoWrap) demoWrap.classList.add('plus-menu-open');
+          btnPlus.classList.add('active');
+          btnPlus.setAttribute('aria-expanded', 'true');
+        }
+        postHeight();
+      });
+      flyoutPlus.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    if (btnHamburger && flyoutHamburger) {
+      btnHamburger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = flyoutHamburger.classList.contains('visible');
+        closePlusFlyout();
+        closeScanBadges();
+        collapseAllPanels();
+        if (open) {
+          closeHamburgerFlyout();
+          postHeight();
+        } else {
+          openHamburgerFlyout();
+        }
+      });
+      flyoutHamburger.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    window.addEventListener('resize', function() {
+      if (flyoutHamburger && flyoutHamburger.classList.contains('visible')) {
+        positionHamburgerFlyout();
+        postHeight();
+      }
+    });
+
+    if (btnScan) {
+      btnScan.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var badgesOpen = scanBadgesBar && scanBadgesBar.classList.contains('visible');
+        var confirmOpen = scanConfirmOverlay && scanConfirmOverlay.classList.contains('visible');
+        closePlusFlyout();
+        closeHamburgerFlyout();
+        collapseAllPanels();
+        if (badgesOpen || confirmOpen) {
+          closeScanConfirm();
+          closeScanBadges();
+        } else {
+          openScanConfirm();
+        }
+      });
+    }
+    if (scanBadgesBar) {
+      scanBadgesBar.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+    if (scanConfirmOui) {
+      scanConfirmOui.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeScanConfirm();
+        showScanBadges();
+      });
+    }
+    if (scanConfirmAnnuler) {
+      scanConfirmAnnuler.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeScanConfirm();
+        closeScanBadges();
+      });
+    }
+    if (scanConfirmOverlay) {
+      scanConfirmOverlay.addEventListener('click', function(e) {
+        if (e.target === scanConfirmOverlay) {
+          closeScanConfirm();
+          closeScanBadges();
+        }
+      });
+    }
+    if (scanConfirmDialog) {
+      scanConfirmDialog.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    document.addEventListener('click', function() {
+      closeBarAux();
+      postHeight();
+    });
+
+    function postHeight() {
+      var h = document.body.scrollHeight;
+      if (demoWrap) {
+        var wrapTop = demoWrap.getBoundingClientRect().top + window.scrollY;
+        var extent = demoWrap.offsetHeight;
+        [flyoutPlus, flyoutHamburger].forEach(function(el) {
+          if (el && el.classList.contains('visible')) {
+            var bottom = el.getBoundingClientRect().bottom + window.scrollY;
+            extent = Math.max(extent, bottom - wrapTop + 16);
+          }
+        });
+        h = Math.max(h, extent + (demoWrap.offsetTop || 0) + 24);
+      }
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'offibox-demo-resize', height: h }, '*');
+      }
+    }
+
+    renderHub();
+    renderCodes();
+    renderRecos();
+    bindHubToggles();
+    window.addEventListener('load', postHeight);
+    window.addEventListener('resize', postHeight);
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(postHeight).observe(document.getElementById('demo-wrap'));
+    }
+  })();
+  </script>
+</body>
+</html>
